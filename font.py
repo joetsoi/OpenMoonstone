@@ -19,6 +19,27 @@ ds_8178 = {
 
 ImageDimension = namedtuple('ImageDimension', 'width, height, x_offset, y_offset')
 
+
+def draw_string(piv, font, text, y, main_exe):
+    image_numbers = []
+    image_widths = []
+    ords = []
+    for char in text:
+        image_number = main_exe.bold_f_char_lookup[ord(char) - 0x20]
+        ords.append(ord(char))
+        image_numbers.append(image_number)
+        meta = main_exe.strings[text]
+        image_widths.append(font.get_image_width(image_number))
+
+    screen_dimensions = main_exe.screen_dimensions
+    image_width = sum(image_widths)
+    center = int(((screen_dimensions.right - screen_dimensions.left) - image_width) / 2)
+
+    for i, w in zip(image_numbers, image_widths):
+        font.extract_subimage(piv, i, center, y)
+        center += w
+
+
 class FontFile(object):
     def __init__(self, file_path):
         with open(file_path, 'rb') as f:
@@ -29,11 +50,18 @@ class FontFile(object):
         self.header = file_data[:self.header_length]
 
         self.extracted = extract_file(self.file_length, self.file_data)
-        print("length", len(self.extracted))
+        #print("length", len(self.extracted))
 
-    def extract_header(self, piv, ax, bx, cx):
+    def get_image_width(self, image_number):
+        image_metadata = self.header[image_number * 10 + 0xa: image_number * 10 + 0xa + 10]
+        image_width = unpack('>H', image_metadata[4:6])[0]
+        # if dx & 8 width:
+        image_width -= 3
+        return image_width
+
+    def extract_subimage(self, piv, ax, bx, cx):
         dx = unpack('>H', self.header[0:2])[0]
-        if ax and ax < dx:
+        if ax >= 0 and ax < dx:
             ds_815f = self.header_length
             ds_8161 = unpack('>H', self.header[4:6])[0]
 
@@ -44,15 +72,18 @@ class FontFile(object):
 
             ds_8164 = unpack('>H', self.header[si + 4:si + 6])[0] + 0xf
             ds_8164 = ((ds_8164 & 0x0ff0) >> 4) << 1 # 320 image width? takes off 5?
-            print("ds_8164 : ", hex(ds_8164))
+            #print("ds_8164 : ", hex(ds_8164))
 
             ds_8168 = unpack('>H', self.header[si + 6:si + 8])[0] # image height
-            print("ds_8168 : ", hex(ds_8168))
+            #print("ds_8168 : ", hex(ds_8168))
 
             ax = self.header[si + 8] >> 4
             bx -= ax
 
             cs_638e = self.header[si + 9]
+
+            if not cs_638e:
+                return
 
             # loc 5e55
             si = dx
@@ -103,6 +134,7 @@ class FontFile(object):
 
             #self.pixels = self.extract_pixels(bx-si, dx-si, si-si, di-si, bp-si, cs_637d)
             self.pixels = self.extract_pixels(bx, dx, si, di, bp, cs_637d)
+
             bx = 0
             bp = ds_8168
             ax = ds_8164 << 3
@@ -121,7 +153,8 @@ class FontFile(object):
                     ds_8172,
                     ds_8163
             )
-            print(hex(cs_638c), hex(cs_638b), hex(cs_5f80), hex(cs_6355), hex(ax))
+            
+            #print(hex(cs_638c), hex(cs_638b), hex(cs_5f80), hex(cs_6355), hex(ax))
 
             #print(bp, di, piv, cs_638b, ax)
             #self.sub_632a(bp, di, piv, cs_638b, ax)
@@ -219,8 +252,6 @@ class FontFile(object):
                 dest += 1
                 src += 1
             first_pass = False
-            
-
 
 
         #length = image_height * 320 
@@ -291,7 +322,7 @@ if __name__ == '__main__':
     #print(hex(font.file_length))
     #print(hex(font.header_length))
 
-    #print_hex_view(font.extracted)
+    print_hex_view(font.extracted)
     #print_hex_view(font.header)
     piv = PivFile(
         file_path=os.path.join(os.path.dirname(os.path.realpath(__file__)),

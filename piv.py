@@ -17,7 +17,6 @@ class PivFile(object):
             self.raw_palette = unpack('>16H', file_data[6:6+32])
             self.pixel_data = file_data[6+32:]
 
-
         self.extract()
 
     def extract(self):
