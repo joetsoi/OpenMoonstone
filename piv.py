@@ -5,9 +5,7 @@ from extract import extract_file, each_bit_in_byte, grouper
 
 
 class PivFile(object):
-    def __init__(self, file_path):
-        with open(file_path, 'rb') as f:
-            file_data = f.read()
+    def __init__(self, file_data):
         self.file_type = unpack('>H', file_data[0:2])[0]
         self.file_length = unpack('>H', file_data[4:6])[0]
         if self.file_type == 5:

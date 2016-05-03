@@ -41,15 +41,15 @@ if __name__ == "__main__":
         print("Usage: view.arg <filename> <piv file>")
         sys.exit()
 
-    piv = PivFile(
-        file_path=os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                               sys.argv[2])
-    )
+    file_path=os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                           sys.argv[2])
+    with open(file_path, 'rb') as f:
+        piv = PivFile(f.read())
 
-    font = FontFile(
-        file_path=os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                               sys.argv[1])
-    )
+    file_path=os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                           sys.argv[1])
+    with open(file_path, 'rb') as f:
+        font = FontFile(f.read())
 
     main_exe = MainExe(
         file_path=os.path.join(os.path.dirname(os.path.realpath(__file__)),
@@ -68,7 +68,6 @@ if __name__ == "__main__":
 
     for string, metadata in main_exe.strings.items():
         draw_string(piv, font, string, metadata[2], main_exe)
-
 
     pygame.init()
     screen = pygame.display.set_mode((320 * scale_factor, 200 * scale_factor))

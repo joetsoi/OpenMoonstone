@@ -41,9 +41,7 @@ def draw_string(piv, font, text, y, main_exe):
 
 
 class FontFile(object):
-    def __init__(self, file_path):
-        with open(file_path, 'rb') as f:
-            file_data = f.read()
+    def __init__(self, file_data):
         self.header_length = unpack('>H', file_data[0:2])[0] * 10 + 10
         self.file_length = unpack('>H', file_data[4:6])[0]
         self.file_data = file_data[self.header_length:]
@@ -56,19 +54,19 @@ class FontFile(object):
         image_metadata = self.header[image_number * 10 + 0xa: image_number * 10 + 0xa + 10]
         image_width = unpack('>H', image_metadata[4:6])[0]
         # if dx & 8 width:
+        test = (((image_width + 0xf) & 0xfff0) >> 4) << 1
+        print(bin(image_width), bin(test))
         image_width -= 3
         return image_width
 
-    def extract_subimage(self, piv, ax, bx, cx):
-        dx = unpack('>H', self.header[0:2])[0]
-        if ax >= 0 and ax < dx:
-            ds_815f = self.header_length
-            ds_8161 = unpack('>H', self.header[4:6])[0]
+    def extract_subimage(self, piv, image_number, x_offset, y_offset):
+        total_images = unpack('>H', self.header[0:2])[0]
+        if image_number >= 0 and image_number < total_images:
 
-            si = (ax << 1) + (ax << 3) + 0xa # + si
+            si = (image_number * 10) + 10
 
             dx = unpack('>H', self.header[si + 2:si + 4])[0]
-            dx += ds_815f
+            dx += self.header_length
 
             ds_8164 = unpack('>H', self.header[si + 4:si + 6])[0] + 0xf
             ds_8164 = ((ds_8164 & 0x0ff0) >> 4) << 1 # 320 image width? takes off 5?
@@ -78,7 +76,7 @@ class FontFile(object):
             #print("ds_8168 : ", hex(ds_8168))
 
             ax = self.header[si + 8] >> 4
-            bx -= ax
+            x_offset -= ax
 
             cs_638e = self.header[si + 9]
 
@@ -87,16 +85,16 @@ class FontFile(object):
 
             # loc 5e55
             si = dx
-            ds_816c = cx # image y offset
-            ds_8174 = dx = (cx << 4) + (cx <<6)
+            ds_816c = y_offset # image y offset
+            ds_8174 = dx = (y_offset << 4) + (y_offset <<6)
 
-            ax = bx & 3
+            ax = x_offset & 3
             ds_8163 = ax & 0x00ff
             
 
 
-            ax = bx
-            ds_816a = bx # 5? related to image width
+            ax = x_offset
+            ds_816a = x_offset # 5? related to image width
 
             ax = ax >> 2
             bx = ax
@@ -160,7 +158,7 @@ class FontFile(object):
             #self.sub_632a(bp, di, piv, cs_638b, ax)
             
             # image x and y offset, image height/source address
-            self.blit(piv, cx, ds_816a, ds_8168, ds_8164, cs_638b)
+            self.blit(piv, y_offset, ds_816a, ds_8168, ds_8164, cs_638b)
             #self.blit(piv, source_address, ds_816c)
 
 
@@ -315,18 +313,19 @@ if __name__ == '__main__':
         print("Usage: view.arg <filename> <piv file>")
         sys.exit()
 
-    font = FontFile(
-        file_path=os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                               sys.argv[1])
-    )
+    file_path=os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                           sys.argv[1])
+    with open(file_path, 'rb') as f:
+        font = FontFile(f.read())
     #print(hex(font.file_length))
     #print(hex(font.header_length))
 
-    print_hex_view(font.extracted)
+    #print_hex_view(font.extracted)
     #print_hex_view(font.header)
-    piv = PivFile(
-        file_path=os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                               sys.argv[2])
-    )
-    font.extract_header(piv, 0x49, 5, 0x14)
-    print(len(font.pixels))
+    file_path=os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                           sys.argv[2])
+    with open(file_path, 'rb') as f:
+        piv = PivFile(f.read())
+
+    for i in range(76):
+        font.get_image_width(i)

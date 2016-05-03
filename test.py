@@ -12,7 +12,8 @@ class TestPivFile(object):
             os.path.dirname(os.path.realpath(__file__)),
             'MINDSCAP'
         )
-        self.mindscape = PivFile(self.file_path)
+        with open(self.file_path, 'rb') as f:
+            self.mindscape = PivFile(f.read())
 
     def test_extract_piv_file(self):
         extracted = extract_file(self.mindscape.file_length,
@@ -43,7 +44,7 @@ class TestPivFile(object):
         with open('mindscap_video_mem.bin', 'rb') as f:
             test_data = f.read()
 
-        assert bytearray(blocks) == bytearray(test_data)
+        assert bytes(blocks) == test_data
 
     def test_extract_palette(self):
         extracted = self.mindscape.extract_palette()
@@ -60,44 +61,30 @@ class TestLoadingScreen(object):
             os.path.dirname(os.path.realpath(__file__)),
             'CH.PIV'
         )
-        self.background = PivFile(self.file_path)
+        with open(self.file_path, 'rb') as f:
+            self.background = PivFile(f.read())
         bold_f_file_path = os.path.join(
             os.path.dirname(os.path.realpath(__file__)),
             'BOLD.F'
         )
-        self.bold_f = FontFile(bold_f_file_path) 
-
-    def test_loading_screen(self):
-        main_exe = MainExe(
+        with open(bold_f_file_path, 'rb') as f:
+            self.bold_f = FontFile(f.read()) 
+        self.main_exe = MainExe(
             file_path=os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                    'MAIN.EXE')
         )
 
+    def test_loading_screen(self):
         self.bold_f.extract_subimage(self.background, 0x49, 0x5, 0x14)
         self.bold_f.extract_subimage(self.background, 0x4a, 0x16, 0xb5)
         self.bold_f.extract_subimage(self.background, 0x4b, 0x6e, 0xbe)
         self.bold_f.extract_subimage(self.background, 0x45, 0x6e, 0xbe)
 
-        for string, metadata in main_exe.strings.items():
-            draw_string(self.background, self.bold_f, string, metadata[2], main_exe)
+        for string, metadata in self.main_exe.strings.items():
+            draw_string(self.background, self.bold_f, string, metadata[2],
+                        self.main_exe)
 
-        block_a = []
-        block_b = []
-        block_c = []
-        block_d = []
-
-        extracted = self.background.pixels
-
-        for a, b, c, d in grouper(extracted, 4):
-            block_a.append(a)
-            block_b.append(b)
-            block_c.append(c)
-            block_d.append(d)
-
-        blocks = block_a + block_b + block_c + block_d
-
-        with open('memdump.bin', 'rb') as f:
+        with open('loading_screen.bin', 'rb') as f:
             test_data = f.read()
-        print('image ' , len(blocks), 'test_data ', len(test_data))
 
-        assert bytearray(blocks) == bytearray(test_data)
+        assert bytes(self.background.pixels) == test_data
