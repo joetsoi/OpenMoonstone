@@ -18,6 +18,8 @@ ds_8178 = {
 }
 
 ImageDimension = namedtuple('ImageDimension', 'width, height, x_offset, y_offset')
+SCREEN_WIDTH = 320
+SCREEN_HEIGHT = 200
 
 
 def draw_string(piv, font, text, y, main_exe):
@@ -29,7 +31,7 @@ def draw_string(piv, font, text, y, main_exe):
         ords.append(ord(char))
         image_numbers.append(image_number)
         meta = main_exe.strings[text]
-        image_widths.append(font.get_image_width(image_number))
+        image_widths.append(font.get_image_width(image_number, bordered=True))
 
     screen_dimensions = main_exe.screen_dimensions
     image_width = sum(image_widths)
@@ -42,63 +44,70 @@ def draw_string(piv, font, text, y, main_exe):
 
 class FontFile(object):
     def __init__(self, file_data):
-        self.header_length = unpack('>H', file_data[0:2])[0] * 10 + 10
+        self.image_count = unpack('>H', file_data[0:2])[0]
+        self.header_length = self.image_count * 10 + 10
         self.file_length = unpack('>H', file_data[4:6])[0]
         self.file_data = file_data[self.header_length:]
         self.header = file_data[:self.header_length]
 
         self.extracted = extract_file(self.file_length, self.file_data)
-        #print("length", len(self.extracted))
 
-    def get_image_width(self, image_number):
+    def get_image_height(self, image_number):
+        image_metadata = self.header[image_number * 10 + 0xa: image_number * 10 + 0xa + 10]
+        return unpack('>H', image_metadata[6:8])[0]
+
+    def get_image_width(self, image_number, bordered=None):
         image_metadata = self.header[image_number * 10 + 0xa: image_number * 10 + 0xa + 10]
         image_width = unpack('>H', image_metadata[4:6])[0]
         # if dx & 8 width:
         test = (((image_width + 0xf) & 0xfff0) >> 4) << 1
-        print(bin(image_width), bin(test))
-        image_width -= 3
+        if bordered:
+            image_width -= 3
         return image_width
+
+    def test(self, image_number):
+        total_images = unpack('>H', self.header[0:2])[0]
+        if image_number >= 0 and image_number < total_images:
+            metadata_offset = (image_number * 10) + 10
+
+            image_data_location = unpack('>H', self.header[metadata_offset + 2:metadata_offset + 4])[0]
+            image_data_location += self.header_length
+
+            image_width = unpack('>H', self.header[metadata_offset + 4:metadata_offset + 6])[0] + 0xf
+            packed_image_width = image_width // 16 * 2
+            print(image_width, packed_image_width, packed_image_width << 3)
 
     def extract_subimage(self, piv, image_number, x_offset, y_offset):
         total_images = unpack('>H', self.header[0:2])[0]
         if image_number >= 0 and image_number < total_images:
+            metadata_offset = (image_number * 10) + 10
 
-            si = (image_number * 10) + 10
+            image_data_location = unpack('>H', self.header[metadata_offset + 2:metadata_offset + 4])[0]
+            image_data_location += self.header_length
 
-            dx = unpack('>H', self.header[si + 2:si + 4])[0]
-            dx += self.header_length
+            image_width = unpack('>H', self.header[metadata_offset + 4:metadata_offset + 6])[0] + 0xf
+            packed_image_width = image_width // 16 * 2
 
-            ds_8164 = unpack('>H', self.header[si + 4:si + 6])[0] + 0xf
-            ds_8164 = ((ds_8164 & 0x0ff0) >> 4) << 1 # 320 image width? takes off 5?
-            #print("ds_8164 : ", hex(ds_8164))
+            image_height = unpack('>H', self.header[metadata_offset + 6:metadata_offset + 8])[0]
 
-            ds_8168 = unpack('>H', self.header[si + 6:si + 8])[0] # image height
-            #print("ds_8168 : ", hex(ds_8168))
+            x_offset_adjust = self.header[metadata_offset + 8] >> 4
+            x_offset -= x_offset_adjust
 
-            ax = self.header[si + 8] >> 4
-            x_offset -= ax
+            blit_type = self.header[metadata_offset + 9]
 
-            cs_638e = self.header[si + 9]
-
-            if not cs_638e:
+            if not blit_type:
                 return
 
             # loc 5e55
-            si = dx
-            ds_816c = y_offset # image y offset
             ds_8174 = dx = (y_offset << 4) + (y_offset <<6)
 
             ax = x_offset & 3
             ds_8163 = ax & 0x00ff
             
-
-
             ax = x_offset
-            ds_816a = x_offset # 5? related to image width
 
             ax = ax >> 2
             bx = ax
-            
 
             ds_816e = 0
             ds_8172 = 0
@@ -106,109 +115,196 @@ class FontFile(object):
             #print(hex(dx))
             ax += dx
             di = ax
-            destination_index = di
 
             # push ds, si, di
-
-            bx = (bx & 0xff00) + (ds_8168 & 0x00ff)
-            ax = (ax & 0xff00) + (ds_8164 & 0x00ff)
-            ax = (ax & 0x00ff) * (bx & 0x00ff)
-
-            dx = si + ax
-            di = dx
-            dx += ax
-            bx = dx
-            dx += ax
-            bp = dx
-            dx += ax
-            cs_637f = dx
+            packed_image_length = packed_image_width * image_height
+            si, di, bx, bp, cs_637f =  [ image_data_location + (packed_image_length * i) for i in range(0, 5)]
 
             cs_637b = 0
-            cs_637d = ax
-            ax = ax & 0x00ff
-            ax = cs_638e << 1
-            dx = 0x638f + ax
-            dx, bx = bx, dx
+            cs_637d = packed_image_length
+            #dx = 0x638f + ax
 
-            #self.pixels = self.extract_pixels(bx-si, dx-si, si-si, di-si, bp-si, cs_637d)
-            self.pixels = self.extract_pixels(bx, dx, si, di, bp, cs_637d)
+            if blit_type == 1:
+                self.pixels = self.recombine_1_bit_image(si, packed_image_length)
+            elif blit_type == 3:
+                self.pixels = self.recombine_2_bit_image(si, di, packed_image_length)
+            elif blit_type == 7:
+                self.pixels = self.recombine_3_bit_image(si, di, bx, packed_image_length)
+            elif blit_type == 15:
+                self.pixels = self.extract_pixels(si, di, bx, bp, cs_637d)
+            elif blit_type == 30:
+                self.pixels = self.recombine_5_bit_planes_first_zero(
+                        si, di, bx, bp, packed_image_length)
+            elif blit_type == 31:
+                self.pixels = self.recombine_5_bit_planes(si, di, bx, bp, cs_637f,
+                                                          packed_image_length)
+            elif blit_type == 32:
+                self.pixels = self.recombine_5_bit_planes_zeroes(si, di, cs_637d)
+            else:
+                print('missing blit function {0}'.format(blit_type))
 
             bx = 0
-            bp = ds_8168
-            ax = ds_8164 << 3
-            ds_8164 = ax #image height
+            bp = image_height
+            unpacked_image_width = packed_image_width * 8
+            #packed_image_width <<= 3
 
-            image_offset = self.sub_78e1(ds_816a, ds_8164)
+            image_offset = self.compare_image_width(x_offset=x_offset, image_width=unpacked_image_width)
             if image_offset:
                 ds_8172 = image_offset[0]
-                ds_8164 = image_offset[1]
-            # ds_8172 is x-offset
-            # ds_8172 image width
+                unpacked_image_width = image_offset[1]
 
             cs_638c, cs_638b, cs_5f80, cs_6355, ax = self.sub_5f12(
                     ds_816e,
-                    ds_8164,
+                    unpacked_image_width,
                     ds_8172,
                     ds_8163
             )
-            
-            #print(hex(cs_638c), hex(cs_638b), hex(cs_5f80), hex(cs_6355), hex(ax))
 
-            #print(bp, di, piv, cs_638b, ax)
             #self.sub_632a(bp, di, piv, cs_638b, ax)
-            
-            # image x and y offset, image height/source address
-            self.blit(piv, y_offset, ds_816a, ds_8168, ds_8164, cs_638b)
-            #self.blit(piv, source_address, ds_816c)
+            self.blit(piv, y_offset, x_offset=x_offset, image_height=image_height, image_width=unpacked_image_width, is_fullscreen=cs_638b)
 
 
-            #print(hex(ax), hex(bx), hex(cx), hex(dx), hex(si))
-
-    def extract_pixels(self, bx, dx, si, di, bp, length):
-        dx, bx = bx, dx
-        output = []
+    def recombine_1_bit_image(self, bit_plane_position_1, length):
+        output = [None] * length * 8
         for i in range(length):
-            dh = self.extracted[si - self.header_length + i]
-            dl = self.extracted[di - self.header_length + i]
-            ch = self.extracted[bx - self.header_length + i]
-            cl = self.extracted[bp - self.header_length + i]
-
-            for x in zip(each_bit_in_byte(dh), each_bit_in_byte(dl),
-                         each_bit_in_byte(ch), each_bit_in_byte(cl)):
-                al = sum(bit << n for n, bit in enumerate(x))
-                output.append(al)
-        #print_hex_view(output)
+            bit_plane_1 = self.extracted[bit_plane_position_1 - self.header_length + i]
+            for j, bit in enumerate(each_bit_in_byte(bit_plane_1)):
+                output[i * 8 + j] = bit
         return output
 
-    def sub_7969(self, ds_816c):
-        if ds_816c < 0:
+    def recombine_2_bit_image(self, bit_plane_position_1, bit_plane_position_2, length):
+        output = [None] * length * 8
+        for i in range(length):
+            bit_plane_1 = self.extracted[bit_plane_position_1 - self.header_length + i]
+            bit_plane_2 = self.extracted[bit_plane_position_2 - self.header_length + i]
+            for j, bits in enumerate(zip(each_bit_in_byte(bit_plane_1),
+                                        each_bit_in_byte(bit_plane_2))):
+                output[i * 8 + j] = sum(bit << n for n, bit in enumerate(bits))
+        return output
+
+    def recombine_3_bit_image(self, bit_plane_position_1, bit_plane_position_2,
+                              bit_plane_position_3, length):
+        output = [None] * length * 8
+        for i in range(length):
+            bit_plane_1 = self.extracted[bit_plane_position_1 - self.header_length + i]
+            bit_plane_2 = self.extracted[bit_plane_position_2 - self.header_length + i]
+            bit_plane_3 = self.extracted[bit_plane_position_3 - self.header_length + i]
+            for j, bits in enumerate(zip(each_bit_in_byte(bit_plane_1),
+                                         each_bit_in_byte(bit_plane_3),
+                                         each_bit_in_byte(bit_plane_2))):
+                output[i * 8 + j] = sum(bit << n for n, bit in enumerate(bits))
+        return output
+
+    def recombine_5_bit_planes_first_zero(self, bit_plane_position_2,
+                               bit_plane_position_3, bit_plane_position_4,
+                               bit_plane_position_5, length):
+        output = [None] * length * 8
+        o = len(output)
+        for i in range(length):
+            bit_plane_1 = 0
+            bit_plane_2 = self.extracted[bit_plane_position_2 - self.header_length + i]
+            bit_plane_3 = self.extracted[bit_plane_position_3 - self.header_length + i]
+            bit_plane_4 = self.extracted[bit_plane_position_4 - self.header_length + i]
+            bit_plane_5 = self.extracted[bit_plane_position_5 - self.header_length + i]
+
+            for j, x in enumerate(zip(each_bit_in_byte(bit_plane_1),
+                                      each_bit_in_byte(bit_plane_2),
+                                      each_bit_in_byte(bit_plane_3),
+                                      each_bit_in_byte(bit_plane_4),
+                                      each_bit_in_byte(bit_plane_5))):
+                output[i * 8 + j] = sum(bit << n for n, bit in enumerate(x))
+        #print_hex_view(output)
+        assert o == len(output)
+        return output
+
+    def recombine_5_bit_planes(self, bit_plane_position_1, bit_plane_position_2,
+                               bit_plane_position_3, bit_plane_position_4,
+                               bit_plane_position_5, length):
+        output = [None] * length * 8
+        o = len(output)
+        for i in range(length):
+            bit_plane_1 = self.extracted[bit_plane_position_1 - self.header_length + i]
+            bit_plane_2 = self.extracted[bit_plane_position_2 - self.header_length + i]
+            bit_plane_3 = self.extracted[bit_plane_position_3 - self.header_length + i]
+            bit_plane_4 = self.extracted[bit_plane_position_4 - self.header_length + i]
+            bit_plane_5 = self.extracted[bit_plane_position_5 - self.header_length + i]
+
+            for j, x in enumerate(zip(each_bit_in_byte(bit_plane_1),
+                                      each_bit_in_byte(bit_plane_2),
+                                      each_bit_in_byte(bit_plane_3),
+                                      each_bit_in_byte(bit_plane_4),
+                                      each_bit_in_byte(bit_plane_5))):
+                output[i * 8 + j] = sum(bit << n for n, bit in enumerate(x))
+        #print_hex_view(output)
+        assert o == len(output)
+        return output
+
+    def recombine_5_bit_planes_zeroes(self, bit_plane_position_1, bit_plane_position_2, length):
+        output = [None] * length * 8
+        o = len(output)
+        for i in range(length):
+            bit_plane_1 = self.extracted[bit_plane_position_1 - self.header_length + i]
+            bit_plane_2 = self.extracted[bit_plane_position_2 - self.header_length + i]
+            bit_plane_3 = 0
+            bit_plane_4 = 0
+            bit_plane_5 = self.extracted[bit_plane_position_1 - self.header_length + i] | self.extracted[bit_plane_position_2 - self.header_length + i]
+
+            for j, x in enumerate(zip(each_bit_in_byte(bit_plane_1),
+                                      each_bit_in_byte(bit_plane_2),
+                                      each_bit_in_byte(bit_plane_3),
+                                      each_bit_in_byte(bit_plane_4),
+                                      each_bit_in_byte(bit_plane_5))):
+                output[i * 8 + j] = sum(bit << n for n, bit in enumerate(x))
+        #print_hex_view(output)
+        assert o == len(output)
+        return output
+
+    def extract_pixels(self, bit_plane_position_1, bit_plane_position_2,
+                       bit_plane_position_3, bit_plane_position_4, length):
+        output = [None] * length * 8
+        o = len(output)
+        for i in range(length):
+            bit_plane_1 = self.extracted[bit_plane_position_1 - self.header_length + i]
+            bit_plane_2 = self.extracted[bit_plane_position_2 - self.header_length + i]
+            bit_plane_3 = self.extracted[bit_plane_position_3 - self.header_length + i]
+            bit_plane_4 = self.extracted[bit_plane_position_4 - self.header_length + i]
+
+            for j, x in enumerate(zip(each_bit_in_byte(bit_plane_1),
+                                      each_bit_in_byte(bit_plane_2),
+                                      each_bit_in_byte(bit_plane_3),
+                                      each_bit_in_byte(bit_plane_4))):
+                output[i * 8 + j] = sum(bit << n for n, bit in enumerate(x))
+        #print_hex_view(output)
+        assert o == len(output)
+        return output
+
+    def sub_7969(self, y_offset):
+        if y_offset < 0:
             pass
 
 
     def sub_793e(self):
         pass
 
-    def sub_78e1(self, ds_816a, ds_8164):
-        # compare image width
-        ax = ds_816a + ds_8164
-        if ax > 0x140 and ds_816a < 0x140:
-            ax -= 0x140
-            ds_8172 = ax
-            return ds_8172, ds_8164 - ax
+    def compare_image_width(self, x_offset, image_width):
+        total = x_offset + image_width
+        if total > SCREEN_WIDTH and x_offset < SCREEN_WIDTH:
+            overrun = total - SCREEN_WIDTH
+            return overrun, image_width - overrun
 
-    def sub_7907(self, ds_816a):
+    def sub_7907(self, r_offset):
         pass
 
-    def sub_5f12(self, ds_816e, ds_8164, ds_8172, ds_8163):
+    def sub_5f12(self, ds_816e, packge_image_width, ds_8172, ds_8163):
         si = ds_816e
         ds_80b9 = 0xa800
         es = ds_80b9 # = a800 graphics address
         dx = 0x50 # 80
-        ax = ds_8164 & 0x0003
+        ax = packge_image_width & 0x0003
 
         cs_638b = ax
         cs_638c = ax
-        ax = ds_8164 >> 2
+        ax = packge_image_width >> 2
         dx -= ax
         dx = dx << 2
         ax = dx
@@ -218,7 +314,7 @@ class FontFile(object):
         cs_5f80 = dx
 
         ax = 0x50
-        dx = ds_8164
+        dx = packge_image_width
         dx = dx >> 2
         ax -= dx
         cs_6355 = ax
@@ -327,5 +423,6 @@ if __name__ == '__main__':
     with open(file_path, 'rb') as f:
         piv = PivFile(f.read())
 
-    for i in range(76):
-        font.get_image_width(i)
+    for i in range(320):
+        test = (((i + 0xf) & 0xfff0) >> 4) << 1
+        print(i, test)

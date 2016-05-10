@@ -19,9 +19,9 @@ def draw(screen, image_data, palette):
 
     pixel_array = pygame.PixelArray(image)
 
-    for x, line in enumerate(grouper(image_data, 320)):
-        for y, pixel in enumerate(line):
-            pixel_array[y][x] = palette[pixel]
+    for y, line in enumerate(grouper(image_data, 320)):
+        for x, pixel in enumerate(line):
+            pixel_array[x, y] = palette[pixel]
 
     del pixel_array
     image = pygame.transform.scale(image, (320 * scale_factor, 200 * scale_factor))
@@ -58,8 +58,9 @@ if __name__ == "__main__":
     #print_hex_view(main_exe.bold_f_char_lookup)
 
     #print_hex_view(piv.pixels)
+    
+#    font.extract_subimage(piv, 3, 0, 0)
     font.extract_subimage(piv, 0x49, 0x5, 0x14)
-    #font.extract_subimage(piv, 0x45, 0x5, 0x14)
 
     font.extract_subimage(piv, 0x4a, 0x16, 0xb5)
     font.extract_subimage(piv, 0x4b, 0x6e, 0xbe)
@@ -68,6 +69,9 @@ if __name__ == "__main__":
 
     for string, metadata in main_exe.strings.items():
         draw_string(piv, font, string, metadata[2], main_exe)
+
+#    for i in range(6):
+#        font.extract_subimage(piv, i, i*20, 0)
 
     pygame.init()
     screen = pygame.display.set_mode((320 * scale_factor, 200 * scale_factor))
