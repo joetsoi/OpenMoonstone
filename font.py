@@ -3,11 +3,12 @@ from pprint import pprint
 
 
 from collections import namedtuple
+from functools import partial
 import os, sys
-from struct import unpack
-from extract import extract_file
+from struct import unpack, iter_unpack
+from extract import extract_file, each_bit_in_byte
 from cli import print_hex_view
-from piv import each_bit_in_byte, PivFile
+from piv import PivFile
 
 # 4ce4:5ba7
 ds_8178 = {
@@ -17,9 +18,50 @@ ds_8178 = {
     0x817b: 0x88,
 }
 
-ImageDimension = namedtuple('ImageDimension', 'width, height, x_offset, y_offset')
 SCREEN_WIDTH = 320
 SCREEN_HEIGHT = 200
+
+ImageDimension = namedtuple('ImageDimension', 'width, height, x_offset, y_offset')
+ImageHeader = namedtuple('ImageHeader', ['padding', 'data_address',
+                                         'width', 'height',
+                                         'x_adjust', 'blit_type'])
+
+def sum_bits(bit_positions, bits):
+    '''Calculate byte from bit values and bit positions
+
+    args:
+        bit_positions (list of ints): each int represents the position of its
+            respective bit value in bits. e.g [3, 4] indicates the first and
+            second element of bits should be shifted to the third and forth
+            positon of the final byte output.
+        bits (list of bool): binary values for each position.
+
+    returns (int/byte): byte value
+    '''
+    return sum(bit << bit_positions[bit_pos] for bit_pos, bit in enumerate(bits))
+
+
+def sum_bits_duplicate(bit_positions, duplicate_position, bits):
+    '''Similar to sum bits, with a duplicate
+
+    The bit in duplicate position is the ORed value of all of bit positions. e.g
+    bit_positions=[0, 1], duplicate_position=4 indicates that bit 4 in the final
+    byte should be bit 0 | bit 1 of the final byte.
+    '''
+    total = sum(bit << bit_positions[bit_pos] for bit_pos, bit in enumerate(bits))
+    duplicate = any(bit_positions) << duplicate_position
+    total += duplicate
+
+
+blit_function_table = {
+    1: partial(sum_bits, [0]),
+    3: partial(sum_bits, [0, 1]),
+    7: partial(sum_bits, [0, 1, 2]),
+    15: partial(sum_bits, [0, 1, 2, 3]),
+    30: partial(sum_bits, [1, 2, 3, 4]),
+    31: partial(sum_bits, [0, 1, 2, 3, 4]),
+    32: partial(sum_bits_duplicate, [0, 1], 4),
+}
 
 
 def draw_string(piv, font, text, y, main_exe):
@@ -50,15 +92,31 @@ class FontFile(object):
         self.file_data = file_data[self.header_length:]
         self.header = file_data[:self.header_length]
 
+        self.headers = [ImageHeader(*xs) for xs in iter_unpack('>4H2B', file_data[10:self.header_length])]
+
+
+
+
         self.extracted = extract_file(self.file_length, self.file_data)
 
+        self.images = []
+        for header in self.headers:
+            packed_image_width = header.width // 16 * 2
+            num_bit_planes = 4
+            image_length = packed_image_width * header.height * num_bit_planes
+            image_data = self.extracted[header.data_address:header.data_address+image_length]
+            self.images.append(image_data)
+
+
     def get_image_height(self, image_number):
-        image_metadata = self.header[image_number * 10 + 0xa: image_number * 10 + 0xa + 10]
-        return unpack('>H', image_metadata[6:8])[0]
+        #image_metadata = self.header[image_number * 10 + 0xa: image_number * 10 + 0xa + 10]
+        #return unpack('>H', image_metadata[6:8])[0]
+        return self.headers[image_number].height
 
     def get_image_width(self, image_number, bordered=None):
-        image_metadata = self.header[image_number * 10 + 0xa: image_number * 10 + 0xa + 10]
-        image_width = unpack('>H', image_metadata[4:6])[0]
+        #image_metadata = self.header[image_number * 10 + 0xa: image_number * 10 + 0xa + 10]
+        #image_width = unpack('>H', image_metadata[4:6])[0]
+        image_width = self.headers[image_number].width
         # if dx & 8 width:
         test = (((image_width + 0xf) & 0xfff0) >> 4) << 1
         if bordered:
@@ -78,25 +136,23 @@ class FontFile(object):
             print(image_width, packed_image_width, packed_image_width << 3)
 
     def extract_subimage(self, piv, image_number, x_offset, y_offset):
-        total_images = unpack('>H', self.header[0:2])[0]
-        if image_number >= 0 and image_number < total_images:
-            metadata_offset = (image_number * 10) + 10
+        if image_number >= 0 and image_number < self.image_count:
 
-            image_data_location = unpack('>H', self.header[metadata_offset + 2:metadata_offset + 4])[0]
-            image_data_location += self.header_length
-
-            image_width = unpack('>H', self.header[metadata_offset + 4:metadata_offset + 6])[0] + 0xf
-            packed_image_width = image_width // 16 * 2
-
-            image_height = unpack('>H', self.header[metadata_offset + 6:metadata_offset + 8])[0]
-
-            x_offset_adjust = self.header[metadata_offset + 8] >> 4
-            x_offset -= x_offset_adjust
-
-            blit_type = self.header[metadata_offset + 9]
-
+            header = self.headers[image_number]
+            blit_type = header.blit_type
             if not blit_type:
                 return
+
+            image_data_location = header.data_address + self.header_length
+
+            image_width = header.width + 0xf
+            packed_image_width = image_width // 16 * 2
+            image_height = header.height
+
+            x_offset_adjust = header.x_adjust >> 4
+            x_offset -= x_offset_adjust
+
+
 
             # loc 5e55
             ds_8174 = dx = (y_offset << 4) + (y_offset <<6)
@@ -125,21 +181,37 @@ class FontFile(object):
             #dx = 0x638f + ax
 
             if blit_type == 1:
-                self.pixels = self.recombine_1_bit_image(si, packed_image_length)
+                extract = self.recombine_1_bit_image(si, packed_image_length)
+                self.pixels = self.recombine(blit_type, [si], packed_image_length)
+                assert(self.pixels == extract)
             elif blit_type == 3:
-                self.pixels = self.recombine_2_bit_image(si, di, packed_image_length)
+                extract = self.recombine_2_bit_image(si, di, packed_image_length)
+                self.pixels = self.recombine(blit_type, [si, di], packed_image_length)
+                assert(self.pixels == extract)
             elif blit_type == 7:
-                self.pixels = self.recombine_3_bit_image(si, di, bx, packed_image_length)
+                extract = self.recombine_3_bit_image(si, di, bx, packed_image_length)
+                self.pixels = self.recombine(blit_type, [si, di, bx], packed_image_length)
+                assert(self.pixels == extract)
             elif blit_type == 15:
-                self.pixels = self.extract_pixels(si, di, bx, bp, cs_637d)
+                extract = self.extract_pixels(si, di, bx, bp, cs_637d)
+                self.pixels = self.recombine(blit_type, [si, di, bx, bp], cs_637d)
+                assert(self.pixels == extract)
             elif blit_type == 30:
-                self.pixels = self.recombine_5_bit_planes_first_zero(
+                extract = self.recombine_5_bit_planes_first_zero(
                         si, di, bx, bp, packed_image_length)
+                self.pixels = self.recombine(blit_type, [si, di, bx, bp],
+                                             packed_image_length)
+                assert(self.pixels == extract)
             elif blit_type == 31:
-                self.pixels = self.recombine_5_bit_planes(si, di, bx, bp, cs_637f,
-                                                          packed_image_length)
+                extract = self.recombine_5_bit_planes(si, di, bx, bp, cs_637f,
+                                                        packed_image_length)
+                self.pixels = self.recombine(blit_type, [si, di, bx, bp, cs_637f],
+                                             packed_image_length)
+                assert(self.pixels == extract)
             elif blit_type == 32:
-                self.pixels = self.recombine_5_bit_planes_zeroes(si, di, cs_637d)
+                extract = self.recombine_5_bit_planes_zeroes(si, di, cs_637d)
+                #self.pixels = self.recombine(blit_type, [si, di], cs_637d)
+                #assert(self.pixels == extract)
             else:
                 print('missing blit function {0}'.format(blit_type))
 
@@ -162,6 +234,27 @@ class FontFile(object):
 
             #self.sub_632a(bp, di, piv, cs_638b, ax)
             self.blit(piv, y_offset, x_offset=x_offset, image_height=image_height, image_width=unpacked_image_width, is_fullscreen=cs_638b)
+
+    def recombine(self, blit_type, bit_plane_positions, length):
+        output = [None] * (length * 8)
+        o = len(output)
+
+        bit_planes = []
+        for position in bit_plane_positions:
+            pos = position - self.header_length
+            bit_planes.append(self.extracted[pos:pos + length]) 
+
+        sum_func = blit_function_table[blit_type]
+
+        # get the nth byte of every bit_plane
+        for i, bytes_list in enumerate(zip(*bit_planes)):
+            # get the nth bits of those bytes
+            for j, bits in enumerate(zip(*[each_bit_in_byte(byte) for byte in bytes_list])):
+                # reconstruct the output byte from those bits
+                output[i * 8 + j] = sum_func(bits)
+
+        assert o == len(output)
+        return output
 
 
     def recombine_1_bit_image(self, bit_plane_position_1, length):
@@ -247,7 +340,8 @@ class FontFile(object):
             bit_plane_2 = self.extracted[bit_plane_position_2 - self.header_length + i]
             bit_plane_3 = 0
             bit_plane_4 = 0
-            bit_plane_5 = self.extracted[bit_plane_position_1 - self.header_length + i] | self.extracted[bit_plane_position_2 - self.header_length + i]
+            bit_plane_5 = bit_plane_1 | bit_plane_2
+            #bit_plane_5 = self.extracted[bit_plane_position_1 - self.header_length + i] | self.extracted[bit_plane_position_2 - self.header_length + i]
 
             for j, x in enumerate(zip(each_bit_in_byte(bit_plane_1),
                                       each_bit_in_byte(bit_plane_2),
