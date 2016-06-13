@@ -49,18 +49,33 @@ def sum_bits_duplicate(bit_positions, duplicate_position, bits):
     byte should be bit 0 | bit 1 of the final byte.
     '''
     total = sum(bit << bit_positions[bit_pos] for bit_pos, bit in enumerate(bits))
-    duplicate = any(bit_positions) << duplicate_position
+    duplicate = any(bits) << duplicate_position
     total += duplicate
+    return total
 
 
 blit_function_table = {
-    1: partial(sum_bits, [0]),
-    3: partial(sum_bits, [0, 1]),
-    7: partial(sum_bits, [0, 1, 2]),
-    15: partial(sum_bits, [0, 1, 2, 3]),
-    30: partial(sum_bits, [1, 2, 3, 4]),
-    31: partial(sum_bits, [0, 1, 2, 3, 4]),
-    32: partial(sum_bits_duplicate, [0, 1], 4),
+    1: (sum_bits, [0]),
+    3: (sum_bits, [0, 1]),
+    4: (sum_bits, [2]),
+    5: (sum_bits, [0, 2]),
+    6: (sum_bits, [1, 2]),
+    7: (sum_bits, [0, 1, 2]),
+    9: (sum_bits, [0, 3]),
+    11: (sum_bits, [0, 1, 3]),
+    12: (sum_bits, [2, 3]),
+    13: (sum_bits, [0, 2, 3]),
+    14: (sum_bits, [1, 2, 3]),
+    15: (sum_bits, [0, 1, 2, 3]),
+    16: (sum_bits, [4]),
+    18: (sum_bits, [1, 4]),
+    19: (sum_bits, [0, 1, 4]),
+    23: (sum_bits, [0, 1, 2, 4]),
+    27: (sum_bits, [0, 1, 3, 4]),
+    28: (sum_bits, [2, 3, 4]),
+    30: (sum_bits, [1, 2, 3, 4]),
+    31: (sum_bits, [0, 1, 2, 3, 4]),
+    32: (sum_bits_duplicate, [0, 1], 4),
 }
 
 
@@ -180,40 +195,9 @@ class FontFile(object):
             cs_637d = packed_image_length
             #dx = 0x638f + ax
 
-            if blit_type == 1:
-                extract = self.recombine_1_bit_image(si, packed_image_length)
-                self.pixels = self.recombine(blit_type, [si], packed_image_length)
-                assert(self.pixels == extract)
-            elif blit_type == 3:
-                extract = self.recombine_2_bit_image(si, di, packed_image_length)
-                self.pixels = self.recombine(blit_type, [si, di], packed_image_length)
-                assert(self.pixels == extract)
-            elif blit_type == 7:
-                extract = self.recombine_3_bit_image(si, di, bx, packed_image_length)
-                self.pixels = self.recombine(blit_type, [si, di, bx], packed_image_length)
-                assert(self.pixels == extract)
-            elif blit_type == 15:
-                extract = self.extract_pixels(si, di, bx, bp, cs_637d)
-                self.pixels = self.recombine(blit_type, [si, di, bx, bp], cs_637d)
-                assert(self.pixels == extract)
-            elif blit_type == 30:
-                extract = self.recombine_5_bit_planes_first_zero(
-                        si, di, bx, bp, packed_image_length)
-                self.pixels = self.recombine(blit_type, [si, di, bx, bp],
-                                             packed_image_length)
-                assert(self.pixels == extract)
-            elif blit_type == 31:
-                extract = self.recombine_5_bit_planes(si, di, bx, bp, cs_637f,
-                                                        packed_image_length)
-                self.pixels = self.recombine(blit_type, [si, di, bx, bp, cs_637f],
-                                             packed_image_length)
-                assert(self.pixels == extract)
-            elif blit_type == 32:
-                extract = self.recombine_5_bit_planes_zeroes(si, di, cs_637d)
-                #self.pixels = self.recombine(blit_type, [si, di], cs_637d)
-                #assert(self.pixels == extract)
-            else:
-                print('missing blit function {0}'.format(blit_type))
+            print(blit_type)
+            self.pixels = self.recombine(blit_type, [si, di, bx, bp, cs_637f],
+                                         packed_image_length)
 
             bx = 0
             bp = image_height
@@ -240,135 +224,19 @@ class FontFile(object):
         o = len(output)
 
         bit_planes = []
-        for position in bit_plane_positions:
+        sum_func, bit_positions = blit_function_table[blit_type]
+        for _, position in zip(bit_positions, bit_plane_positions):
             pos = position - self.header_length
             bit_planes.append(self.extracted[pos:pos + length]) 
 
-        sum_func = blit_function_table[blit_type]
 
         # get the nth byte of every bit_plane
         for i, bytes_list in enumerate(zip(*bit_planes)):
-            # get the nth bits of those bytes
+            # get the nth set of bits of those bytes
             for j, bits in enumerate(zip(*[each_bit_in_byte(byte) for byte in bytes_list])):
                 # reconstruct the output byte from those bits
-                output[i * 8 + j] = sum_func(bits)
+                output[i * 8 + j] = sum_func(bit_positions, bits)
 
-        assert o == len(output)
-        return output
-
-
-    def recombine_1_bit_image(self, bit_plane_position_1, length):
-        output = [None] * length * 8
-        for i in range(length):
-            bit_plane_1 = self.extracted[bit_plane_position_1 - self.header_length + i]
-            for j, bit in enumerate(each_bit_in_byte(bit_plane_1)):
-                output[i * 8 + j] = bit
-        return output
-
-    def recombine_2_bit_image(self, bit_plane_position_1, bit_plane_position_2, length):
-        output = [None] * length * 8
-        for i in range(length):
-            bit_plane_1 = self.extracted[bit_plane_position_1 - self.header_length + i]
-            bit_plane_2 = self.extracted[bit_plane_position_2 - self.header_length + i]
-            for j, bits in enumerate(zip(each_bit_in_byte(bit_plane_1),
-                                        each_bit_in_byte(bit_plane_2))):
-                output[i * 8 + j] = sum(bit << n for n, bit in enumerate(bits))
-        return output
-
-    def recombine_3_bit_image(self, bit_plane_position_1, bit_plane_position_2,
-                              bit_plane_position_3, length):
-        output = [None] * length * 8
-        for i in range(length):
-            bit_plane_1 = self.extracted[bit_plane_position_1 - self.header_length + i]
-            bit_plane_2 = self.extracted[bit_plane_position_2 - self.header_length + i]
-            bit_plane_3 = self.extracted[bit_plane_position_3 - self.header_length + i]
-            for j, bits in enumerate(zip(each_bit_in_byte(bit_plane_1),
-                                         each_bit_in_byte(bit_plane_3),
-                                         each_bit_in_byte(bit_plane_2))):
-                output[i * 8 + j] = sum(bit << n for n, bit in enumerate(bits))
-        return output
-
-    def recombine_5_bit_planes_first_zero(self, bit_plane_position_2,
-                               bit_plane_position_3, bit_plane_position_4,
-                               bit_plane_position_5, length):
-        output = [None] * length * 8
-        o = len(output)
-        for i in range(length):
-            bit_plane_1 = 0
-            bit_plane_2 = self.extracted[bit_plane_position_2 - self.header_length + i]
-            bit_plane_3 = self.extracted[bit_plane_position_3 - self.header_length + i]
-            bit_plane_4 = self.extracted[bit_plane_position_4 - self.header_length + i]
-            bit_plane_5 = self.extracted[bit_plane_position_5 - self.header_length + i]
-
-            for j, x in enumerate(zip(each_bit_in_byte(bit_plane_1),
-                                      each_bit_in_byte(bit_plane_2),
-                                      each_bit_in_byte(bit_plane_3),
-                                      each_bit_in_byte(bit_plane_4),
-                                      each_bit_in_byte(bit_plane_5))):
-                output[i * 8 + j] = sum(bit << n for n, bit in enumerate(x))
-        #print_hex_view(output)
-        assert o == len(output)
-        return output
-
-    def recombine_5_bit_planes(self, bit_plane_position_1, bit_plane_position_2,
-                               bit_plane_position_3, bit_plane_position_4,
-                               bit_plane_position_5, length):
-        output = [None] * length * 8
-        o = len(output)
-        for i in range(length):
-            bit_plane_1 = self.extracted[bit_plane_position_1 - self.header_length + i]
-            bit_plane_2 = self.extracted[bit_plane_position_2 - self.header_length + i]
-            bit_plane_3 = self.extracted[bit_plane_position_3 - self.header_length + i]
-            bit_plane_4 = self.extracted[bit_plane_position_4 - self.header_length + i]
-            bit_plane_5 = self.extracted[bit_plane_position_5 - self.header_length + i]
-
-            for j, x in enumerate(zip(each_bit_in_byte(bit_plane_1),
-                                      each_bit_in_byte(bit_plane_2),
-                                      each_bit_in_byte(bit_plane_3),
-                                      each_bit_in_byte(bit_plane_4),
-                                      each_bit_in_byte(bit_plane_5))):
-                output[i * 8 + j] = sum(bit << n for n, bit in enumerate(x))
-        #print_hex_view(output)
-        assert o == len(output)
-        return output
-
-    def recombine_5_bit_planes_zeroes(self, bit_plane_position_1, bit_plane_position_2, length):
-        output = [None] * length * 8
-        o = len(output)
-        for i in range(length):
-            bit_plane_1 = self.extracted[bit_plane_position_1 - self.header_length + i]
-            bit_plane_2 = self.extracted[bit_plane_position_2 - self.header_length + i]
-            bit_plane_3 = 0
-            bit_plane_4 = 0
-            bit_plane_5 = bit_plane_1 | bit_plane_2
-            #bit_plane_5 = self.extracted[bit_plane_position_1 - self.header_length + i] | self.extracted[bit_plane_position_2 - self.header_length + i]
-
-            for j, x in enumerate(zip(each_bit_in_byte(bit_plane_1),
-                                      each_bit_in_byte(bit_plane_2),
-                                      each_bit_in_byte(bit_plane_3),
-                                      each_bit_in_byte(bit_plane_4),
-                                      each_bit_in_byte(bit_plane_5))):
-                output[i * 8 + j] = sum(bit << n for n, bit in enumerate(x))
-        #print_hex_view(output)
-        assert o == len(output)
-        return output
-
-    def extract_pixels(self, bit_plane_position_1, bit_plane_position_2,
-                       bit_plane_position_3, bit_plane_position_4, length):
-        output = [None] * length * 8
-        o = len(output)
-        for i in range(length):
-            bit_plane_1 = self.extracted[bit_plane_position_1 - self.header_length + i]
-            bit_plane_2 = self.extracted[bit_plane_position_2 - self.header_length + i]
-            bit_plane_3 = self.extracted[bit_plane_position_3 - self.header_length + i]
-            bit_plane_4 = self.extracted[bit_plane_position_4 - self.header_length + i]
-
-            for j, x in enumerate(zip(each_bit_in_byte(bit_plane_1),
-                                      each_bit_in_byte(bit_plane_2),
-                                      each_bit_in_byte(bit_plane_3),
-                                      each_bit_in_byte(bit_plane_4))):
-                output[i * 8 + j] = sum(bit << n for n, bit in enumerate(x))
-        #print_hex_view(output)
         assert o == len(output)
         return output
 
