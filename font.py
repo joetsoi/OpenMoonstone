@@ -109,9 +109,6 @@ class FontFile(object):
 
         self.headers = [ImageHeader(*xs) for xs in iter_unpack('>4H2B', file_data[10:self.header_length])]
 
-
-
-
         self.extracted = extract_file(self.file_length, self.file_data)
 
         self.images = []
@@ -138,18 +135,6 @@ class FontFile(object):
             image_width -= 3
         return image_width
 
-    def test(self, image_number):
-        total_images = unpack('>H', self.header[0:2])[0]
-        if image_number >= 0 and image_number < total_images:
-            metadata_offset = (image_number * 10) + 10
-
-            image_data_location = unpack('>H', self.header[metadata_offset + 2:metadata_offset + 4])[0]
-            image_data_location += self.header_length
-
-            image_width = unpack('>H', self.header[metadata_offset + 4:metadata_offset + 6])[0] + 0xf
-            packed_image_width = image_width // 16 * 2
-            print(image_width, packed_image_width, packed_image_width << 3)
-
     def extract_subimage(self, piv, image_number, x_offset, y_offset):
         if image_number >= 0 and image_number < self.image_count:
 
@@ -167,57 +152,32 @@ class FontFile(object):
             x_offset_adjust = header.x_adjust >> 4
             x_offset -= x_offset_adjust
 
-
-
-            # loc 5e55
-            ds_8174 = dx = (y_offset << 4) + (y_offset <<6)
-
-            ax = x_offset & 3
-            ds_8163 = ax & 0x00ff
-            
-            ax = x_offset
-
-            ax = ax >> 2
-            bx = ax
-
-            ds_816e = 0
-            ds_8172 = 0
-
-            #print(hex(dx))
-            ax += dx
-            di = ax
-
-            # push ds, si, di
             packed_image_length = packed_image_width * image_height
-            si, di, bx, bp, cs_637f =  [ image_data_location + (packed_image_length * i) for i in range(0, 5)]
+            bit_planes =  [image_data_location + (packed_image_length * i)
+                           for i in range(0, 5)]
 
-            cs_637b = 0
-            cs_637d = packed_image_length
-            #dx = 0x638f + ax
-
-            print(blit_type)
-            self.pixels = self.recombine(blit_type, [si, di, bx, bp, cs_637f],
+            self.pixels = self.recombine(blit_type, bit_planes,
                                          packed_image_length)
 
-            bx = 0
-            bp = image_height
             unpacked_image_width = packed_image_width * 8
             #packed_image_width <<= 3
 
-            image_offset = self.compare_image_width(x_offset=x_offset, image_width=unpacked_image_width)
-            if image_offset:
-                ds_8172 = image_offset[0]
-                unpacked_image_width = image_offset[1]
-
-            cs_638c, cs_638b, cs_5f80, cs_6355, ax = self.sub_5f12(
-                    ds_816e,
-                    unpacked_image_width,
-                    ds_8172,
-                    ds_8163
+            image_offset = self.compare_image_width(
+                    x_offset=x_offset,
+                    image_width=unpacked_image_width
             )
 
-            #self.sub_632a(bp, di, piv, cs_638b, ax)
-            self.blit(piv, y_offset, x_offset=x_offset, image_height=image_height, image_width=unpacked_image_width, is_fullscreen=cs_638b)
+            if image_offset:
+                unpacked_image_width = image_offset[1]
+
+            self.blit(
+                piv,
+                y_offset,
+                x_offset=x_offset,
+                image_height=image_height,
+                image_width=unpacked_image_width,
+                is_fullscreen=self.is_fullscreen(unpacked_image_width)
+            )
 
     def recombine(self, blit_type, bit_plane_positions, length):
         output = [None] * (length * 8)
@@ -244,53 +204,14 @@ class FontFile(object):
         if y_offset < 0:
             pass
 
-
-    def sub_793e(self):
-        pass
-
     def compare_image_width(self, x_offset, image_width):
         total = x_offset + image_width
         if total > SCREEN_WIDTH and x_offset < SCREEN_WIDTH:
             overrun = total - SCREEN_WIDTH
             return overrun, image_width - overrun
 
-    def sub_7907(self, r_offset):
-        pass
-
-    def sub_5f12(self, ds_816e, packge_image_width, ds_8172, ds_8163):
-        si = ds_816e
-        ds_80b9 = 0xa800
-        es = ds_80b9 # = a800 graphics address
-        dx = 0x50 # 80
-        ax = packge_image_width & 0x0003
-
-        cs_638b = ax
-        cs_638c = ax
-        ax = packge_image_width >> 2
-        dx -= ax
-        dx = dx << 2
-        ax = dx
-        dx = dx << 1
-        #ax += dx
-        dx += ax
-        cs_5f80 = dx
-
-        ax = 0x50
-        dx = packge_image_width
-        dx = dx >> 2
-        ax -= dx
-        cs_6355 = ax
-
-        ax = ds_8172 + cs_638c
-        cs_6359 = ax
-        al = ds_8163
-        bx = 0x8178 + al
-        al = ds_8178[bx]
-        #ax = (2 << 8) + al
-        ax = (al << 8) + 2
-
-        #print(hex(cs_638c), hex(cs_638b), hex(cs_5f80), hex(cs_6355))
-        return cs_638c, cs_638b, cs_5f80, cs_6355, ax
+    def is_fullscreen(self, unpacked_image_width):
+        return unpacked_image_width & 0x0003
 
     def blit(self, piv, y_offset, x_offset, image_height, image_width, is_fullscreen):
         src = 0
@@ -308,62 +229,6 @@ class FontFile(object):
                 dest += 1
                 src += 1
             first_pass = False
-
-
-        #length = image_height * 320 
-        #y_pos = y_offset * 320 + x_offset
-        #for src, dest in enumerate(range(y_pos, y_pos + length)):
-        #    try:
-        #        if self.pixels[src] != 0:
-        #            piv.pixels[dest] = self.pixels[src]
-        #    except Exception as e:
-        #        pass
-
-
-    def sub_632a(self, bp, di, piv, cs_638b, ax):
-        i = 0
-        original_i = 0
-        original_di = di
-
-        i_s = []
-
-        for bx in range(4):
-            for b in range(bp):
-                al = self.pixels[i]
-                i_s.append(i)
-                i += 3 + 1
-                if al != 0:
-                    piv.pixels[di] = al
-
-                di += 1
-                al = self.pixels[i]
-                i_s.append(i)
-                i += 3 + 1
-                if al != 0:
-                    piv.pixels[di] = al
-
-                di += 1
-                if not cs_638b <= 0:
-                    al = self.pixels[i]
-                    i_s.append(i)
-                    if al != 0:
-                        piv.pixels[di] = al
-
-                di += 0x2# 0x130
-                i += 0x8# 0x101
-
-            # pop di, si, ax
-            di = original_di
-            # inc si
-            original_i = original_i + 1
-            i = original_i
-            ah = (0xff00 & ax) >> 8
-            ah = ah << 1
-            # rol ah, 1
-            if (ah & 0x80) >> 7:
-                di += 1
-
-            cs_638b -= 1
 
 
 if __name__ == '__main__':
