@@ -62,6 +62,7 @@ blit_function_table = {
     6: (sum_bits, [1, 2]),
     7: (sum_bits, [0, 1, 2]),
     9: (sum_bits, [0, 3]),
+    10: (sum_bits, [1, 3]),
     11: (sum_bits, [0, 1, 3]),
     12: (sum_bits, [2, 3]),
     13: (sum_bits, [0, 2, 3]),
