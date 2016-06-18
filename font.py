@@ -100,15 +100,20 @@ def draw_string(piv, font, text, y, main_exe):
         center += w
 
 
+class NotValidSubimage(Exception):
+    pass
+
+
 class FontFile(object):
     def __init__(self, file_data):
         self.image_count = unpack('>H', file_data[0:2])[0]
         self.header_length = self.image_count * 10 + 10
+
         self.file_length = unpack('>H', file_data[4:6])[0]
         self.file_data = file_data[self.header_length:]
-        self.header = file_data[:self.header_length]
 
-        self.headers = [ImageHeader(*xs) for xs in iter_unpack('>4H2B', file_data[10:self.header_length])]
+        header_data = file_data[10:self.header_length]
+        self.headers = [ImageHeader(*xs) for xs in iter_unpack('>4H2B', header_data)]
 
         self.extracted = extract_file(self.file_length, self.file_data)
 
@@ -120,15 +125,10 @@ class FontFile(object):
             image_data = self.extracted[header.data_address:header.data_address+image_length]
             self.images.append(image_data)
 
-
     def get_image_height(self, image_number):
-        #image_metadata = self.header[image_number * 10 + 0xa: image_number * 10 + 0xa + 10]
-        #return unpack('>H', image_metadata[6:8])[0]
         return self.headers[image_number].height
 
     def get_image_width(self, image_number, bordered=None):
-        #image_metadata = self.header[image_number * 10 + 0xa: image_number * 10 + 0xa + 10]
-        #image_width = unpack('>H', image_metadata[4:6])[0]
         image_width = self.headers[image_number].width
         # if dx & 8 width:
         test = (((image_width + 0xf) & 0xfff0) >> 4) << 1
@@ -137,48 +137,51 @@ class FontFile(object):
         return image_width
 
     def extract_subimage(self, piv, image_number, x_offset, y_offset):
-        if image_number >= 0 and image_number < self.image_count:
-
+        try:
             header = self.headers[image_number]
-            blit_type = header.blit_type
-            if not blit_type:
-                return
-
-            image_data_location = header.data_address + self.header_length
-
-            image_width = header.width + 0xf
-            packed_image_width = image_width // 16 * 2
-            image_height = header.height
-
-            x_offset_adjust = header.x_adjust >> 4
-            x_offset -= x_offset_adjust
-
-            packed_image_length = packed_image_width * image_height
-            bit_planes =  [image_data_location + (packed_image_length * i)
-                           for i in range(0, 5)]
-
-            self.pixels = self.recombine(blit_type, bit_planes,
-                                         packed_image_length)
-
-            unpacked_image_width = packed_image_width * 8
-            #packed_image_width <<= 3
-
-            image_offset = self.compare_image_width(
-                    x_offset=x_offset,
-                    image_width=unpacked_image_width
+        except KeyError:
+            raise NotValidSubImage(
+                '{} is not in the range [0, {}]'.format(image_number,
+                                                        self.image_count)
             )
+        if not header.blit_type:
+            return
 
-            if image_offset:
-                unpacked_image_width = image_offset[1]
+        image_data_location = header.data_address + self.header_length
 
-            self.blit(
-                piv,
-                y_offset,
+        image_width = header.width + 0xf
+        packed_image_width = image_width // 16 * 2
+        image_height = header.height
+
+        x_offset_adjust = header.x_adjust >> 4
+        x_offset -= x_offset_adjust
+
+        packed_image_length = packed_image_width * image_height
+        bit_planes =  [image_data_location + (packed_image_length * i)
+                       for i in range(0, 5)]
+
+        self.pixels = self.recombine(header.blit_type, bit_planes,
+                                     packed_image_length)
+
+        unpacked_image_width = packed_image_width * 8
+        #packed_image_width <<= 3
+
+        image_offset = self.compare_image_width(
                 x_offset=x_offset,
-                image_height=image_height,
-                image_width=unpacked_image_width,
-                is_fullscreen=self.is_fullscreen(unpacked_image_width)
-            )
+                image_width=unpacked_image_width
+        )
+
+        if image_offset:
+            unpacked_image_width = image_offset[1]
+
+        self.blit(
+            piv,
+            y_offset,
+            x_offset=x_offset,
+            image_height=image_height,
+            image_width=unpacked_image_width,
+            is_fullscreen=self.is_fullscreen(unpacked_image_width)
+        )
 
     def recombine(self, blit_type, bit_plane_positions, length):
         output = [None] * (length * 8)
