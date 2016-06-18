@@ -1,6 +1,6 @@
 from struct import unpack, unpack_from
 from itertools import repeat
-from extract import extract_file, each_bit_in_byte, grouper
+from extract import extract_file, extract_palette, each_bit_in_byte, grouper
 
 
 
@@ -21,9 +21,8 @@ class PivFile(object):
         self.extracted_palette = self.extract_palette()
         extracted = extract_file(self.file_length, self.pixel_data)
         self.extracted = extracted + bytearray(repeat(0, 40000 - len(extracted)))
-        #print("blah", len(self.extracted))
 
-        self.palette = self.extract_palette_2()
+        self.palette = extract_palette(self.extracted_palette, base=256)
         self.pixels = self.extract_pixels()
 
     def extract_pixels(self):
@@ -49,20 +48,3 @@ class PivFile(object):
 
     def extract_palette(self):
         return [pel & 0x7fff for pel in self.raw_palette]
-
-    def extract_palette_2(self):
-        extracted = []
-        for pel in self.extracted_palette:
-            pel_bytes = pel.to_bytes(2, byteorder='little')
-
-            #red = pel_bytes[1] << 2
-            #green = (pel_bytes[0] & 0xf0) >> 2
-            #blue = (pel_bytes[0] & 0x0f) << 2
-
-            red = int((pel_bytes[1] << 2) / 64 * 256)
-            green = int(((pel_bytes[0] & 0xf0) >> 2) / 64 * 256)
-            blue = int(((pel_bytes[0] & 0x0f) << 2) / 64 * 256)
-
-            extracted.append((red, green, blue))
-
-        return extracted

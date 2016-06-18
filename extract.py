@@ -1,6 +1,7 @@
 from itertools import zip_longest
 from struct import unpack, unpack_from
 
+
 class CompressedFile(object):
     def __init__(self, file_path):
         with open(file_path, 'rb') as f:
@@ -57,3 +58,16 @@ def extract_file(file_length, file_data):
                 break
 
     return extracted
+
+
+def extract_palette(palette_data, base=64):
+    def extract_rgb(pel):
+        pel_bytes = pel.to_bytes(2, byteorder='little')
+
+        red = int((pel_bytes[1] << 2) / 64 * base)
+        green = int(((pel_bytes[0] & 0xf0) >> 2) / 64 * base)
+        blue = int(((pel_bytes[0] & 0x0f) << 2) / 64 * base)
+
+        return red, green, blue
+
+    return [extract_rgb(i) for i in palette_data]
