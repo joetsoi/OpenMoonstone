@@ -1,18 +1,23 @@
 import os
 from struct import iter_unpack
 from piv import PivFile, grouper
+from font import FontFile, draw_string
+from extract import extract_file
+from main import MainExe
 
 
-class TestPivFile():
+class TestPivFile(object):
     def setup(self):
         self.file_path = os.path.join(
             os.path.dirname(os.path.realpath(__file__)),
             'MINDSCAP'
         )
-        self.mindscape = PivFile(self.file_path)
+        with open(self.file_path, 'rb') as f:
+            self.mindscape = PivFile(f.read())
 
     def test_extract_piv_file(self):
-        extracted = self.mindscape.extract_file()
+        extracted = extract_file(self.mindscape.file_length,
+                                 self.mindscape.pixel_data)
         with open('mindscap_extract_1.bin', 'rb') as f:
             test_data = f.read()
 
@@ -39,7 +44,7 @@ class TestPivFile():
         with open('mindscap_video_mem.bin', 'rb') as f:
             test_data = f.read()
 
-        assert bytearray(blocks) == bytearray(test_data)
+        assert bytes(blocks) == test_data
 
     def test_extract_palette(self):
         extracted = self.mindscape.extract_palette()
@@ -48,3 +53,38 @@ class TestPivFile():
             test_data = f.read()
 
         assert extracted == [i[0] for i in iter_unpack('<H', test_data)]
+
+
+class TestLoadingScreen(object):
+    def setup(self):
+        self.file_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)),
+            'CH.PIV'
+        )
+        with open(self.file_path, 'rb') as f:
+            self.background = PivFile(f.read())
+        bold_f_file_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)),
+            'BOLD.F'
+        )
+        with open(bold_f_file_path, 'rb') as f:
+            self.bold_f = FontFile(f.read()) 
+        self.main_exe = MainExe(
+            file_path=os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                   'MAIN.EXE')
+        )
+
+    def test_loading_screen(self):
+        self.bold_f.extract_subimage(self.background, 0x49, 0x5, 0x14)
+        self.bold_f.extract_subimage(self.background, 0x4a, 0x16, 0xb5)
+        self.bold_f.extract_subimage(self.background, 0x4b, 0x6e, 0xbe)
+        self.bold_f.extract_subimage(self.background, 0x45, 0x6e, 0xbe)
+
+        for string, metadata in self.main_exe.strings.items():
+            draw_string(self.background, self.bold_f, string, metadata[2],
+                        self.main_exe)
+
+        with open('loading_screen.bin', 'rb') as f:
+            test_data = f.read()
+
+        assert bytes(self.background.pixels) == test_data
