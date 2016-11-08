@@ -3,7 +3,6 @@ from pprint import pprint
 
 
 from collections import namedtuple
-from functools import partial
 import os, sys
 from struct import unpack, iter_unpack
 from extract import extract_file, each_bit_in_byte
@@ -25,6 +24,7 @@ ImageDimension = namedtuple('ImageDimension', 'width, height, x_offset, y_offset
 ImageHeader = namedtuple('ImageHeader', ['padding', 'data_address',
                                          'width', 'height',
                                          'x_adjust', 'blit_type'])
+SubimageMetadata = namedtuple('SubimageMetadata', 'dimension, is_fullscreen')
 
 def sum_bits(bit_positions, bits):
     '''Calculate byte from bit values and bit positions
@@ -140,7 +140,7 @@ class FontFile(object):
         try:
             header = self.headers[image_number]
         except KeyError:
-            raise NotValidSubImage(
+            raise NotValidSubimage(
                 '{} is not in the range [0, {}]'.format(image_number,
                                                         self.image_count)
             )
@@ -173,6 +173,12 @@ class FontFile(object):
 
         if image_offset:
             unpacked_image_width = image_offset[1]
+
+    
+        #return SubimageMetadata(
+        #    ImageDimension(image_width, image_height, x_offset, y_offset),
+        #    is_fullscreen,
+        #)
 
         self.blit(
             piv,
@@ -230,6 +236,7 @@ class FontFile(object):
             for x in range(image_width):
                 if self.pixels[src] != 0:
                     piv.pixels[dest] = self.pixels[src]
+                #piv.pixels[dest] = self.pixels[src]
                 dest += 1
                 src += 1
             first_pass = False
