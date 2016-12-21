@@ -1,14 +1,14 @@
 import copy
-import os, sys
+import os
+import sys
+
 import pygame
-from pygame.locals import *
-from extract import extract_palette, grouper
-from piv import PivFile
-from font import FontFile, draw_string
+
 from cli import print_hex_view
+from extract import extract_palette, grouper
+from font import FontFile, draw_string
 from main import MainExe
-import pdb
-from struct import unpack, unpack_from
+from piv import PivFile
 
 
 scale_factor = 3
@@ -18,34 +18,31 @@ def draw(screen, image_data, palette):
     image = pygame.Surface((320, 200))
     image.fill((255, 255, 255))
 
-
     pixel_array = pygame.PixelArray(image)
 
     for y, line in enumerate(grouper(image_data, 320)):
         for x, pixel in enumerate(line):
             pixel_array[x, y] = palette[pixel]
 
-
     del pixel_array
-    image = pygame.transform.scale(image, (320 * scale_factor, 200 * scale_factor))
+    image = pygame.transform.scale(image,
+                                   (320 * scale_factor, 200 * scale_factor))
     screen.blit(image, (0, 0))
 
 
-
-
 if __name__ == "__main__":
+    # if len(sys.argv) != 3:
     if len(sys.argv) != 4:
-    #if len(sys.argv) != 3:
         print("Usage: view.arg <filename> <piv file>")
         sys.exit()
 
-    file_path=os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                           sys.argv[2])
+    file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                             sys.argv[2])
     with open(file_path, 'rb') as f:
         piv = PivFile(f.read())
 
-    file_path=os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                           sys.argv[1])
+    file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                             sys.argv[1])
     with open(file_path, 'rb') as f:
         font = FontFile(f.read())
 
@@ -57,10 +54,10 @@ if __name__ == "__main__":
     default_palette = extract_palette(main_exe.palette, base=256)
     pixels = copy.deepcopy(piv.pixels)
     piv_palette = copy.deepcopy(piv.palette)
-    #piv.palette = default_palette
-    #print_hex_view(main_exe.bold_f_char_lookup)
+    # piv.palette = default_palette
+    # print_hex_view(main_exe.bold_f_char_lookup)
 
-    #print_hex_view(piv.pixels)
+    # print_hex_view(piv.pixels)
     image_number = int(sys.argv[3])
 
     font.extract_subimage(piv, int(sys.argv[3]), 0, 0)
@@ -83,7 +80,7 @@ if __name__ == "__main__":
 
     while True:
         for event in pygame.event.get():
-            if event.type == QUIT:
+            if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.KEYDOWN:

@@ -2,13 +2,13 @@ from itertools import zip_longest
 from struct import unpack, unpack_from
 
 
-class CompressedFile(object):
-    def __init__(self, file_path):
-        with open(file_path, 'rb') as f:
-            file_data = f.read()
+# class CompressedFile(object):
+#     def __init__(self, file_path):
+#         with open(file_path, 'rb') as f:
+#             file_data = f.read()
 
-    def get_header_length(self, file_data):
-        return unpack('>H', file_data[0:2])[0] * 10 + 10
+#     def get_header_length(self, file_data):
+#         return unpack('>H', file_data[0:2])[0] * 10 + 10
 
 
 def each_bit_in_byte(byte):

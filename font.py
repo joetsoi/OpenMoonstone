@@ -86,12 +86,13 @@ def draw_string(piv, font, text, y, main_exe):
         image_number = main_exe.bold_f_char_lookup[ord(char) - 0x20]
         ords.append(ord(char))
         image_numbers.append(image_number)
-        meta = main_exe.strings[text]
+        # meta = main_exe.strings[text]
         image_widths.append(font.get_image_width(image_number, bordered=True))
 
     screen_dimensions = main_exe.screen_dimensions
     image_width = sum(image_widths)
-    center = int(((screen_dimensions.right - screen_dimensions.left) - image_width) / 2)
+    center = int(((screen_dimensions.right - screen_dimensions.left) -
+                  image_width) / 2)
 
     for i, w in zip(image_numbers, image_widths):
         font.extract_subimage(piv, i, center, y)
@@ -107,7 +108,8 @@ class FontFile(object):
         self.file_data = file_data[self.header_length:]
 
         header_data = file_data[10:self.header_length]
-        self.headers = [ImageHeader(*xs) for xs in iter_unpack('>4H2B', header_data)]
+        self.headers = [ImageHeader(*xs)
+                        for xs in iter_unpack('>4H2B', header_data)]
 
         self.extracted = extract_file(self.file_length, self.file_data)
 
@@ -116,7 +118,9 @@ class FontFile(object):
             packed_image_width = header.width // 16 * 2
             num_bit_planes = 4
             image_length = packed_image_width * header.height * num_bit_planes
-            image_data = self.extracted[header.data_address:header.data_address+image_length]
+
+            data_address = header.data_address
+            image_data = self.extracted[data_address:data_address+image_length]
             self.images.append(image_data)
         print("number of subimages: {}".format(self.image_count))
 
@@ -126,7 +130,7 @@ class FontFile(object):
     def get_image_width(self, image_number, bordered=None):
         image_width = self.headers[image_number].width
         # if dx & 8 width:
-        test = (((image_width + 0xf) & 0xfff0) >> 4) << 1
+        # test = (((image_width + 0xf) & 0xfff0) >> 4) << 1
         if bordered:
             image_width -= 3
         return image_width
@@ -136,8 +140,8 @@ class FontFile(object):
             header = self.headers[image_number]
         except IndexError:
             raise IndexError(
-                'Not a valid subimage {} is not in the range [0, {}]'.format(image_number,
-                                                                             self.image_count)
+                'Not a valid subimage {} is not in the range [0, {}]'.format(
+                    image_number, self.image_count)
             )
         if not header.blit_type:
             return
@@ -152,14 +156,14 @@ class FontFile(object):
         x_offset -= x_offset_adjust
 
         packed_image_length = packed_image_width * image_height
-        bit_planes =  [image_data_location + (packed_image_length * i)
-                       for i in range(0, 5)]
+        bit_planes = [image_data_location + (packed_image_length * i)
+                      for i in range(0, 5)]
 
         self.pixels = self.recombine(header.blit_type, bit_planes,
                                      packed_image_length)
 
         unpacked_image_width = packed_image_width * 8
-        #packed_image_width <<= 3
+        # packed_image_width <<= 3
 
         image_offset = self.compare_image_width(
                 x_offset=x_offset,
@@ -169,11 +173,10 @@ class FontFile(object):
         if image_offset:
             unpacked_image_width = image_offset[1]
 
-    
-        #return SubimageMetadata(
-        #    ImageDimension(image_width, image_height, x_offset, y_offset),
-        #    is_fullscreen,
-        #)
+        # return SubimageMetadata(
+        #     ImageDimension(image_width, image_height, x_offset, y_offset),
+        #     is_fullscreen,
+        # )
 
         self.blit(
             piv,
@@ -195,11 +198,11 @@ class FontFile(object):
             pos = position - self.header_length
             bit_planes.append(self.extracted[pos:pos + length])
 
-
         # get the nth byte of every bit_plane
         for i, bytes_list in enumerate(zip(*bit_planes)):
             # get the nth set of bits of those bytes
-            for j, bits in enumerate(zip(*[each_bit_in_byte(byte) for byte in bytes_list])):
+            as_bits = [each_bit_in_byte(byte) for byte in bytes_list]
+            for j, bits in enumerate(zip(*as_bits)):
                 # reconstruct the output byte from those bits
                 output[i * 8 + j] = blit_function(bits=bits)
 
@@ -219,7 +222,8 @@ class FontFile(object):
     def is_fullscreen(self, unpacked_image_width):
         return unpacked_image_width & 0x0003
 
-    def blit(self, piv, y_offset, x_offset, image_height, image_width, is_fullscreen):
+    def blit(self, piv, y_offset, x_offset, image_height, image_width,
+             is_fullscreen):
         src = 0
         first_pass = True
 
@@ -232,7 +236,7 @@ class FontFile(object):
             for x in range(image_width):
                 if self.pixels[src] != 0:
                     piv.pixels[dest] = self.pixels[src]
-                #piv.pixels[dest] = self.pixels[src]
+                # piv.pixels[dest] = self.pixels[src]
                 dest += 1
                 src += 1
             first_pass = False
@@ -243,17 +247,17 @@ if __name__ == '__main__':
         print("Usage: view.arg <filename> <piv file>")
         sys.exit()
 
-    file_path=os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                           sys.argv[1])
+    file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                             sys.argv[1])
     with open(file_path, 'rb') as f:
         font = FontFile(f.read())
-    #print(hex(font.file_length))
-    #print(hex(font.header_length))
+    # print(hex(font.file_length))
+    # print(hex(font.header_length))
 
-    #print_hex_view(font.extracted)
-    #print_hex_view(font.header)
-    file_path=os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                           sys.argv[2])
+    # print_hex_view(font.extracted)
+    # print_hex_view(font.header)
+    file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                             sys.argv[2])
     with open(file_path, 'rb') as f:
         piv = PivFile(f.read())
 
