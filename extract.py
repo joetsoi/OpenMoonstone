@@ -47,7 +47,7 @@ def extract_file(file_length, file_data):
 
                 overlapped_bytes = copy_from + count - len(extracted)
                 for extra in range(overlapped_bytes):
-                    new_bytes += bytes([new_bytes[extra]])
+                    new_bytes.append(new_bytes[extra])
 
                 extracted += new_bytes
             else:

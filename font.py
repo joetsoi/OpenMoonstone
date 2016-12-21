@@ -1,12 +1,11 @@
-import pdb
-from pprint import pprint
-
-
+import os
+import sys
 from collections import namedtuple
-import os, sys
-from struct import unpack, iter_unpack
-from extract import extract_file, each_bit_in_byte
-from cli import print_hex_view
+from functools import partial
+from struct import iter_unpack, unpack
+
+from extract import each_bit_in_byte, extract_file
+# from cli import print_hex_view
 from piv import PivFile
 
 # 4ce4:5ba7
@@ -20,13 +19,15 @@ ds_8178 = {
 SCREEN_WIDTH = 320
 SCREEN_HEIGHT = 200
 
-ImageDimension = namedtuple('ImageDimension', 'width, height, x_offset, y_offset')
+ImageDimension = namedtuple('ImageDimension',
+                            'width, height, x_offset, y_offset')
 ImageHeader = namedtuple('ImageHeader', ['padding', 'data_address',
                                          'width', 'height',
                                          'x_adjust', 'blit_type'])
 SubimageMetadata = namedtuple('SubimageMetadata', 'dimension, is_fullscreen')
 
-def sum_bits(bit_positions, bits):
+
+def sum_bits(bit_positions, bits, duplicate_position=None):
     '''Calculate byte from bit values and bit positions
 
     args:
@@ -35,48 +36,45 @@ def sum_bits(bit_positions, bits):
             second element of bits should be shifted to the third and forth
             positon of the final byte output.
         bits (list of bool): binary values for each position.
+        duplicate_position (int): The bit in duplicate position is the ORed
+            value of all of bit positions. e.g bit_positions=[0, 1],
+            duplicate_position=4 indicates that bit 4 in the final byte should
+            be bit 0 | bit 1 of the final byte.
 
     returns (int/byte): byte value
     '''
-    return sum(bit << bit_positions[bit_pos] for bit_pos, bit in enumerate(bits))
-
-
-def sum_bits_duplicate(bit_positions, duplicate_position, bits):
-    '''Similar to sum bits, with a duplicate
-
-    The bit in duplicate position is the ORed value of all of bit positions. e.g
-    bit_positions=[0, 1], duplicate_position=4 indicates that bit 4 in the final
-    byte should be bit 0 | bit 1 of the final byte.
-    '''
-    total = sum(bit << bit_positions[bit_pos] for bit_pos, bit in enumerate(bits))
-    duplicate = any(bits) << duplicate_position
-    total += duplicate
+    total = sum(
+        bit << bit_positions[bit_pos] for bit_pos, bit in enumerate(bits)
+    )
+    if duplicate_position:
+        duplicate = any(bits) << duplicate_position
+        total += duplicate
     return total
 
 
 blit_function_table = {
-    1: (sum_bits, [0]),
-    3: (sum_bits, [0, 1]),
-    4: (sum_bits, [2]),
-    5: (sum_bits, [0, 2]),
-    6: (sum_bits, [1, 2]),
-    7: (sum_bits, [0, 1, 2]),
-    9: (sum_bits, [0, 3]),
-    10: (sum_bits, [1, 3]),
-    11: (sum_bits, [0, 1, 3]),
-    12: (sum_bits, [2, 3]),
-    13: (sum_bits, [0, 2, 3]),
-    14: (sum_bits, [1, 2, 3]),
-    15: (sum_bits, [0, 1, 2, 3]),
-    16: (sum_bits, [4]),
-    18: (sum_bits, [1, 4]),
-    19: (sum_bits, [0, 1, 4]),
-    23: (sum_bits, [0, 1, 2, 4]),
-    27: (sum_bits, [0, 1, 3, 4]),
-    28: (sum_bits, [2, 3, 4]),
-    30: (sum_bits, [1, 2, 3, 4]),
-    31: (sum_bits, [0, 1, 2, 3, 4]),
-    32: (sum_bits_duplicate, [0, 1], 4),
+    1: partial(sum_bits, bit_positions=[0]),
+    3: partial(sum_bits, bit_positions=[0, 1]),
+    4: partial(sum_bits, bit_positions=[2]),
+    5: partial(sum_bits, bit_positions=[0, 2]),
+    6: partial(sum_bits, bit_positions=[1, 2]),
+    7: partial(sum_bits, bit_positions=[0, 1, 2]),
+    9: partial(sum_bits, bit_positions=[0, 3]),
+    10: partial(sum_bits, bit_positions=[1, 3]),
+    11: partial(sum_bits, bit_positions=[0, 1, 3]),
+    12: partial(sum_bits, bit_positions=[2, 3]),
+    13: partial(sum_bits, bit_positions=[0, 2, 3]),
+    14: partial(sum_bits, bit_positions=[1, 2, 3]),
+    15: partial(sum_bits, bit_positions=[0, 1, 2, 3]),
+    16: partial(sum_bits, bit_positions=[4]),
+    18: partial(sum_bits, bit_positions=[1, 4]),
+    19: partial(sum_bits, bit_positions=[0, 1, 4]),
+    23: partial(sum_bits, bit_positions=[0, 1, 2, 4]),
+    27: partial(sum_bits, bit_positions=[0, 1, 3, 4]),
+    28: partial(sum_bits, bit_positions=[2, 3, 4]),
+    30: partial(sum_bits, bit_positions=[1, 2, 3, 4]),
+    31: partial(sum_bits, bit_positions=[0, 1, 2, 3, 4]),
+    32: partial(sum_bits, bit_positions=[0, 1], duplicate_position=4),
 }
 
 
@@ -100,10 +98,6 @@ def draw_string(piv, font, text, y, main_exe):
         center += w
 
 
-class NotValidSubimage(Exception):
-    pass
-
-
 class FontFile(object):
     def __init__(self, file_data):
         self.image_count = unpack('>H', file_data[0:2])[0]
@@ -124,6 +118,7 @@ class FontFile(object):
             image_length = packed_image_width * header.height * num_bit_planes
             image_data = self.extracted[header.data_address:header.data_address+image_length]
             self.images.append(image_data)
+        print("number of subimages: {}".format(self.image_count))
 
     def get_image_height(self, image_number):
         return self.headers[image_number].height
@@ -139,10 +134,10 @@ class FontFile(object):
     def extract_subimage(self, piv, image_number, x_offset, y_offset):
         try:
             header = self.headers[image_number]
-        except KeyError:
-            raise NotValidSubimage(
-                '{} is not in the range [0, {}]'.format(image_number,
-                                                        self.image_count)
+        except IndexError:
+            raise IndexError(
+                'Not a valid subimage {} is not in the range [0, {}]'.format(image_number,
+                                                                             self.image_count)
             )
         if not header.blit_type:
             return
@@ -194,10 +189,11 @@ class FontFile(object):
         o = len(output)
 
         bit_planes = []
-        sum_func, bit_positions = blit_function_table[blit_type]
+        blit_function = blit_function_table[blit_type]
+        bit_positions = blit_function.keywords['bit_positions']
         for _, position in zip(bit_positions, bit_plane_positions):
             pos = position - self.header_length
-            bit_planes.append(self.extracted[pos:pos + length]) 
+            bit_planes.append(self.extracted[pos:pos + length])
 
 
         # get the nth byte of every bit_plane
@@ -205,7 +201,7 @@ class FontFile(object):
             # get the nth set of bits of those bytes
             for j, bits in enumerate(zip(*[each_bit_in_byte(byte) for byte in bytes_list])):
                 # reconstruct the output byte from those bits
-                output[i * 8 + j] = sum_func(bit_positions, bits)
+                output[i * 8 + j] = blit_function(bits=bits)
 
         assert o == len(output)
         return output

@@ -1,8 +1,8 @@
 import os
 from struct import iter_unpack
-from piv import PivFile, grouper
+from piv import PivFile
 from font import FontFile, draw_string
-from extract import extract_file
+from extract import extract_file, grouper
 from main import MainExe
 
 

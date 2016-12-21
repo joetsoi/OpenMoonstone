@@ -1,7 +1,7 @@
-from struct import unpack, unpack_from
 from itertools import repeat
-from extract import extract_file, extract_palette, each_bit_in_byte, grouper
+from struct import unpack
 
+from extract import each_bit_in_byte, extract_file, extract_palette
 
 
 class PivFile(object):
@@ -14,13 +14,22 @@ class PivFile(object):
         elif self.file_type == 4:
             self.raw_palette = unpack('>16H', file_data[6:6+32])
             self.pixel_data = file_data[6+32:]
+        else:
+            raise ValueError(
+                'Does not appear to be a valid piv file,'
+                'valid types are 4 or 5, got {}'.format(self.file_type)
+            )
 
         self.extract()
 
     def extract(self):
         self.extracted_palette = self.extract_palette()
-        extracted = extract_file(self.file_length, self.pixel_data)
-        self.extracted = extracted + bytearray(repeat(0, 40000 - len(extracted)))
+        self.extracted = extract_file(self.file_length, self.pixel_data)
+
+        padding = 40000 - len(self.extracted)
+        if padding > 0:
+            trailing_zeroes = bytearray(repeat(0, padding))
+            self.extracted += trailing_zeroes
 
         self.palette = extract_palette(self.extracted_palette, base=256)
         self.pixels = self.extract_pixels()
