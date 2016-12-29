@@ -11,7 +11,7 @@ from main import MainExe
 from piv import PivFile
 
 
-scale_factor = 3
+scale_factor = 4
 
 
 def draw(screen, image_data, palette):
@@ -54,23 +54,24 @@ if __name__ == "__main__":
     default_palette = extract_palette(main_exe.palette, base=256)
     pixels = copy.deepcopy(piv.pixels)
     piv_palette = copy.deepcopy(piv.palette)
-    # piv.palette = default_palette
+    piv.palette = default_palette
     # print_hex_view(main_exe.bold_f_char_lookup)
 
     # print_hex_view(piv.pixels)
     image_number = int(sys.argv[3])
 
-    font.extract_subimage(piv, int(sys.argv[3]), 0, 0)
 
-    # font.extract_subimage(piv, 0x49, 0x5, 0x14)
+    # font.extract_subimage(piv, int(sys.argv[3]), 0, 0)
 
-    # font.extract_subimage(piv, 0x4a, 0x16, 0xb5)
+    font.extract_subimage(piv, 0x49, 0x5, 0x14)
+
+    font.extract_subimage(piv, 0x4a, 0x16, 0xb5)
+    font.extract_subimage(piv, 0x4b, 0x6e, 0xbe)
+
     # font.extract_subimage(piv, 0x4b, 0x6e, 0xbe)
 
-    # font.extract_subimage(piv, 0x45, 0x6e, 0xbe)
-
-    # for string, metadata in main_exe.strings.items():
-    #     draw_string(piv, font, string, metadata[2], main_exe)
+    for string, metadata in main_exe.strings.items():
+        draw_string(piv, font, string, metadata[2], main_exe)
 
 #    for i in range(6):
 #        font.extract_subimage(piv, i, i*20, 0)
@@ -93,9 +94,11 @@ if __name__ == "__main__":
                 elif event.key == pygame.K_DOWN:
                     piv.palette == copy.deepcopy(default_palette)
                 print(image_number)
-                piv.pixels = copy.deepcopy(pixels)
-                font.extract_subimage(piv, image_number, 0, 0)
+        piv.pixels = copy.deepcopy(pixels)
+        #mouse = pygame.mouse.get_pos()
+        #font.extract_subimage(piv, image_number, *mouse)
+        font.extract_subimage(piv, image_number, 0, 0)
 
         pygame.display.update()
-        pygame.time.wait(250)
+        pygame.time.wait(10)
         draw(screen, piv.pixels, piv.palette)

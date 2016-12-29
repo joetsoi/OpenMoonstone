@@ -1,7 +1,6 @@
 import os
 import sys
 from collections import namedtuple
-from functools import partial
 from struct import iter_unpack, unpack
 
 from extract import each_bit_in_byte, extract_file
@@ -27,55 +26,45 @@ ImageHeader = namedtuple('ImageHeader', ['padding', 'data_address',
 SubimageMetadata = namedtuple('SubimageMetadata', 'dimension, is_fullscreen')
 
 
-def sum_bits(bit_positions, bits, duplicate_position=None):
+def sum_bits(bits, bit_mask=0):
     '''Calculate byte from bit values and bit positions
 
     args:
-        bit_positions (list of ints): each int represents the position of its
+        bits (list of bool): binary values for each position.
+        bit_mask (int): values of bits we want to sum
+
+    returns (int/byte): byte value
+    '''
+
+    original_byte = sum(bit << x for x, bit in enumerate(bits))
+    return original_byte & bit_mask
+
+
+def sum_bits_duplicates(bits, duplicate_position=4, bit_mask=None):
+    '''Calculate byte from bit values and bit positions
+
+    args:
+        bit_mask (list of ints): each int represents the position of its
             respective bit value in bits. e.g [3, 4] indicates the first and
             second element of bits should be shifted to the third and forth
             positon of the final byte output.
         bits (list of bool): binary values for each position.
         duplicate_position (int): The bit in duplicate position is the ORed
-            value of all of bit positions. e.g bit_positions=[0, 1],
+            value of all of bit positions. e.g bit_mask=[0, 1],
             duplicate_position=4 indicates that bit 4 in the final byte should
             be bit 0 | bit 1 of the final byte.
 
     returns (int/byte): byte value
     '''
+    if bit_mask is None:
+        bit_mask = [0, 1]
+
     total = sum(
-        bit << bit_positions[bit_pos] for bit_pos, bit in enumerate(bits)
+        bit << bit_mask[bit_pos] for bit_pos, bit in enumerate(bits)
     )
-    if duplicate_position:
-        duplicate = any(bits) << duplicate_position
-        total += duplicate
+    duplicate = any(bits) << duplicate_position
+    total += duplicate
     return total
-
-
-blit_function_table = {
-    1: partial(sum_bits, bit_positions=[0]),
-    3: partial(sum_bits, bit_positions=[0, 1]),
-    4: partial(sum_bits, bit_positions=[2]),
-    5: partial(sum_bits, bit_positions=[0, 2]),
-    6: partial(sum_bits, bit_positions=[1, 2]),
-    7: partial(sum_bits, bit_positions=[0, 1, 2]),
-    9: partial(sum_bits, bit_positions=[0, 3]),
-    10: partial(sum_bits, bit_positions=[1, 3]),
-    11: partial(sum_bits, bit_positions=[0, 1, 3]),
-    12: partial(sum_bits, bit_positions=[2, 3]),
-    13: partial(sum_bits, bit_positions=[0, 2, 3]),
-    14: partial(sum_bits, bit_positions=[1, 2, 3]),
-    15: partial(sum_bits, bit_positions=[0, 1, 2, 3]),
-    16: partial(sum_bits, bit_positions=[4]),
-    18: partial(sum_bits, bit_positions=[1, 4]),
-    19: partial(sum_bits, bit_positions=[0, 1, 4]),
-    23: partial(sum_bits, bit_positions=[0, 1, 2, 4]),
-    27: partial(sum_bits, bit_positions=[0, 1, 3, 4]),
-    28: partial(sum_bits, bit_positions=[2, 3, 4]),
-    30: partial(sum_bits, bit_positions=[1, 2, 3, 4]),
-    31: partial(sum_bits, bit_positions=[0, 1, 2, 3, 4]),
-    32: partial(sum_bits, bit_positions=[0, 1], duplicate_position=4),
-}
 
 
 def draw_string(piv, font, text, y, main_exe):
@@ -165,6 +154,8 @@ class FontFile(object):
         unpacked_image_width = packed_image_width * 8
         # packed_image_width <<= 3
 
+        print(image_width, packed_image_width, unpacked_image_width)
+
         image_offset = self.compare_image_width(
                 x_offset=x_offset,
                 image_width=unpacked_image_width
@@ -183,6 +174,7 @@ class FontFile(object):
             y_offset,
             x_offset=x_offset,
             image_height=image_height,
+            # image_width=image_width,
             image_width=unpacked_image_width,
             is_fullscreen=self.is_fullscreen(unpacked_image_width)
         )
@@ -192,9 +184,14 @@ class FontFile(object):
         o = len(output)
 
         bit_planes = []
-        blit_function = blit_function_table[blit_type]
-        bit_positions = blit_function.keywords['bit_positions']
-        for _, position in zip(bit_positions, bit_plane_positions):
+        if blit_type == 32:
+            bit_length = 2
+            blit_function = sum_bits_duplicates
+        else:
+            bit_length = blit_type.bit_length()
+            blit_function = sum_bits
+
+        for position in bit_plane_positions[0:bit_length]:
             pos = position - self.header_length
             bit_planes.append(self.extracted[pos:pos + length])
 
@@ -202,9 +199,11 @@ class FontFile(object):
         for i, bytes_list in enumerate(zip(*bit_planes)):
             # get the nth set of bits of those bytes
             as_bits = [each_bit_in_byte(byte) for byte in bytes_list]
+
             for j, bits in enumerate(zip(*as_bits)):
                 # reconstruct the output byte from those bits
-                output[i * 8 + j] = blit_function(bits=bits)
+                output[i * 8 + j] = blit_function(bits=bits,
+                                                  bit_mask=blit_type)
 
         assert o == len(output)
         return output
@@ -220,17 +219,21 @@ class FontFile(object):
             return overrun, image_width - overrun
 
     def is_fullscreen(self, unpacked_image_width):
+        print("is_fullscreen", unpacked_image_width & 0x0003)
         return unpacked_image_width & 0x0003
 
     def blit(self, piv, y_offset, x_offset, image_height, image_width,
              is_fullscreen):
         src = 0
-        first_pass = True
+        if is_fullscreen:
+            first_pass = True
+        else:
+            first_pass = False
 
         for y in range(image_height):
-            if is_fullscreen and not first_pass:
-                dest = (y + y_offset) * 320
-                image_width = 320
+            if first_pass:
+                dest = (y + y_offset) * 320 + x_offset
+                # image_width = 320
             else:
                 dest = (y + y_offset) * 320 + x_offset
             for x in range(image_width):

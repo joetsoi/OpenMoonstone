@@ -1,4 +1,5 @@
 import os
+from struct import iter_unpack
 
 import pytest
 
@@ -6,7 +7,7 @@ from extract import extract_file, grouper
 from font import FontFile, draw_string
 from main import MainExe
 from piv import PivFile
-from struct import iter_unpack
+from sprite import SpriteSheetFile
 
 
 def read_file(file_name, file_type):
@@ -94,3 +95,9 @@ class TestLoadingScreen(object):
             test_data = f.read()
 
         assert bytes(loading_screen.pixels) == test_data
+
+
+def test_sprite():
+    test = read_file('BOLD.F', SpriteSheetFile)
+    import pdb; pdb.set_trace()
+
