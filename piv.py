@@ -1,7 +1,9 @@
 from itertools import repeat
 from struct import unpack
 
-from extract import each_bit_in_byte, extract_file, extract_palette
+import pygame
+
+from extract import each_bit_in_byte, extract_file, extract_palette, grouper
 
 
 class PivFile(object):
@@ -22,9 +24,29 @@ class PivFile(object):
 
         self.extract()
 
+    def make_palette(self):
+        return [pygame.Color(*c) for c in self.palette]
+
+    def make_surface(self):
+        surface = pygame.Surface((320, 200), pygame.SRCALPHA)
+        palette = self.make_palette()
+        #surface.set_palette(palette)
+        surface.fill(palette[0])
+
+        pixel_array = pygame.PixelArray(surface)
+
+        for y, line in enumerate(grouper(self.pixels, 320)):
+            for x, pixel in enumerate(line):
+                #pixel_array[x, y] = surface.get_palette_at(pixel)
+                pixel_array[x, y] = palette[pixel]
+
+        del pixel_array
+        return surface
+
     def extract(self):
         self.extracted_palette = self.extract_palette()
         self.extracted = extract_file(self.file_length, self.pixel_data)
+        #self.extracted = self.extracted[:0x7d0]
 
         padding = 40000 - len(self.extracted)
         if padding > 0:
@@ -52,6 +74,35 @@ class PivFile(object):
 
                 al = sum(bit << n for n, bit in enumerate(x))
                 output.append(al)
+
+        return output
+
+    def extract_pixels1(self):
+        memory_width = 40 * 200
+        planes = [i * memory_width for i in range(5)]
+        output = []
+
+        for i in range(0,  7):
+            si = 1000 * i
+            for i in range(25):
+
+                for j in range(4):
+                    dh = self.extracted[si]
+                    dl = self.extracted[planes[1] + si]
+                    ch = self.extracted[planes[2] + si]
+                    cl = self.extracted[planes[3] + si]
+                    ah = self.extracted[planes[4] + si]
+
+                    for x in zip(each_bit_in_byte(dh), each_bit_in_byte(dl),
+                                 each_bit_in_byte(ch), each_bit_in_byte(cl),
+                                 each_bit_in_byte(ah)):
+
+                        al = sum(bit << n for n, bit in enumerate(x))
+                        output.append(al)
+                    si += 1
+
+
+                si += 36
 
         return output
 
