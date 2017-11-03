@@ -3,7 +3,10 @@ import sys
 from collections import namedtuple
 from struct import iter_unpack, unpack
 
-from extract import each_bit_in_byte, extract_file
+import pygame
+from attr import attrs, attrib
+
+from extract import each_bit_in_byte, extract_file, grouper
 # from cli import print_hex_view
 from piv import PivFile
 
@@ -67,6 +70,29 @@ def sum_bits_duplicates(bits, duplicate_position=4, bit_mask=None):
     return total
 
 
+def recombine(blit_type, bit_planes, length):
+    output = [None] * (length * 8)
+    o = len(output)
+
+    if blit_type == 32:
+        blit_function = sum_bits_duplicates
+    else:
+        blit_function = sum_bits
+
+    # get the nth byte of every bit_plane
+    for i, bytes_list in enumerate(zip(*bit_planes)):
+        # get the nth set of bits of those bytes
+        as_bits = [each_bit_in_byte(byte) for byte in bytes_list]
+
+        for j, bits in enumerate(zip(*as_bits)):
+            # reconstruct the output byte from those bits
+            output[i * 8 + j] = blit_function(bits=bits,
+                                              bit_mask=blit_type)
+
+    assert o == len(output)
+    return output
+
+
 def draw_string(piv, font, text, y, main_exe):
     image_numbers = []
     image_widths = []
@@ -89,7 +115,7 @@ def draw_string(piv, font, text, y, main_exe):
 
 
 class FontFile(object):
-    def __init__(self, file_data):
+    def __init__(self, file_data, piv):
         self.image_count = unpack('>H', file_data[0:2])[0]
         self.header_length = self.image_count * 10 + 10
 
@@ -104,13 +130,7 @@ class FontFile(object):
 
         self.images = []
         for header in self.headers:
-            packed_image_width = header.width // 16 * 2
-            num_bit_planes = 4
-            image_length = packed_image_width * header.height * num_bit_planes
-
-            data_address = header.data_address
-            image_data = self.extracted[data_address:data_address+image_length]
-            self.images.append(image_data)
+            self.images.append(Image.from_data(header, self.extracted, piv))
         print("number of subimages: {}".format(self.image_count))
 
     def get_image_height(self, image_number):
@@ -125,19 +145,11 @@ class FontFile(object):
         return image_width
 
     def extract_subimage(self, piv, image_number, x_offset, y_offset):
-        try:
-            header = self.headers[image_number]
-        except IndexError:
-            raise IndexError(
-                'Not a valid subimage {} is not in the range [0, {}]'.format(
-                    image_number, self.image_count)
-            )
-        if not header.blit_type:
-            return
+        header = self.headers[image_number]
 
         image_data_location = header.data_address + self.header_length
 
-        image_width = header.width + 0xf
+        image_width = header.width + 15
         packed_image_width = image_width // 16 * 2
         image_height = header.height
 
@@ -148,38 +160,51 @@ class FontFile(object):
         bit_planes = [image_data_location + (packed_image_length * i)
                       for i in range(0, 5)]
 
-        self.pixels = self.recombine(header.blit_type, bit_planes,
-                                     packed_image_length)
-
-        unpacked_image_width = packed_image_width * 8
-        # packed_image_width <<= 3
-
-        print(image_width, packed_image_width, unpacked_image_width)
-
-        image_offset = self.compare_image_width(
-                x_offset=x_offset,
-                image_width=unpacked_image_width
+        pixels = self.recombine(
+            image_number,
+            header.blit_type,
+            bit_planes,
+            packed_image_length
         )
 
-        if image_offset:
-            unpacked_image_width = image_offset[1]
+        unpacked_image_width = packed_image_width * 8
+
+        return Image(
+            width=unpacked_image_width,
+            height=image_height,
+            x_adjust=x_offset_adjust,
+            piv=piv,
+            pixels=pixels
+        )
+
+        # packed_image_width <<= 3
+
+        #print("width", image_width, packed_image_width, unpacked_image_width)
+
+        # image_offset = self.compare_image_width(
+        #         x_offset=x_offset,
+        #         image_width=unpacked_image_width
+        # )
+
+        #if image_offset:
+        #    unpacked_image_width = image_offset[1]
 
         # return SubimageMetadata(
         #     ImageDimension(image_width, image_height, x_offset, y_offset),
         #     is_fullscreen,
         # )
 
-        self.blit(
-            piv,
-            y_offset,
-            x_offset=x_offset,
-            image_height=image_height,
-            # image_width=image_width,
-            image_width=unpacked_image_width,
-            is_fullscreen=self.is_fullscreen(unpacked_image_width)
-        )
+        # self.blit(
+        #     piv,
+        #     y_offset,
+        #     x_offset=x_offset,
+        #     image_height=image_height,
+        #     #image_width=image_width,
+        #     image_width=unpacked_image_width,
+        #     is_fullscreen=self.is_fullscreen(unpacked_image_width)
+        # )
 
-    def recombine(self, blit_type, bit_plane_positions, length):
+    def recombine(self, image_num, blit_type, bit_plane_positions, length):
         output = [None] * (length * 8)
         o = len(output)
 
@@ -195,6 +220,8 @@ class FontFile(object):
             pos = position - self.header_length
             bit_planes.append(self.extracted[pos:pos + length])
 
+        #import ipdb; ipdb.set_trace()
+        #bit_planes = self.images[image_num]
         # get the nth byte of every bit_plane
         for i, bytes_list in enumerate(zip(*bit_planes)):
             # get the nth set of bits of those bytes
@@ -225,6 +252,7 @@ class FontFile(object):
     def blit(self, piv, y_offset, x_offset, image_height, image_width,
              is_fullscreen):
         src = 0
+        print("is fullscreen", is_fullscreen)
         if is_fullscreen:
             first_pass = True
         else:
@@ -243,6 +271,54 @@ class FontFile(object):
                 dest += 1
                 src += 1
             first_pass = False
+
+
+@attrs
+class Image(object):
+    width = attrib()
+    height = attrib()
+    x_adjust = attrib()
+    piv = attrib()
+    pixels = attrib()
+    surface = attrib(init=False)
+
+    def __attrs_post_init__(self):
+        surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+
+        pixel_array = pygame.PixelArray(surface)
+
+        for y, line in enumerate(grouper(self.pixels, self.width)):
+            for x, pixel in enumerate(line):
+                if pixel:
+                    pixel_array[x, y] = self.piv.palette[pixel]
+
+        del pixel_array
+        self.surface = surface
+
+    @classmethod
+    def from_data(cls, header, extracted, piv):
+        packed_image_width = (header.width + 15) // 16 * 2
+        if header.blit_type == 32:
+            num_bit_planes = 2
+        else:
+            num_bit_planes = header.blit_type.bit_length()
+        bit_plane_length = packed_image_width * header.height
+
+        data_address = header.data_address
+
+        bit_planes = []
+        for i in range(num_bit_planes):
+            start = data_address + (i * bit_plane_length)
+            stop = start + bit_plane_length
+            bit_planes.append(extracted[start:stop])
+
+        unpacked_image_width = packed_image_width * 8
+
+        pixels = recombine(header.blit_type, bit_planes, unpacked_image_width * header.height)
+
+        return cls(unpacked_image_width, header.height, header.x_adjust, piv, pixels)
+
+
 
 
 if __name__ == '__main__':
