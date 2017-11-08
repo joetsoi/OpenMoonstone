@@ -1,6 +1,7 @@
 import os
 import sys
 from collections import namedtuple
+from enum import IntFlag
 from struct import iter_unpack, unpack
 
 import pygame
@@ -93,29 +94,30 @@ def recombine(blit_type, bit_planes, length):
     return output
 
 
-def draw_string(piv, font, text, y, main_exe):
-    image_numbers = []
-    image_widths = []
-    ords = []
-    for char in text:
-        image_number = main_exe.bold_f_char_lookup[ord(char) - 0x20]
-        ords.append(ord(char))
-        image_numbers.append(image_number)
-        # meta = main_exe.strings[text]
-        image_widths.append(font.get_image_width(image_number, bordered=True))
-
-    screen_dimensions = main_exe.screen_dimensions
-    image_width = sum(image_widths)
-    center = int(((screen_dimensions.right - screen_dimensions.left) -
-                  image_width) / 2)
-
-    for i, w in zip(image_numbers, image_widths):
-        font.extract_subimage(piv, i, center, y)
-        center += w
+# def draw_string(font, text, y, main_exe):
+#     image_numbers = []
+#     image_widths = []
+#     ords = []
+#     for char in text:
+#         image_number = main_exe.bold_f_char_lookup[ord(char) - 0x20]
+#         ords.append(ord(char))
+#         image_numbers.append(image_number)
+#         # meta = main_exe.strings[text]
+#         image_widths.append(font.get_image_width(image_number, bordered=True))
+#
+#     screen_dimensions = main_exe.screen_dimensions
+#     image_width = sum(image_widths)
+#     center = int(((screen_dimensions.right - screen_dimensions.left) -
+#                   image_width) / 2)
+#
+#     for i, w in zip(image_numbers, image_widths):
+#         #font.extract_subimage(piv, i, center, y)
+#         center += w
+#     print(f"draw_string {text}", image_widths, image_numbers)
 
 
 class FontFile(object):
-    def __init__(self, file_data, piv):
+    def __init__(self, file_data):
         self.image_count = unpack('>H', file_data[0:2])[0]
         self.header_length = self.image_count * 10 + 10
 
@@ -128,54 +130,55 @@ class FontFile(object):
 
         self.extracted = extract_file(self.file_length, self.file_data)
 
-        self.images = []
-        for header in self.headers:
-            self.images.append(Image.from_data(header, self.extracted, piv))
-        print("number of subimages: {}".format(self.image_count))
+        self.images = [
+            Image.from_data(header, self.extracted)
+            for header in self.headers
+        ]
+        #print("number of subimages: {}".format(self.image_count))
 
-    def get_image_height(self, image_number):
-        return self.headers[image_number].height
+    #def get_image_height(self, image_number):
+    #    return self.headers[image_number].height
 
-    def get_image_width(self, image_number, bordered=None):
-        image_width = self.headers[image_number].width
+    #def get_image_width(self, image_number, bordered=None):
+    #    image_width = self.headers[image_number].width
         # if dx & 8 width:
         # test = (((image_width + 0xf) & 0xfff0) >> 4) << 1
-        if bordered:
-            image_width -= 3
-        return image_width
+     #   if bordered:
+     #       image_width -= 3
+     #   return image_width
 
-    def extract_subimage(self, piv, image_number, x_offset, y_offset):
-        header = self.headers[image_number]
-
-        image_data_location = header.data_address + self.header_length
-
-        image_width = header.width + 15
-        packed_image_width = image_width // 16 * 2
-        image_height = header.height
-
-        x_offset_adjust = header.x_adjust >> 4
-        x_offset -= x_offset_adjust
-
-        packed_image_length = packed_image_width * image_height
-        bit_planes = [image_data_location + (packed_image_length * i)
-                      for i in range(0, 5)]
-
-        pixels = self.recombine(
-            image_number,
-            header.blit_type,
-            bit_planes,
-            packed_image_length
-        )
-
-        unpacked_image_width = packed_image_width * 8
-
-        return Image(
-            width=unpacked_image_width,
-            height=image_height,
-            x_adjust=x_offset_adjust,
-            piv=piv,
-            pixels=pixels
-        )
+    # def extract_subimage(self, piv, image_number, x_offset, y_offset):
+    #     header = self.headers[image_number]
+    #
+    #     image_data_location = header.data_address + self.header_length
+    #
+    #     image_width = header.width + 15
+    #     packed_image_width = image_width // 16 * 2
+    #     image_height = header.height
+    #
+    #     x_offset_adjust = header.x_adjust >> 4
+    #     x_offset -= x_offset_adjust
+    #
+    #     packed_image_length = packed_image_width * image_height
+    #     bit_planes = [image_data_location + (packed_image_length * i)
+    #                   for i in range(0, 5)]
+    #
+    #     pixels = self.recombine(
+    #         image_number,
+    #         header.blit_type,
+    #         bit_planes,
+    #         packed_image_length
+    #     )
+    #
+    #     unpacked_image_width = packed_image_width * 8
+    #
+    #     return Image(
+    #         width=unpacked_image_width,
+    #         height=image_height,
+    #         x_adjust=x_offset_adjust,
+    #         piv=piv,
+    #         pixels=pixels
+    #     )
 
         # packed_image_width <<= 3
 
@@ -235,42 +238,42 @@ class FontFile(object):
         assert o == len(output)
         return output
 
-    def sub_7969(self, y_offset):
-        if y_offset < 0:
-            pass
-
-    def compare_image_width(self, x_offset, image_width):
-        total = x_offset + image_width
-        if total > SCREEN_WIDTH and x_offset < SCREEN_WIDTH:
-            overrun = total - SCREEN_WIDTH
-            return overrun, image_width - overrun
-
-    def is_fullscreen(self, unpacked_image_width):
-        print("is_fullscreen", unpacked_image_width & 0x0003)
-        return unpacked_image_width & 0x0003
-
-    def blit(self, piv, y_offset, x_offset, image_height, image_width,
-             is_fullscreen):
-        src = 0
-        print("is fullscreen", is_fullscreen)
-        if is_fullscreen:
-            first_pass = True
-        else:
-            first_pass = False
-
-        for y in range(image_height):
-            if first_pass:
-                dest = (y + y_offset) * 320 + x_offset
-                # image_width = 320
-            else:
-                dest = (y + y_offset) * 320 + x_offset
-            for x in range(image_width):
-                if self.pixels[src] != 0:
-                    piv.pixels[dest] = self.pixels[src]
-                # piv.pixels[dest] = self.pixels[src]
-                dest += 1
-                src += 1
-            first_pass = False
+    # def sub_7969(self, y_offset):
+    #     if y_offset < 0:
+    #         pass
+    #
+    # def compare_image_width(self, x_offset, image_width):
+    #     total = x_offset + image_width
+    #     if total > SCREEN_WIDTH and x_offset < SCREEN_WIDTH:
+    #         overrun = total - SCREEN_WIDTH
+    #         return overrun, image_width - overrun
+    #
+    # def is_fullscreen(self, unpacked_image_width):
+    #     print("is_fullscreen", unpacked_image_width & 0x0003)
+    #     return unpacked_image_width & 0x0003
+    #
+    # def blit(self, piv, y_offset, x_offset, image_height, image_width,
+    #          is_fullscreen):
+    #     src = 0
+    #     print("is fullscreen", is_fullscreen)
+    #     if is_fullscreen:
+    #         first_pass = True
+    #     else:
+    #         first_pass = False
+    #
+    #     for y in range(image_height):
+    #         if first_pass:
+    #             dest = (y + y_offset) * 320 + x_offset
+    #             # image_width = 320
+    #         else:
+    #             dest = (y + y_offset) * 320 + x_offset
+    #         for x in range(image_width):
+    #             if self.pixels[src] != 0:
+    #                 piv.pixels[dest] = self.pixels[src]
+    #             # piv.pixels[dest] = self.pixels[src]
+    #             dest += 1
+    #             src += 1
+    #         first_pass = False
 
 
 @attrs
@@ -278,25 +281,10 @@ class Image(object):
     width = attrib()
     height = attrib()
     x_adjust = attrib()
-    piv = attrib()
     pixels = attrib()
-    surface = attrib(init=False)
-
-    def __attrs_post_init__(self):
-        surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
-
-        pixel_array = pygame.PixelArray(surface)
-
-        for y, line in enumerate(grouper(self.pixels, self.width)):
-            for x, pixel in enumerate(line):
-                if pixel:
-                    pixel_array[x, y] = self.piv.palette[pixel]
-
-        del pixel_array
-        self.surface = surface
 
     @classmethod
-    def from_data(cls, header, extracted, piv):
+    def from_data(cls, header, extracted):
         packed_image_width = (header.width + 15) // 16 * 2
         if header.blit_type == 32:
             num_bit_planes = 2
@@ -304,11 +292,9 @@ class Image(object):
             num_bit_planes = header.blit_type.bit_length()
         bit_plane_length = packed_image_width * header.height
 
-        data_address = header.data_address
-
         bit_planes = []
         for i in range(num_bit_planes):
-            start = data_address + (i * bit_plane_length)
+            start = header.data_address + (i * bit_plane_length)
             stop = start + bit_plane_length
             bit_planes.append(extracted[start:stop])
 
@@ -316,9 +302,35 @@ class Image(object):
 
         pixels = recombine(header.blit_type, bit_planes, unpacked_image_width * header.height)
 
-        return cls(unpacked_image_width, header.height, header.x_adjust, piv, pixels)
+        return cls(unpacked_image_width, header.height, header.x_adjust, pixels)
 
 
+def pixel_to_surface(width, height, pixels, palette):
+    surface = pygame.Surface((width, height), pygame.SRCALPHA)
+    pixel_array = pygame.PixelArray(surface)
+
+    for y, line in enumerate(grouper(pixels, width)):
+        for x, pixel in enumerate(line):
+            if pixel:
+                pixel_array[x, y] = palette[pixel]
+
+    del pixel_array
+    return surface
+
+
+class StringFlag(IntFlag):
+    centered = 1
+    right_justified = 4
+    bordered = 8
+
+
+@attrs
+class String():
+    x = attrib()
+    y = attrib()
+    text = attrib()
+    flags = attrib()
+    font = attrib()
 
 
 if __name__ == '__main__':

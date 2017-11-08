@@ -6,14 +6,16 @@ import pygame
 
 from cli import print_hex_view
 from extract import extract_palette, grouper
-from font import FontFile, draw_string
+from font import FontFile#, draw_string
 from main import MainExe
 from piv import PivFile
 from cmp import CmpFile
 from t import TFile
+import settings
+import assets
 
 
-scale_factor = 4
+scale_factor = 3
 
 
 def draw(screen, image_data, palette):
@@ -44,27 +46,27 @@ if __name__ == "__main__":
     pygame.init()
     screen = pygame.display.set_mode((320 * scale_factor, 200 * scale_factor))
 
-    file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+    file_path = os.path.join(settings.MOONSTONE_DIR,
                              sys.argv[2])
     with open(file_path, 'rb') as f:
         data = f.read()
         piv = PivFile(data)
 
 
-    file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+    file_path = os.path.join(settings.MOONSTONE_DIR,
                              sys.argv[1])
     with open(file_path, 'rb') as f:
         #font = FontFile(f.read())
         cmp = CmpFile(f.read())
 
-    file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+    file_path = os.path.join(settings.MOONSTONE_DIR,
                              sys.argv[4])
     with open(file_path, 'rb') as f:
         #font = FontFile(f.read())
         positions = TFile(f.read())
 
     main_exe = MainExe(
-        file_path=os.path.join(os.path.dirname(os.path.realpath(__file__)),
+        file_path=os.path.join(settings.MOONSTONE_DIR,
                                'MAIN.EXE')
     )
 
@@ -135,7 +137,7 @@ if __name__ == "__main__":
         image = piv.make_surface()
         image.blit(image, (0, 0))
         for pos in positions.positions:
-
+            cmp = assets.scenery[pos.cmp_file]
             image.blit(cmp.get_image(pos.image_number), (pos.x, pos.y))
 
         image = pygame.transform.scale(image,

@@ -14,7 +14,7 @@ class TFile:
         self.file_length = unpack('>I', file_data[:4])[0]
         self.extracted = extract_file(self.file_length, file_data[4:])
 
-        word_2a465 = 30
+        smallest_t_value = 30
 
         num_images_to_extract = test = unpack('>H', self.extracted[:2])[0] * 8
         si = 2 + test
@@ -26,8 +26,8 @@ class TFile:
 
         al = unpack('>H', self.extracted[6:8])[0]
         print(hex(al))
-        if al > word_2a465:
-            word_2a465 = al
+        if al > smallest_t_value:
+            smallest_t_value = al
 
         di += 8
         # unpack extracted to 3H tuples todo
@@ -37,7 +37,7 @@ class TFile:
         # 2 = sw1.cmp
         # 3 = wa1.cmp
         # 4 = fo2.cmp (default)  if not 0xff, 0xfe or 0-3
-        print('test',  len(self.extracted) % 6 )
+        print('test',  len(self.extracted) % 6)
         self.positions = []
         images_remaining = True
         while True:
