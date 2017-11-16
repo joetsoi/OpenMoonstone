@@ -304,6 +304,9 @@ class Image(object):
 
         return cls(unpacked_image_width, header.height, header.x_adjust, pixels)
 
+    def to_surface(self, palette):
+        return pixel_to_surface(self.width, self.height, self.pixels, palette)
+
 
 def pixel_to_surface(width, height, pixels, palette):
     surface = pygame.Surface((width, height), pygame.SRCALPHA)

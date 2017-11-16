@@ -16,6 +16,8 @@ from assets import loading_screen, lairs
 import assets
 import settings
 
+from sprite import Entity, make_frame
+
 
 #def draw(screen, image_data, palette):
 #    image = pygame.Surface((320, 200))
@@ -34,6 +36,38 @@ import settings
     #image = pygame.transform.scale(image,
     #                              (320 * scale_factor, 200 * scale_factor))
     #screen.blit(image, (0, 0))
+
+
+def game_loop(screen):
+    knights = pygame.sprite.Group()
+    knight = Entity(pygame.Rect(0, 0, 0, 0), assets.animation.knight['walk'],
+                    assets.backgrounds[lairs[0].background].palette, [knights])
+    image = lairs[0].draw()
+    image.blit(image, (0, 0))
+    clock = pygame.time.Clock()
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
+                    pass
+                elif event.key == pygame.K_RIGHT:
+                    knights.update()
+
+        knights.draw(image)
+
+        scaled = pygame.transform.scale(
+            image,
+            (320 * settings.SCALE_FACTOR, 200 * settings.SCALE_FACTOR)
+        )
+        screen.blit(scaled, (0, 0))
+        delta = clock.get_time()
+        print(delta)
+        pygame.display.update()
+        clock.tick(60)
+        #pygame.time.wait(17)
 
 
 if __name__ == "__main__":
@@ -113,28 +147,32 @@ if __name__ == "__main__":
 #     font.extract_subimage(piv, 7, 30+3+23, 60)
 #     font.extract_subimage(piv, 9, 25+3+23+4, 90)
 #     font.extract_subimage(piv, 3, 25 + 3 + 23 + 4+25, 120)
-    #image = lairs[0].draw()
-    image = loading_screen.draw()
-    image.blit(image, (0, 0))
+
+
+
+
     #for string, metadata in main_exe.strings.items():
     #   draw_string(assets.fonts['bold'], string, metadata[2], main_exe)
+    frame_number = 0
 
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            #elif event.type == pygame.KEYDOWN:
-            #    if event.key == pygame.K_LEFT:
-            #        image_number = (image_number - 1) % font.image_count
-            #    elif event.key == pygame.K_RIGHT:
-            #        image_number = (image_number + 1) % font.image_count
+    game_loop(screen)
+    #
+    # while True:
+    #     for event in pygame.event.get():
+    #         if event.type == pygame.QUIT:
+    #             pygame.quit()
+    #             sys.exit()
+    #         elif event.type == pygame.KEYDOWN:
+    #             if event.key == pygame.K_LEFT:
+    #                 pass
+    #             elif event.key == pygame.K_RIGHT:
+    #                 knights.update()
                 #elif event.key == pygame.K_UP:
                 #    piv.palette = copy.deepcopy(piv_palette)
                 #elif event.key == pygame.K_DOWN:
                 #    piv.palette == copy.deepcopy(default_palette)
                 #print(image_number)
-        mouse = pygame.mouse.get_pos()
+        # mouse = pygame.mouse.get_pos()
         #font.extract_subimage(piv, image_number, *mouse)
         #font.extract_subimage(piv, image_number, 0, 0)
 
@@ -150,16 +188,27 @@ if __name__ == "__main__":
         #image.blit(font.images[0x4b].surface, (0x6e, 0xbe))
         #for string, metadata in main_exe.strings.items():
         #    draw_string(piv, font, string, metadata[2], main_exe)
+        # image = lairs[0].draw()
+        # image = loading_screen.draw()
+        # image.blit(image, (0, 0))
 
+        #frame = Frame(assets.animation.knight['walk'][frame_number], assets.backgrounds[lairs[0].background].palette)
+        #frame, rect = make_frame(assets.animation.knight['walk'][frame_number], assets.backgrounds[lairs[0].background].palette)
+        #image.blit(frame, (0, 0))
 
-        image = pygame.transform.scale(
-            image,
-            (320 * settings.SCALE_FACTOR, 200 * settings.SCALE_FACTOR)
-        )
-        screen.blit(image, (0, 0))
-        pygame.display.update()
-        pygame.time.wait(100)
-
+        # knights.draw(image)
+        #
+        # image = pygame.transform.scale(
+        #     image,
+        #     (320 * settings.SCALE_FACTOR, 200 * settings.SCALE_FACTOR)
+        # )
+        # screen.blit(image, (0, 0))
+        #
+        #
+        #
+        # pygame.display.update()
+        # pygame.time.sleep(17)
+        #
 
 
 
