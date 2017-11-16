@@ -42,9 +42,9 @@ def game_loop(screen):
     knights = pygame.sprite.Group()
     knight = Entity(pygame.Rect(0, 0, 0, 0), assets.animation.knight['walk'],
                     assets.backgrounds[lairs[0].background].palette, [knights])
-    image = lairs[0].draw()
-    image.blit(image, (0, 0))
+    lair = lairs[0].draw()
     clock = pygame.time.Clock()
+    last_tick = pygame.time.get_ticks()
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -54,20 +54,24 @@ def game_loop(screen):
                 if event.key == pygame.K_LEFT:
                     pass
                 elif event.key == pygame.K_RIGHT:
-                    knights.update()
+                    pass
+                    #knights.update()
+        now = pygame.time.get_ticks()
+        time = now - last_tick
+        if time > 1000 / 18.2065 * 2:
+            knights.update()
+            last_tick = now
 
+        image = lair.copy()
         knights.draw(image)
-
         scaled = pygame.transform.scale(
             image,
             (320 * settings.SCALE_FACTOR, 200 * settings.SCALE_FACTOR)
         )
         screen.blit(scaled, (0, 0))
-        delta = clock.get_time()
-        print(delta)
+
         pygame.display.update()
-        clock.tick(60)
-        #pygame.time.wait(17)
+        clock.tick(settings.FRAME_LIMIT)
 
 
 if __name__ == "__main__":
