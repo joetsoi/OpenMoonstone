@@ -1,12 +1,6 @@
-import os
-
-from cmp import CmpFile
-from piv import PivFile
-from font import FontFile, StringFlag, String
-from t import TFile
+from font import StringFlag, String
 from screen import ImageLocation, Screen, Lair
-from settings import MOONSTONE_DIR
-from . import animation
+from . import animation, files  # noqa
 
 
 bold_font_char_lookup = (
@@ -23,53 +17,18 @@ bold_font_char_lookup = (
 )
 
 
-def load_file(file_type, filename):
-    file_path = os.path.join(MOONSTONE_DIR, filename)
-    with open(file_path, 'rb') as f:
-        data = f.read()
-    return file_type(data)
-
-
-backgrounds = {
-    'ch': load_file(PivFile, 'DISKB\CH.PIV'),
-    'wab1': load_file(PivFile, 'DISKB\WAB1.CMP'),
-
-}
-
-
-scenery_files = {
-    'fo1': load_file(CmpFile, 'DISKB\FO1.CMP'),
-    'fo2': load_file(CmpFile, 'DISKB\FO2.CMP'),
-    'sw1': load_file(CmpFile, 'DISKB\SW1.CMP'),
-    'wa1': load_file(CmpFile, 'DISKB\WA1.CMP'),
-}
-
 scenery = [
-    scenery_files['fo1'],
-    scenery_files['fo1'],
-    scenery_files['sw1'],
-    scenery_files['wa1'],
-    scenery_files['fo2'],
+    files.scenery_files['fo1'],
+    files.scenery_files['fo1'],
+    files.scenery_files['sw1'],
+    files.scenery_files['wa1'],
+    files.scenery_files['fo2'],
 ]
 
-fonts = {
-    'bold': load_file(FontFile, 'DISKA\BOLD.F'),
-    'small': load_file(FontFile, 'DISKB\SMALL.FON'),
-}
-
-objects = {
-    'kn1': load_file(FontFile, 'DISKB\KN1.OB'),
-    'kn4': load_file(FontFile, 'DISKB\KN4.OB'),
-}
-
 spritesheets = {
-    'bold.f': fonts['bold'],
-    'kn1.ob': objects['kn1'],
-    'kn4.ob': objects['kn4'],
-}
-
-terrain = {
-    'wa1': load_file(TFile, 'DISKB\WA1.T'),
+    'bold.f': files.fonts['bold'],
+    'kn1.ob': files.objects['kn1'],
+    'kn4.ob': files.objects['kn4'],
 }
 
 lairs = (
@@ -86,5 +45,6 @@ loading_screen = Screen(
     images=[
         ImageLocation('bold.f', 73, 5, 20),
         ImageLocation('bold.f', 74, 22, 181),
-        ImageLocation('bold.f', 75, 110, 190),    ]
+        ImageLocation('bold.f', 75, 110, 190),
+    ],
 )

@@ -16,7 +16,7 @@ from assets import loading_screen, lairs
 import assets
 import settings
 
-from sprite import Entity, make_frame
+from sprite import Entity, make_frame#, Move
 
 
 #def draw(screen, image_data, palette):
@@ -41,7 +41,7 @@ from sprite import Entity, make_frame
 def game_loop(screen):
     knights = pygame.sprite.Group()
     knight = Entity(pygame.Rect(0, 0, 0, 0), assets.animation.knight['walk'],
-                    assets.backgrounds[lairs[0].background].palette, [knights])
+                    assets.files.backgrounds[lairs[0].background].palette, [knights])
     lair = lairs[0].draw()
     clock = pygame.time.Clock()
     last_tick = pygame.time.get_ticks()
@@ -53,9 +53,12 @@ def game_loop(screen):
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
                     pass
+                    #knight.move(Move.LEFT)
                 elif event.key == pygame.K_RIGHT:
                     pass
+                    #knight.move(Move.RIGHT)
                     #knights.update()
+                
         now = pygame.time.get_ticks()
         time = now - last_tick
         if time > 1000 / 18.2065 * 2:

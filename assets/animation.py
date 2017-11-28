@@ -20,6 +20,14 @@ def byte_to_sign(value):
 
 
 knight = {
+    'idle': (
+        (
+            FrameImage('kn1.ob', 1, 45, -13),
+            FrameImage('kn1.ob', 0, -9, -9),
+            FrameImage('kn4.ob', 1, -6, 4),
+        ),
+
+    ),
     'walk': (
         (
             FrameImage('kn1.ob', 3, 46, -13),
