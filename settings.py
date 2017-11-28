@@ -1,3 +1,6 @@
+from pathlib import Path
+
+
 SCALE_FACTOR = 3
 FRAME_LIMIT = 60
-MOONSTONE_DIR = "C:\\Users\Joe\Dropbox\moonstone"
+MOONSTONE_DIR = Path.home() / "Dropbox/moonstone"
