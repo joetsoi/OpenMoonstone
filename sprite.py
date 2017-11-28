@@ -1,3 +1,5 @@
+import operator
+from enum import Enum, auto
 from itertools import cycle
 
 from attr import attrs, attrib
@@ -11,24 +13,65 @@ y_move_up_distances = [2, 9, 2, 9]
 y_move_down_distances = [8, 2, 9, 2]
 
 
+class Move(Enum):
+    UP = auto()
+    DOWN = auto()
+    LEFT = auto()
+    RIGHT = auto()
+    IDLE = auto()
+
+
 class Entity(pygame.sprite.Sprite):
     def __init__(self, position, animations, palette, groups=None):
         super().__init__(*groups)
         self.rect = position
-        self.animations = [make_frame(f, palette) for f in animations]
+        self.animations = {
+            name: [make_frame(f, palette) for f in frames]
+            for name, frames in animations.items()
+        }
         self.groups = groups
         self.palette = palette
 
-        self.image = self.animations[1].surface
+        self.image = self.animations['walk'][0].surface
 
         self.x_move = cycle(x_move_distances)
-        self.cur_anim = cycle(self.animations)
+        self.direction = Move.IDLE
+        self.cur_anim = cycle(self.animations['walk'])
 
     def update(self):
         self.rect.x += next(self.x_move)
         frame = next(self.cur_anim)
         print(self.rect)
         self.image = frame.surface
+
+    def move(self, direction: Move):
+        if direction == self.direction:
+            self.rect.x += next(self.x_move)
+            frame = next(self.cur_anim)
+            #print(self.rect)
+            self.image = frame.surface
+
+        elif direction == Move.RIGHT:
+            self.direction = direction
+            self.x_move = cycle(x_move_distances)
+            self.cur_anim = cycle(self.animations['walk'])
+
+            self.rect.x += next(self.x_move)
+            frame = next(self.cur_anim)
+            #print(self.rect)
+            self.image = frame.surface
+        elif direction == Move.IDLE:
+            self.direction = direction
+            self.x_move = 0
+            self.cur_anim = cycle(self.animations['idle'])
+
+
+
+
+
+class Player(Entity):
+    def update(self):
+        pass
 
 
 @attrs

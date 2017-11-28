@@ -40,7 +40,7 @@ from sprite import Entity, make_frame#, Move
 
 def game_loop(screen):
     knights = pygame.sprite.Group()
-    knight = Entity(pygame.Rect(0, 0, 0, 0), assets.animation.knight['walk'],
+    knight = Entity(pygame.Rect(0, 0, 0, 0), assets.animation.knight,
                     assets.files.backgrounds[lairs[0].background].palette, [knights])
     lair = lairs[0].draw()
     clock = pygame.time.Clock()
