@@ -4,10 +4,10 @@ from struct import iter_unpack
 import pytest
 
 from extract import extract_file, grouper
-from font import FontFile, draw_string
+from font import FontFile#, draw_string
 from main import MainExe
 from piv import PivFile
-from sprite import SpriteSheetFile
+#from sprite import SpriteSheetFile
 
 
 def read_file(file_name, file_type):
@@ -80,24 +80,24 @@ def main_exe():
         os.path.dirname(os.path.realpath(__file__)), 'MAIN.EXE'))
 
 
-class TestLoadingScreen(object):
-    def test_loading_screen(self, loading_screen, bold_font, main_exe):
-        bold_font.extract_subimage(loading_screen, 0x49, 0x5, 0x14)
-        bold_font.extract_subimage(loading_screen, 0x4a, 0x16, 0xb5)
-        bold_font.extract_subimage(loading_screen, 0x4b, 0x6e, 0xbe)
-        bold_font.extract_subimage(loading_screen, 0x45, 0x6e, 0xbe)
+# class TestLoadingScreen(object):
+#     def test_loading_screen(self, loading_screen, bold_font, main_exe):
+#         bold_font.extract_subimage(loading_screen, 0x49, 0x5, 0x14)
+#         bold_font.extract_subimage(loading_screen, 0x4a, 0x16, 0xb5)
+#         bold_font.extract_subimage(loading_screen, 0x4b, 0x6e, 0xbe)
+#         bold_font.extract_subimage(loading_screen, 0x45, 0x6e, 0xbe)
 
-        for string, metadata in main_exe.strings.items():
-            draw_string(loading_screen, bold_font, string, metadata[2],
-                        main_exe)
+#         for string, metadata in main_exe.strings.items():
+#             draw_string(loading_screen, bold_font, string, metadata[2],
+#                         main_exe)
 
-        with open('loading_screen.bin', 'rb') as f:
-            test_data = f.read()
+#         with open('loading_screen.bin', 'rb') as f:
+#             test_data = f.read()
 
-        assert bytes(loading_screen.pixels) == test_data
+#         assert bytes(loading_screen.pixels) == test_data
 
 
-def test_sprite():
-    test = read_file('BOLD.F', SpriteSheetFile)
-    import pdb; pdb.set_trace()
+# def test_sprite():
+#     test = read_file('BOLD.F', SpriteSheetFile)
+#     import pdb; pdb.set_trace()
 
