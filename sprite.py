@@ -97,7 +97,7 @@ class Entity(pygame.sprite.Sprite):
             else:
                 self.y_move  = (self.y_move + 1) % 3
 
-            #self.position.y += y_move_down_distances[self.y_move]
+            self.position.y += y_move_down_distances[self.y_move]
             frame = self.animations['down'][self.y_move]
 
         elif pressed.y == -1:
@@ -105,18 +105,15 @@ class Entity(pygame.sprite.Sprite):
                 self.y_move = 0#cycle(y_move_down_distances)
             else:
                 self.y_move  = (self.y_move + 1) % 3
-            #self.position.y -= y_move_up_distances[self.y_move]
+            self.position.y -= y_move_up_distances[self.y_move]
             frame = self.animations['up'][self.y_move]
-
-        self.rect.y = self.position.y
 
         if pressed.x == 1:
             if pressed.x != self.input.x:
                 self.x_move = 0
             else:
                 self.x_move  = (self.x_move + 1) % 3
-            #self.position.x += x_move_distances[self.x_move]
-            self.rect.x = self.position.x
+            self.position.x += x_move_distances[self.x_move]
 
             self.direction = Direction.RIGHT
             frame = self.animations['walk'][self.x_move]
@@ -126,7 +123,7 @@ class Entity(pygame.sprite.Sprite):
                 self.x_move = 0
             else:
                 self.x_move  = (self.x_move + 1) % 3
-            #self.position.x -= x_move_distances[self.x_move]
+            self.position.x -= x_move_distances[self.x_move]
                 # self.cur_anim = cycle([
                 #     Frame(
                 #         surface=pygame.transform.flip(frame.surface,
@@ -146,20 +143,22 @@ class Entity(pygame.sprite.Sprite):
             #self.rect.x = self.position.x - frame.surface.get_width()
             #self.rect.x = self.position.x# - frame.surface.get_width()
 
-            test = self.position.x - frame.rect.width
-            print(frame.rect.width)
-            self.rect.x = self.position.x - frame.surface.get_width()
-            self.rect.x = self.position.x
             #print(self.rect.x, frame.surface.get_width())
 
         if pressed.x == 0 and pressed.y == 0:
             if self.direction == Direction.LEFT:
                 #print(self.position)
                 frame = self.animations['idle_left'][0]
-                self.rect.x = self.position.x - frame.surface.get_width()
-
             else:
                 frame = self.animations['idle'][0]
+
+
+        if self.direction == Direction.LEFT:
+            self.rect.x = self.position.x - (frame.rect.x + frame.rect.width)
+            self.rect.y = self.position.y + frame.rect.y
+        else:
+            self.rect.x = self.position.x + frame.rect.x
+            self.rect.y = self.position.y + frame.rect.y
 
         self.input = pressed
         #print(self.position)
