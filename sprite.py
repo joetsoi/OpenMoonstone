@@ -50,26 +50,19 @@ class Entity(pygame.sprite.Sprite):
             name: [make_frame(f, palette) for f in frames]
             for name, frames in animations.items()
         }
-        print("walk: ", [f.rect for f in self.animations['walk']])
-        print("walk: ", [f.surface.get_width() for f in self.animations['walk']])
-        self.animations['left'] = [
-            Frame(
-                surface=pygame.transform.flip(frame.surface,
-                                              True,
-                                              False),
-                rect=frame.rect,
-            )
-            for frame in self.animations['walk']
-        ]
-        self.animations['idle_left'] = [
-            Frame(
-                surface=pygame.transform.flip(frame.surface,
-                                              True,
-                                              False),
-                rect=frame.rect,
-            )
-            for frame in self.animations['idle']
-        ]
+        left_animations = {
+           f'{name}_left': [
+                Frame(
+                    surface=pygame.transform.flip(frame.surface,
+                                                  True,
+                                                  False),
+                    rect=frame.rect,
+                )
+                for frame in animation
+            ] for name, animation in self.animations.items()
+        }
+        self.animations.update(left_animations)
+
         self.groups = groups
         self.palette = palette
 
@@ -98,7 +91,10 @@ class Entity(pygame.sprite.Sprite):
                 self.y_move  = (self.y_move + 1) % 3
 
             self.position.y += y_move_down_distances[self.y_move]
-            frame = self.animations['down'][self.y_move]
+            if self.direction == Direction.LEFT:
+                frame = self.animations['down_left'][self.y_move]
+            else:
+                frame = self.animations['down'][self.y_move]
 
         elif pressed.y == -1:
             if pressed.y != self.input.y:
@@ -106,7 +102,10 @@ class Entity(pygame.sprite.Sprite):
             else:
                 self.y_move  = (self.y_move + 1) % 3
             self.position.y -= y_move_up_distances[self.y_move]
-            frame = self.animations['up'][self.y_move]
+            if self.direction == Direction.LEFT:
+                frame = self.animations['up_left'][self.y_move]
+            else:
+                frame = self.animations['up'][self.y_move]
 
         if pressed.x == 1:
             if pressed.x != self.input.x:
@@ -139,7 +138,7 @@ class Entity(pygame.sprite.Sprite):
                 #     for frame in self.animations['walk']
                 # ])
             self.direction = Direction.LEFT
-            frame = self.animations['left'][self.x_move]
+            frame = self.animations['walk_left'][self.x_move]
             #self.rect.x = self.position.x - frame.surface.get_width()
             #self.rect.x = self.position.x# - frame.surface.get_width()
 
