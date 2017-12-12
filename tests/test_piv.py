@@ -3,6 +3,7 @@ from struct import iter_unpack
 
 import pytest
 
+import assets
 from extract import extract_file, grouper
 from font import FontFile#, draw_string
 from main import MainExe
@@ -10,29 +11,25 @@ from piv import PivFile
 #from sprite import SpriteSheetFile
 
 
-def read_file(file_name, file_type):
-    file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                             file_name)
+# def read_file(file_name, file_type):
+#     file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+#                              file_name)
 
-    with open(file_path, 'rb') as f:
-        file_data = f.read()
-    return file_type(file_data)
-
-
-@pytest.fixture
-def mindscape():
-    return read_file('MINDSCAP', PivFile)
+#     with open(file_path, 'rb') as f:
+#         file_data = f.read()
+#     return file_type(file_data)
 
 
 class TestPivFile(object):
-    def test_extract_piv_file(self, mindscape):
+    def test_extract_piv_file(self):
+        mindscape = assets.files.backgrounds['mindscape']
         extracted = extract_file(mindscape.file_length, mindscape.pixel_data)
         with open('mindscap_extract_1.bin', 'rb') as f:
             test_data = f.read()
 
         assert extracted == test_data
 
-    def test_extract_pixels(self, mindscape):
+    def test_extract_pixels(self):
         '''The original code would extract the code into video memory into the
         four memory blocks in unchained mode, this tests recreates those blocks
         '''
@@ -41,7 +38,7 @@ class TestPivFile(object):
         block_c = []
         block_d = []
 
-        extracted = mindscape.extract_pixels()
+        extracted = assets.files.backgrounds['mindscape'].extract_pixels()
 
         for a, b, c, d in grouper(extracted, 4):
             block_a.append(a)
@@ -55,8 +52,8 @@ class TestPivFile(object):
 
         assert bytes(blocks) == test_data
 
-    def test_extract_palette(self, mindscape):
-        extracted = mindscape.extract_palette()
+    def test_extract_palette(self):
+        extracted = assets.files.backgrounds['mindscape'].extract_palette()
 
         with open('mindscap_palette_extract_1.bin', 'rb') as f:
             test_data = f.read()
@@ -64,20 +61,20 @@ class TestPivFile(object):
         assert extracted == [i[0] for i in iter_unpack('<H', test_data)]
 
 
-@pytest.fixture
-def loading_screen():
-    return read_file('CH.PIV', PivFile)
+# @pytest.fixture
+# def loading_screen():
+#     return read_file('CH.PIV', PivFile)
 
 
-@pytest.fixture
-def bold_font():
-    return read_file('BOLD.F', FontFile)
+# @pytest.fixture
+# def bold_font():
+#     return read_file('BOLD.F', FontFile)
 
 
-@pytest.fixture
-def main_exe():
-    return MainExe(file_path=os.path.join(
-        os.path.dirname(os.path.realpath(__file__)), 'MAIN.EXE'))
+# @pytest.fixture
+# def main_exe():
+#     return MainExe(file_path=os.path.join(
+#         os.path.dirname(os.path.realpath(__file__)), 'MAIN.EXE'))
 
 
 # class TestLoadingScreen(object):
