@@ -11,7 +11,6 @@ class Screen:
     images = attrib()
 
     def draw(self):
-
         surface = assets.backgrounds[self.background].make_surface()
         for string in self.text:
             self.draw_string(surface, string)
@@ -65,11 +64,15 @@ class Lair:
     background = attrib()
     terrain = attrib()
 
+    @property
+    def terrain_object(self):
+        return assets.files.terrain[self.terrain]
+
     def draw(self):
-        background = assets.backgrounds[self.background]
+        background = assets.files.backgrounds[self.background]
         surface = background.make_surface()
 
-        terrain = assets.terrain[self.terrain]
+        terrain = assets.files.terrain[self.terrain]
         for t in terrain.positions:
             cmp = assets.scenery[t.cmp_file]
             surface.blit(cmp.get_image(t.image_number), (t.x, t.y))

@@ -51,13 +51,14 @@ DIRECTION = {
 
 def game_loop(screen):
     knights = pygame.sprite.Group()
+    lair = lairs[0]
     knight = Entity(
-        pygame.Rect(0, 0, 0, 0),
+        pygame.Rect(100, 100, 0, 0),
         assets.animation.knight,
         assets.files.backgrounds[lairs[0].background].palette,
+        lair=lair,
         groups=[knights]
     )
-    lair = lairs[0].draw()
     clock = pygame.time.Clock()
     last_tick = pygame.time.get_ticks()
     while True:
@@ -77,15 +78,25 @@ def game_loop(screen):
             knights.update()
             last_tick = now
 
-        image = lair.copy()
+        image = lair.draw().copy()
         knights.draw(image)
 
         pygame.draw.rect(
             image,
             (255, 255, 255),
 
-            pygame.rect.Rect(knight.rect.x, knight.rect.y, 0, 0),
-            #pygame.rect.Rect(knight.rect.x, knight.rect.y, knight.image.get_width(), knight.image.get_height()),
+            #pygame.rect.Rect(knight.rect.x, knight.rect.y, 0, 0),
+            pygame.rect.Rect(knight.rect.x, knight.rect.y, knight.image.get_width(), knight.image.get_height()),
+            1,
+        )
+
+
+        pygame.draw.rect(
+            image,
+            (255, 255, 255),
+
+            #pygame.rect.Rect(knight.rect.x, knight.rect.y, 0, 0),
+            pygame.rect.Rect(0, 113, 320, 1),
             1,
         )
         scaled = pygame.transform.scale(
@@ -105,6 +116,7 @@ if __name__ == "__main__":
     #    sys.exit()
 
     pygame.init()
+    pygame.display.set_caption("OpenMoonstone")
     screen = pygame.display.set_mode((320 * settings.SCALE_FACTOR, 200 * settings.SCALE_FACTOR))
 
     #file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),

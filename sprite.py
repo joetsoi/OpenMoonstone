@@ -44,6 +44,7 @@ class Entity(pygame.sprite.Sprite):
                  position,
                  animations,
                  palette,
+                 lair,
                  direction=Direction.RIGHT,
                  groups=None):
         super().__init__(*groups)
@@ -76,6 +77,8 @@ class Entity(pygame.sprite.Sprite):
         self.input = pygame.Rect(0, 0, 0, 0)
         self.direction = direction
 
+        self.lair = lair
+
     def update(self):
         keys = pygame.key.get_pressed()
         pressed = pygame.Rect(0, 0, 0, 0)
@@ -84,6 +87,7 @@ class Entity(pygame.sprite.Sprite):
                 pressed.x += value[0]
                 pressed.y += value[1]
 
+        new_position = pygame.Rect(self.position)
         if pressed.x == 0 and pressed.y == 0:
             animation_name = 'idle'
             frame_num = 0
@@ -92,36 +96,54 @@ class Entity(pygame.sprite.Sprite):
             frame_num = self.move
 
         if pressed.y == 1:
-            self.position.y += y_move_down_distances[frame_num]
+            new_position.y = self.position.y + y_move_down_distances[frame_num]
             animation_name = 'down'
 
         elif pressed.y == -1:
-            self.position.y -= y_move_up_distances[frame_num]
+            new_position.y = self.position.y - y_move_up_distances[frame_num]
             animation_name = 'up'
 
         if pressed.x == 1:
-            self.position.x += x_move_distances[frame_num]
+            new_position.x = self.position.x + x_move_distances[frame_num]
             animation_name = 'walk'
             self.direction = Direction.RIGHT
 
         elif pressed.x == -1:
-            self.position.x -= x_move_distances[frame_num]
+            new_position.x = self.position.x - x_move_distances[frame_num]
             animation_name = 'walk'
             self.direction = Direction.LEFT
+
+        clamped = new_position.clamp(BOUNDARY)
+        if clamped != new_position:
+            animation_name = 'idle'
+            frame_num = 0
+            self.position = clamped
 
         if self.direction == Direction.LEFT:
             animation_name = f'{animation_name}_left'
 
             frame = self.animations[animation_name][frame_num]
-            self.rect.x = self.position.x - (frame.rect.x + frame.rect.width)
+            self.rect.x = new_position.x - (frame.rect.x + frame.rect.width)
         else:
             frame = self.animations[animation_name][frame_num]
-            self.rect.x = self.position.x + frame.rect.x
+            self.rect.x = new_position.x + frame.rect.x
 
-        self.rect.y = self.position.y + frame.rect.y
+        self.rect.width = frame.rect.width
+        self.rect.height = frame.rect.height
 
+        new_rect_y = new_position.y + frame.rect.y + frame.rect.height
+
+
+        print(self.rect.bottom, self.lair.terrain_object.boundary.bottom, new_rect_y)
+        if new_rect_y <= self.lair.terrain_object.boundary.bottom:
+            print(new_position.y)
+            print(self.position.y)
+            new_position.y = self.position.y
+
+        self.rect.y = new_position.y + frame.rect.y
         self.input = pressed
         self.image = frame.surface
+        self.position = new_position
 
 
 class Player(Entity):

@@ -3,6 +3,8 @@ from collections import namedtuple
 from struct import unpack, unpack_from, iter_unpack
 import sys
 
+import pygame
+
 from cli import print_hex_view
 from extract import extract_file
 
@@ -25,7 +27,7 @@ class TFile:
 
 
         al = unpack('>H', self.extracted[6:8])[0]
-        print(hex(al))
+        #print(hex(al))
         if al > smallest_t_value:
             smallest_t_value = al
 
@@ -38,27 +40,38 @@ class TFile:
         # 3 = wa1.cmp
         # 4 = fo2.cmp (default)  if not 0xff, 0xfe or 0-3
         print('test',  len(self.extracted) % 6)
+
+        left = unpack('>H', self.extracted[2:4])[0]
+        right = unpack('>H', self.extracted[4:6])[0]
+        bottom = unpack('>H', self.extracted[6:8])[0]
+        unused_top = unpack('>H', self.extracted[8:10])[0]
+
+        self.boundary = pygame.Rect((left, 30), (right - left, bottom - 30))
+        print(self.boundary, self.boundary.bottomright)
+
+
         self.positions = []
         images_remaining = True
         while True:
+            #print(hex(di))
             subimage_meta = CmpSubImage._make(unpack_from('>BBHH', self.extracted, di))
             if subimage_meta.cmp_file == 0xff:
                 break
-            print(subimage_meta)
+            #print(subimage_meta)
             self.positions.append(subimage_meta)
             di +=6
 
         ax, bx, dx = [i for i in sub_7e77(0x4e, 0x51, 0x14)]
-        print(0x4e, 0x51, 0x14 )
-        print_hex_view((ax, bx, dx))
-        print_hex_view(sub_7e8c(ax, bx, dx))
-        print(sub_7e8c(ax, bx, dx))
+        #print(0x4e, 0x51, 0x14 )
+        #print_hex_view((ax, bx, dx))
+        #print_hex_view(sub_7e8c(ax, bx, dx))
+        #print(sub_7e8c(ax, bx, dx))
 
         for i in range(21):
             ax, bx, dx = [i for i in sub_7e77(0x4e, 0x51, i)]
             #print_hex_view((ax, bx, dx))
             #print_hex_view(sub_7e8c(ax, bx, dx))
-            print(i, sub_7e8c(ax, bx, dx))
+            #print(i, sub_7e8c(ax, bx, dx))
 
 def sub_7e77(ax, bx, dx):
     bx = dx // 10 * 25
