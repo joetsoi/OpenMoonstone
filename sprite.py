@@ -85,10 +85,7 @@ class Entity(pygame.sprite.Sprite):
         #print(pressed)
 
         if pressed.y == 1:
-            if pressed.y != self.input.y:
-                self.y_move = 0#cycle(y_move_down_distances)
-            else:
-                self.y_move  = (self.y_move + 1) % 3
+            self.y_move  = (self.y_move + 1) % 4
 
             self.position.y += y_move_down_distances[self.y_move]
             if self.direction == Direction.LEFT:
@@ -97,10 +94,7 @@ class Entity(pygame.sprite.Sprite):
                 frame = self.animations['down'][self.y_move]
 
         elif pressed.y == -1:
-            if pressed.y != self.input.y:
-                self.y_move = 0#cycle(y_move_down_distances)
-            else:
-                self.y_move  = (self.y_move + 1) % 3
+            self.y_move  = (self.y_move + 1) % 4
             self.position.y -= y_move_up_distances[self.y_move]
             if self.direction == Direction.LEFT:
                 frame = self.animations['up_left'][self.y_move]
@@ -108,20 +102,14 @@ class Entity(pygame.sprite.Sprite):
                 frame = self.animations['up'][self.y_move]
 
         if pressed.x == 1:
-            if pressed.x != self.input.x:
-                self.x_move = 0
-            else:
-                self.x_move  = (self.x_move + 1) % 3
+            self.x_move  = (self.x_move + 1) % 4
             self.position.x += x_move_distances[self.x_move]
 
             self.direction = Direction.RIGHT
             frame = self.animations['walk'][self.x_move]
 
         elif pressed.x == -1:
-            if pressed.x != self.input.x:
-                self.x_move = 0
-            else:
-                self.x_move  = (self.x_move + 1) % 3
+            self.x_move  = (self.x_move + 1) % 4
             self.position.x -= x_move_distances[self.x_move]
                 # self.cur_anim = cycle([
                 #     Frame(
@@ -150,7 +138,6 @@ class Entity(pygame.sprite.Sprite):
                 frame = self.animations['idle_left'][0]
             else:
                 frame = self.animations['idle'][0]
-
 
         if self.direction == Direction.LEFT:
             self.rect.x = self.position.x - (frame.rect.x + frame.rect.width)
