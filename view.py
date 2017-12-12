@@ -16,7 +16,7 @@ from assets import loading_screen, lairs
 import assets
 import settings
 
-from sprite import Entity, make_frame#, Move
+from sprite import Entity, Move
 
 
 #def draw(screen, image_data, palette):
@@ -36,12 +36,27 @@ from sprite import Entity, make_frame#, Move
     #image = pygame.transform.scale(image,
     #                              (320 * scale_factor, 200 * scale_factor))
     #screen.blit(image, (0, 0))
+controls = {
+    pygame.K_LEFT: Move.LEFT,
+    pygame.K_RIGHT: Move.RIGHT,
+}
+
+DIRECTION = {
+    pygame.K_LEFT: (1, 0),
+    pygame.K_RIGHT: (-1, 0),
+    pygame.K_UP: (0, 1),
+    pygame.K_DOWN: (0, -1),
+}
 
 
 def game_loop(screen):
     knights = pygame.sprite.Group()
-    knight = Entity(pygame.Rect(0, 0, 0, 0), assets.animation.knight,
-                    assets.files.backgrounds[lairs[0].background].palette, [knights])
+    knight = Entity(
+        pygame.Rect(0, 0, 0, 0),
+        assets.animation.knight,
+        assets.files.backgrounds[lairs[0].background].palette,
+        groups=[knights]
+    )
     lair = lairs[0].draw()
     clock = pygame.time.Clock()
     last_tick = pygame.time.get_ticks()
@@ -50,15 +65,12 @@ def game_loop(screen):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
-                    pass
-                    #knight.move(Move.LEFT)
-                elif event.key == pygame.K_RIGHT:
-                    pass
-                    #knight.move(Move.RIGHT)
-                    #knights.update()
-                
+
+        # for key, value in DIRECTION.keys():
+        #     if keys[key]:
+        #         pressed[0] += value[0]
+        #         pressed[1] += value[1]
+
         now = pygame.time.get_ticks()
         time = now - last_tick
         if time > 1000 / 18.2065 * 2:
@@ -67,6 +79,15 @@ def game_loop(screen):
 
         image = lair.copy()
         knights.draw(image)
+
+        pygame.draw.rect(
+            image,
+            (255, 255, 255),
+
+            pygame.rect.Rect(knight.rect.x, knight.rect.y, 0, 0),
+            #pygame.rect.Rect(knight.rect.x, knight.rect.y, knight.image.get_width(), knight.image.get_height()),
+            1,
+        )
         scaled = pygame.transform.scale(
             image,
             (320 * settings.SCALE_FACTOR, 200 * settings.SCALE_FACTOR)
