@@ -16,6 +16,7 @@ def load_file(file_type, filename):
 
 backgrounds = {
     'ch': load_file(PivFile, 'DISKB\CH.PIV'),
+    'mindscape': load_file(PivFile, 'DISKA\MINDSCAP'),
     'wab1': load_file(PivFile, 'DISKB\WAB1.CMP'),
 }
 
