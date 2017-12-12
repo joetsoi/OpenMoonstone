@@ -33,6 +33,9 @@ class Direction(Enum):
     RIGHT = auto()
 
 
+BOUNDARY = pygame.Rect(10, 30, 320 - 10, 155 - 30)
+
+
 def mod3(n):
     return (n + 1) % 3
 
@@ -68,11 +71,9 @@ class Entity(pygame.sprite.Sprite):
 
         self.image = self.animations['idle'][0].surface
 
-        self.x_move = 0#cycle(x_move_distances)
-        self.y_move = 0#cycle(y_move_up_distances)
+        self.move = 0
 
         self.input = pygame.Rect(0, 0, 0, 0)
-        self.cur_anim = self.animations['idle'][0]
         self.direction = direction
 
     def update(self):
@@ -82,98 +83,45 @@ class Entity(pygame.sprite.Sprite):
             if keys[key]:
                 pressed.x += value[0]
                 pressed.y += value[1]
-        #print(pressed)
-
-        if pressed.y == 1:
-            self.y_move  = (self.y_move + 1) % 4
-
-            self.position.y += y_move_down_distances[self.y_move]
-            if self.direction == Direction.LEFT:
-                frame = self.animations['down_left'][self.y_move]
-            else:
-                frame = self.animations['down'][self.y_move]
-
-        elif pressed.y == -1:
-            self.y_move  = (self.y_move + 1) % 4
-            self.position.y -= y_move_up_distances[self.y_move]
-            if self.direction == Direction.LEFT:
-                frame = self.animations['up_left'][self.y_move]
-            else:
-                frame = self.animations['up'][self.y_move]
-
-        if pressed.x == 1:
-            self.x_move  = (self.x_move + 1) % 4
-            self.position.x += x_move_distances[self.x_move]
-
-            self.direction = Direction.RIGHT
-            frame = self.animations['walk'][self.x_move]
-
-        elif pressed.x == -1:
-            self.x_move  = (self.x_move + 1) % 4
-            self.position.x -= x_move_distances[self.x_move]
-                # self.cur_anim = cycle([
-                #     Frame(
-                #         surface=pygame.transform.flip(frame.surface,
-                #                                       True,
-                #                                       False),
-                #         rect=pygame.Rect(
-                #             frame.rect.x,# - frame.rect.width,
-                #             frame.rect.y,
-                #             frame.rect.width,
-                #             frame.rect.height,
-                #             ),
-                #     )
-                #     for frame in self.animations['walk']
-                # ])
-            self.direction = Direction.LEFT
-            frame = self.animations['walk_left'][self.x_move]
-            #self.rect.x = self.position.x - frame.surface.get_width()
-            #self.rect.x = self.position.x# - frame.surface.get_width()
-
-            #print(self.rect.x, frame.surface.get_width())
 
         if pressed.x == 0 and pressed.y == 0:
-            if self.direction == Direction.LEFT:
-                #print(self.position)
-                frame = self.animations['idle_left'][0]
-            else:
-                frame = self.animations['idle'][0]
+            animation_name = 'idle'
+            frame_num = 0
+        else:
+            self.move = (self.move + 1) % 4
+            frame_num = self.move
+
+        if pressed.y == 1:
+            self.position.y += y_move_down_distances[frame_num]
+            animation_name = 'down'
+
+        elif pressed.y == -1:
+            self.position.y -= y_move_up_distances[frame_num]
+            animation_name = 'up'
+
+        if pressed.x == 1:
+            self.position.x += x_move_distances[frame_num]
+            animation_name = 'walk'
+            self.direction = Direction.RIGHT
+
+        elif pressed.x == -1:
+            self.position.x -= x_move_distances[frame_num]
+            animation_name = 'walk'
+            self.direction = Direction.LEFT
 
         if self.direction == Direction.LEFT:
+            animation_name = f'{animation_name}_left'
+
+            frame = self.animations[animation_name][frame_num]
             self.rect.x = self.position.x - (frame.rect.x + frame.rect.width)
-            self.rect.y = self.position.y + frame.rect.y
         else:
+            frame = self.animations[animation_name][frame_num]
             self.rect.x = self.position.x + frame.rect.x
-            self.rect.y = self.position.y + frame.rect.y
+
+        self.rect.y = self.position.y + frame.rect.y
 
         self.input = pressed
-        #print(self.position)
         self.image = frame.surface
-
-
-    def move(self, direction):
-        if direction == self.direction:
-            self.rect.x += next(self.x_move)
-            frame = next(self.cur_anim)
-            #print(self.rect)
-            self.image = frame.surface
-
-        elif direction == Move.RIGHT:
-            self.direction = direction
-            self.x_move = cycle(x_move_distances)
-            self.cur_anim = cycle(self.animations['walk'])
-
-            self.rect.x += next(self.x_move)
-            frame = next(self.cur_anim)
-            #print(self.rect)
-            self.image = frame.surface
-        elif direction == Move.IDLE:
-            self.direction = direction
-            self.x_move = 0
-            self.cur_anim = cycle(self.animations['idle'])
-
-
-
 
 
 class Player(Entity):
@@ -234,22 +182,3 @@ def make_frame(frame_images, palette):
         frame_surface.blit(surface, (rect.left - frame_rect.left, rect.top - frame_rect.top))
 
     return Frame(frame_surface, frame_rect)
-
-
-def flip_animation(frames):
-    max_x = max(frames, key=lambda rect: rect.width)
-    flipped = [
-        Frame(
-            surface=pygame.transform.flip(frame.surface,
-                                          True,
-                                          False),
-            rect=pygame.Rect(
-                frame.rect.x,
-                frame.rect.y,
-                frame.rect.width,
-                frame.rect.height,
-            ),
-        )
-        for frame in frames
-    ]
-    return flipped
