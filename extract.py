@@ -1,4 +1,4 @@
-from itertools import zip_longest
+from itertools import cycle, islice, zip_longest
 from struct import unpack, unpack_from
 
 
@@ -43,13 +43,10 @@ def extract_file(file_length, file_data):
                 copy_source = encoded & 0x7ff
 
                 copy_from = len(extracted) - copy_source
-                new_bytes = extracted[copy_from:copy_from + count]
+                new_bytes_iter = cycle(extracted[copy_from:copy_from + count])
+                new_bytes = islice(new_bytes_iter, count)
 
-                overlapped_bytes = copy_from + count - len(extracted)
-                for extra in range(overlapped_bytes):
-                    new_bytes.append(new_bytes[extra])
-
-                extracted += new_bytes
+                extracted.extend(new_bytes)
             else:
                 extracted += unpack_from('>c',  file_data, offset)[0]
                 offset += 1
