@@ -190,7 +190,8 @@ def make_frame(frame_images, palette):
         surfaces.append(image.to_surface(palette))
         rects.append(
             pygame.Rect(
-                frame_image.x,
+                # TODO: determine whether x_adjust is needed
+                frame_image.x - image.x_adjust,
                 frame_image.y,
                 image.width,
                 image.height

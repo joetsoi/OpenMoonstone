@@ -300,9 +300,12 @@ class Image(object):
 
         unpacked_image_width = packed_image_width * 8
 
+        x_offset_adjust = header.x_adjust >> 4
+        #x_offset -= x_offset_adjust
+
         pixels = recombine(header.blit_type, bit_planes, unpacked_image_width * header.height)
 
-        return cls(unpacked_image_width, header.height, header.x_adjust, pixels)
+        return cls(unpacked_image_width, header.height, x_offset_adjust, pixels)
 
     def to_surface(self, palette):
         return pixel_to_surface(self.width, self.height, self.pixels, palette)
