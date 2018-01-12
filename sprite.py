@@ -19,6 +19,7 @@ DIRECTION = {
     pygame.K_DOWN: (0, 1),
 }
 
+FIRE = pygame.K_SPACE
 
 class Move(Enum):
     UP = auto()
@@ -72,7 +73,9 @@ class Entity(pygame.sprite.Sprite):
 
         self.image = self.animations['idle'][0].surface
 
-        self.move = 0
+        self.move_frame = 0
+        self.attack_frame = None
+
 
         self.input = pygame.Rect(0, 0, 0, 0)
         self.direction = direction
@@ -87,45 +90,88 @@ class Entity(pygame.sprite.Sprite):
                 pressed.x += value[0]
                 pressed.y += value[1]
 
+        if self.attack_frame:
+            animation_name = 'swing'
+
+
+            if self.direction == Direction.LEFT:
+                animation_name = f'{animation_name}_left'
+                frame = self.animations[animation_name][self.attack_frame]
+                self.rect.x = self.position.x - (frame.rect.x + frame.rect.width)
+            else:
+                frame = self.animations[animation_name][self.attack_frame]
+                self.rect.x = self.position.x + frame.rect.x
+
+            self.rect.width = frame.rect.width
+            self.rect.height = frame.rect.height
+            self.rect.y = self.position.y + frame.rect.y
+            self.image = frame.surface
+
+            self.attack_frame += 1
+            if self.attack_frame >= len(self.animations[animation_name]):
+                self.attack_frame = None
+
+        elif keys[FIRE]:
+            animation_name = 'swing'
+
+
+            if self.direction == Direction.LEFT:
+                animation_name = f'{animation_name}_left'
+                frame = self.animations[animation_name][0]
+                self.rect.x = self.position.x - (frame.rect.x + frame.rect.width)
+            else:
+                frame = self.animations[animation_name][0]
+                self.rect.x = self.position.x + frame.rect.x
+
+            self.rect.width = frame.rect.width
+            self.rect.height = frame.rect.height
+            self.rect.y = self.position.y + frame.rect.y
+            self.image = frame.surface
+
+            self.attack_frame = 1
+        else:
+            self.move(pressed)
+
+    def move(self, pressed):
         new_position = pygame.Rect(self.position)
         if pressed.x == 0 and pressed.y == 0:
             animation_name = 'idle'
-            frame_num = 0
+            move_frame = 0
         else:
-            self.move = (self.move + 1) % 4
-            frame_num = self.move
+            self.move_frame = (self.move_frame + 1) % 4
+            move_frame = self.move_frame
 
         if pressed.y == 1:
-            new_position.y = self.position.y + y_move_down_distances[frame_num]
+            new_position.y = self.position.y + y_move_down_distances[move_frame]
             animation_name = 'down'
 
         elif pressed.y == -1:
-            new_position.y = self.position.y - y_move_up_distances[frame_num]
+            new_position.y = self.position.y - y_move_up_distances[move_frame]
             animation_name = 'up'
 
         if pressed.x == 1:
-            new_position.x = self.position.x + x_move_distances[frame_num]
+            new_position.x = self.position.x + x_move_distances[move_frame]
             animation_name = 'walk'
             self.direction = Direction.RIGHT
 
         elif pressed.x == -1:
-            new_position.x = self.position.x - x_move_distances[frame_num]
+            new_position.x = self.position.x - x_move_distances[move_frame]
             animation_name = 'walk'
             self.direction = Direction.LEFT
 
         clamped = new_position.clamp(BOUNDARY)
         if clamped != new_position:
             animation_name = 'idle'
-            frame_num = 0
+            move_frame = 0
             self.position = clamped
 
         if self.direction == Direction.LEFT:
             animation_name = f'{animation_name}_left'
 
-            frame = self.animations[animation_name][frame_num]
+            frame = self.animations[animation_name][move_frame]
             self.rect.x = new_position.x - (frame.rect.x + frame.rect.width)
         else:
-            frame = self.animations[animation_name][frame_num]
+            frame = self.animations[animation_name][move_frame]
             self.rect.x = new_position.x + frame.rect.x
 
         self.rect.width = frame.rect.width
@@ -134,7 +180,7 @@ class Entity(pygame.sprite.Sprite):
         new_rect_y = new_position.y + frame.rect.y + frame.rect.height
 
 
-        print(self.rect.bottom, self.lair.terrain_object.boundary.bottom, new_rect_y)
+        # print(self.rect.bottom, self.lair.terrain_object.boundary.bottom, new_rect_y)
         if new_rect_y <= self.lair.terrain_object.boundary.bottom:
             print(new_position.y)
             print(self.position.y)
