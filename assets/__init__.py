@@ -28,6 +28,7 @@ scenery = [
 spritesheets = {
     'bold.f': files.fonts['bold'],
     'kn1.ob': files.objects['kn1'],
+    'kn3.ob': files.objects['kn3'],
     'kn4.ob': files.objects['kn4'],
 }
 
