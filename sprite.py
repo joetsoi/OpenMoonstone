@@ -145,11 +145,8 @@ class Entity(pygame.sprite.Sprite):
             position: pygame.Rect):
         frame = self.animations[animation_name, self.direction][frame_num]
         if self.direction == Direction.LEFT:
-            # animation_name = f'{animation_name}_left'
-            # frame = self.animations[animation_name][frame_num]
             x = position.x - (frame.rect.x + frame.rect.width)
         else:
-            # frame = self.animations[animation_name][frame_num]
             x = position.x + frame.rect.x
 
         self.rect.x = x
@@ -161,11 +158,6 @@ class Entity(pygame.sprite.Sprite):
     def calculate_next_frame_position(self, pressed):
         new_position = pygame.Rect(self.position)
         move_frame = ((self.move_frame + 1) % 4) * ((pressed.x | pressed.y) & 1)
-        # equivalent to
-        # if pressed.x == 0 and pressed.y == 0:
-        #     move_frame = 0
-        # else:
-        #     move_frame = (self.move_frame + 1) % 4
 
         new_position.x = self.position.x + (x_move_distances[pressed.x + 1][move_frame] * pressed.x)
         new_position.y = self.position.y + (y_move_distances[pressed.y + 1][move_frame] * pressed.y)
@@ -185,9 +177,6 @@ class Entity(pygame.sprite.Sprite):
             pressed.y = 0
 
         move_frame = move_frame * ((pressed.x | pressed.y) & 1)
-        # equivalent to
-        # if pressed.x == 0 and pressed.y == 0:
-        #     move_frame = 0
         animation_name = input_to_animation[Move((pressed.x, pressed.y))]
 
         frame = self.animations[animation_name, self.direction][move_frame]
@@ -195,13 +184,6 @@ class Entity(pygame.sprite.Sprite):
         # if we're facing left we want to add frame.rect.width to x
         facing_left_offset = frame.rect.width * int(self.direction.value == Direction.LEFT.value)
         x = new_position.x + self.direction.value * (frame.rect.x + facing_left_offset)
-        # if self.direction == Direction.LEFT:
-        #     animation_name = f'{animation_name}_left'
-        #     x = new_position.x - (frame.rect.x + frame.rect.width)
-        # else:
-        #     frame = self.animations[animation_name][move_frame]
-        #     x = new_position.x + frame.rect.x
-
 
         self.rect.x = x
 
@@ -213,10 +195,6 @@ class Entity(pygame.sprite.Sprite):
             frame = self.animations['idle', self.direction][0]
             facing_left_offset = frame.rect.width * int(self.direction.value == Direction.LEFT.value)
             x = new_position.x + self.direction.value * (frame.rect.x + facing_left_offset)
-            # if self.direction == Direction.LEFT:
-            #     frame = self.animations['idle_left'][0]
-            # else:
-            #     frame = self.animations['idle'][0]
         else:
             self.position = new_position
             self.move_frame = move_frame
