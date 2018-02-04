@@ -26,7 +26,7 @@ ImageDimension = namedtuple('ImageDimension',
                             'width, height, x_offset, y_offset')
 ImageHeader = namedtuple('ImageHeader', ['padding', 'data_address',
                                          'width', 'height',
-                                         'x_adjust', 'blit_type'])
+                                         'bit_plane_count', 'blit_type'])
 SubimageMetadata = namedtuple('SubimageMetadata', 'dimension, is_fullscreen')
 
 
@@ -280,7 +280,7 @@ class FontFile(object):
 class Image(object):
     width = attrib()
     height = attrib()
-    x_adjust = attrib()
+    bit_plane_count = attrib()
     pixels = attrib()
 
     @classmethod
@@ -291,6 +291,7 @@ class Image(object):
         else:
             num_bit_planes = header.blit_type.bit_length()
         bit_plane_length = packed_image_width * header.height
+        print("blit_type", header.blit_type, " bit_length ", num_bit_planes, " hum ", header.bit_plane_count)
 
         bit_planes = []
         for i in range(num_bit_planes):
@@ -300,12 +301,13 @@ class Image(object):
 
         unpacked_image_width = packed_image_width * 8
 
-        x_offset_adjust = header.x_adjust >> 4
+        bit_plane_count = header.bit_plane_count >> 4
+        #assert num_bit_planes == bit_plane_count
         #x_offset -= x_offset_adjust
 
         pixels = recombine(header.blit_type, bit_planes, unpacked_image_width * header.height)
 
-        return cls(unpacked_image_width, header.height, x_offset_adjust, pixels)
+        return cls(unpacked_image_width, header.height, bit_plane_count, pixels)
 
     def to_surface(self, palette):
         return pixel_to_surface(self.width, self.height, self.pixels, palette)
