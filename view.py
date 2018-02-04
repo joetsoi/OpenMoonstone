@@ -6,7 +6,7 @@ from pprint import pprint
 import pygame
 
 from cli import print_hex_view
-from extract import extract_palette, grouper
+from extract import extract_palette
 from font import FontFile#, draw_string
 from main import MainExe
 from piv import PivFile
@@ -42,21 +42,61 @@ controls = {
     pygame.K_RIGHT: Move.RIGHT,
 }
 
-DIRECTION = {
-    pygame.K_LEFT: (1, 0),
-    pygame.K_RIGHT: (-1, 0),
-    pygame.K_UP: (0, 1),
-    pygame.K_DOWN: (0, -1),
+player_one = {
+    'direction': {
+        pygame.K_LEFT: (-1, 0),
+        pygame.K_RIGHT: (1, 0),
+        pygame.K_UP: (0, -1),
+        pygame.K_DOWN: (0, 1),
+    },
+    'fire': pygame.K_SPACE,
+}
+player_two = {
+    'direction': {
+        pygame.K_a: (-1, 0),
+        pygame.K_d: (1, 0),
+        pygame.K_w: (0, -1),
+        pygame.K_s: (0, 1),
+    },
+    'fire': pygame.K_f,
 }
 
+def change_player_colour(colour: str, palette: list):
+    colours = {
+        'blue': [0xa, 0x7, 0x4],
+        'orange': [0xf80, 0xc50, 0xa30],
+        'green': [0x8c6, 0x593, 0x251],
+        'red': [0xf22, 0xb22, 0x700],
+        'black': [0x206, 0x103, 1],
+    }
+    palette = copy.deepcopy(palette)
+    # palette[0xc // 2:0xc // 2 + 2] = colours[colour]
+    palette[6:8] = colours[colour]
+    palette = extract_palette(palette, base=256)
+    return PivFile.make_palette(palette)
 
 def game_loop(screen):
     knights = pygame.sprite.Group()
     lair = lairs[0]
     knight_1 = Entity(
+        player_one['direction'],
+        player_one['fire'],
         pygame.Rect(100, 100, 0, 0),
         assets.animation.knight,
         assets.files.backgrounds[lairs[0].background].palette,
+        lair=lair,
+        groups=[knights]
+    )
+    palette = change_player_colour(
+        'blue',
+        assets.files.backgrounds[lairs[0].background].extracted_palette,
+    )
+    knight_2 = Entity(
+        player_two['direction'],
+        player_two['fire'],
+        pygame.Rect(200, 150, 0, 0),
+        assets.animation.knight,
+        palette=palette,
         lair=lair,
         groups=[knights]
     )
@@ -67,11 +107,6 @@ def game_loop(screen):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-
-        # for key, value in DIRECTION.keys():
-        #     if keys[key]:
-        #         pressed[0] += value[0]
-        #         pressed[1] += value[1]
 
         now = pygame.time.get_ticks()
         time = now - last_tick
@@ -94,7 +129,6 @@ def game_loop(screen):
             1,
         )
 
-
         pygame.draw.rect(
             image,
             (255, 255, 255),
@@ -115,152 +149,9 @@ def game_loop(screen):
 
 
 if __name__ == "__main__":
-    # if len(sys.argv) != 3:
-    #if len(sys.argv) != 4:
-    #    print("Usage: view.arg <filename> <piv file>")
-    #    sys.exit()
-
     pygame.init()
     pygame.display.set_caption("OpenMoonstone")
-    screen = pygame.display.set_mode((320 * settings.SCALE_FACTOR, 200 * settings.SCALE_FACTOR))
-    #print_hex_view(assets.files.objects['kn1'].file_data)
-    #pprint(assets.files.objects['kn1'].headers)
-    #sys.exit()
-    #file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-    #                         sys.argv[2])
-    #with open(file_path, 'rb') as f:
-    #    data = f.read()
-    #    piv = PivFile(data)
-
-
-    #file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-    #                         sys.argv[1])
-    #with open(file_path, 'rb') as f:
-    #    font = FontFile(f.read(), piv)
-
-    #main_exe = MainExe(
-    #    file_path=os.path.join(os.path.dirname(os.path.realpath(__file__)),
-    #                           'MAIN.EXE')
-    #)
-
-    #default_palette = extract_palette(main_exe.palette, base=256)
-    #pixels = copy.deepcopy(piv.pixels)
-    #piv_palette = copy.deepcopy(piv.extracted_palette)
-
-    #
-    # piv_palette[0xc // 2] = 0x8c6
-    # piv_palette[(0xc + 2) // 2] = 0x593
-    # piv_palette[(0xc + 4) // 2] = 0x251
-    #
-    # piv_palette[0x12 // 2] = 0xa
-    # piv_palette[(0x12 + 2) // 2] = 0x7
-    # piv_palette[(0x12 + 4) // 2] = 0x4
-    #
-    # piv_palette[0x12 // 2] = 0x206
-    # piv_palette[(0x12 + 2) // 2] = 0x103
-    # piv_palette[(0x12 + 4) // 2] = 0x1
-
-
-    #piv.pixels = copy.deepcopy(pixels)
-    #piv.palette = default_palette
-    #print_hex_view(piv_palette)
-    #piv.palette = extract_palette(piv_palette, base=256)
-    #print_hex_view(piv.pixels[:0x200:4])
-    #import pdb; pdb.set_trace()
-    # print_hex_view(main_exe.bold_f_char_lookup)
-
-    # print_hex_view(piv.pixels)
-    #image_number = int(sys.argv[3])
-
-
-
-    #subsurf = font.extract_subimage(piv, 0x49, 0x5, 0x14)
-    #print_hex_view(piv.pixels)
-    #print("hello")
-    #font.extract_subimage(piv, 0x49, 0x0, 0x14)
-
-    #font.extract_subimage(piv, 0x4a, 0x16, 0xb5)
-    #font.extract_subimage(piv, 0x4b, 0x6e, 0xbe)
-
-    #font.extract_subimage(piv, 0x4b, 0x6e, 0xbe)
-
-
-
-    #print("world")
-#    for i in range(6):
-#        font.extract_subimage(piv, i, i*20, 0)
-#     font.extract_subimage(piv, 3, 30, 0)
-#     font.extract_subimage(piv, 5, 30+3, 30)
-#     font.extract_subimage(piv, 7, 30+3+23, 60)
-#     font.extract_subimage(piv, 9, 25+3+23+4, 90)
-#     font.extract_subimage(piv, 3, 25 + 3 + 23 + 4+25, 120)
-
-
-
-
-    #for string, metadata in main_exe.strings.items():
-    #   draw_string(assets.fonts['bold'], string, metadata[2], main_exe)
-    frame_number = 0
-
+    screen = pygame.display.set_mode(
+        (320 * settings.SCALE_FACTOR, 200 * settings.SCALE_FACTOR)
+    )
     game_loop(screen)
-    #
-    # while True:
-    #     for event in pygame.event.get():
-    #         if event.type == pygame.QUIT:
-    #             pygame.quit()
-    #             sys.exit()
-    #         elif event.type == pygame.KEYDOWN:
-    #             if event.key == pygame.K_LEFT:
-    #                 pass
-    #             elif event.key == pygame.K_RIGHT:
-    #                 knights.update()
-                #elif event.key == pygame.K_UP:
-                #    piv.palette = copy.deepcopy(piv_palette)
-                #elif event.key == pygame.K_DOWN:
-                #    piv.palette == copy.deepcopy(default_palette)
-                #print(image_number)
-        # mouse = pygame.mouse.get_pos()
-        #font.extract_subimage(piv, image_number, *mouse)
-        #font.extract_subimage(piv, image_number, 0, 0)
-
-        #image = piv.make_surface()
-
-        #image = pygame.transform.scale(image,
-        #                               (320 * scale_factor, 200 * scale_factor))
-        #screen.blit(image, (0, 0))
-
-
-        #image.blit(font.images[0x49].surface, (5, 20))
-        #image.blit(font.images[0x4a].surface, (0x16, 0xb5))
-        #image.blit(font.images[0x4b].surface, (0x6e, 0xbe))
-        #for string, metadata in main_exe.strings.items():
-        #    draw_string(piv, font, string, metadata[2], main_exe)
-        # image = lairs[0].draw()
-        # image = loading_screen.draw()
-        # image.blit(image, (0, 0))
-
-        #frame = Frame(assets.animation.knight['walk'][frame_number], assets.backgrounds[lairs[0].background].palette)
-        #frame, rect = make_frame(assets.animation.knight['walk'][frame_number], assets.backgrounds[lairs[0].background].palette)
-        #image.blit(frame, (0, 0))
-
-        # knights.draw(image)
-        #
-        # image = pygame.transform.scale(
-        #     image,
-        #     (320 * settings.SCALE_FACTOR, 200 * settings.SCALE_FACTOR)
-        # )
-        # screen.blit(image, (0, 0))
-        #
-        #
-        #
-        # pygame.display.update()
-        # pygame.time.sleep(17)
-        #
-
-
-
-
-        ##
-        #pygame.display.update()
-        #pygame.time.wait(100)
-        #draw(screen, piv.pixels, piv.palette)

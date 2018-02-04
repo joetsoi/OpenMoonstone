@@ -18,14 +18,6 @@ y_move_distances = (
 )
 
 
-DIRECTION = {
-    pygame.K_LEFT: (-1, 0),
-    pygame.K_RIGHT: (1, 0),
-    pygame.K_UP: (0, -1),
-    pygame.K_DOWN: (0, 1),
-}
-
-FIRE = pygame.K_SPACE
 
 
 class Move(Enum):
@@ -64,6 +56,8 @@ BOUNDARY = pygame.Rect(10, 30, 320 - 10, 155 - 30)
 
 class Entity(pygame.sprite.Sprite):
     def __init__(self,
+                 direction_keys,
+                 fire,
                  position,
                  animations,
                  palette,
@@ -71,9 +65,13 @@ class Entity(pygame.sprite.Sprite):
                  direction=Direction.RIGHT,
                  groups=None):
         super().__init__(*groups)
+        self.direction_keys = direction_keys
+        self.fire = fire
+
         self.rect = pygame.Rect(position)
         self.position = pygame.Rect(position)
         self.frames = animations
+
         self.animations = {
             (name, Direction.RIGHT): [make_frame(f, palette) for f in frames]
             for name, frames in animations.items()
@@ -110,7 +108,7 @@ class Entity(pygame.sprite.Sprite):
     def update(self):
         keys = pygame.key.get_pressed()
         pressed = pygame.Rect(0, 0, 0, 0)
-        for key, value in DIRECTION.items():
+        for key, value in self.direction_keys.items():
             if keys[key]:
                 pressed.x += value[0]
                 pressed.y += value[1]
@@ -124,7 +122,7 @@ class Entity(pygame.sprite.Sprite):
             if self.attack_frame >= len(animation):
                 self.attack_frame = None
 
-        elif keys[FIRE]:
+        elif keys[self.fire]:
             self.update_image('swing', 0, self.position)
             self.attack_frame = 1
         else:

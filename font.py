@@ -291,7 +291,7 @@ class Image(object):
         else:
             num_bit_planes = header.blit_type.bit_length()
         bit_plane_length = packed_image_width * header.height
-        print("blit_type", header.blit_type, " bit_length ", num_bit_planes, " hum ", header.bit_plane_count)
+        #print("blit_type", header.blit_type, " bit_length ", num_bit_planes, " hum ", header.bit_plane_count)
 
         bit_planes = []
         for i in range(num_bit_planes):

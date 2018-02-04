@@ -1,9 +1,12 @@
+import os
 from itertools import repeat
 from struct import unpack
 
 import pygame
 
 from extract import each_bit_in_byte, extract_file, extract_palette, grouper
+from settings import MOONSTONE_DIR
+
 
 
 class PivFile(object):
@@ -24,12 +27,16 @@ class PivFile(object):
 
         self.extract()
 
-    def make_palette(self):
-        return [pygame.Color(*c) for c in self.palette]
+    @classmethod
+    def make_palette(cls, palette):
+        return [pygame.Color(*c) for c in palette]
+    # def make_palette(self):
+    #     return [pygame.Color(*c) for c in self.palette]
 
     def make_surface(self):
         surface = pygame.Surface((320, 200), pygame.SRCALPHA)
-        palette = self.make_palette()
+        palette = self.make_palette(self.palette)
+        #palette = self.make_palette()
         #surface.set_palette(palette)
         surface.fill(palette[0])
 
