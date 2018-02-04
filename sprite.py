@@ -136,14 +136,15 @@ class Entity(pygame.sprite.Sprite):
             frame_num: int,
             position: pygame.Rect):
         frame, x = self.get_frame(animation_name, frame_num, position)
+        self.set_frame_image(
+            x,
+            position.y + frame.rect.y,
+            frame.rect.width,
+            frame.rect.height,
+            frame.surface,
+        )
 
-        self.rect.x = x
-        self.rect.y = position.y + frame.rect.y
-        self.rect.width = frame.rect.width
-        self.rect.height = frame.rect.height
-        self.image = frame.surface
-
-    def calculate_next_frame_position(self, pressed):
+    def next_frame_position(self, pressed):
         new_position = pygame.Rect(self.position)
 
         is_moving = (pressed.x | pressed.y) & 1
@@ -181,8 +182,15 @@ class Entity(pygame.sprite.Sprite):
         x = position.x + frame_x
         return frame, x
 
+    def set_frame_image(self, x: int, y: int, w: int, h:int, image):
+        self.rect.x = x
+        self.rect.y = y
+        self.rect.width = w
+        self.rect.height = h
+        self.image = image
+
     def move(self, pressed):
-        new_position, move_frame = self.calculate_next_frame_position(pressed)
+        new_position, move_frame = self.next_frame_position(pressed)
         if pressed.x:
             self.direction = Direction(pressed.x)
 
@@ -200,11 +208,13 @@ class Entity(pygame.sprite.Sprite):
             self.position = new_position
             self.move_frame = move_frame
 
-        self.rect.x = x
-        self.rect.y = new_position.y + frame.rect.y
-        self.rect.width = frame.rect.width
-        self.rect.height = frame.rect.height
-        self.image = frame.surface
+        self.set_frame_image(
+            x,
+            new_position.y + frame.rect.y,
+            frame.rect.width,
+            frame.rect.height,
+            frame.surface,
+        )
         self.input = pressed
 
 
