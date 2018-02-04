@@ -135,12 +135,9 @@ class Entity(pygame.sprite.Sprite):
             animation_name: str,
             frame_num: int,
             position: pygame.Rect):
-        frame = self.animations[animation_name, self.direction][frame_num]
-        is_facing_left = int(self.direction.value == Direction.LEFT.value)
-        frame_width = frame.rect.width * is_facing_left
-        frame_x = self.direction.value * (frame.rect.x + frame_width)
+        frame, x = self.get_frame(animation_name, frame_num, position)
 
-        self.rect.x = position.x + frame_x
+        self.rect.x = x
         self.rect.y = position.y + frame.rect.y
         self.rect.width = frame.rect.width
         self.rect.height = frame.rect.height
@@ -169,6 +166,21 @@ class Entity(pygame.sprite.Sprite):
             pressed.y = 0
         return pressed, new_position
 
+    def clamp_to_terrain(self, new_position, frame, frame_num):
+        new_rect_y = new_position.y + frame.rect.y + frame.rect.height
+        if new_rect_y <= self.lair.terrain_object.boundary.bottom:
+            return self.position.y
+        return new_position.y
+
+    def get_frame(self, animation_name, frame_number, position):
+        frame = self.animations[animation_name, self.direction][frame_number]
+        # if we're facing left we want to add frame.rect.width to x
+        is_facing_left = int(self.direction.value == Direction.LEFT.value)
+        frame_width = frame.rect.width * is_facing_left
+        frame_x = self.direction.value * (frame.rect.x + frame_width)
+        x = position.x + frame_x
+        return frame, x
+
     def move(self, pressed):
         new_position, move_frame = self.calculate_next_frame_position(pressed)
         if pressed.x:
@@ -179,29 +191,16 @@ class Entity(pygame.sprite.Sprite):
         move_frame = move_frame * ((pressed.x | pressed.y) & 1)
         animation_name = input_to_animation[Move((pressed.x, pressed.y))]
 
-        frame = self.animations[animation_name, self.direction][move_frame]
-
-        # if we're facing left we want to add frame.rect.width to x
-        is_facing_left = int(self.direction.value == Direction.LEFT.value)
-        frame_width = frame.rect.width * is_facing_left
-        frame_x = self.direction.value * (frame.rect.x + frame_width)
-        self.rect.x = new_position.x + frame_x
-
-        new_rect_y = new_position.y + frame.rect.y + frame.rect.height
-        if new_rect_y <= self.lair.terrain_object.boundary.bottom:
-            new_position.y = self.position.y
+        frame, x = self.get_frame(animation_name, move_frame, new_position)
+        new_position.y = self.clamp_to_terrain(new_position, frame, move_frame)
 
         if self.position == new_position:
-            frame = self.animations['idle', self.direction][0]
-
-            is_facing_left = int(self.direction.value == Direction.LEFT.value)
-            frame_width = frame.rect.width * is_facing_left
-            frame_x = self.direction.value * (frame.rect.x + frame_width)
-            self.rect.x = new_position.x + frame_x
+            frame, x = self.get_frame('idle', 0, new_position)
         else:
             self.position = new_position
             self.move_frame = move_frame
 
+        self.rect.x = x
         self.rect.y = new_position.y + frame.rect.y
         self.rect.width = frame.rect.width
         self.rect.height = frame.rect.height
