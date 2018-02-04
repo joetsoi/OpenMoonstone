@@ -144,12 +144,11 @@ class Entity(pygame.sprite.Sprite):
             frame_num: int,
             position: pygame.Rect):
         frame = self.animations[animation_name, self.direction][frame_num]
-        if self.direction == Direction.LEFT:
-            x = position.x - (frame.rect.x + frame.rect.width)
-        else:
-            x = position.x + frame.rect.x
+        is_facing_left = int(self.direction.value == Direction.LEFT.value)
+        frame_width = frame.rect.width * is_facing_left
+        frame_x = self.direction.value * (frame.rect.x + frame_width)
 
-        self.rect.x = x
+        self.rect.x = position.x + frame_x
         self.rect.y = position.y + frame.rect.y
         self.rect.width = frame.rect.width
         self.rect.height = frame.rect.height
@@ -163,11 +162,7 @@ class Entity(pygame.sprite.Sprite):
         new_position.y = self.position.y + (y_move_distances[pressed.y + 1][move_frame] * pressed.y)
         return new_position, move_frame
 
-    def move(self, pressed):
-        new_position, move_frame = self.calculate_next_frame_position(pressed)
-        if pressed.x:
-            self.direction = Direction(pressed.x)
-
+    def clamp_to_boundary(self, pressed, new_position):
         clamped = new_position.clamp(BOUNDARY)
         if clamped.x != new_position.x:
             new_position.x = self.position.x
@@ -175,6 +170,14 @@ class Entity(pygame.sprite.Sprite):
         if clamped.y != new_position.y:
             new_position.y = self.position.y
             pressed.y = 0
+        return pressed, new_position
+
+    def move(self, pressed):
+        new_position, move_frame = self.calculate_next_frame_position(pressed)
+        if pressed.x:
+            self.direction = Direction(pressed.x)
+
+        pressed, new_position = self.clamp_to_boundary(pressed, new_position)
 
         move_frame = move_frame * ((pressed.x | pressed.y) & 1)
         animation_name = input_to_animation[Move((pressed.x, pressed.y))]
@@ -182,10 +185,10 @@ class Entity(pygame.sprite.Sprite):
         frame = self.animations[animation_name, self.direction][move_frame]
 
         # if we're facing left we want to add frame.rect.width to x
-        facing_left_offset = frame.rect.width * int(self.direction.value == Direction.LEFT.value)
-        x = new_position.x + self.direction.value * (frame.rect.x + facing_left_offset)
-
-        self.rect.x = x
+        is_facing_left = int(self.direction.value == Direction.LEFT.value)
+        frame_width = frame.rect.width * is_facing_left
+        frame_x = self.direction.value * (frame.rect.x + frame_width)
+        self.rect.x = new_position.x + frame_x
 
         new_rect_y = new_position.y + frame.rect.y + frame.rect.height
         if new_rect_y <= self.lair.terrain_object.boundary.bottom:
