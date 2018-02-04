@@ -1,6 +1,7 @@
 import copy
 import os
 import sys
+from pprint import pprint
 
 import pygame
 
@@ -52,7 +53,7 @@ DIRECTION = {
 def game_loop(screen):
     knights = pygame.sprite.Group()
     lair = lairs[0]
-    knight = Entity(
+    knight_1 = Entity(
         pygame.Rect(100, 100, 0, 0),
         assets.animation.knight,
         assets.files.backgrounds[lairs[0].background].palette,
@@ -74,9 +75,12 @@ def game_loop(screen):
 
         now = pygame.time.get_ticks()
         time = now - last_tick
-        if time > 1000 / 18.2065 * 2:
-            knights.update()
-            last_tick = now
+        # if time > 1000 / (18.2065 / 2):
+        #if time > 1000 / ((1193182 / 21845) * 2):
+        #if time > 1000 / ((1193182 / 21845) * 2):
+        #    knights.update()
+        #    last_tick = now
+        knights.update()
 
         image = lair.draw().copy()
         knights.draw(image)
@@ -86,7 +90,7 @@ def game_loop(screen):
             (255, 255, 255),
 
             #pygame.rect.Rect(knight.rect.x, knight.rect.y, 0, 0),
-            pygame.rect.Rect(knight.rect.x, knight.rect.y, knight.image.get_width(), knight.image.get_height()),
+            pygame.rect.Rect(knight_1.rect.x, knight_1.rect.y, knight_1.image.get_width(), knight_1.image.get_height()),
             1,
         )
 
@@ -106,7 +110,8 @@ def game_loop(screen):
         screen.blit(scaled, (0, 0))
 
         pygame.display.update()
-        clock.tick(settings.FRAME_LIMIT)
+        #clock.tick(settings.FRAME_LIMIT)
+        clock.tick(1000 / (1193182 / 21845 * 2))
 
 
 if __name__ == "__main__":
@@ -118,7 +123,9 @@ if __name__ == "__main__":
     pygame.init()
     pygame.display.set_caption("OpenMoonstone")
     screen = pygame.display.set_mode((320 * settings.SCALE_FACTOR, 200 * settings.SCALE_FACTOR))
-
+    #print_hex_view(assets.files.objects['kn1'].file_data)
+    #pprint(assets.files.objects['kn1'].headers)
+    #sys.exit()
     #file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
     #                         sys.argv[2])
     #with open(file_path, 'rb') as f:
