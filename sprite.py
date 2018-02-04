@@ -1,17 +1,15 @@
-import operator
-from enum import Enum, IntEnum, auto
-from functools import partial
+from enum import Enum
 
 from attr import attrs, attrib
 import pygame
 
 import assets
-from font import pixel_to_surface
+
 
 x_move_distances = (
-    (25, 3, 23, 4), #  , 25]
+    (25, 3, 23, 4),
     (0, 0, 0, 0),
-    (25, 3, 23, 4), #  , 25]
+    (25, 3, 23, 4),
 )
 y_move_distances = (
     (2, 9, 2, 9),
@@ -28,6 +26,7 @@ DIRECTION = {
 }
 
 FIRE = pygame.K_SPACE
+
 
 class Move(Enum):
     IDLE = (0, 0)
@@ -61,14 +60,7 @@ class Direction(Enum):
 
 
 BOUNDARY = pygame.Rect(10, 30, 320 - 10, 155 - 30)
-input_move_map = {
 
-}
-
-
-
-def mod3(n):
-    return (n + 1) % 3
 
 class Entity(pygame.sprite.Sprite):
     def __init__(self,
@@ -107,7 +99,6 @@ class Entity(pygame.sprite.Sprite):
         self.move_frame = 0
         self.attack_frame = None
 
-
         self.input = pygame.Rect(0, 0, 0, 0)
         self.direction = direction
 
@@ -129,7 +120,8 @@ class Entity(pygame.sprite.Sprite):
             self.update_image(animation_name, self.attack_frame, self.position)
             self.attack_frame += 1
 
-            if self.attack_frame >= len(self.animations[animation_name, self.direction]):
+            animation = self.animations[animation_name, self.direction]
+            if self.attack_frame >= len(animation):
                 self.attack_frame = None
 
         elif keys[FIRE]:
@@ -156,10 +148,15 @@ class Entity(pygame.sprite.Sprite):
 
     def calculate_next_frame_position(self, pressed):
         new_position = pygame.Rect(self.position)
-        move_frame = ((self.move_frame + 1) % 4) * ((pressed.x | pressed.y) & 1)
 
-        new_position.x = self.position.x + (x_move_distances[pressed.x + 1][move_frame] * pressed.x)
-        new_position.y = self.position.y + (y_move_distances[pressed.y + 1][move_frame] * pressed.y)
+        is_moving = (pressed.x | pressed.y) & 1
+        move_frame = ((self.move_frame + 1) % 4) * is_moving
+
+        x_delta = x_move_distances[pressed.x + 1][move_frame] * pressed.x
+        new_position.x = self.position.x + x_delta
+
+        y_delta = y_move_distances[pressed.y + 1][move_frame] * pressed.y
+        new_position.y = self.position.y + y_delta
         return new_position, move_frame
 
     def clamp_to_boundary(self, pressed, new_position):
@@ -196,8 +193,11 @@ class Entity(pygame.sprite.Sprite):
 
         if self.position == new_position:
             frame = self.animations['idle', self.direction][0]
-            facing_left_offset = frame.rect.width * int(self.direction.value == Direction.LEFT.value)
-            x = new_position.x + self.direction.value * (frame.rect.x + facing_left_offset)
+
+            is_facing_left = int(self.direction.value == Direction.LEFT.value)
+            frame_width = frame.rect.width * is_facing_left
+            frame_x = self.direction.value * (frame.rect.x + frame_width)
+            self.rect.x = new_position.x + frame_x
         else:
             self.position = new_position
             self.move_frame = move_frame
@@ -240,7 +240,10 @@ class Frame:
         frame_rect = frame_rect.unionall(rects[1:])
         frame_surface = pygame.Surface(frame_rect.size, pygame.SRCALPHA)
         for rect, surface in zip(rects, surfaces):
-            frame_surface.blit(surface, (rect.left - frame_rect.left, rect.top - frame_rect.top))
+            frame_surface.blit(
+                surface,
+                (rect.left - frame_rect.left, rect.top - frame_rect.top),
+            )
         return cls(frame_surface, frame_rect)
 
 
@@ -251,11 +254,10 @@ def make_frame(frame_images, palette):
         spritesheet = assets.spritesheets[frame_image.spritesheet]
         image = spritesheet.images[frame_image.image_number]
         surfaces.append(image.to_surface(palette))
-        # print(f"x adjust: {image.x_adjust}")
         rects.append(
             pygame.Rect(
                 # TODO: determine whether x_adjust is needed
-                frame_image.x,# - image.x_adjust,
+                frame_image.x, # - image.x_adjust,
                 frame_image.y,
                 image.width,
                 image.height
@@ -266,6 +268,9 @@ def make_frame(frame_images, palette):
     frame_rect = frame_rect.unionall(rects[1:])
     frame_surface = pygame.Surface(frame_rect.size, pygame.SRCALPHA)
     for rect, surface in zip(rects, surfaces):
-        frame_surface.blit(surface, (rect.left - frame_rect.left, rect.top - frame_rect.top))
+        frame_surface.blit(
+            surface,
+            (rect.left - frame_rect.left, rect.top - frame_rect.top),
+        )
 
     return Frame(frame_surface, frame_rect)
