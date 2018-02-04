@@ -1,3 +1,4 @@
+from collide import collide
 from font import StringFlag, String
 from screen import ImageLocation, Screen, Lair
 from . import animation, files  # noqa
@@ -34,6 +35,8 @@ spritesheets = {
 
 lairs = (
     Lair('wab1', 'wa1'),
+    Lair('wab1', 'wa2'),
+    Lair('wab1', 'wa3'),
 )
 
 loading_screen = Screen(

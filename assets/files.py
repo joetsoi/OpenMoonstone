@@ -33,10 +33,14 @@ fonts = {
 }
 
 objects = {
+    'sel': load_file(FontFile, 'SEL.CEL'),
     'kn1': load_file(FontFile, 'DISKB\KN1.OB'),
+    'kn3': load_file(FontFile, 'DISKB\KN3.OB'),
     'kn4': load_file(FontFile, 'DISKB\KN4.OB'),
 }
 
 terrain = {
     'wa1': load_file(TFile, 'DISKB\WA1.T'),
+    'wa2': load_file(TFile, 'DISKB\WA2.T'),
+    'wa3': load_file(TFile, 'DISKB\WA3.T'),
 }
