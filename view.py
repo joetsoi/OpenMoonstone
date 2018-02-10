@@ -18,7 +18,7 @@ import assets
 import collide
 import settings
 
-from sprite import Entity, Move
+from entity import Entity, Move
 
 
 #def draw(screen, image_data, palette):

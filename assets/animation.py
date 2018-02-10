@@ -6,6 +6,7 @@ class Collide(IntFlag):
     NON_SOLID = 0
     COLLIDEE = 1
     COLLIDER = 2
+    BLOOD = 128
 
 
 class ImagePosition(NamedTuple):
