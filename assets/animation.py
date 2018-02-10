@@ -96,6 +96,16 @@ knight = {
     ),
     'swing': (
         (
+            ImagePosition('kn1.ob', 32, 44, -22, Collide.COLLIDEE),
+            ImagePosition('kn1.ob', 31, -4, -18, Collide.COLLIDEE),
+            ImagePosition('kn4.ob', 3, 25, -22, Collide.COLLIDER),
+        ),
+        (
+            ImagePosition('kn1.ob', 32, 44, -22, Collide.COLLIDEE),
+            ImagePosition('kn1.ob', 31, -4, -18, Collide.COLLIDEE),
+            ImagePosition('kn4.ob', 3, 25, -22, Collide.COLLIDER),
+        ),
+        (
             ImagePosition('kn1.ob', 34, -3, 4, Collide.COLLIDEE),
             ImagePosition('kn1.ob', 33, 24, -14, Collide.COLLIDEE),
             ImagePosition('kn4.ob', 4, 21, 15, Collide.COLLIDER),
@@ -154,4 +164,40 @@ knight = {
             ImagePosition('kn4.ob', 0, -15, -1, Collide.COLLIDEE),
         ),
     ),
+    'damage_2': (
+        (
+            ImagePosition('kn3.ob', 0, -8, -25, Collide.NON_SOLID),
+            ImagePosition('kn3.ob', 1, 3, -33, Collide.NON_SOLID),
+            ImagePosition('kn4.ob', 0, -14, 2, Collide.NON_SOLID),
+        ),
+        (
+            ImagePosition('kn3.ob', 3, 46, -25, Collide.NON_SOLID),
+            ImagePosition('kn3.ob', 2, 5, -15, Collide.NON_SOLID),
+            ImagePosition('kn3.ob', 4, 2, -35, Collide.NON_SOLID),
+            ImagePosition('kn4.ob', 1, -2, -7, Collide.NON_SOLID),
+        ),
+        (
+            ImagePosition('kn3.ob', 3, 46, -25, Collide.NON_SOLID),
+            ImagePosition('kn3.ob', 2, 5, -15, Collide.NON_SOLID),
+            ImagePosition('kn3.ob', 5, 19, -45, Collide.NON_SOLID),
+            ImagePosition('kn3.ob', 6, 0, -15, Collide.NON_SOLID),
+            ImagePosition('kn3.ob', 17, 49, -61, Collide.NON_SOLID),
+            ImagePosition('kn4.ob', 1, -2, -7, Collide.NON_SOLID),
+        ),
+        (
+            ImagePosition('kn3.ob', 3, 46, -25, Collide.NON_SOLID),
+            ImagePosition('kn3.ob', 2, 5, -15, Collide.NON_SOLID),
+            ImagePosition('kn3.ob', 7, 4, -23, Collide.NON_SOLID),
+            ImagePosition('kn3.ob', 8, -2, -15, Collide.NON_SOLID),
+            ImagePosition('kn3.ob', 17, 49, -61, Collide.NON_SOLID),
+            ImagePosition('kn4.ob', 1, -2, -7, Collide.NON_SOLID),
+        ),
+    ),
+    'death': (
+         (
+             ImagePosition('kn3.ob', 23, 40, -59, Collide.NON_SOLID),
+             ImagePosition('kn3.ob', 22, 21, -28, Collide.NON_SOLID),
+             ImagePosition('kn3.ob', 28, -19, -25, Collide.NON_SOLID),
+         ),
+    )
 }
