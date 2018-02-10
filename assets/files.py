@@ -5,6 +5,7 @@ from piv import PivFile
 from font import FontFile
 from t import TFile
 from settings import MOONSTONE_DIR
+from .collide import parse_collision_file
 
 
 def load_file(file_type, filename):
@@ -12,6 +13,12 @@ def load_file(file_type, filename):
     with open(file_path, 'rb') as f:
         data = f.read()
     return file_type(data)
+
+
+def load_collision_file(filename):
+    file_path = Path(MOONSTONE_DIR) / PureWindowsPath(filename)
+    with open(file_path, 'r') as f:
+        return parse_collision_file(f)
 
 
 backgrounds = {
@@ -44,3 +51,6 @@ terrain = {
     'wa2': load_file(TFile, 'DISKB\WA2.T'),
     'wa3': load_file(TFile, 'DISKB\WA3.T'),
 }
+
+
+collide_hit = load_collision_file("COLLIDE.HIT")

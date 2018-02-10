@@ -1,9 +1,25 @@
-from collections import defaultdict
+from collections import defaultdict, UserList
 from enum import IntEnum, auto
 from pathlib import Path, PureWindowsPath
 
 from extract import grouper
 from settings import MOONSTONE_DIR
+
+
+class Colliders(UserList):
+    def __init__(self, data=None):
+        super().__init__(data)
+        self.last_len = 0
+        self._max = (None, None)
+
+    @property
+    def max(self):
+        if len(self.data) != self.last_len:
+            self._max = (
+                max((i[0] for i in self.data), default=None),
+                max((i[1] for i in self.data), default=None),
+            )
+        return self._max
 
 
 class ParseState(IntEnum):
@@ -25,7 +41,7 @@ def parse_collision_file(collide_data):
         elif state == ParseState.COUNT:
             pair_count = int(line)
             if pair_count == 0:
-                collide_dict[collide_file].append([])
+                collide_dict[collide_file].append(Colliders())
             elif pair_count == 99:
                 state = ParseState.FILENAME
             else:
@@ -38,17 +54,9 @@ def parse_collision_file(collide_data):
             # convert from list of str to list of ints
             groups = (int(''.join(g)) for g in grouper(line.strip(), 3))
             # group them into x y pairs
-            coordinates = list(grouper(groups, 2))
+            coordinates = Colliders(grouper(groups, 2))
             assert len(coordinates) == pair_count
             collide_dict[collide_file].append(coordinates)
             state = ParseState.COUNT
+    collide_dict.default_factory = None
     return collide_dict
-
-
-def load_collision_file(filename):
-    file_path = Path(MOONSTONE_DIR) / PureWindowsPath(filename)
-    with open(file_path, 'r') as f:
-        return parse_collision_file(f)
-
-
-collide = load_collision_file("COLLIDE.HIT")

@@ -1,9 +1,12 @@
 from enum import Enum
+from itertools import chain
 
 from attr import attrs, attrib
 import pygame
 
 import assets
+from assets.animation import Collide
+import collide
 
 
 x_move_distances = (
@@ -16,8 +19,6 @@ y_move_distances = (
     (0, 0, 0, 0),
     (8, 2, 9, 2),
 )
-
-
 
 
 class Move(Enum):
@@ -72,22 +73,7 @@ class Entity(pygame.sprite.Sprite):
         self.position = pygame.Rect(position)
         self.frames = animations
 
-        self.animations = {
-            (name, Direction.RIGHT): [make_frame(f, palette) for f in frames]
-            for name, frames in animations.items()
-        }
-        left_animations = {
-           (name, Direction.LEFT): [
-                Frame(
-                    surface=pygame.transform.flip(frame.surface,
-                                                  True,
-                                                  False),
-                    rect=frame.rect,
-                )
-                for frame in animation
-            ] for (name, _), animation in self.animations.items()
-        }
-        self.animations.update(left_animations)
+        self._init_animations(animations, palette)
 
         self.groups = groups
         self.palette = palette
@@ -102,8 +88,28 @@ class Entity(pygame.sprite.Sprite):
 
         self.lair = lair
 
-        self.current_animation = None
-        self.current_frame_number = None
+        self.animation_name = None
+        self.frame_number = None
+
+    def _init_animations(self, animations: dict, palette):
+        self.animations = {
+            (name, Direction.RIGHT): [make_frame(f, palette) for f in frames]
+            for name, frames in animations.items()
+        }
+        self.animations.update({
+            (name, Direction.LEFT): [
+                Frame(
+                    surface=pygame.transform.flip(frame.surface,
+                                                  True,
+                                                  False),
+                    rect=frame.rect,
+                )
+                for frame in animation
+            ] for (name, _), animation in self.animations.items()
+        })
+
+    def get_images(self):
+        return self.frames[self.animation_name][self.frame_number]
 
     def update(self):
         keys = pygame.key.get_pressed()
@@ -116,15 +122,21 @@ class Entity(pygame.sprite.Sprite):
         if self.attack_frame:
             animation_name = 'swing'
             self.update_image(animation_name, self.attack_frame, self.position)
+            #self.check_collision()
+            collide.attack.add(self)
             self.attack_frame += 1
+
 
             animation = self.animations[animation_name, self.direction]
             if self.attack_frame >= len(animation):
                 self.attack_frame = None
+                collide.attack.remove(self)
 
         elif keys[self.fire]:
             self.update_image('swing', 0, self.position)
+            #self.check_collision()
             self.attack_frame = 1
+            collide.attack.add(self)
         else:
             self.move(pressed)
 
@@ -135,6 +147,8 @@ class Entity(pygame.sprite.Sprite):
             position: pygame.Rect):
         frame, x = self.get_frame(animation_name, frame_num, position)
         self.set_frame_image(
+            animation_name,
+            frame_num,
             x,
             position.y + frame.rect.y,
             frame.rect.width,
@@ -180,7 +194,17 @@ class Entity(pygame.sprite.Sprite):
         x = position.x + frame_x
         return frame, x
 
-    def set_frame_image(self, x: int, y: int, w: int, h:int, image):
+    def set_frame_image(
+            self,
+            animation_name: str,
+            frame_number: int,
+            x: int,
+            y: int,
+            w: int,
+            h:int,
+            image: pygame.Surface):
+        self.animation_name = animation_name
+        self.frame_number = frame_number
         self.rect.x = x
         self.rect.y = y
         self.rect.width = w
@@ -207,6 +231,8 @@ class Entity(pygame.sprite.Sprite):
             self.move_frame = move_frame
 
         self.set_frame_image(
+            animation_name,
+            move_frame,
             x,
             new_position.y + frame.rect.y,
             frame.rect.width,
@@ -219,6 +245,7 @@ class Entity(pygame.sprite.Sprite):
 class Player(Entity):
     def update(self):
         pass
+
 
 
 @attrs

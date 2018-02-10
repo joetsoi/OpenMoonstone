@@ -1,7 +1,8 @@
-from collide import collide
 from font import StringFlag, String
 from screen import ImageLocation, Screen, Lair
 from . import animation, files  # noqa
+from .files import collide_hit
+
 
 
 bold_font_char_lookup = (

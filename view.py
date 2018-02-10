@@ -15,6 +15,7 @@ from cmp import CmpFile
 from t import TFile
 from assets import loading_screen, lairs
 import assets
+import collide
 import settings
 
 from sprite import Entity, Move
@@ -76,7 +77,6 @@ def change_player_colour(colour: str, palette: list):
     return PivFile.make_palette(palette)
 
 def game_loop(screen):
-    knights = pygame.sprite.Group()
     lair = lairs[0]
     knight_1 = Entity(
         player_one['direction'],
@@ -85,7 +85,7 @@ def game_loop(screen):
         assets.animation.knight,
         assets.files.backgrounds[lairs[0].background].palette,
         lair=lair,
-        groups=[knights]
+        groups=[collide.active]
     )
     palette = change_player_colour(
         'blue',
@@ -98,7 +98,7 @@ def game_loop(screen):
         assets.animation.knight,
         palette=palette,
         lair=lair,
-        groups=[knights]
+        groups=[collide.active]
     )
     clock = pygame.time.Clock()
     last_tick = pygame.time.get_ticks()
@@ -115,19 +115,33 @@ def game_loop(screen):
         #if time > 1000 / ((1193182 / 21845) * 2):
         #    knights.update()
         #    last_tick = now
-        knights.update()
+        collide.active.update()
+
+        collide.check_collision()
 
         image = lair.draw().copy()
-        knights.draw(image)
+        collide.active.draw(image)
 
-        pygame.draw.rect(
-            image,
-            (255, 255, 255),
+        #pygame.draw.rect(
+        #    image,
+        #    (255, 255, 255),
 
-            #pygame.rect.Rect(knight.rect.x, knight.rect.y, 0, 0),
-            pygame.rect.Rect(knight_1.rect.x, knight_1.rect.y, knight_1.image.get_width(), knight_1.image.get_height()),
-            1,
-        )
+        #    #pygame.rect.Rect(knight.rect.x, knight.rect.y, 0, 0),
+        #    pygame.rect.Rect(knight_1.rect.x, knight_1.rect.y, knight_1.image.get_width(), knight_1.image.get_height()),
+        #    1,
+        #)
+        #print("rects", rects)
+        freeze = False
+        for r in collide.rects:
+            freeze = True
+
+            pygame.draw.rect(
+                image,
+                (255, 255, 255),
+                r,
+                1,
+            )
+        collide.rects = []
 
         pygame.draw.rect(
             image,
@@ -144,6 +158,9 @@ def game_loop(screen):
         screen.blit(scaled, (0, 0))
 
         pygame.display.update()
+        if freeze:
+            test = 1
+            
         #clock.tick(settings.FRAME_LIMIT)
         clock.tick(1000 / (1193182 / 21845 * 2))
 
