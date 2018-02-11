@@ -18,6 +18,7 @@ import assets
 import collide
 import settings
 from input import input_system, player_one, player_two, Input
+from movement import movement_system, Movement
 
 from entity import Entity, Move
 
@@ -61,11 +62,13 @@ def change_player_colour(colour: str, palette: list):
 
 def game_loop(screen):
     lair = lairs[0]
+    one_up_input = Input(player_one)
+    two_up_input = Input(player_two)
     knight_1 = Entity(
-        pygame.Rect(100, 100, 0, 0),
         assets.animation.knight,
         assets.files.backgrounds[lairs[0].background].palette,
-        input=Input(player_one),
+        input=one_up_input,
+        movement=Movement(one_up_input, (100, 100)),
         lair=lair,
         groups=[collide.active]
     )
@@ -74,14 +77,15 @@ def game_loop(screen):
         assets.files.backgrounds[lairs[0].background].extracted_palette,
     )
     knight_2 = Entity(
-        pygame.Rect(200, 150, 0, 0),
         assets.animation.knight,
         palette=palette,
         input=Input(player_two),
+        movement=Movement(two_up_input, (200, 150)),
         lair=lair,
         groups=[collide.active]
     )
     input_system.add(knight_1.input, knight_2.input)
+    movement_system.extend([knight_1.movement, knight_2.movement])
     clock = pygame.time.Clock()
     last_tick = pygame.time.get_ticks()
     while True:
@@ -98,6 +102,7 @@ def game_loop(screen):
         #    knights.update()
         #    last_tick = now
         input_system.update()
+        movement_system.try_movement()
         collide.active.update()
 
         collide.check_collision()
