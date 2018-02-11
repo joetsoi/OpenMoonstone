@@ -123,7 +123,7 @@ class Entity(pygame.sprite.Sprite):
     def clamp_to_terrain(self, new_position, frame, frame_num):
         new_rect_y = new_position.y + frame.rect.y + frame.rect.height
         if new_rect_y <= self.lair.terrain_object.boundary.bottom:
-            return self.position.y
+            return self.movement.position.y
         return new_position.y
 
     def get_frame(self, animation_name, frame_number, position):

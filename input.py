@@ -1,3 +1,6 @@
+# TODO: Rename to controller to avoid masking built-in input().
+from collections import UserList
+
 from attr import attrib, attrs, Factory
 import pygame
 
@@ -32,16 +35,10 @@ class Input:
     fire = attrib(type=bool, default=False)
 
 
-class InputSystem:
-    def __init__(self):
-        self._components = []
-
-    def add(self, *components):
-        self._components.extend(components)
-
+class InputSystem(UserList):
     def update(self):
         keys = pygame.key.get_pressed()
-        for input in self._components:
+        for input in self.data:
             input.direction.topleft = (0, 0)
             for key, value in input.mapping['direction'].items():
                 if keys[key]:

@@ -79,12 +79,12 @@ def game_loop(screen):
     knight_2 = Entity(
         assets.animation.knight,
         palette=palette,
-        input=Input(player_two),
+        input=two_up_input,
         movement=Movement(two_up_input, (200, 150)),
         lair=lair,
         groups=[collide.active]
     )
-    input_system.add(knight_1.input, knight_2.input)
+    input_system.extend([knight_1.input, knight_2.input])
     movement_system.extend([knight_1.movement, knight_2.movement])
     clock = pygame.time.Clock()
     last_tick = pygame.time.get_ticks()
