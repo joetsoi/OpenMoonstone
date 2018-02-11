@@ -17,6 +17,7 @@ from assets import loading_screen, lairs
 import assets
 import collide
 import settings
+from input import input_system, player_one, player_two, Input
 
 from entity import Entity, Move
 
@@ -43,24 +44,6 @@ controls = {
     pygame.K_RIGHT: Move.RIGHT,
 }
 
-player_one = {
-    'direction': {
-        pygame.K_LEFT: (-1, 0),
-        pygame.K_RIGHT: (1, 0),
-        pygame.K_UP: (0, -1),
-        pygame.K_DOWN: (0, 1),
-    },
-    'fire': pygame.K_SPACE,
-}
-player_two = {
-    'direction': {
-        pygame.K_a: (-1, 0),
-        pygame.K_d: (1, 0),
-        pygame.K_w: (0, -1),
-        pygame.K_s: (0, 1),
-    },
-    'fire': pygame.K_f,
-}
 
 def change_player_colour(colour: str, palette: list):
     colours = {
@@ -79,11 +62,10 @@ def change_player_colour(colour: str, palette: list):
 def game_loop(screen):
     lair = lairs[0]
     knight_1 = Entity(
-        player_one['direction'],
-        player_one['fire'],
         pygame.Rect(100, 100, 0, 0),
         assets.animation.knight,
         assets.files.backgrounds[lairs[0].background].palette,
+        input=Input(player_one),
         lair=lair,
         groups=[collide.active]
     )
@@ -92,14 +74,14 @@ def game_loop(screen):
         assets.files.backgrounds[lairs[0].background].extracted_palette,
     )
     knight_2 = Entity(
-        player_two['direction'],
-        player_two['fire'],
         pygame.Rect(200, 150, 0, 0),
         assets.animation.knight,
         palette=palette,
+        input=Input(player_two),
         lair=lair,
         groups=[collide.active]
     )
+    input_system.add(knight_1.input, knight_2.input)
     clock = pygame.time.Clock()
     last_tick = pygame.time.get_ticks()
     while True:
@@ -115,6 +97,7 @@ def game_loop(screen):
         #if time > 1000 / ((1193182 / 21845) * 2):
         #    knights.update()
         #    last_tick = now
+        input_system.update()
         collide.active.update()
 
         collide.check_collision()

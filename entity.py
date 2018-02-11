@@ -7,6 +7,7 @@ import pygame
 import assets
 from assets.animation import Collide
 import collide
+from input import InputSystem
 
 
 x_move_distances = (
@@ -57,17 +58,15 @@ BOUNDARY = pygame.Rect(10, 30, 320 - 10, 155 - 30)
 
 class Entity(pygame.sprite.Sprite):
     def __init__(self,
-                 direction_keys,
-                 fire,
                  position,
                  animations,
                  palette,
                  lair,
+                 input: InputSystem,
                  direction=Direction.RIGHT,
                  groups=None):
         super().__init__(*groups)
-        self.direction_keys = direction_keys
-        self.fire = fire
+        self.input = input
 
         self.rect = pygame.Rect(position)
         self.position = pygame.Rect(position)
@@ -83,7 +82,6 @@ class Entity(pygame.sprite.Sprite):
         self.move_frame = 0
         self.attack_frame = None
 
-        self.input = pygame.Rect(0, 0, 0, 0)
         self.direction = direction
 
         self.lair = lair
@@ -112,13 +110,6 @@ class Entity(pygame.sprite.Sprite):
         return self.frames[self.animation_name][self.frame_number]
 
     def update(self):
-        keys = pygame.key.get_pressed()
-        pressed = pygame.Rect(0, 0, 0, 0)
-        for key, value in self.direction_keys.items():
-            if keys[key]:
-                pressed.x += value[0]
-                pressed.y += value[1]
-
         if self.attack_frame:
             animation_name = 'swing'
             self.update_image(animation_name, self.attack_frame, self.position)
@@ -132,13 +123,13 @@ class Entity(pygame.sprite.Sprite):
                 self.attack_frame = None
                 collide.attack.remove(self)
 
-        elif keys[self.fire]:
+        elif self.input.fire:
             self.update_image('swing', 0, self.position)
             #self.check_collision()
             self.attack_frame = 1
             collide.attack.add(self)
         else:
-            self.move(pressed)
+            self.move(self.input.direction)
 
     def update_image(
             self,
@@ -239,7 +230,6 @@ class Entity(pygame.sprite.Sprite):
             frame.rect.height,
             frame.surface,
         )
-        self.input = pressed
 
 
 class Player(Entity):
