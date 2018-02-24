@@ -48,7 +48,6 @@ class Movement:
 class MovementSystem(UserList):
     def update(self):
         for mover in self.data:
-            print(mover)
             if mover.attack_frame is not None:
                 mover.attack_frame += 1
                 if mover.attack_frame < mover.attack_anim_length:

@@ -1,10 +1,38 @@
+from enum import Enum
 from collections import UserList
 
 from attr import attrs, attrib
 import pygame
 
 import assets
+import collide
 from movement import Movement, Direction
+from input import Input
+
+
+class Move(Enum):
+    IDLE = (0, 0)
+    UP = (0, -1)
+    DOWN = (0, 1)
+    LEFT = (-1, 0)
+    RIGHT = (1, 0)
+
+    LEFT_UP = (-1, -1)
+    RIGHT_UP = (1, -1)
+    LEFT_DOWN = (-1, 1)
+    RIGHT_DOWN = (1, 1)
+
+input_to_animation = {
+    Move.IDLE: 'idle',
+    Move.UP: 'up',
+    Move.DOWN: 'down',
+    Move.LEFT: 'walk',
+    Move.RIGHT: 'walk',
+    Move.LEFT_UP: 'walk',
+    Move.RIGHT_UP: 'walk',
+    Move.LEFT_DOWN: 'walk',
+    Move.RIGHT_DOWN: 'walk',
+}
 
 
 @attrs
@@ -39,9 +67,12 @@ class Frame:
             )
         return cls(frame_surface, frame_rect)
 
+
 def make_animations(animations: dict, palette):
     animations = {
-        (name, Direction.RIGHT): [Frame.from_frame_images(f, palette) for f in frames]
+        (name, Direction.RIGHT): [
+            Frame.from_frame_images(f, palette) for f in frames
+        ]
         for name, frames in animations.items()
     }
     animations.update({
@@ -60,6 +91,8 @@ def make_animations(animations: dict, palette):
 
 class Graphic(pygame.sprite.Sprite):
     def __init__(self,
+                 input: Input,
+                 movement: Movement,
                  animations,
                  palette,
                  lair,
@@ -75,7 +108,6 @@ class Graphic(pygame.sprite.Sprite):
         self.animations = make_animations(animations, palette)
 
         self.groups = groups
-        self.palette = palette
 
         self.image = self.animations['idle', Direction.RIGHT][0].surface
 
@@ -90,15 +122,27 @@ class GraphicsSystem(UserList):
             if graphic.movement.attack_frame:
                 animation_name = 'swing'
 
-                animation = graphic.animations[animation_name, graphic.movement.direction]
+                animation = graphic.animations[animation_name,
+                                               graphic.movement.direction]
                 if graphic.movement.attack_frame == len(animation) - 1:
                     collide.attack.remove(graphic)
 
-                GraphicsSystem.update_image(graphic, animation_name, graphic.movement.attack_frame, graphic.movement.position)
+                GraphicsSystem.update_image(
+                    graphic,
+                    animation_name,
+                    graphic.movement.attack_frame,
+                    graphic.movement.position,
+                )
 
             elif graphic.input.fire:
-                GraphicsSystem.update_image(graphic, 'swing', graphic.movement.attack_frame, graphic.movement.position)
-                animation = graphic.animations['swing', graphic.movement.direction]
+                GraphicsSystem.update_image(
+                    graphic,
+                    'swing',
+                    graphic.movement.attack_frame,
+                    graphic.movement.position,
+                )
+                animation = graphic.animations['swing',
+                                               graphic.movement.direction]
                 graphic.movement.attack_anim_length = len(animation)
                 collide.attack.add(graphic)
             else:
@@ -114,7 +158,12 @@ class GraphicsSystem(UserList):
             animation_name: str,
             frame_num: int,
             position: pygame.Rect):
-        frame, x = GraphicsSystem.get_frame(graphic, animation_name, frame_num, position)
+        frame, x = GraphicsSystem.get_frame(
+            graphic,
+            animation_name,
+            frame_num,
+            position,
+        )
         GraphicsSystem.set_frame_image(
             graphic,
             animation_name,
@@ -174,6 +223,7 @@ class GraphicsSystem(UserList):
         frame, x = GraphicsSystem.get_frame(graphic, animation_name, move_frame, new_position)
         new_position.y = GraphicsSystem.clamp_to_terrain(graphic, new_position, frame, move_frame)
 
+        # TODO: move this to movement.py
         if graphic.movement.position == new_position:
             frame, x = GraphicsSystem.get_frame(graphic, 'idle', 0, new_position)
         else:

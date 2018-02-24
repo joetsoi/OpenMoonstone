@@ -1,5 +1,4 @@
 import copy
-import os
 import sys
 from pprint import pprint
 
@@ -7,7 +6,6 @@ import pygame
 
 from cli import print_hex_view
 from extract import extract_palette
-from font import FontFile#, draw_string
 from main import MainExe
 from piv import PivFile
 from cmp import CmpFile
@@ -17,29 +15,13 @@ from assets import loading_screen, lairs
 import assets
 import collide
 import settings
+from graphics import Graphic, graphics_system, Move
 from input import input_system, player_one, player_two, Input
 from movement import movement_system, Movement
 
-from entity import Entity, Move
+from entity import Entity
 
 
-#def draw(screen, image_data, palette):
-#    image = pygame.Surface((320, 200))
-#    image.fill((255, 255, 255))
-
-    #pixel_array = pygame.PixelArray(image)
-
-    #for y, line in enumerate(grouper(image_data, 320)):
-    #    for x, pixel in enumerate(line):
-    #        try:
-    #            pixel_array[x, y] = palette[pixel]
-    #        except TypeError:
-    #            pass
-
-    #del pixel_array
-    #image = pygame.transform.scale(image,
-    #                              (320 * scale_factor, 200 * scale_factor))
-    #screen.blit(image, (0, 0))
 controls = {
     pygame.K_LEFT: Move.LEFT,
     pygame.K_RIGHT: Move.RIGHT,
@@ -60,32 +42,49 @@ def change_player_colour(colour: str, palette: list):
     palette = extract_palette(palette, base=256)
     return PivFile.make_palette(palette)
 
+
 def game_loop(screen):
     lair = lairs[0]
     one_up_input = Input(player_one)
-    two_up_input = Input(player_two)
-    knight_1 = Entity(
+    movement_1 = Movement(one_up_input, (100, 100))
+    graphics_1 = Graphic(
+        one_up_input,
+        movement_1,
         assets.animation.knight,
         assets.files.backgrounds[lairs[0].background].palette,
-        input=one_up_input,
-        movement=Movement(one_up_input, (100, 100)),
-        lair=lair,
-        groups=[collide.active]
+        lair,
+        groups=[collide.active],
     )
-    # palette = change_player_coour(
-    #     'blue',
-    #     assets.files.backgrounds[lairs[0].background].extracted_palette,
-    # )
-    # knight_2 = Entity(
-    #     assets.animation.knight,
-    #     palette=palette,
-    #     input=two_up_input,
-    #     movement=Movement(two_up_input, (200, 150)),
-    #     lair=lair,
-    #     groups=[collide.active]
-    # )
-    input_system.extend([knight_1.input])#, knight_2.input])
-    movement_system.extend([knight_1.movement])#), knight_2.movement])
+
+    knight_1 = Entity(
+        input=one_up_input,
+        movement=movement_1,
+        graphics=graphics_1,
+    )
+
+    palette = change_player_colour(
+        'blue',
+        assets.files.backgrounds[lairs[0].background].extracted_palette,
+    )
+    two_up_input = Input(player_two)
+    movement_2 = Movement(two_up_input, (200, 150))
+    graphics_2 = Graphic(
+        two_up_input,
+        movement_2,
+        assets.animation.knight,
+        palette,
+        lair,
+        groups=[collide.active],
+    )
+
+    knight_2 = Entity(
+        input=two_up_input,
+        movement=movement_2,
+        graphics=graphics_2
+    )
+    input_system.extend([knight_1.input, knight_2.input])
+    movement_system.extend([knight_1.movement, knight_2.movement])
+    graphics_system.extend([knight_1.graphics, knight_2.graphics])
     clock = pygame.time.Clock()
     last_tick = pygame.time.get_ticks()
     while True:
@@ -103,7 +102,8 @@ def game_loop(screen):
         #    last_tick = now
         input_system.update()
         movement_system.update()
-        collide.active.update()
+        graphics_system.update()
+        #collide.active.update()
 
         collide.check_collision()
 
@@ -148,7 +148,6 @@ def game_loop(screen):
         pygame.display.update()
         if freeze:
             test = 1
-            
         #clock.tick(settings.FRAME_LIMIT)
         clock.tick(1000 / (1193182 / 21845 * 2))
 

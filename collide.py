@@ -5,6 +5,8 @@ from assets import collide_hit
 from pprint import pprint
 import assets
 
+from graphics import GraphicsSystem
+
 
 rects = []
 active = pygame.sprite.Group()
@@ -23,14 +25,14 @@ def check_collision():
             # if not attacker.rect.colliderect(defender):
             #     continue
 
-            attack_frame = attacker.get_images()
+            attack_frame = GraphicsSystem.get_images(attacker)
             attack_images = [i for i in attack_frame if i.collide == Collide.COLLIDER]
             #print(attack_images)
             attack_rect = pygame.Rect(0, 0, 0, 0)
 
 
 
-            defender_frame = defender.get_images()
+            defender_frame = GraphicsSystem.get_images(defender)
             defender_images = [i for i in defender_frame if i.collide == Collide.COLLIDEE]
             defender_rect = pygame.Rect(0, 0, 0, 0)
 
