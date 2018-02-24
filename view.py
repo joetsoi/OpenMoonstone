@@ -72,20 +72,20 @@ def game_loop(screen):
         lair=lair,
         groups=[collide.active]
     )
-    palette = change_player_colour(
-        'blue',
-        assets.files.backgrounds[lairs[0].background].extracted_palette,
-    )
-    knight_2 = Entity(
-        assets.animation.knight,
-        palette=palette,
-        input=two_up_input,
-        movement=Movement(two_up_input, (200, 150)),
-        lair=lair,
-        groups=[collide.active]
-    )
-    input_system.extend([knight_1.input, knight_2.input])
-    movement_system.extend([knight_1.movement, knight_2.movement])
+    # palette = change_player_coour(
+    #     'blue',
+    #     assets.files.backgrounds[lairs[0].background].extracted_palette,
+    # )
+    # knight_2 = Entity(
+    #     assets.animation.knight,
+    #     palette=palette,
+    #     input=two_up_input,
+    #     movement=Movement(two_up_input, (200, 150)),
+    #     lair=lair,
+    #     groups=[collide.active]
+    # )
+    input_system.extend([knight_1.input])#, knight_2.input])
+    movement_system.extend([knight_1.movement])#), knight_2.movement])
     clock = pygame.time.Clock()
     last_tick = pygame.time.get_ticks()
     while True:
@@ -102,7 +102,7 @@ def game_loop(screen):
         #    knights.update()
         #    last_tick = now
         input_system.update()
-        movement_system.try_movement()
+        movement_system.update()
         collide.active.update()
 
         collide.check_collision()

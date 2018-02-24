@@ -41,10 +41,26 @@ class Movement:
     )
     next_frame = attrib(type=int, default=0)
 
+    attack_frame = attrib(type=int, default=None)
+    attack_anim_length = attrib(type=int, default=None)
+
 
 class MovementSystem(UserList):
-    def try_movement(self):
+    def update(self):
         for mover in self.data:
+            print(mover)
+            if mover.attack_frame is not None:
+                mover.attack_frame += 1
+                if mover.attack_frame < mover.attack_anim_length:
+                    continue
+                else:
+                    mover.attack_frame = None
+                    mover.attack_anim_length = None
+
+            if mover.input.fire:
+                mover.attack_frame = 0
+                continue
+
             new_position, frame = MovementSystem.next_position(mover)
             direction = mover.input.direction
             if direction.x:

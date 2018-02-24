@@ -5,6 +5,7 @@ import pygame
 
 import assets
 import collide
+from graphics import make_animations
 from input import Input
 from movement import Movement, Direction
 
@@ -51,58 +52,39 @@ class Entity(pygame.sprite.Sprite):
         self.rect = pygame.Rect(movement.position)
         self.frames = animations
 
-        self._init_animations(animations, palette)
+        self.animations = make_animations(animations, palette)
 
         self.groups = groups
         self.palette = palette
 
         self.image = self.animations['idle', Direction.RIGHT][0].surface
 
-        self.attack_frame = None
-
         self.lair = lair
 
         self.animation_name = None
         self.frame_number = None
 
-    def _init_animations(self, animations: dict, palette):
-        self.animations = {
-            (name, Direction.RIGHT): [make_frame(f, palette) for f in frames]
-            for name, frames in animations.items()
-        }
-        self.animations.update({
-            (name, Direction.LEFT): [
-                Frame(
-                    surface=pygame.transform.flip(frame.surface,
-                                                  True,
-                                                  False),
-                    rect=frame.rect,
-                )
-                for frame in animation
-            ] for (name, _), animation in self.animations.items()
-        })
-
     def get_images(self):
         return self.frames[self.animation_name][self.frame_number]
 
     def update(self):
-        if self.attack_frame:
+        if self.movement.attack_frame:
             animation_name = 'swing'
-            self.update_image(animation_name, self.attack_frame, self.movement.position)
-            collide.attack.add(self)
-            self.attack_frame += 1
 
             animation = self.animations[animation_name, self.movement.direction]
-            if self.attack_frame >= len(animation):
-                self.attack_frame = None
+            if self.movement.attack_frame == len(animation) - 1:
                 collide.attack.remove(self)
 
+            self.update_image(animation_name, self.movement.attack_frame, self.movement.position)
+
         elif self.input.fire:
-            self.update_image('swing', 0, self.movement.position)
-            self.attack_frame = 1
+            self.update_image('swing', self.movement.attack_frame, self.movement.position)
+            animation = self.animations['swing', self.movement.direction]
+            self.movement.attack_anim_length = len(animation)
             collide.attack.add(self)
         else:
             self.move()
+
 
     def update_image(
             self,
@@ -179,39 +161,6 @@ class Entity(pygame.sprite.Sprite):
             frame.rect.height,
             frame.surface,
         )
-
-
-@attrs
-class Frame:
-    surface = attrib()
-    rect = attrib()
-
-    @classmethod
-    def from_frame_images(cls, frame_images, palette):
-        surfaces = []
-        rects = []
-        for frame_image in frame_images:
-            spritesheet = assets.spritesheets[frame_image.spritesheet]
-            image = spritesheet.images[frame_image.image_number]
-            surfaces.append(image.to_surface(palette))
-            rects.append(
-                pygame.Rect(
-                    frame_image.x,
-                    frame_image.y,
-                    image.width,
-                    image.height
-                )
-            )
-
-        frame_rect = rects[0]
-        frame_rect = frame_rect.unionall(rects[1:])
-        frame_surface = pygame.Surface(frame_rect.size, pygame.SRCALPHA)
-        for rect, surface in zip(rects, surfaces):
-            frame_surface.blit(
-                surface,
-                (rect.left - frame_rect.left, rect.top - frame_rect.top),
-            )
-        return cls(frame_surface, frame_rect)
 
 
 def make_frame(frame_images, palette):
