@@ -6,6 +6,7 @@ import pygame
 
 import assets
 import collide
+from collide import Collider
 from movement import Movement, Direction
 from input import Input
 
@@ -93,6 +94,7 @@ class Graphic(pygame.sprite.Sprite):
     def __init__(self,
                  input: Input,
                  movement: Movement,
+                 collider: Collider,
                  animations,
                  palette,
                  lair,
@@ -101,6 +103,7 @@ class Graphic(pygame.sprite.Sprite):
         super().__init__(*groups)
         self.input = input
         self.movement = movement
+        self.collider = collider
 
         self.rect = pygame.Rect(movement.position)
         self.frames = animations

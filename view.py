@@ -15,6 +15,7 @@ from assets import loading_screen, lairs
 import assets
 import collide
 import settings
+from collide import Collider
 from graphics import Graphic, graphics_system, Move
 from input import input_system, player_one, player_two, Input
 from movement import movement_system, Movement
@@ -47,9 +48,11 @@ def game_loop(screen):
     lair = lairs[0]
     one_up_input = Input(player_one)
     movement_1 = Movement(one_up_input, (100, 100))
+    collider_1 = Collider(assets.animation.knight, assets.collide_hit)
     graphics_1 = Graphic(
         one_up_input,
         movement_1,
+        collider_1,
         assets.animation.knight,
         assets.files.backgrounds[lairs[0].background].palette,
         lair,
@@ -60,6 +63,7 @@ def game_loop(screen):
         input=one_up_input,
         movement=movement_1,
         graphics=graphics_1,
+        collider=collider_1,
     )
 
     palette = change_player_colour(
@@ -68,9 +72,11 @@ def game_loop(screen):
     )
     two_up_input = Input(player_two)
     movement_2 = Movement(two_up_input, (200, 150))
+    collider_2 = Collider(assets.animation.knight, assets.collide_hit)
     graphics_2 = Graphic(
         two_up_input,
         movement_2,
+        collider_2,
         assets.animation.knight,
         palette,
         lair,
@@ -80,7 +86,8 @@ def game_loop(screen):
     knight_2 = Entity(
         input=two_up_input,
         movement=movement_2,
-        graphics=graphics_2
+        graphics=graphics_2,
+        collider=collider_2,
     )
     input_system.extend([knight_1.input, knight_2.input])
     movement_system.extend([knight_1.movement, knight_2.movement])
