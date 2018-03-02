@@ -5,6 +5,7 @@ from assets import collide_hit
 from pprint import pprint
 import assets
 
+from movement import Direction
 
 
 rects = []
@@ -16,63 +17,65 @@ class Collider:
     def __init__(self, animations, collide_data):
         self.defend = {}
         for name, animation in animations.items():
-            rects=[]
+            rects = []
             for frames in animation:
                 collidees = [c for c in frames if c.collide == Collide.COLLIDEE]
-                frame_rects = []
-                for collidee in collidees:
-                    sprite_sheet = assets.spritesheets[collidee.spritesheet]
-                    image = sprite_sheet.images[collidee.image_number]
-                    frame_rects.append(pygame.Rect(
-                        collidee.x,
-                        collidee.y,
-                        image.width,
-                        image.height,
-                    ))
-                rects.append(frame_rects)
+                rects.append(
+                    [Collider._make_image_rect(collidee) for collidee in collidees]
+                )
             self.defend[name] = rects
 
         self.attack = {}
-        self.attack_max = {}
         for name, animation in animations.items():
             rects = []
-            max = []
-            for i, frames in enumerate(animation):
+            for frames in animation:
                 colliders = [c for c in frames if c.collide == Collide.COLLIDER]
-                collide_list = []
-                frame_max = []
-                for collider in colliders:
-                    collide_pairs = collide_data[collider.spritesheet][collider.image_number]
-                    collide_rects = []
-                    for x, y in collide_pairs:
-                        collide_rects.append(pygame.Rect(
-                            collider.x,
-                            collider.y,
-                            x,
-                            y,
-                        ))
-                    collide_list.append(collide_rects)
-                    frame_max.append(pygame.Rect(
-                        collider.x,
-                        collider.y,
-                        collide_pairs.max[0],
-                        collide_pairs.max[1],
-                    ))
-                rects.append(collide_list)
-                max.append(frame_max)
+                rects.append([
+                    (
+                        Collider._make_image_rect(collider),
+                        *Collider._make_collide_rect(collider, collide_data),
+                    )
+                    for collider in colliders
+                ])
             self.attack[name] = rects
-            self.attack_max[name] = max
 
-        print(self.attack_max)
+    @staticmethod
+    def _make_image_rect(image_position):
+        sprite_sheet = assets.spritesheets[image_position.spritesheet]
+        image = sprite_sheet.images[image_position.image_number]
+        return pygame.Rect(
+            image_position.x,
+            image_position.y,
+            image.width,
+            image.height
+        )
+
+    @staticmethod
+    def _make_collide_rect(collider, collide_data):
+        collide_pairs = collide_data[collider.spritesheet][collider.image_number]
+        collide_rects = [
+            pygame.Rect(collider.x, collider.y, x, y)
+            for x, y in collide_pairs
+        ]
+        max = pygame.Rect(
+            collider.x,
+            collider.y,
+            collide_pairs.max[0],
+            collide_pairs.max[1],
+        )
+        return max, collide_rects
 
     def get_defend_rects(self, animation_name, frame_number):
         return self.defend[animation_name][frame_number]
 
+    def get_attacker_rects(self, attacker):
+        return self.attack[attacker.animation_name][attacker.frame_number]
+
     def get_attack_rects(self, animation_name, image_number):
-        return self.attack[animation_name][image_number]
+        return [i[2] for i in self.attack[animation_name][image_number]]
 
     def get_attack_max(self, animation_name, image_number):
-        return self.attack_max[animation_name][image_number]
+        return [i[1] for i in self.attack[animation_name][image_number]]
 
 
 def check_collision():
@@ -88,8 +91,8 @@ def check_collision():
             # if not attacker.rect.colliderect(defender):
             #     continue
 
-            # attack_frame = GraphicsSystem.get_images(attacker)
-            # attack_images = [i for i in attack_frame if i.collide == Collide.COLLIDER]
+            #attack_frame = GraphicsSystem.get_images(attacker)
+            #attack_images = [i for i in attack_frame if i.collide == Collide.COLLIDER]
 
             defender_frame = GraphicsSystem.get_images(defender)
             defender_images = [i for i in defender_frame if i.collide == Collide.COLLIDEE]
@@ -97,25 +100,38 @@ def check_collision():
             defender_rects = defender.collider.get_defend_rects(
                 defender.animation_name, defender.frame_number
             )
-            attack_max = attacker.collider.get_attack_max(attacker.animation_name, attacker.frame_number)
-            collide_list = attacker.collider.get_attack_rects(attacker.animation_name, attacker.frame_number)
+            #attack_max = attacker.collider.get_attack_max(attacker.animation_name, attacker.frame_number)
+            #collide_list = attacker.collider.get_attack_rects(attacker.animation_name, attacker.frame_number)
 
+            for image_rect, collide_max, collide_rects in attacker.collider.get_attacker_rects(attacker):
             #for a_image_position, max, collide_rects in zip(attack_images, attack_max, collide_list):
-            for max, collide_rects in zip(attack_max, collide_list):
                 #collide_frame = assets.collide_hit[a_image_position.spritesheet][a_image_position.image_number]
                 #a_image = assets.spritesheets[a_image_position.spritesheet].images[a_image_position.image_number]
 
-                max_rect = max.move(
+                max_rect = collide_max.copy()
+                attacker_facing_left = int(attacker.movement.direction.value == Direction.LEFT.value)
+                max_rect.x += max_rect.width * attacker_facing_left
+                max_rect.x *= attacker.movement.direction.value
+
+                max_rect.move_ip(
                     attacker.movement.position.x,
                     attacker.movement.position.y,
                 )
 
+                #rects.append(pygame.Rect(max_rect))
+
 
                 for d_rect, d_image_position in zip(defender_rects, defender_images):
-                    defender_rect = d_rect.move(
+                    defender_rect = d_rect.copy()
+                    defender_facing_left = int(defender.movement.direction.value == Direction.LEFT.value)
+                    defender_rect.x += defender_rect.width * defender_facing_left
+                    defender_rect.x *= defender.movement.direction.value
+
+                    defender_rect.move_ip(
                         defender.movement.position.x,
                         defender.movement.position.y
                     )
+                    rects.append(pygame.Rect(defender_rect))
                 # for d_image_position in defender_images:
                 #     d_image = assets.spritesheets[d_image_position.spritesheet].images[d_image_position.image_number]
                 #     defender_rect.x = defender.movement.position.x + d_image_position.x
@@ -131,12 +147,16 @@ def check_collision():
                         continue
 
                     #for (x, y), a_rects in zip(collide_frame, collide_rects):
-                    for  a_rects in collide_rects:
+                    for a_rects in collide_rects:
+                        attacker_rect = a_rects.copy()
+                        attacker_rect.x += attacker_rect.width * attacker_facing_left
+                        attacker_rect.x *= attacker.movement.direction.value
 
-                        attacker_rect = a_rects.move(
+                        attacker_rect.move_ip(
                             attacker.movement.position.x,
                             attacker.movement.position.y,
                         )
+                        rects.append(pygame.Rect(attacker_rect))
                         # attack_rect.left = attacker.movement.position.x + a_image_position.x# + a_image.width - x
                         # attack_rect.top =  attacker.movement.position.y + a_image_position.y
                         # attack_rect.width = x
@@ -156,7 +176,7 @@ def check_collision():
                         d_image = assets.spritesheets[d_image_position.spritesheet].images[d_image_position.image_number]
                         pixel = d_image.pixels[pixel]
                         if pixel:
-                            rects.append(pygame.Rect(attacker_rect))
+                            #rects.append(pygame.Rect(attacker_rect))
                             print("collide")
 
 if __name__ == '__main__':
