@@ -96,59 +96,58 @@ def check_collision():
             )
 
             for image_rect, collide_max, collide_rects in attacker.collider.get_attacker_rects(attacker):
-                max_rect = collide_max.copy()
-                attacker_facing_left = int(attacker.movement.direction.value == Direction.LEFT.value)
-                max_rect.x += max_rect.width * attacker_facing_left
-                max_rect.x *= attacker.movement.direction.value
+                max_rect = get_entity_collision_rect(attacker, collide_max)
 
-                max_rect.move_ip(
-                    attacker.movement.position.x,
-                    attacker.movement.position.y,
-                )
-
-                #rects.append(pygame.Rect(max_rect))
+                rects.append(pygame.Rect(max_rect))
 
                 for d_rect, d_image_position in zip(defender_rects, defender_images):
-                    defender_rect = d_rect.copy()
-                    defender_facing_left = int(defender.movement.direction.value == Direction.LEFT.value)
-                    defender_rect.x += defender_rect.width * defender_facing_left
-                    defender_rect.x *= defender.movement.direction.value
-
-                    defender_rect.move_ip(
-                        defender.movement.position.x,
-                        defender.movement.position.y
-                    )
+                    defender_rect = get_entity_collision_rect(defender, d_rect)
                     rects.append(pygame.Rect(defender_rect))
 
                     if not max_rect.colliderect(defender_rect):
                         continue
 
-                    for a_rects in collide_rects:
-                        attacker_rect = a_rects.copy()
-                        attacker_rect.x += attacker_rect.width * attacker_facing_left
-                        attacker_rect.x *= attacker.movement.direction.value
-
-                        attacker_rect.move_ip(
-                            attacker.movement.position.x,
-                            attacker.movement.position.y,
-                        )
+                    for attacker_rect in collide_rects:
+                        attacker_rect = get_entity_collision_rect(attacker, attacker_rect)
                         rects.append(pygame.Rect(attacker_rect))
 
                         if not attacker_rect.colliderect(defender_rect):
                             continue
 
-                        attack_x = attacker_rect.right
-                        attack_y = attacker_rect.bottom
-                        def_x = defender_rect.x
-                        def_y = defender_rect.y
+                        check_pixel_collision(
+                            attacker_rect,
+                            defender_rect,
+                            d_image_position,
+                        )
 
-                        pixel = (attack_y - def_y) * d_rect.width + (attack_x - def_x)
 
-                        d_image = assets.spritesheets[d_image_position.spritesheet].images[d_image_position.image_number]
-                        pixel = d_image.pixels[pixel]
-                        if pixel:
-                            #rects.append(pygame.Rect(attacker_rect))
-                            print("collide")
+def get_entity_collision_rect(entity, rect):
+    rect = rect.copy()
+    is_facing_left = int(entity.movement.direction.value == Direction.LEFT.value)
+    rect.x += rect.width * is_facing_left
+    rect.x *= entity.movement.direction.value
+
+    rect.move_ip(
+        entity.movement.position.x,
+        entity.movement.position.y,
+    )
+    return rect
+
+
+def check_pixel_collision(attacker_rect, defender_rect, defender_image_position):
+    attack_x = attacker_rect.right
+    attack_y = attacker_rect.bottom
+    def_x = defender_rect.x
+    def_y = defender_rect.y
+
+    pixel = (attack_y - def_y) * defender_rect.width + (attack_x - def_x)
+
+    d_image = assets.spritesheets[defender_image_position.spritesheet].images[defender_image_position.image_number]
+    pixel = d_image.pixels[pixel]
+    if pixel:
+        #rects.append(pygame.Rect(attacker_rect))
+        print("collide")
+
 
 if __name__ == '__main__':
     for c in collide_hit['kn4.ob']:
