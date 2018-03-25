@@ -32,6 +32,12 @@ class AnimationDefinition:
         for i in order:
             yield self.frames[i]
 
+    def __getitem__(self, i):
+        if self.order:
+            return self.frames[self.order[i]]
+        else:
+            return self.frames[i]
+
 
 def hex_to_sign(value):
     if value >= 0x8000:

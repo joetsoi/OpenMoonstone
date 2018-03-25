@@ -136,7 +136,7 @@ class Graphic(pygame.sprite.Sprite):
 
     def get_images(self):
         animation = self.frames[self.animation_name]
-        return animation.frames[self.frame_number]
+        return animation[self.frame_number]
 
     def update_image(
             self,
@@ -225,7 +225,6 @@ class Graphic(pygame.sprite.Sprite):
 class GraphicsSystem(UserList):
     def update(self):
         for graphic in self.data:
-
             if graphic.movement.attack_frame:
                 animation_name = 'swing'
 
