@@ -73,16 +73,21 @@ class Frame:
 @attrs(slots=True, auto_attribs=True)
 class Animation:
     frames: List[Frame]
-    order: Optional[Tuple[int]] = None
+    order: Optional[List[int]] = None
 
 
 def make_animations(animation_definitions: dict, palette):
+    def make_order(frames, order):
+        if not order:
+            order = list(range(len(frames)))
+        return list(order)
+
     animations = {
         (name, Direction.RIGHT): Animation(
             frames=[
                 Frame.from_frame_images(f, palette) for f in animation.frames
             ],
-            order=animation.order,
+            order=make_order(animation.frames, animation.order),
         ) for name, animation in animation_definitions.items()
     }
     animations.update({
@@ -139,7 +144,7 @@ class GraphicsSystem(UserList):
 
                 animation = graphic.animations[animation_name,
                                                graphic.movement.direction]
-                if graphic.movement.attack_frame == len(animation.frames) - 1:
+                if graphic.movement.attack_frame == len(animation.order) - 1:
                     collide.attack.remove(graphic)
 
                 GraphicsSystem.update_image(
@@ -158,7 +163,7 @@ class GraphicsSystem(UserList):
                 )
                 animation = graphic.animations['swing',
                                                graphic.movement.direction]
-                graphic.movement.attack_anim_length = len(animation.frames)
+                graphic.movement.attack_anim_length = len(animation.order)
                 collide.attack.add(graphic)
             else:
                 GraphicsSystem.move(graphic)
@@ -200,7 +205,9 @@ class GraphicsSystem(UserList):
 
     @staticmethod
     def get_frame(graphic, animation_name, frame_number, position):
-        frame = graphic.animations[animation_name, graphic.movement.direction].frames[frame_number]
+        animation = graphic.animations[animation_name, graphic.movement.direction]
+        frame_number = animation.order[frame_number]
+        frame = animation.frames[frame_number]
         # if we're facing left we want to add frame.rect.width to x
         is_facing_left = int(graphic.movement.direction.value == Direction.LEFT.value)
         frame_width = frame.rect.width * is_facing_left

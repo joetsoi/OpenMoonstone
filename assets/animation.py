@@ -24,6 +24,14 @@ class AnimationDefinition:
     frames: Tuple[Tuple[ImagePosition]]
     order: Optional[Tuple[int]] = None
 
+    def __iter__(self):
+        order = self.order
+        if not self.order:
+            order = range(len(self.frames))
+
+        for i in order:
+            yield self.frames[i]
+
 
 def hex_to_sign(value):
     if value >= 0x8000:
