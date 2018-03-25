@@ -18,8 +18,8 @@ class Collider:
         self.defend = {}
         for name, animation in animations.items():
             rects = []
-            for frames in animation:
-                collidees = [c for c in frames if c.collide == Collide.COLLIDEE]
+            for frame in animation.frames:
+                collidees = [c for c in frame if c.collide == Collide.COLLIDEE]
                 rects.append(
                     [Collider._make_image_rect(collidee) for collidee in collidees]
                 )
@@ -28,8 +28,8 @@ class Collider:
         self.attack = {}
         for name, animation in animations.items():
             rects = []
-            for frames in animation:
-                colliders = [c for c in frames if c.collide == Collide.COLLIDER]
+            for frame in animation.frames:
+                colliders = [c for c in frame if c.collide == Collide.COLLIDER]
                 rects.append([
                     (
                         Collider._make_image_rect(collider),

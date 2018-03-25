@@ -1,5 +1,6 @@
 from enum import Enum
 from collections import UserList
+from typing import List, Optional, Tuple
 
 from attr import attrs, attrib
 import pygame
@@ -36,7 +37,7 @@ input_to_animation = {
 }
 
 
-@attrs
+@attrs(slots=True)
 class Frame:
     surface = attrib()
     rect = attrib()
@@ -69,23 +70,34 @@ class Frame:
         return cls(frame_surface, frame_rect)
 
 
-def make_animations(animations: dict, palette):
+@attrs(slots=True, auto_attribs=True)
+class Animation:
+    frames: List[Frame]
+    order: Optional[Tuple[int]] = None
+
+
+def make_animations(animation_definitions: dict, palette):
     animations = {
-        (name, Direction.RIGHT): [
-            Frame.from_frame_images(f, palette) for f in frames
-        ]
-        for name, frames in animations.items()
+        (name, Direction.RIGHT): Animation(
+            frames=[
+                Frame.from_frame_images(f, palette) for f in animation.frames
+            ],
+            order=animation.order,
+        ) for name, animation in animation_definitions.items()
     }
     animations.update({
-        (name, Direction.LEFT): [
-            Frame(
-                surface=pygame.transform.flip(frame.surface,
-                                              True,
-                                              False),
-                rect=frame.rect,
-            )
-            for frame in animation
-        ] for (name, _), animation in animations.items()
+        (name, Direction.LEFT): Animation(
+            frames=[
+                Frame(
+                    surface=pygame.transform.flip(frame.surface,
+                                                  True,
+                                                  False),
+                    rect=frame.rect,
+                )
+                for frame in animation.frames
+            ],
+            order=animation.order,
+        ) for (name, _), animation in animations.items()
     })
     return animations
 
@@ -112,7 +124,7 @@ class Graphic(pygame.sprite.Sprite):
 
         self.groups = groups
 
-        self.image = self.animations['idle', Direction.RIGHT][0].surface
+        self.image = self.animations['idle', Direction.RIGHT].frames[0].surface
 
         self.lair = lair
         self.animation_name = None
@@ -127,7 +139,7 @@ class GraphicsSystem(UserList):
 
                 animation = graphic.animations[animation_name,
                                                graphic.movement.direction]
-                if graphic.movement.attack_frame == len(animation) - 1:
+                if graphic.movement.attack_frame == len(animation.frames) - 1:
                     collide.attack.remove(graphic)
 
                 GraphicsSystem.update_image(
@@ -146,14 +158,15 @@ class GraphicsSystem(UserList):
                 )
                 animation = graphic.animations['swing',
                                                graphic.movement.direction]
-                graphic.movement.attack_anim_length = len(animation)
+                graphic.movement.attack_anim_length = len(animation.frames)
                 collide.attack.add(graphic)
             else:
                 GraphicsSystem.move(graphic)
 
     @staticmethod
     def get_images(graphic):
-        return graphic.frames[graphic.animation_name][graphic.frame_number]
+        animation = graphic.frames[graphic.animation_name]
+        return animation.frames[graphic.frame_number]
 
     @staticmethod
     def update_image(
@@ -187,7 +200,7 @@ class GraphicsSystem(UserList):
 
     @staticmethod
     def get_frame(graphic, animation_name, frame_number, position):
-        frame = graphic.animations[animation_name, graphic.movement.direction][frame_number]
+        frame = graphic.animations[animation_name, graphic.movement.direction].frames[frame_number]
         # if we're facing left we want to add frame.rect.width to x
         is_facing_left = int(graphic.movement.direction.value == Direction.LEFT.value)
         frame_width = frame.rect.width * is_facing_left

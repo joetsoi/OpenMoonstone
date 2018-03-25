@@ -25,7 +25,7 @@ class Direction(Enum):
     RIGHT = 1
 
 
-@attrs
+@attrs(slots=True)
 class Movement:
     input = attrib(type=InputSystem)
     position = attrib(
@@ -40,6 +40,7 @@ class Movement:
         default=lambda: pygame.Rect(0, 0, 0, 0),
     )
     next_frame = attrib(type=int, default=0)
+    move_frame = attrib(type=int, default=0)
 
     attack_frame = attrib(type=int, default=None)
     attack_anim_length = attrib(type=int, default=None)

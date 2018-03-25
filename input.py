@@ -25,7 +25,7 @@ player_two = {
 }
 
 
-@attrs
+@attrs(slots=True)
 class Input:
     mapping = attrib(type=dict)
     direction = attrib(

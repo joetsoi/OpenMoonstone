@@ -6,7 +6,7 @@ from input import Input
 from movement import Movement
 
 
-@attrs
+@attrs(slots=True)
 class Entity:
     input = attrib(type=Input)
     movement = attrib(type=Movement)
