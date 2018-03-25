@@ -134,6 +134,93 @@ class Graphic(pygame.sprite.Sprite):
         self.lair = lair
         self.animation_name = None
 
+    def get_images(self):
+        animation = self.frames[self.animation_name]
+        return animation.frames[self.frame_number]
+
+    def update_image(
+            self,
+            animation_name: str,
+            frame_num: int,
+            position: pygame.Rect):
+        frame, x = self.get_frame(
+            animation_name,
+            frame_num,
+            position,
+        )
+        self.set_frame_image(
+            animation_name,
+            frame_num,
+            x,
+            position.y + frame.rect.y,
+            frame.rect.width,
+            frame.rect.height,
+            frame.surface,
+        )
+
+    def clamp_to_terrain(self, new_position, frame, frame_num):
+        new_rect_y = new_position.y + frame.rect.y + frame.rect.height
+        if new_rect_y <= self.lair.terrain_object.boundary.bottom:
+            return self.movement.position.y
+        return new_position.y
+
+    def get_frame(self, animation_name, frame_number, position):
+        animation = self.animations[animation_name, self.movement.direction]
+        frame_number = animation.order[frame_number]
+        frame = animation.frames[frame_number]
+        # if we're facing left we want to add frame.rect.width to x
+        is_facing_left = int(self.movement.direction.value == Direction.LEFT.value)
+        frame_width = frame.rect.width * is_facing_left
+        frame_x = self.movement.direction.value * (frame.rect.x + frame_width)
+        x = position.x + frame_x
+        return frame, x
+
+    def set_frame_image(
+            self,
+            animation_name: str,
+            frame_number: int,
+            x: int,
+            y: int,
+            w: int,
+            h: int,
+            image: pygame.Surface):
+        self.animation_name = animation_name
+        self.frame_number = frame_number
+        self.movement.frame_num = frame_number
+        self.rect.x = x
+        self.rect.y = y
+        self.rect.width = w
+        self.rect.height = h
+        self.image = image
+
+    def move(self):
+        move_frame = self.movement.next_frame
+        new_position = self.movement.next_position
+
+        animation_name = input_to_animation[
+            Move((self.input.direction.x, self.input.direction.y))
+        ]
+
+        frame, x = self.get_frame(animation_name, move_frame, new_position)
+        new_position.y = self.clamp_to_terrain(new_position, frame, move_frame)
+
+        # TODO: move this to movement.py
+        if self.movement.position == new_position:
+            frame, x = self.get_frame('idle', 0, new_position)
+        else:
+            self.movement.position = new_position
+            self.movement.move_frame = move_frame
+
+        self.set_frame_image(
+            animation_name,
+            move_frame,
+            x,
+            new_position.y + frame.rect.y,
+            frame.rect.width,
+            frame.rect.height,
+            frame.surface,
+        )
+
 
 class GraphicsSystem(UserList):
     def update(self):
@@ -147,16 +234,14 @@ class GraphicsSystem(UserList):
                 if graphic.movement.attack_frame == len(animation.order) - 1:
                     collide.attack.remove(graphic)
 
-                GraphicsSystem.update_image(
-                    graphic,
+                graphic.update_image(
                     animation_name,
                     graphic.movement.attack_frame,
                     graphic.movement.position,
                 )
 
             elif graphic.input.fire:
-                GraphicsSystem.update_image(
-                    graphic,
+                graphic.update_image(
                     'swing',
                     graphic.movement.attack_frame,
                     graphic.movement.position,
@@ -166,102 +251,7 @@ class GraphicsSystem(UserList):
                 graphic.movement.attack_anim_length = len(animation.order)
                 collide.attack.add(graphic)
             else:
-                GraphicsSystem.move(graphic)
+                graphic.move()
 
-    @staticmethod
-    def get_images(graphic):
-        animation = graphic.frames[graphic.animation_name]
-        return animation.frames[graphic.frame_number]
-
-    @staticmethod
-    def update_image(
-            graphic,
-            animation_name: str,
-            frame_num: int,
-            position: pygame.Rect):
-        frame, x = GraphicsSystem.get_frame(
-            graphic,
-            animation_name,
-            frame_num,
-            position,
-        )
-        GraphicsSystem.set_frame_image(
-            graphic,
-            animation_name,
-            frame_num,
-            x,
-            position.y + frame.rect.y,
-            frame.rect.width,
-            frame.rect.height,
-            frame.surface,
-        )
-
-    @staticmethod
-    def clamp_to_terrain(graphic, new_position, frame, frame_num):
-        new_rect_y = new_position.y + frame.rect.y + frame.rect.height
-        if new_rect_y <= graphic.lair.terrain_object.boundary.bottom:
-            return graphic.movement.position.y
-        return new_position.y
-
-    @staticmethod
-    def get_frame(graphic, animation_name, frame_number, position):
-        animation = graphic.animations[animation_name, graphic.movement.direction]
-        frame_number = animation.order[frame_number]
-        frame = animation.frames[frame_number]
-        # if we're facing left we want to add frame.rect.width to x
-        is_facing_left = int(graphic.movement.direction.value == Direction.LEFT.value)
-        frame_width = frame.rect.width * is_facing_left
-        frame_x = graphic.movement.direction.value * (frame.rect.x + frame_width)
-        x = position.x + frame_x
-        return frame, x
-
-    @staticmethod
-    def set_frame_image(
-            graphic,
-            animation_name: str,
-            frame_number: int,
-            x: int,
-            y: int,
-            w: int,
-            h: int,
-            image: pygame.Surface):
-        graphic.animation_name = animation_name
-        graphic.frame_number = frame_number
-        graphic.movement.frame_num = frame_number
-        graphic.rect.x = x
-        graphic.rect.y = y
-        graphic.rect.width = w
-        graphic.rect.height = h
-        graphic.image = image
-
-    @staticmethod
-    def move(graphic):
-        move_frame = graphic.movement.next_frame
-        new_position = graphic.movement.next_position
-
-        animation_name = input_to_animation[
-            Move((graphic.input.direction.x, graphic.input.direction.y))
-        ]
-
-        frame, x = GraphicsSystem.get_frame(graphic, animation_name, move_frame, new_position)
-        new_position.y = GraphicsSystem.clamp_to_terrain(graphic, new_position, frame, move_frame)
-
-        # TODO: move this to movement.py
-        if graphic.movement.position == new_position:
-            frame, x = GraphicsSystem.get_frame(graphic, 'idle', 0, new_position)
-        else:
-            graphic.movement.position = new_position
-            graphic.movement.move_frame = move_frame
-
-        GraphicsSystem.set_frame_image(
-            graphic,
-            animation_name,
-            move_frame,
-            x,
-            new_position.y + frame.rect.y,
-            frame.rect.width,
-            frame.rect.height,
-            frame.surface,
-        )
 
 graphics_system = GraphicsSystem()

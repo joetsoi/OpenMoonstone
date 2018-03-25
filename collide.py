@@ -79,7 +79,6 @@ class Collider:
 
 
 def check_collision():
-    from graphics import GraphicsSystem
     for attacker in attack:
         for defender in active.sprites():
             if defender == attacker:
@@ -88,7 +87,7 @@ def check_collision():
             if abs(attacker.movement.position.y - defender.movement.position.y) >= 10:
                 continue
 
-            defender_frame = GraphicsSystem.get_images(defender)
+            defender_frame = defender.get_images()
             defender_images = [i for i in defender_frame if i.collide == Collide.COLLIDEE]
 
             defender_rects = defender.collider.get_defend_rects(
