@@ -45,6 +45,34 @@ class Movement:
     attack_frame = attrib(type=int, default=None)
     attack_anim_length = attrib(type=int, default=None)
 
+    def get_next_position(self):
+        new_position = pygame.Rect(self.position)
+
+        direction = self.input.direction
+
+        is_moving = (direction.x | direction.y) & 1
+        move_frame = ((self.frame_num + 1) % 4) * is_moving
+
+        x_delta = x_distances[direction.x + 1][move_frame] * direction.x
+        new_position.x = self.position.x + x_delta
+
+        y_delta = y_distances[direction.y + 1][move_frame] * direction.y
+        new_position.y = self.position.y + y_delta
+        return new_position, move_frame
+
+    def clamp_to_boundary(self, direction, new_position):
+        x = direction.x
+        y = direction.y
+
+        clamped = new_position.clamp(BOUNDARY)
+        if clamped.x != new_position.x:
+            new_position.x = self.position.x
+            x = 0
+        if clamped.y != new_position.y:
+            new_position.y = self.position.y
+            y = 0
+        return x, y, new_position
+
 
 class MovementSystem(UserList):
     def update(self):
@@ -61,49 +89,18 @@ class MovementSystem(UserList):
                 mover.attack_frame = 0
                 continue
 
-            new_position, frame = MovementSystem.next_position(mover)
+            new_position, frame = mover.get_next_position()
             direction = mover.input.direction
             if direction.x:
                 mover.direction = Direction(mover.input.direction.x)
 
-            x, y, new_position = MovementSystem.clamp_to_boundary(
-                mover.position, direction, new_position)
+            x, y, new_position = mover.clamp_to_boundary(direction, new_position)
             direction.x = x
             direction.y = y
 
             frame = frame * ((direction.x | direction.y) & 1)
             mover.next_frame = frame
             mover.next_position = new_position
-
-    @staticmethod
-    def next_position(mover):
-        new_position = pygame.Rect(mover.position)
-
-        direction = mover.input.direction
-
-        is_moving = (direction.x | direction.y) & 1
-        move_frame = ((mover.frame_num + 1) % 4) * is_moving
-
-        x_delta = x_distances[direction.x + 1][move_frame] * direction.x
-        new_position.x = mover.position.x + x_delta
-
-        y_delta = y_distances[direction.y + 1][move_frame] * direction.y
-        new_position.y = mover.position.y + y_delta
-        return new_position, move_frame
-
-    @staticmethod
-    def clamp_to_boundary(position, direction, new_position):
-        x = direction.x
-        y = direction.y
-
-        clamped = new_position.clamp(BOUNDARY)
-        if clamped.x != new_position.x:
-            new_position.x = position.x
-            x = 0
-        if clamped.y != new_position.y:
-            new_position.y = position.y
-            y = 0
-        return x, y, new_position
 
 
 movement_system = MovementSystem()
