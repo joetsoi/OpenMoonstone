@@ -19,7 +19,7 @@ import settings
 from collide import Collider, Collision, collision_system
 from graphics import Graphic, graphics_system, Move
 from logic import Logic, logic_system
-from controller import input_components, input_system, player_one, player_two, Input
+from controller import controller_components, controller_system, player_one, player_two, Controller
 from movement import movement_system, Movement
 
 from entity import Entity
@@ -48,10 +48,10 @@ def change_player_colour(colour: str, palette: list):
 
 def game_loop(screen):
     lair = lairs[0]
-    one_up_input = Input(player_one)
-    movement_1 = Movement(one_up_input, (100, 100))
+    one_up_controller = Controller(player_one)
+    movement_1 = Movement(one_up_controller, (100, 100))
     graphics_1 = Graphic(
-        one_up_input,
+        one_up_controller,
         movement_1,
     #    collider_1,
         assets.animation.knight,
@@ -67,7 +67,7 @@ def game_loop(screen):
     logic_1 = Logic(graphics_1)
 
     knight_1 = Entity(
-        input=one_up_input,
+        controller=one_up_controller,
         movement=movement_1,
         graphics=graphics_1,
         collider=collider_1,
@@ -78,10 +78,10 @@ def game_loop(screen):
         'blue',
         assets.files.backgrounds[lairs[0].background].extracted_palette,
     )
-    two_up_input = Input(player_two)
-    movement_2 = Movement(two_up_input, (200, 150))
+    two_up_controller = Controller(player_two)
+    movement_2 = Movement(two_up_controller, (200, 150))
     graphics_2 = Graphic(
-        two_up_input,
+        two_up_controller,
         movement_2,
         assets.animation.knight,
         palette,
@@ -96,13 +96,13 @@ def game_loop(screen):
     logic_2 = Logic(graphics_2)
 
     knight_2 = Entity(
-        input=two_up_input,
+        controller=two_up_controller,
         movement=movement_2,
         graphics=graphics_2,
         collider=collider_2,
         logic=logic_2,
     )
-    input_components.extend([knight_1.input, knight_2.input])
+    controller_components.extend([knight_1.controller, knight_2.controller])
     movement_system.extend([knight_1.movement, knight_2.movement])
     graphics_system.extend([knight_1.graphics, knight_2.graphics])
     collision_system.extend([collider_1, collider_2])
@@ -122,7 +122,7 @@ def game_loop(screen):
         #if time > 1000 / ((1193182 / 21845) * 2):
         #    knights.update()
         #    last_tick = now
-        input_system.update()
+        controller_system.update()
         movement_system.update()
         graphics_system.update()
         #collide.active.update()

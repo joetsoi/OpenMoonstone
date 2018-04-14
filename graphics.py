@@ -9,7 +9,7 @@ import assets
 #import collide
 #from collide import Collider
 from movement import Movement, Direction
-from controller import Input
+from controller import Controller
 
 
 active = pygame.sprite.Group()
@@ -27,7 +27,7 @@ class Move(Enum):
     LEFT_DOWN = (-1, 1)
     RIGHT_DOWN = (1, 1)
 
-input_to_animation = {
+controller_to_animation = {
     Move.IDLE: 'idle',
     Move.UP: 'up',
     Move.DOWN: 'down',
@@ -112,7 +112,7 @@ def make_animations(animation_definitions: dict, palette):
 
 class Graphic(pygame.sprite.Sprite):
     def __init__(self,
-                 input: Input,
+                 controller: Controller,
                  movement: Movement,
                  #collider: Collider,
                  animations,
@@ -121,7 +121,7 @@ class Graphic(pygame.sprite.Sprite):
                  direction: Direction=Direction.RIGHT,
                  groups=None):
         super().__init__(*groups)
-        self.input = input
+        self.controller = controller
         self.movement = movement
         #self.collider = collider
 
@@ -203,8 +203,8 @@ class Graphic(pygame.sprite.Sprite):
         move_frame = self.movement.next_frame
         new_position = self.movement.next_position
 
-        animation_name = input_to_animation[
-            Move((self.input.direction.x, self.input.direction.y))
+        animation_name = controller_to_animation[
+            Move((self.controller.direction.x, self.controller.direction.y))
         ]
 
         frame, x = self.get_frame(animation_name, move_frame, new_position)
@@ -246,7 +246,7 @@ class GraphicsSystem(UserList):
                     graphic.movement.position,
                 )
 
-            elif graphic.input.fire:
+            elif graphic.controller.fire:
                 graphic.update_image(
                     'swing',
                     graphic.movement.attack_frame,

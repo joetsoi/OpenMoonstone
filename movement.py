@@ -4,7 +4,7 @@ from enum import Enum
 from attr import attrs, attrib
 import pygame
 
-from controller import Input
+from controller import Controller
 
 
 x_distances = (
@@ -27,7 +27,7 @@ class Direction(Enum):
 
 @attrs(slots=True)
 class Movement:
-    input = attrib(type=Input)
+    controller = attrib(type=Controller)
     position = attrib(
         type=pygame.Rect,
         converter=lambda p: pygame.Rect(p[0], p[1], 0, 0),
@@ -48,7 +48,7 @@ class Movement:
     def get_next_position(self):
         new_position = pygame.Rect(self.position)
 
-        direction = self.input.direction
+        direction = self.controller.direction
 
         is_moving = (direction.x | direction.y) & 1
         move_frame = ((self.frame_num + 1) % 4) * is_moving
@@ -85,14 +85,14 @@ class MovementSystem(UserList):
                     mover.attack_frame = None
                     mover.attack_anim_length = None
 
-            if mover.input.fire:
+            if mover.controller.fire:
                 mover.attack_frame = 0
                 continue
 
             new_position, frame = mover.get_next_position()
-            direction = mover.input.direction
+            direction = mover.controller.direction
             if direction.x:
-                mover.direction = Direction(mover.input.direction.x)
+                mover.direction = Direction(mover.controller.direction.x)
 
             x, y, new_position = mover.clamp_to_boundary(direction, new_position)
             direction.x = x

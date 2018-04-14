@@ -1,6 +1,3 @@
-# TODO: Rename to controller to avoid masking built-in input().
-from collections import UserList
-
 from attr import attrib, attrs, Factory
 import pygame
 
@@ -26,7 +23,7 @@ player_two = {
 
 
 @attrs(slots=True)
-class Input:
+class Controller:
     mapping = attrib(type=dict)
     direction = attrib(
         type=pygame.Rect,
@@ -35,19 +32,19 @@ class Input:
     fire = attrib(type=bool, default=False)
 
 
-input_components = []
+controller_components = []
 
 
-class InputSystem:
+class ControllerSystem:
     def update(self):
         keys = pygame.key.get_pressed()
-        for input in input_components:
-            input.direction.topleft = (0, 0)
-            for key, value in input.mapping['direction'].items():
+        for controller in controller_components:
+            controller.direction.topleft = (0, 0)
+            for key, value in controller.mapping['direction'].items():
                 if keys[key]:
-                    input.direction.x += value[0]
-                    input.direction.y += value[1]
-            input.fire = keys[input.mapping['fire']]
+                    controller.direction.x += value[0]
+                    controller.direction.y += value[1]
+            controller.fire = keys[controller.mapping['fire']]
 
 
-input_system = InputSystem()
+controller_system = ControllerSystem()
