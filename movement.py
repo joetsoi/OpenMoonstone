@@ -4,7 +4,7 @@ from enum import Enum
 from attr import attrs, attrib
 import pygame
 
-from input import InputSystem
+from input import Input
 
 
 x_distances = (
@@ -27,7 +27,7 @@ class Direction(Enum):
 
 @attrs(slots=True)
 class Movement:
-    input = attrib(type=InputSystem)
+    input = attrib(type=Input)
     position = attrib(
         type=pygame.Rect,
         converter=lambda p: pygame.Rect(p[0], p[1], 0, 0),

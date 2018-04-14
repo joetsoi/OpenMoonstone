@@ -6,10 +6,13 @@ from attr import attrs, attrib
 import pygame
 
 import assets
-import collide
-from collide import Collider
+#import collide
+#from collide import Collider
 from movement import Movement, Direction
 from input import Input
+
+
+active = pygame.sprite.Group()
 
 
 class Move(Enum):
@@ -111,7 +114,7 @@ class Graphic(pygame.sprite.Sprite):
     def __init__(self,
                  input: Input,
                  movement: Movement,
-                 collider: Collider,
+                 #collider: Collider,
                  animations,
                  palette,
                  lair,
@@ -120,7 +123,7 @@ class Graphic(pygame.sprite.Sprite):
         super().__init__(*groups)
         self.input = input
         self.movement = movement
-        self.collider = collider
+        #self.collider = collider
 
         self.rect = pygame.Rect(movement.position)
         self.frames = animations
@@ -134,6 +137,8 @@ class Graphic(pygame.sprite.Sprite):
         self.lair = lair
         self.animation_name = None
         self.has_hit = None
+
+        self.is_attacking = False
 
     def get_images(self):
         animation = self.frames[self.animation_name]
@@ -232,7 +237,8 @@ class GraphicsSystem(UserList):
                 animation = graphic.animations[animation_name,
                                                graphic.movement.direction]
                 if graphic.movement.attack_frame == len(animation.order) - 1:
-                    collide.attack.remove(graphic)
+                    graphic.is_attacking = False
+                    #collide.attack.remove(graphic)
 
                 graphic.update_image(
                     animation_name,
@@ -249,7 +255,8 @@ class GraphicsSystem(UserList):
                 animation = graphic.animations['swing',
                                                graphic.movement.direction]
                 graphic.movement.attack_anim_length = len(animation.order)
-                collide.attack.add(graphic)
+                graphic.is_attacking = True
+                #collide.attack.add(graphic)
             else:
                 graphic.move()
 

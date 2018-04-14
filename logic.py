@@ -2,12 +2,13 @@ from collections import UserList
 
 from attr import attrs, attrib
 
-from graphics import Graphic
+from collide import Collision
 
 
 
 @attrs(slots=True)
 class Logic:
+    collision = attrib(type=Collision)
     health = attrib(type=int, default=10)
     weapon_damage = attrib(type=int, default=3)
 
@@ -20,13 +21,12 @@ class Logic:
 
 class LogicSystem(UserList):
     def update(self):
-        for logic in self.data:
+        attackers = [l for l in self.data if l.collision.has_hit]
+        for attacker in attackers:
             pass
-            #if logic.graphic.has_hit:
-            #    logic.resolve_give_collision(logic.graphic.has_hit)
-            #    #defender = logic.graphic.has_hit
-            #    import ipdb; ipdb.set_trace()
-            #    defender.resolve_take_collision(logic.graphic)
+            defender = attacker.has_hit
+            
+
 
 
 logic_system = LogicSystem()

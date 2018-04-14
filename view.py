@@ -14,8 +14,9 @@ from t import TFile
 from assets import loading_screen, lairs
 import assets
 import collide
+import graphics
 import settings
-from collide import Collider
+from collide import Collider, Collision, collision_system
 from graphics import Graphic, graphics_system, Move
 from logic import Logic, logic_system
 from input import input_system, player_one, player_two, Input
@@ -49,15 +50,19 @@ def game_loop(screen):
     lair = lairs[0]
     one_up_input = Input(player_one)
     movement_1 = Movement(one_up_input, (100, 100))
-    collider_1 = Collider(assets.animation.knight, assets.collide_hit)
     graphics_1 = Graphic(
         one_up_input,
         movement_1,
-        collider_1,
+    #    collider_1,
         assets.animation.knight,
         assets.files.backgrounds[lairs[0].background].palette,
         lair,
-        groups=[collide.active],
+        groups=[graphics.active],
+    )
+    collider_1 = Collision(
+        graphics=graphics_1,
+        movement=movement_1,
+        collider=Collider(assets.animation.knight, assets.collide_hit),
     )
     logic_1 = Logic(graphics_1)
 
@@ -75,15 +80,18 @@ def game_loop(screen):
     )
     two_up_input = Input(player_two)
     movement_2 = Movement(two_up_input, (200, 150))
-    collider_2 = Collider(assets.animation.knight, assets.collide_hit)
     graphics_2 = Graphic(
         two_up_input,
         movement_2,
-        collider_2,
         assets.animation.knight,
         palette,
         lair,
-        groups=[collide.active],
+        groups=[graphics.active],
+    )
+    collider_2 = Collision(
+        graphics=graphics_2,
+        movement=movement_2,
+        collider=Collider(assets.animation.knight, assets.collide_hit),
     )
     logic_2 = Logic(graphics_2)
 
@@ -97,6 +105,7 @@ def game_loop(screen):
     input_system.extend([knight_1.input, knight_2.input])
     movement_system.extend([knight_1.movement, knight_2.movement])
     graphics_system.extend([knight_1.graphics, knight_2.graphics])
+    collision_system.extend([collider_1, collider_2])
     logic_system.extend([knight_1.logic, knight_2.logic])
     clock = pygame.time.Clock()
     last_tick = pygame.time.get_ticks()
@@ -118,11 +127,12 @@ def game_loop(screen):
         graphics_system.update()
         #collide.active.update()
 
-        collide.check_collisions()
+        collision_system.update()
+        #collide.check_collisions()
         logic_system.update()
 
         image = lair.draw().copy()
-        collide.active.draw(image)
+        graphics.active.draw(image)
 
         #pygame.draw.rect(
         #    image,
