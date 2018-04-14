@@ -133,6 +133,7 @@ class Graphic(pygame.sprite.Sprite):
 
         self.lair = lair
         self.animation_name = None
+        self.has_hit = None
 
     def get_images(self):
         animation = self.frames[self.animation_name]

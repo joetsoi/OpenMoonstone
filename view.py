@@ -17,6 +17,7 @@ import collide
 import settings
 from collide import Collider
 from graphics import Graphic, graphics_system, Move
+from logic import Logic, logic_system
 from input import input_system, player_one, player_two, Input
 from movement import movement_system, Movement
 
@@ -58,12 +59,14 @@ def game_loop(screen):
         lair,
         groups=[collide.active],
     )
+    logic_1 = Logic(graphics_1)
 
     knight_1 = Entity(
         input=one_up_input,
         movement=movement_1,
         graphics=graphics_1,
         collider=collider_1,
+        logic=logic_1,
     )
 
     palette = change_player_colour(
@@ -82,16 +85,19 @@ def game_loop(screen):
         lair,
         groups=[collide.active],
     )
+    logic_2 = Logic(graphics_2)
 
     knight_2 = Entity(
         input=two_up_input,
         movement=movement_2,
         graphics=graphics_2,
         collider=collider_2,
+        logic=logic_2,
     )
     input_system.extend([knight_1.input, knight_2.input])
     movement_system.extend([knight_1.movement, knight_2.movement])
     graphics_system.extend([knight_1.graphics, knight_2.graphics])
+    logic_system.extend([knight_1.logic, knight_2.logic])
     clock = pygame.time.Clock()
     last_tick = pygame.time.get_ticks()
     while True:
@@ -112,7 +118,8 @@ def game_loop(screen):
         graphics_system.update()
         #collide.active.update()
 
-        collide.check_collision()
+        collide.check_collisions()
+        logic_system.update()
 
         image = lair.draw().copy()
         collide.active.draw(image)

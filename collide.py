@@ -78,46 +78,55 @@ class Collider:
         return [i[1] for i in self.attack[animation_name][image_number]]
 
 
-def check_collision():
+def check_collisions():
     for attacker in attack:
+        attacker.has_hit = None
         for defender in active.sprites():
-            if defender == attacker:
+            collided = check_collision(attacker, defender)
+            if collided:
+                attacker.has_hit = defender
+
+
+def check_collision(attacker, defender):
+    if defender == attacker:
+        return False
+
+    if abs(attacker.movement.position.y - defender.movement.position.y) >= 10:
+        return False
+
+    defender_frame = defender.get_images()
+    defender_images = [i for i in defender_frame if i.collide == Collide.COLLIDEE]
+
+    defender_rects = defender.collider.get_defend_rects(
+        defender.animation_name, defender.frame_number
+    )
+
+    for image_rect, collide_max, collide_rects in attacker.collider.get_attacker_rects(attacker):
+        max_rect = get_entity_collision_rect(attacker, collide_max)
+
+        rects.append(pygame.Rect(max_rect))
+
+        for d_rect, d_image_position in zip(defender_rects, defender_images):
+            defender_rect = get_entity_collision_rect(defender, d_rect)
+            rects.append(pygame.Rect(defender_rect))
+
+            if not max_rect.colliderect(defender_rect):
                 continue
 
-            if abs(attacker.movement.position.y - defender.movement.position.y) >= 10:
-                continue
+            for attacker_rect in collide_rects:
+                attacker_rect = get_entity_collision_rect(attacker, attacker_rect)
+                rects.append(pygame.Rect(attacker_rect))
 
-            defender_frame = defender.get_images()
-            defender_images = [i for i in defender_frame if i.collide == Collide.COLLIDEE]
+                if not attacker_rect.colliderect(defender_rect):
+                    continue
 
-            defender_rects = defender.collider.get_defend_rects(
-                defender.animation_name, defender.frame_number
-            )
-
-            for image_rect, collide_max, collide_rects in attacker.collider.get_attacker_rects(attacker):
-                max_rect = get_entity_collision_rect(attacker, collide_max)
-
-                rects.append(pygame.Rect(max_rect))
-
-                for d_rect, d_image_position in zip(defender_rects, defender_images):
-                    defender_rect = get_entity_collision_rect(defender, d_rect)
-                    rects.append(pygame.Rect(defender_rect))
-
-                    if not max_rect.colliderect(defender_rect):
-                        continue
-
-                    for attacker_rect in collide_rects:
-                        attacker_rect = get_entity_collision_rect(attacker, attacker_rect)
-                        rects.append(pygame.Rect(attacker_rect))
-
-                        if not attacker_rect.colliderect(defender_rect):
-                            continue
-
-                        check_pixel_collision(
-                            attacker_rect,
-                            defender_rect,
-                            d_image_position,
-                        )
+                collided = check_pixel_collision(
+                    attacker_rect,
+                    defender_rect,
+                    d_image_position,
+                )
+                if collided:
+                    return True
 
 
 def get_entity_collision_rect(entity, rect):
@@ -145,7 +154,8 @@ def check_pixel_collision(attacker_rect, defender_rect, defender_image_position)
     pixel = d_image.pixels[pixel]
     if pixel:
         #rects.append(pygame.Rect(attacker_rect))
-        print("collide")
+        #print("collide")
+        return True
 
 
 if __name__ == '__main__':
