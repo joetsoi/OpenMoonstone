@@ -19,7 +19,7 @@ import settings
 from collide import Collider, Collision, collision_system
 from graphics import Graphic, graphics_system, Move
 from logic import Logic, logic_system
-from input import input_system, player_one, player_two, Input
+from input import input_components, input_system, player_one, player_two, Input
 from movement import movement_system, Movement
 
 from entity import Entity
@@ -102,7 +102,7 @@ def game_loop(screen):
         collider=collider_2,
         logic=logic_2,
     )
-    input_system.extend([knight_1.input, knight_2.input])
+    input_components.extend([knight_1.input, knight_2.input])
     movement_system.extend([knight_1.movement, knight_2.movement])
     graphics_system.extend([knight_1.graphics, knight_2.graphics])
     collision_system.extend([collider_1, collider_2])

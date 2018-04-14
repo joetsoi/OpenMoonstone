@@ -35,10 +35,13 @@ class Input:
     fire = attrib(type=bool, default=False)
 
 
-class InputSystem(UserList):
+input_components = []
+
+
+class InputSystem:
     def update(self):
         keys = pygame.key.get_pressed()
-        for input in self.data:
+        for input in input_components:
             input.direction.topleft = (0, 0)
             for key, value in input.mapping['direction'].items():
                 if keys[key]:
