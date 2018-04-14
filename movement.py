@@ -4,7 +4,7 @@ from enum import Enum
 from attr import attrs, attrib
 import pygame
 
-from input import Input
+from controller import Input
 
 
 x_distances = (

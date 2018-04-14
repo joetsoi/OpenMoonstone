@@ -19,7 +19,7 @@ import settings
 from collide import Collider, Collision, collision_system
 from graphics import Graphic, graphics_system, Move
 from logic import Logic, logic_system
-from input import input_components, input_system, player_one, player_two, Input
+from controller import input_components, input_system, player_one, player_two, Input
 from movement import movement_system, Movement
 
 from entity import Entity

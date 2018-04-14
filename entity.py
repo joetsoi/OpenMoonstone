@@ -2,7 +2,7 @@ from attr import attrs, attrib
 
 from collide import Collider
 from graphics import Graphic
-from input import Input
+from controller import Input
 from movement import Movement
 from logic import Logic
 

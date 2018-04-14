@@ -9,7 +9,7 @@ import assets
 #import collide
 #from collide import Collider
 from movement import Movement, Direction
-from input import Input
+from controller import Input
 
 
 active = pygame.sprite.Group()
