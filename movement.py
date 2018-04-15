@@ -1,5 +1,5 @@
 from collections import UserList
-from enum import Enum
+from enum import auto, Enum
 
 import pygame
 from attr import attrib, attrs
@@ -24,6 +24,13 @@ class Direction(Enum):
     RIGHT = 1
 
 
+class State(Enum):
+    walking = auto()
+    start_attacking = auto()
+    attacking = auto()
+    busy = auto()
+
+
 @attrs(slots=True)
 class Movement:
     position = attrib(
@@ -38,10 +45,12 @@ class Movement:
         default=lambda: pygame.Rect(0, 0, 0, 0),
     )
     next_frame = attrib(type=int, default=0)
-    move_frame = attrib(type=int, default=0)
+    #move_frame = attrib(type=int, default=0)
 
     attack_frame = attrib(type=int, default=None)
     attack_anim_length = attrib(type=int, default=None)
+
+    state = attrib(type=State, default=State.walking)
 
     def get_next_position(self, direction):
         new_position = pygame.Rect(self.position)
@@ -78,6 +87,9 @@ class MovementSystem(UserList):
             mover = entity.movement
             controller = entity.controller
 
+            if mover.state == State.busy:
+                continue
+
             if mover.attack_frame is not None:
                 mover.attack_frame += 1
                 if mover.attack_frame < mover.attack_anim_length:
@@ -85,8 +97,10 @@ class MovementSystem(UserList):
                 else:
                     mover.attack_frame = None
                     mover.attack_anim_length = None
+                    mover.state = State.walking
 
             if controller.fire:
+                mover.state = State.start_attacking
                 mover.attack_frame = 0
                 continue
 
@@ -103,6 +117,7 @@ class MovementSystem(UserList):
             frame = frame * ((direction.x | direction.y) & 1)
             mover.next_frame = frame
             mover.next_position = new_position
+            mover.state = State.walking
 
 
 movement_system = MovementSystem()

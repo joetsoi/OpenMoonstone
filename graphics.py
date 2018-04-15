@@ -6,7 +6,7 @@ import pygame
 from attr import attrib, attrs
 
 import assets
-from movement import Direction, Movement
+from movement import Direction, Movement, State
 from system import SystemFlag
 
 active = pygame.sprite.Group()
@@ -132,10 +132,42 @@ class Graphic(pygame.sprite.Sprite):
         self.has_hit = None
 
         self.is_attacking = False
+        self.frame_number = 0
 
     def get_images(self):
         animation = self.frames[self.animation_name]
         return animation[self.frame_number]
+
+    def get_frame(self, animation_name, frame_number, position, direction):
+        animation = self.animations[animation_name, direction]
+        frame_number = animation.order[frame_number]
+        frame = animation.frames[frame_number]
+
+        # if we're facing left we want to add frame.rect.width to x
+        is_facing_left = int(direction.value == Direction.LEFT.value)
+        frame_width = frame.rect.width * is_facing_left
+        frame_x = direction.value * (frame.rect.x + frame_width)
+        x = position.x + frame_x
+        return frame, x
+
+    def set_frame_image(
+            self,
+            animation_name: str,
+            frame_number: int,
+            movement,
+            x: int,
+            y: int,
+            w: int,
+            h: int,
+            image: pygame.Surface):
+        self.animation_name = animation_name
+        self.frame_number = frame_number
+        movement.frame_num = frame_number
+        self.rect.x = x
+        self.rect.y = y
+        self.rect.width = w
+        self.rect.height = h
+        self.image = image
 
 
 class GraphicsSystem(UserList):
@@ -147,7 +179,7 @@ class GraphicsSystem(UserList):
             graphic = entity.graphics
             movement = entity.movement
 
-            if movement.attack_frame:
+            if entity.movement.state == State.attacking:
                 animation_name = 'swing'
 
                 animation = graphic.animations[animation_name,
@@ -165,7 +197,7 @@ class GraphicsSystem(UserList):
                     movement.direction,
                 )
 
-            elif entity.controller.fire:
+            elif entity.movement.state == State.start_attacking:
                 GraphicsSystem.update_image(
                     graphic,
                     movement,
@@ -178,7 +210,11 @@ class GraphicsSystem(UserList):
                                                movement.direction]
                 movement.attack_anim_length = len(animation.order)
                 graphic.is_attacking = True
+                entity.movement.state = State.attacking
                 # collide.attack.add(graphic)
+            # elif movement.state == State.busy:
+            #     animation = graphic.animations[animation_name,
+            #                                    movement.direction]
             else:
                 GraphicsSystem.move(graphic, movement, controller.direction)
 
@@ -190,15 +226,13 @@ class GraphicsSystem(UserList):
             frame_num: int,
             position: pygame.Rect,
             direction):
-        frame, x = GraphicsSystem.get_frame(
-            graphic,
+        frame, x = graphic.get_frame(
             animation_name,
             frame_num,
             position,
             direction,
         )
-        GraphicsSystem.set_frame_image(
-            graphic,
+        graphic.set_frame_image(
             animation_name,
             frame_num,
             movement,
@@ -223,39 +257,6 @@ class GraphicsSystem(UserList):
         return new_position.y
 
     @staticmethod
-    def get_frame(graphic, animation_name, frame_number, position, direction):
-        animation = graphic.animations[animation_name, direction]
-        frame_number = animation.order[frame_number]
-        frame = animation.frames[frame_number]
-
-        # if we're facing left we want to add frame.rect.width to x
-        is_facing_left = int(direction.value == Direction.LEFT.value)
-        frame_width = frame.rect.width * is_facing_left
-        frame_x = direction.value * (frame.rect.x + frame_width)
-        x = position.x + frame_x
-        return frame, x
-
-    @staticmethod
-    def set_frame_image(
-            graphic,
-            animation_name: str,
-            frame_number: int,
-            movement,
-            x: int,
-            y: int,
-            w: int,
-            h: int,
-            image: pygame.Surface):
-        graphic.animation_name = animation_name
-        graphic.frame_number = frame_number
-        movement.frame_num = frame_number
-        graphic.rect.x = x
-        graphic.rect.y = y
-        graphic.rect.width = w
-        graphic.rect.height = h
-        graphic.image = image
-
-    @staticmethod
     def move(graphic, movement, direction):
         move_frame = movement.next_frame
         new_position = movement.next_position
@@ -264,8 +265,7 @@ class GraphicsSystem(UserList):
             Move((direction.x, direction.y))
         ]
 
-        frame, x = GraphicsSystem.get_frame(
-            graphic,
+        frame, x = graphic.get_frame(
             animation_name,
             move_frame,
             new_position,
@@ -280,8 +280,7 @@ class GraphicsSystem(UserList):
         )
 
         if movement.position == new_position:
-            frame, x = GraphicsSystem.get_frame(
-                graphic,
+            frame, x = graphic.get_frame(
                 'idle',
                 0,
                 new_position,
@@ -289,10 +288,9 @@ class GraphicsSystem(UserList):
             )
         else:
             movement.position = new_position
-            movement.move_frame = move_frame
+            #movement.move_frame = move_frame
 
-        GraphicsSystem.set_frame_image(
-            graphic,
+        graphic.set_frame_image(
             animation_name,
             move_frame,
             movement,

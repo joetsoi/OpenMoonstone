@@ -57,7 +57,7 @@ def game_loop(screen):
     collider_1 = Collision(
         collider=Collider(assets.animation.knight, assets.collide_hit),
     )
-    logic_1 = Logic(graphics_1)
+    logic_1 = Logic()
 
     knight_1 = Entity(
         controller=one_up_controller,
@@ -83,7 +83,7 @@ def game_loop(screen):
     collider_2 = Collision(
         collider=Collider(assets.animation.knight, assets.collide_hit),
     )
-    logic_2 = Logic(graphics_2)
+    logic_2 = Logic()
 
     knight_2 = Entity(
         controller=two_up_controller,
@@ -116,7 +116,12 @@ def game_loop(screen):
     if collision_system.flags in knight_2.flags:
         collision_system.append(knight_2)
 
-    logic_system.extend([knight_1.logic, knight_2.logic])
+    if logic_system.flags in knight_1.flags:
+        logic_system.append(knight_1)
+
+    if logic_system.flags in knight_2.flags:
+        logic_system.append(knight_2)
+
     clock = pygame.time.Clock()
     last_tick = pygame.time.get_ticks()
     while True:

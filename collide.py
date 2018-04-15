@@ -83,7 +83,7 @@ class Collider:
 @attrs(slots=True)
 class Collision:
     collider = attrib(type=Collider)
-    has_hit = attrib(type=Collider, default=None)
+    has_hit = attrib(type='Entity', default=None)
 
 
 class CollisionSystem(UserList):
