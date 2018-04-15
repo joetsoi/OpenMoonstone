@@ -10,7 +10,7 @@ from main import MainExe
 from piv import PivFile
 
 #from sprite import SpriteSheetFile
-
+test_dir = os.path.dirname(os.path.realpath(__file__))
 
 # def read_file(file_name, file_type):
 #     file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
@@ -25,7 +25,7 @@ class TestPivFile(object):
     def test_extract_piv_file(self):
         mindscape = assets.files.backgrounds['mindscape']
         extracted = extract_file(mindscape.file_length, mindscape.pixel_data)
-        with open('mindscap_extract_1.bin', 'rb') as f:
+        with open(os.path.join(test_dir, 'mindscap_extract_1.bin'), 'rb') as f:
             test_data = f.read()
 
         assert extracted == test_data
@@ -48,7 +48,7 @@ class TestPivFile(object):
             block_d.append(d)
 
         blocks = block_a + block_b + block_c + block_d
-        with open('mindscap_video_mem.bin', 'rb') as f:
+        with open(os.path.join(test_dir, 'mindscap_video_mem.bin'), 'rb') as f:
             test_data = f.read()
 
         assert bytes(blocks) == test_data
@@ -56,7 +56,7 @@ class TestPivFile(object):
     def test_extract_palette(self):
         extracted = assets.files.backgrounds['mindscape'].extract_palette()
 
-        with open('mindscap_palette_extract_1.bin', 'rb') as f:
+        with open(os.path.join(test_dir, 'mindscap_palette_extract_1.bin'), 'rb') as f:
             test_data = f.read()
 
         assert extracted == [i[0] for i in iter_unpack('<H', test_data)]
