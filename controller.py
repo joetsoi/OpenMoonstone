@@ -1,5 +1,9 @@
+from collections import UserList
+
 from attr import attrib, attrs, Factory
 import pygame
+
+from system import SystemFlag
 
 
 player_one = {
@@ -32,13 +36,13 @@ class Controller:
     fire = attrib(type=bool, default=False)
 
 
-controller_components = []
+class ControllerSystem(UserList):
+    flags = SystemFlag.controller
 
-
-class ControllerSystem:
     def update(self):
         keys = pygame.key.get_pressed()
-        for controller in controller_components:
+        for entity in self.data:
+            controller = entity.controller
             controller.direction.topleft = (0, 0)
             for key, value in controller.mapping['direction'].items():
                 if keys[key]:
