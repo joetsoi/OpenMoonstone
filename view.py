@@ -48,12 +48,10 @@ def game_loop(screen):
     one_up_controller = Controller(player_one)
     movement_1 = Movement((100, 100))
     graphics_1 = Graphic(
-        one_up_controller,
-        movement_1,
-    #    collider_1,
-        assets.animation.knight,
-        assets.files.backgrounds[lairs[0].background].palette,
-        lair,
+        animations=assets.animation.knight,
+        position=movement_1.position,
+        palette=assets.files.backgrounds[lairs[0].background].palette,
+        lair=lair,
         groups=[graphics.active],
     )
     collider_1 = Collision(
@@ -78,11 +76,10 @@ def game_loop(screen):
     two_up_controller = Controller(player_two)
     movement_2 = Movement((200, 150))
     graphics_2 = Graphic(
-        two_up_controller,
-        movement_2,
-        assets.animation.knight,
-        palette,
-        lair,
+        animations=assets.animation.knight,
+        position=movement_2.position,
+        palette=palette,
+        lair=lair,
         groups=[graphics.active],
     )
     collider_2 = Collision(
@@ -111,7 +108,12 @@ def game_loop(screen):
     if movement_system.flags in knight_2.flags:
         movement_system.append(knight_2)
 
-    graphics_system.extend([knight_1.graphics, knight_2.graphics])
+    if graphics_system.flags in knight_1.flags:
+        graphics_system.append(knight_1)
+
+    if graphics_system.flags in knight_2.flags:
+        graphics_system.append(knight_2)
+
     collision_system.extend([collider_1, collider_2])
     logic_system.extend([knight_1.logic, knight_2.logic])
     clock = pygame.time.Clock()

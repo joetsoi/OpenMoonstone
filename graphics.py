@@ -6,10 +6,8 @@ import pygame
 from attr import attrib, attrs
 
 import assets
-from controller import Controller
-#import collide
-#from collide import Collider
 from movement import Direction, Movement
+from system import SystemFlag
 
 active = pygame.sprite.Group()
 
@@ -112,20 +110,15 @@ def make_animations(animation_definitions: dict, palette):
 
 class Graphic(pygame.sprite.Sprite):
     def __init__(self,
-                 controller: Controller,
-                 movement: Movement,
-                 #collider: Collider,
                  animations,
+                 position,
                  palette,
                  lair,
                  direction: Direction=Direction.RIGHT,
-                 groups=None):
+                 groups=None) -> None:
         super().__init__(*groups)
-        self.controller = controller
-        self.movement = movement
-        #self.collider = collider
 
-        self.rect = pygame.Rect(movement.position)
+        self.rect = pygame.Rect(position)
         self.frames = animations
 
         self.animations = make_animations(animations, palette)
@@ -144,19 +137,71 @@ class Graphic(pygame.sprite.Sprite):
         animation = self.frames[self.animation_name]
         return animation[self.frame_number]
 
+
+class GraphicsSystem(UserList):
+    flags = SystemFlag.controller + SystemFlag.movement + SystemFlag.graphics
+
+    def update(self):
+        for entity in self.data:
+            controller = entity.controller
+            graphic = entity.graphics
+            movement = entity.movement
+
+            if movement.attack_frame:
+                animation_name = 'swing'
+
+                animation = graphic.animations[animation_name,
+                                               movement.direction]
+                if movement.attack_frame == len(animation.order) - 1:
+                    graphic.is_attacking = False
+                    # collide.attack.remove(graphic)
+
+                GraphicsSystem.update_image(
+                    graphic,
+                    movement,
+                    animation_name,
+                    movement.attack_frame,
+                    movement.position,
+                    movement.direction,
+                )
+
+            elif entity.controller.fire:
+                GraphicsSystem.update_image(
+                    graphic,
+                    movement,
+                    'swing',
+                    movement.attack_frame,
+                    movement.position,
+                    movement.direction,
+                )
+                animation = graphic.animations['swing',
+                                               movement.direction]
+                movement.attack_anim_length = len(animation.order)
+                graphic.is_attacking = True
+                # collide.attack.add(graphic)
+            else:
+                GraphicsSystem.move(graphic, movement, controller.direction)
+
+    @staticmethod
     def update_image(
-            self,
+            graphic: Graphic,
+            movement: Movement,
             animation_name: str,
             frame_num: int,
-            position: pygame.Rect):
-        frame, x = self.get_frame(
+            position: pygame.Rect,
+            direction):
+        frame, x = GraphicsSystem.get_frame(
+            graphic,
             animation_name,
             frame_num,
             position,
+            direction,
         )
-        self.set_frame_image(
+        GraphicsSystem.set_frame_image(
+            graphic,
             animation_name,
             frame_num,
+            movement,
             x,
             position.y + frame.rect.y,
             frame.rect.width,
@@ -164,103 +209,99 @@ class Graphic(pygame.sprite.Sprite):
             frame.surface,
         )
 
-    def clamp_to_terrain(self, new_position, frame, frame_num):
+    @staticmethod
+    def clamp_to_terrain(
+            graphic: Graphic,
+            current_position: pygame.Rect,
+            new_position: pygame.Rect,
+            frame: Frame,
+            frame_num: int,
+            ) -> int:
         new_rect_y = new_position.y + frame.rect.y + frame.rect.height
-        if new_rect_y <= self.lair.terrain_object.boundary.bottom:
-            return self.movement.position.y
+        if new_rect_y <= graphic.lair.terrain_object.boundary.bottom:
+            return current_position.y
         return new_position.y
 
-    def get_frame(self, animation_name, frame_number, position):
-        animation = self.animations[animation_name, self.movement.direction]
+    @staticmethod
+    def get_frame(graphic, animation_name, frame_number, position, direction):
+        animation = graphic.animations[animation_name, direction]
         frame_number = animation.order[frame_number]
         frame = animation.frames[frame_number]
 
-        direction = self.movement.direction
         # if we're facing left we want to add frame.rect.width to x
         is_facing_left = int(direction.value == Direction.LEFT.value)
         frame_width = frame.rect.width * is_facing_left
-        frame_x = self.movement.direction.value * (frame.rect.x + frame_width)
+        frame_x = direction.value * (frame.rect.x + frame_width)
         x = position.x + frame_x
         return frame, x
 
+    @staticmethod
     def set_frame_image(
-            self,
+            graphic,
             animation_name: str,
             frame_number: int,
+            movement,
             x: int,
             y: int,
             w: int,
             h: int,
             image: pygame.Surface):
-        self.animation_name = animation_name
-        self.frame_number = frame_number
-        self.movement.frame_num = frame_number
-        self.rect.x = x
-        self.rect.y = y
-        self.rect.width = w
-        self.rect.height = h
-        self.image = image
+        graphic.animation_name = animation_name
+        graphic.frame_number = frame_number
+        movement.frame_num = frame_number
+        graphic.rect.x = x
+        graphic.rect.y = y
+        graphic.rect.width = w
+        graphic.rect.height = h
+        graphic.image = image
 
-    def move(self):
-        move_frame = self.movement.next_frame
-        new_position = self.movement.next_position
+    @staticmethod
+    def move(graphic, movement, direction):
+        move_frame = movement.next_frame
+        new_position = movement.next_position
 
         animation_name = controller_to_animation[
-            Move((self.controller.direction.x, self.controller.direction.y))
+            Move((direction.x, direction.y))
         ]
 
-        frame, x = self.get_frame(animation_name, move_frame, new_position)
-        new_position.y = self.clamp_to_terrain(new_position, frame, move_frame)
-
-        # TODO: move this to movement.py
-        if self.movement.position == new_position:
-            frame, x = self.get_frame('idle', 0, new_position)
-        else:
-            self.movement.position = new_position
-            self.movement.move_frame = move_frame
-
-        self.set_frame_image(
+        frame, x = GraphicsSystem.get_frame(
+            graphic,
             animation_name,
             move_frame,
+            new_position,
+            movement.direction
+        )
+        new_position.y = GraphicsSystem.clamp_to_terrain(
+            graphic,
+            movement.position,
+            new_position,
+            frame,
+            move_frame
+        )
+
+        if movement.position == new_position:
+            frame, x = GraphicsSystem.get_frame(
+                graphic,
+                'idle',
+                0,
+                new_position,
+                movement.direction
+            )
+        else:
+            movement.position = new_position
+            movement.move_frame = move_frame
+
+        GraphicsSystem.set_frame_image(
+            graphic,
+            animation_name,
+            move_frame,
+            movement,
             x,
             new_position.y + frame.rect.y,
             frame.rect.width,
             frame.rect.height,
             frame.surface,
         )
-
-
-class GraphicsSystem(UserList):
-    def update(self):
-        for graphic in self.data:
-            if graphic.movement.attack_frame:
-                animation_name = 'swing'
-
-                animation = graphic.animations[animation_name,
-                                               graphic.movement.direction]
-                if graphic.movement.attack_frame == len(animation.order) - 1:
-                    graphic.is_attacking = False
-                    #collide.attack.remove(graphic)
-
-                graphic.update_image(
-                    animation_name,
-                    graphic.movement.attack_frame,
-                    graphic.movement.position,
-                )
-
-            elif graphic.controller.fire:
-                graphic.update_image(
-                    'swing',
-                    graphic.movement.attack_frame,
-                    graphic.movement.position,
-                )
-                animation = graphic.animations['swing',
-                                               graphic.movement.direction]
-                graphic.movement.attack_anim_length = len(animation.order)
-                graphic.is_attacking = True
-                #collide.attack.add(graphic)
-            else:
-                graphic.move()
 
 
 graphics_system = GraphicsSystem()
