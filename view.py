@@ -4,26 +4,23 @@ from pprint import pprint
 
 import pygame
 
-from cli import print_hex_view
-from extract import extract_palette
-from main import MainExe
-from piv import PivFile
-from cmp import CmpFile
-
-from t import TFile
-from assets import loading_screen, lairs
 import assets
 import collide
 import graphics
 import settings
+from assets import lairs, loading_screen
+from cli import print_hex_view
+from cmp import CmpFile
 from collide import Collider, Collision, collision_system
-from graphics import Graphic, graphics_system, Move
-from logic import Logic, logic_system
-from controller import controller_system, player_one, player_two, Controller
-from movement import movement_system, Movement
-
+from controller import Controller, controller_system, player_one, player_two
 from entity import Entity
-
+from extract import extract_palette
+from graphics import Graphic, Move, graphics_system
+from logic import Logic, logic_system
+from main import MainExe
+from movement import Movement, movement_system
+from piv import PivFile
+from t import TFile
 
 controls = {
     pygame.K_LEFT: Move.LEFT,
@@ -49,7 +46,7 @@ def change_player_colour(colour: str, palette: list):
 def game_loop(screen):
     lair = lairs[0]
     one_up_controller = Controller(player_one)
-    movement_1 = Movement(one_up_controller, (100, 100))
+    movement_1 = Movement((100, 100))
     graphics_1 = Graphic(
         one_up_controller,
         movement_1,
@@ -79,7 +76,7 @@ def game_loop(screen):
         assets.files.backgrounds[lairs[0].background].extracted_palette,
     )
     two_up_controller = Controller(player_two)
-    movement_2 = Movement(two_up_controller, (200, 150))
+    movement_2 = Movement((200, 150))
     graphics_2 = Graphic(
         two_up_controller,
         movement_2,
@@ -108,7 +105,12 @@ def game_loop(screen):
     if controller_system.flags in knight_2.flags:
         controller_system.append(knight_2)
 
-    movement_system.extend([knight_1.movement, knight_2.movement])
+    if movement_system.flags in knight_1.flags:
+        movement_system.append(knight_1)
+
+    if movement_system.flags in knight_2.flags:
+        movement_system.append(knight_2)
+
     graphics_system.extend([knight_1.graphics, knight_2.graphics])
     collision_system.extend([collider_1, collider_2])
     logic_system.extend([knight_1.logic, knight_2.logic])

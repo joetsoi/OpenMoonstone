@@ -1,11 +1,10 @@
 from collections import UserList
 from enum import Enum
 
-from attr import attrs, attrib
 import pygame
+from attr import attrib, attrs
 
-from controller import Controller
-
+from system import SystemFlag
 
 x_distances = (
     (25, 3, 23, 4),
@@ -27,7 +26,6 @@ class Direction(Enum):
 
 @attrs(slots=True)
 class Movement:
-    controller = attrib(type=Controller)
     position = attrib(
         type=pygame.Rect,
         converter=lambda p: pygame.Rect(p[0], p[1], 0, 0),
@@ -45,10 +43,8 @@ class Movement:
     attack_frame = attrib(type=int, default=None)
     attack_anim_length = attrib(type=int, default=None)
 
-    def get_next_position(self):
+    def get_next_position(self, direction):
         new_position = pygame.Rect(self.position)
-
-        direction = self.controller.direction
 
         is_moving = (direction.x | direction.y) & 1
         move_frame = ((self.frame_num + 1) % 4) * is_moving
@@ -75,8 +71,13 @@ class Movement:
 
 
 class MovementSystem(UserList):
+    flags = SystemFlag.controller + SystemFlag.movement
+
     def update(self):
-        for mover in self.data:
+        for entity in self.data:
+            mover = entity.movement
+            controller = entity.controller
+
             if mover.attack_frame is not None:
                 mover.attack_frame += 1
                 if mover.attack_frame < mover.attack_anim_length:
@@ -85,16 +86,17 @@ class MovementSystem(UserList):
                     mover.attack_frame = None
                     mover.attack_anim_length = None
 
-            if mover.controller.fire:
+            if controller.fire:
                 mover.attack_frame = 0
                 continue
 
-            new_position, frame = mover.get_next_position()
-            direction = mover.controller.direction
+            direction = controller.direction
+            new_position, frame = mover.get_next_position(direction)
             if direction.x:
-                mover.direction = Direction(mover.controller.direction.x)
+                mover.direction = Direction(controller.direction.x)
 
-            x, y, new_position = mover.clamp_to_boundary(direction, new_position)
+            x, y, new_position = mover.clamp_to_boundary(direction,
+                                                         new_position)
             direction.x = x
             direction.y = y
 

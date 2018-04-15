@@ -1,10 +1,10 @@
-from attr import attrs, attrib
+from attr import attrib, attrs
 
 from collide import Collider
-from graphics import Graphic
 from controller import Controller
-from movement import Movement
+from graphics import Graphic
 from logic import Logic
+from movement import Movement
 from system import SystemFlag
 
 
@@ -22,4 +22,3 @@ class Entity:
         for slot in self.__slots__:
             flags += hasattr(self, slot) * getattr(SystemFlag, slot)
         return SystemFlag(flags)
-
