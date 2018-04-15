@@ -1,14 +1,15 @@
 from collections import UserList
-from pprint import pprint
+# from pprint import pprint
 
 import pygame
 from attr import attrib, attrs
 
 import assets
-from assets import collide_hit
 from assets.animation import Collide
-from graphics import Graphic
+# from graphics import Graphic
 from movement import Direction, Movement
+from system import SystemFlag
+
 
 rects = []
 attack = pygame.sprite.Group()
@@ -81,33 +82,24 @@ class Collider:
 
 @attrs(slots=True)
 class Collision:
-    graphics = attrib(type=Graphic)
-    movement = attrib(type=Movement)
     collider = attrib(type=Collider)
     has_hit = attrib(type=Collider, default=None)
 
 
 class CollisionSystem(UserList):
+    flags = SystemFlag.movement + SystemFlag.graphics + SystemFlag.collision
+
     def update(self):
-        attackers = [c for c in self.data if c.graphics.is_attacking]
+        attackers = [e for e in self.data if e.graphics.is_attacking]
         for attacker in attackers:
-            attacker.has_hit = None
+            attacker.collision.has_hit = None
             for defender in self.data:
                 collided = check_collision(attacker, defender)
                 if collided:
-                    attacker.has_hit = defender
+                    attacker.collision.has_hit = defender
 
 
 collision_system = CollisionSystem()
-
-
-# def check_collisions():
-#     for attacker in attack:
-#         attacker.has_hit = None
-#         for defender in active.sprites():
-#             collided = check_collision(attacker, defender)
-#             if collided:
-#                 attacker.has_hit = defender
 
 
 def check_collision(attacker, defender):
@@ -120,24 +112,24 @@ def check_collision(attacker, defender):
     defender_frame = defender.graphics.get_images()
     defender_images = [i for i in defender_frame if i.collide == Collide.COLLIDEE]
 
-    defender_rects = defender.collider.get_defend_rects(
+    defender_rects = defender.collision.collider.get_defend_rects(
         defender.graphics.animation_name, defender.graphics.frame_number
     )
 
-    for image_rect, collide_max, collide_rects in attacker.collider.get_attacker_rects(attacker.graphics):
-        max_rect = get_entity_collision_rect(attacker, collide_max)
+    for image_rect, collide_max, collide_rects in attacker.collision.collider.get_attacker_rects(attacker.graphics):
+        max_rect = get_entity_collision_rect(attacker.movement, collide_max)
 
         rects.append(pygame.Rect(max_rect))
 
         for d_rect, d_image_position in zip(defender_rects, defender_images):
-            defender_rect = get_entity_collision_rect(defender, d_rect)
+            defender_rect = get_entity_collision_rect(defender.movement, d_rect)
             rects.append(pygame.Rect(defender_rect))
 
             if not max_rect.colliderect(defender_rect):
                 continue
 
             for attacker_rect in collide_rects:
-                attacker_rect = get_entity_collision_rect(attacker, attacker_rect)
+                attacker_rect = get_entity_collision_rect(attacker.movement, attacker_rect)
                 rects.append(pygame.Rect(attacker_rect))
 
                 if not attacker_rect.colliderect(defender_rect):
@@ -152,15 +144,15 @@ def check_collision(attacker, defender):
                     return True
 
 
-def get_entity_collision_rect(entity, rect):
+def get_entity_collision_rect(movement: Movement, rect):
     rect = rect.copy()
-    is_facing_left = int(entity.movement.direction.value == Direction.LEFT.value)
+    is_facing_left = int(movement.direction.value == Direction.LEFT.value)
     rect.x += rect.width * is_facing_left
-    rect.x *= entity.movement.direction.value
+    rect.x *= movement.direction.value
 
     rect.move_ip(
-        entity.movement.position.x,
-        entity.movement.position.y,
+        movement.position.x,
+        movement.position.y,
     )
     return rect
 

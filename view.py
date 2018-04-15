@@ -55,8 +55,6 @@ def game_loop(screen):
         groups=[graphics.active],
     )
     collider_1 = Collision(
-        graphics=graphics_1,
-        movement=movement_1,
         collider=Collider(assets.animation.knight, assets.collide_hit),
     )
     logic_1 = Logic(graphics_1)
@@ -65,7 +63,7 @@ def game_loop(screen):
         controller=one_up_controller,
         movement=movement_1,
         graphics=graphics_1,
-        collider=collider_1,
+        collision=collider_1,
         logic=logic_1,
     )
 
@@ -83,8 +81,6 @@ def game_loop(screen):
         groups=[graphics.active],
     )
     collider_2 = Collision(
-        graphics=graphics_2,
-        movement=movement_2,
         collider=Collider(assets.animation.knight, assets.collide_hit),
     )
     logic_2 = Logic(graphics_2)
@@ -93,7 +89,7 @@ def game_loop(screen):
         controller=two_up_controller,
         movement=movement_2,
         graphics=graphics_2,
-        collider=collider_2,
+        collision=collider_2,
         logic=logic_2,
     )
     if controller_system.flags in knight_1.flags:
@@ -114,7 +110,12 @@ def game_loop(screen):
     if graphics_system.flags in knight_2.flags:
         graphics_system.append(knight_2)
 
-    collision_system.extend([collider_1, collider_2])
+    if collision_system.flags in knight_1.flags:
+        collision_system.append(knight_1)
+
+    if collision_system.flags in knight_2.flags:
+        collision_system.append(knight_2)
+
     logic_system.extend([knight_1.logic, knight_2.logic])
     clock = pygame.time.Clock()
     last_tick = pygame.time.get_ticks()

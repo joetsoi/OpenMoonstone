@@ -1,6 +1,6 @@
 from attr import attrib, attrs
 
-from collide import Collider
+from collide import Collision
 from controller import Controller
 from graphics import Graphic
 from logic import Logic
@@ -13,7 +13,7 @@ class Entity:
     controller = attrib(type=Controller, default=None)
     movement = attrib(type=Movement, default=None)
     graphics = attrib(type=Graphic, default=None)
-    collider = attrib(type=Collider, default=None)
+    collision = attrib(type=Collision, default=None)
     logic = attrib(type=Logic, default=None)
 
     @property
