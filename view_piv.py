@@ -5,13 +5,12 @@ import sys
 import pygame
 
 from cli import print_hex_view
+from cmp import CmpFile
 from extract import extract_palette, grouper
 from font import FontFile, draw_string
 from main import MainExe
 from piv import PivFile
-from cmp import CmpFile
 from t import TFile
-
 
 scale_factor = 4
 

@@ -1,4 +1,4 @@
-from attr import attrs, attrib
+from attr import attrib, attrs
 
 import assets
 from font import StringFlag, pixel_to_surface

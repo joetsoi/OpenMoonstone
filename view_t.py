@@ -4,16 +4,15 @@ import sys
 
 import pygame
 
+import assets
+import settings
 from cli import print_hex_view
+from cmp import CmpFile
 from extract import extract_palette, grouper
-from font import FontFile#, draw_string
+from font import FontFile  # , draw_string
 from main import MainExe
 from piv import PivFile
-from cmp import CmpFile
 from t import TFile
-import settings
-import assets
-
 
 scale_factor = 3
 

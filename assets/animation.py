@@ -1,7 +1,7 @@
 from enum import IntFlag
 from typing import NamedTuple, Optional, Tuple
 
-from attr import attrs, attrib
+from attr import attrib, attrs
 
 
 class Collide(IntFlag):

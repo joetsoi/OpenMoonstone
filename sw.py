@@ -1,6 +1,7 @@
+import os
+import sys
 from codecs import decode
 from glob import glob
-import os, sys
 
 if __name__ == '__main__':
     if len(sys.argv) != 3:
@@ -20,4 +21,3 @@ if __name__ == '__main__':
         else:
             pass
             #print('no match')
-

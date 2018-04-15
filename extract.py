@@ -1,7 +1,6 @@
 from itertools import cycle, islice, zip_longest
 from struct import unpack, unpack_from
 
-
 # class CompressedFile(object):
 #     def __init__(self, file_path):
 #         with open(file_path, 'rb') as f:

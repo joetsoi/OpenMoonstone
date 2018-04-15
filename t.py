@@ -1,7 +1,7 @@
 import os
-from collections import namedtuple
-from struct import unpack, unpack_from, iter_unpack
 import sys
+from collections import namedtuple
+from struct import iter_unpack, unpack, unpack_from
 
 import pygame
 
@@ -95,4 +95,3 @@ if __name__ == "__main__":
     with open(file_path, 'rb') as f:
         t = TFile(f.read())
     #print_hex_view(t.extracted)
-

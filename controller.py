@@ -1,10 +1,9 @@
 from collections import UserList
 
-from attr import attrib, attrs, Factory
 import pygame
+from attr import Factory, attrib, attrs
 
 from system import SystemFlag
-
 
 player_one = {
     'direction': {

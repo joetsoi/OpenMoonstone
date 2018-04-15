@@ -5,9 +5,10 @@ import pytest
 
 import assets
 from extract import extract_file, grouper
-from font import FontFile#, draw_string
+from font import FontFile  # , draw_string
 from main import MainExe
 from piv import PivFile
+
 #from sprite import SpriteSheetFile
 
 
@@ -97,4 +98,3 @@ class TestPivFile(object):
 # def test_sprite():
 #     test = read_file('BOLD.F', SpriteSheetFile)
 #     import pdb; pdb.set_trace()
-

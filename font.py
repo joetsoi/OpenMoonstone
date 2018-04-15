@@ -5,7 +5,7 @@ from enum import IntFlag
 from struct import iter_unpack, unpack
 
 import pygame
-from attr import attrs, attrib
+from attr import attrib, attrs
 
 from extract import each_bit_in_byte, extract_file, grouper
 # from cli import print_hex_view

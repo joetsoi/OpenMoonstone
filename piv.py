@@ -8,7 +8,6 @@ from extract import each_bit_in_byte, extract_file, extract_palette, grouper
 from settings import MOONSTONE_DIR
 
 
-
 class PivFile(object):
     def __init__(self, file_data):
         self.file_type = unpack('>H', file_data[0:2])[0]

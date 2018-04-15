@@ -1,9 +1,8 @@
 from collections import UserList
 
-from attr import attrs, attrib
+from attr import attrib, attrs
 
 from collide import Collision
-
 
 
 @attrs(slots=True)
@@ -25,6 +24,7 @@ class LogicSystem(UserList):
         for attacker in attackers:
             pass
             defender = attacker.has_hit
+            collider
             
 
 

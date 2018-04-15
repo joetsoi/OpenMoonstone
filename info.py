@@ -1,5 +1,7 @@
+import os
+import sys
 from collections import defaultdict
-import os, sys
+
 from font import FontFile
 
 if __name__ == '__main__':
@@ -23,4 +25,3 @@ if __name__ == '__main__':
 
     for k, v in image_types.items():
         print('blit type: {}'.format(k))
-                                                        

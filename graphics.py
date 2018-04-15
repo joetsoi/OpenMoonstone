@@ -1,16 +1,15 @@
-from enum import Enum
 from collections import UserList
-from typing import List, Optional, Tuple
+from enum import Enum
+from typing import List, Optional
 
-from attr import attrs, attrib
 import pygame
+from attr import attrib, attrs
 
 import assets
+from controller import Controller
 #import collide
 #from collide import Collider
-from movement import Movement, Direction
-from controller import Controller
-
+from movement import Direction, Movement
 
 active = pygame.sprite.Group()
 
@@ -26,6 +25,7 @@ class Move(Enum):
     RIGHT_UP = (1, -1)
     LEFT_DOWN = (-1, 1)
     RIGHT_DOWN = (1, 1)
+
 
 controller_to_animation = {
     Move.IDLE: 'idle',
@@ -174,8 +174,10 @@ class Graphic(pygame.sprite.Sprite):
         animation = self.animations[animation_name, self.movement.direction]
         frame_number = animation.order[frame_number]
         frame = animation.frames[frame_number]
+
+        direction = self.movement.direction
         # if we're facing left we want to add frame.rect.width to x
-        is_facing_left = int(self.movement.direction.value == Direction.LEFT.value)
+        is_facing_left = int(direction.value == Direction.LEFT.value)
         frame_width = frame.rect.width * is_facing_left
         frame_x = self.movement.direction.value * (frame.rect.x + frame_width)
         x = position.x + frame_x

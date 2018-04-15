@@ -1,16 +1,14 @@
 from collections import UserList
-
-from attr import attrs, attrib
-import pygame
-
-from assets.animation import Collide
-from assets import collide_hit
 from pprint import pprint
+
+import pygame
+from attr import attrib, attrs
+
 import assets
-
-from movement import Direction, Movement
+from assets import collide_hit
+from assets.animation import Collide
 from graphics import Graphic
-
+from movement import Direction, Movement
 
 rects = []
 attack = pygame.sprite.Group()

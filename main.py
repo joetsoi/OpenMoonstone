@@ -1,8 +1,6 @@
 from collections import namedtuple
 from struct import unpack, unpack_from
 
-
-
 Segment = namedtuple('Segment', 'offset length')
 ViewportDimension = namedtuple('ViewportDimension', 'right left')
 

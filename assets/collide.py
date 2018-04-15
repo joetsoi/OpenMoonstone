@@ -1,4 +1,4 @@
-from collections import defaultdict, UserList
+from collections import UserList, defaultdict
 from enum import IntEnum, auto
 from pathlib import Path, PureWindowsPath
 
