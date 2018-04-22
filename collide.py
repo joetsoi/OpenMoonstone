@@ -146,9 +146,9 @@ def check_collision(attacker, defender):
 
 def get_entity_collision_rect(movement: Movement, rect):
     rect = rect.copy()
-    is_facing_left = int(movement.direction.value == Direction.LEFT.value)
+    is_facing_left = int(movement.facing.value == Direction.LEFT.value)
     rect.x += rect.width * is_facing_left
-    rect.x *= movement.direction.value
+    rect.x *= movement.facing.value
 
     rect.move_ip(
         movement.position.x,

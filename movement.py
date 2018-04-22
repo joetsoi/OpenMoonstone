@@ -38,7 +38,7 @@ class Movement:
         converter=lambda p: pygame.Rect(p[0], p[1], 0, 0),
     )
     frame_num = attrib(type=int, default=0)
-    direction = attrib(type=Direction, default=Direction.RIGHT)
+    facing = attrib(type=Direction, default=Direction.RIGHT)
 
     next_position = attrib(
         type=pygame.Rect,
@@ -107,7 +107,7 @@ class MovementSystem(UserList):
             direction = controller.direction
             new_position, frame = mover.get_next_position(direction)
             if direction.x:
-                mover.direction = Direction(controller.direction.x)
+                mover.facing = Direction(controller.direction.x)
 
             x, y, new_position = mover.clamp_to_boundary(direction,
                                                          new_position)

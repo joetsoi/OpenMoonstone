@@ -29,7 +29,7 @@ class LogicSystem(UserList):
                 'some',
                 0,
                 defender.movement.position,
-                defender.movement.direction
+                defender.movement.facing
             )
             defender.graphics.set_frame_image(
                 'some',

@@ -183,7 +183,7 @@ class GraphicsSystem(UserList):
                 animation_name = 'swing'
 
                 animation = graphic.animations[animation_name,
-                                               movement.direction]
+                                               movement.facing]
                 if movement.attack_frame == len(animation.order) - 1:
                     graphic.is_attacking = False
                     # collide.attack.remove(graphic)
@@ -194,7 +194,7 @@ class GraphicsSystem(UserList):
                     animation_name,
                     movement.attack_frame,
                     movement.position,
-                    movement.direction,
+                    movement.facing,
                 )
 
             elif entity.movement.state == State.start_attacking:
@@ -204,17 +204,17 @@ class GraphicsSystem(UserList):
                     'swing',
                     movement.attack_frame,
                     movement.position,
-                    movement.direction,
+                    movement.facing,
                 )
                 animation = graphic.animations['swing',
-                                               movement.direction]
+                                               movement.facing]
                 movement.attack_anim_length = len(animation.order)
                 graphic.is_attacking = True
                 entity.movement.state = State.attacking
                 # collide.attack.add(graphic)
             # elif movement.state == State.busy:
             #     animation = graphic.animations[animation_name,
-            #                                    movement.direction]
+            #                                    movement.facing]
             else:
                 GraphicsSystem.move(graphic, movement, controller.direction)
 
@@ -269,7 +269,7 @@ class GraphicsSystem(UserList):
             animation_name,
             move_frame,
             new_position,
-            movement.direction
+            movement.facing
         )
         new_position.y = GraphicsSystem.clamp_to_terrain(
             graphic,
@@ -284,7 +284,7 @@ class GraphicsSystem(UserList):
                 'idle',
                 0,
                 new_position,
-                movement.direction
+                movement.facing
             )
         else:
             movement.position = new_position
