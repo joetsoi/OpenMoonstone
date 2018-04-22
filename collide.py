@@ -8,6 +8,7 @@ import assets
 from assets.animation import Collide
 # from graphics import Graphic
 from movement import Direction, Movement
+from state import State
 from system import SystemFlag
 
 
@@ -87,10 +88,11 @@ class Collision:
 
 
 class CollisionSystem(UserList):
-    flags = SystemFlag.movement + SystemFlag.graphics + SystemFlag.collision
+    flags = SystemFlag.movement + SystemFlag.graphics + SystemFlag.collision + SystemFlag.state
 
     def update(self):
-        attackers = [e for e in self.data if e.graphics.is_attacking]
+        # attackers = [e for e in self.data if e.graphics.is_attacking]
+        attackers = [e for e in self.data if e.state.value == State.attacking]
         for attacker in attackers:
             attacker.collision.has_hit = None
             for defender in self.data:

@@ -132,7 +132,6 @@ class Graphic(pygame.sprite.Sprite):
         self.animation_name = None
         self.has_hit = None
 
-        self.is_attacking = False
         self.frame_number = 0
 
     def get_images(self):
@@ -183,13 +182,6 @@ class GraphicsSystem(UserList):
 
             if entity.state.value == State.attacking:
                 animation_name = 'swing'
-
-                animation = graphic.animations[animation_name,
-                                               movement.facing]
-                if state.frame_num == len(animation.order) - 1:
-                    graphic.is_attacking = False
-                    # collide.attack.remove(graphic)
-
                 GraphicsSystem.update_image(
                     graphic,
                     movement,
@@ -211,7 +203,6 @@ class GraphicsSystem(UserList):
                 animation = graphic.animations['swing',
                                                movement.facing]
                 state.animation_len = len(animation.order)
-                graphic.is_attacking = True
                 entity.state.value = State.attacking
                 # collide.attack.add(graphic)
             # elif movement.state == State.busy:
