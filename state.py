@@ -16,6 +16,7 @@ class State(Enum):
 @attrs(slots=True)
 class AnimationState:
     frame_num = attrib(type=int, default=None)
+    animation_name = attrib(type=str, default=None)
     animation_len = attrib(type=int, default=None)
     value = attrib(type=State, default=State.walking)
 

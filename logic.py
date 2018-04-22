@@ -27,14 +27,15 @@ class LogicSystem(UserList):
             defender = attacker.collision.has_hit
             defender.logic.health -= attacker.logic.weapon_damage
 
+            damage_animation = 'some'
             frame, x = defender.graphics.get_frame(
-                'some',
+                damage_animation,
                 0,
                 defender.movement.position,
                 defender.movement.facing
             )
             defender.graphics.set_frame_image(
-                'some',
+                damage_animation,
                 0,
                 defender.movement,
                 x,
@@ -43,7 +44,9 @@ class LogicSystem(UserList):
                 frame.rect.height,
                 frame.surface,
             )
-            animation = defender.graphics.animations['some', defender.movement.facing]
+            animation = defender.graphics.animations[damage_animation,
+                                                    defender.movement.facing]
+            defender.state.animation_name = damage_animation
             defender.state.animation_len = len(animation.order)
             defender.state.frame_num = 0
             defender.state.value = State.busy

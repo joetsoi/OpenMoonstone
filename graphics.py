@@ -182,12 +182,14 @@ class GraphicsSystem(UserList):
             state = entity.state
 
             if entity.state.value == State.start_attacking:
-                animation = graphic.animations['swing', movement.facing]
+                state.animation_name = 'swing'
+                animation = graphic.animations[state.animation_name,
+                                               movement.facing]
                 state.animation_len = len(animation.order)
                 entity.state.value = State.attacking
 
             if entity.state.value == State.attacking:
-                animation_name = 'swing'
+                animation_name = state.animation_name
                 GraphicsSystem.update_image(
                     graphic,
                     movement,
@@ -197,7 +199,7 @@ class GraphicsSystem(UserList):
                     movement.facing,
                 )
             elif entity.state.value == State.busy:
-                animation_name = 'some'
+                animation_name = state.animation_name
                 GraphicsSystem.update_image(
                     graphic,
                     movement,
