@@ -3,7 +3,9 @@ from collections import UserList
 from attr import attrib, attrs
 
 from collide import Collision
+from state import State
 from system import SystemFlag
+
 
 @attrs(slots=True)
 class Logic:
@@ -41,6 +43,10 @@ class LogicSystem(UserList):
                 frame.rect.height,
                 frame.surface,
             )
+            animation = defender.graphics.animations['some', defender.movement.facing]
+            defender.state.animation_len = len(animation.order)
+            defender.state.frame_num = 0
+            defender.state.value = State.busy
 
 
             print(f"{defender.logic.health}")

@@ -28,12 +28,7 @@ class AnimationStateSystem(UserList):
             controller = entity.controller
             state = entity.state
 
-            if state.value == State.busy:
-                state.frame_num += 1
-                continue
-
-            #if mover.attack_frame is not None:
-            if state.value == State.attacking:
+            if state.value in [State.attacking, State.busy]:
                 state.frame_num += 1
                 if state.frame_num < state.animation_len:
                     continue

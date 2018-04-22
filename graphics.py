@@ -171,7 +171,8 @@ class Graphic(pygame.sprite.Sprite):
 
 
 class GraphicsSystem(UserList):
-    flags = SystemFlag.controller + SystemFlag.state + SystemFlag.movement + SystemFlag.graphics
+    flags = SystemFlag.controller + SystemFlag.state + SystemFlag.movement +\
+            SystemFlag.graphics
 
     def update(self):
         for entity in self.data:
@@ -179,6 +180,11 @@ class GraphicsSystem(UserList):
             graphic = entity.graphics
             movement = entity.movement
             state = entity.state
+
+            if entity.state.value == State.start_attacking:
+                animation = graphic.animations['swing', movement.facing]
+                state.animation_len = len(animation.order)
+                entity.state.value = State.attacking
 
             if entity.state.value == State.attacking:
                 animation_name = 'swing'
@@ -190,24 +196,16 @@ class GraphicsSystem(UserList):
                     movement.position,
                     movement.facing,
                 )
-
-            elif entity.state.value == State.start_attacking:
+            elif entity.state.value == State.busy:
+                animation_name = 'some'
                 GraphicsSystem.update_image(
                     graphic,
                     movement,
-                    'swing',
+                    animation_name,
                     state.frame_num,
                     movement.position,
                     movement.facing,
                 )
-                animation = graphic.animations['swing',
-                                               movement.facing]
-                state.animation_len = len(animation.order)
-                entity.state.value = State.attacking
-                # collide.attack.add(graphic)
-            # elif movement.state == State.busy:
-            #     animation = graphic.animations[animation_name,
-            #                                    movement.facing]
             else:
                 GraphicsSystem.move(graphic, movement, controller.direction)
 
