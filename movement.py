@@ -31,7 +31,6 @@ class Movement:
         type=pygame.Rect,
         converter=lambda p: pygame.Rect(p[0], p[1], 0, 0),
     )
-    frame_num = attrib(type=int, default=0)
     facing = attrib(type=Direction, default=Direction.RIGHT)
 
     next_position = attrib(
@@ -39,7 +38,7 @@ class Movement:
         default=lambda: pygame.Rect(0, 0, 0, 0),
     )
     next_frame = attrib(type=int, default=0)
-    #move_frame = attrib(type=int, default=0)
+    move_frame = attrib(type=int, default=0)
 
     attack_frame = attrib(type=int, default=None)
     attack_anim_length = attrib(type=int, default=None)
@@ -48,7 +47,7 @@ class Movement:
         new_position = pygame.Rect(self.position)
 
         is_moving = (direction.x | direction.y) & 1
-        move_frame = ((self.frame_num + 1) % 4) * is_moving
+        move_frame = ((self.move_frame + 1) % 4) * is_moving
 
         x_delta = x_distances[direction.x + 1][move_frame] * direction.x
         new_position.x = self.position.x + x_delta
@@ -83,7 +82,8 @@ class MovementSystem(UserList):
             if state.value.name == State.busy:
                 continue
 
-            if mover.attack_frame is not None:
+            #if mover.attack_frame is not None:
+            if state.value == State.attacking:
                 mover.attack_frame += 1
                 if mover.attack_frame < mover.attack_anim_length:
                     continue

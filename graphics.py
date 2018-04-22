@@ -7,7 +7,7 @@ from attr import attrib, attrs
 
 import assets
 from movement import Direction, Movement
-from state import GameState, State
+from state import State
 from system import SystemFlag
 
 active = pygame.sprite.Group()
@@ -163,7 +163,7 @@ class Graphic(pygame.sprite.Sprite):
             image: pygame.Surface):
         self.animation_name = animation_name
         self.frame_number = frame_number
-        movement.frame_num = frame_number
+        movement.move_frame = frame_number
         self.rect.x = x
         self.rect.y = y
         self.rect.width = w
@@ -289,7 +289,7 @@ class GraphicsSystem(UserList):
             )
         else:
             movement.position = new_position
-            #movement.move_frame = move_frame
+            # movement.move_frame = move_frame
 
         graphic.set_frame_image(
             animation_name,

@@ -19,7 +19,7 @@ from graphics import Graphic, Move, graphics_system
 from logic import Logic, logic_system
 from main import MainExe
 from movement import Movement, movement_system
-from state import GameState
+from state import AnimationState
 from piv import PivFile
 from t import TFile
 
@@ -66,7 +66,7 @@ def game_loop(screen):
         graphics=graphics_1,
         collision=collider_1,
         logic=logic_1,
-        state=GameState(),
+        state=AnimationState(),
     )
 
     palette = change_player_colour(
@@ -93,7 +93,7 @@ def game_loop(screen):
         graphics=graphics_2,
         collision=collider_2,
         logic=logic_2,
-        state=GameState(),
+        state=AnimationState(),
     )
     if controller_system.flags in knight_1.flags:
         controller_system.append(knight_1)
