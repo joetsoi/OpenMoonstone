@@ -179,13 +179,14 @@ class GraphicsSystem(UserList):
             controller = entity.controller
             graphic = entity.graphics
             movement = entity.movement
+            state = entity.state
 
             if entity.state.value == State.attacking:
                 animation_name = 'swing'
 
                 animation = graphic.animations[animation_name,
                                                movement.facing]
-                if movement.attack_frame == len(animation.order) - 1:
+                if state.frame_num == len(animation.order) - 1:
                     graphic.is_attacking = False
                     # collide.attack.remove(graphic)
 
@@ -193,7 +194,7 @@ class GraphicsSystem(UserList):
                     graphic,
                     movement,
                     animation_name,
-                    movement.attack_frame,
+                    state.frame_num,
                     movement.position,
                     movement.facing,
                 )
@@ -203,13 +204,13 @@ class GraphicsSystem(UserList):
                     graphic,
                     movement,
                     'swing',
-                    movement.attack_frame,
+                    state.frame_num,
                     movement.position,
                     movement.facing,
                 )
                 animation = graphic.animations['swing',
                                                movement.facing]
-                movement.attack_anim_length = len(animation.order)
+                state.animation_len = len(animation.order)
                 graphic.is_attacking = True
                 entity.state.value = State.attacking
                 # collide.attack.add(graphic)

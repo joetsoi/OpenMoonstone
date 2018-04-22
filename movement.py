@@ -40,8 +40,8 @@ class Movement:
     next_frame = attrib(type=int, default=0)
     move_frame = attrib(type=int, default=0)
 
-    attack_frame = attrib(type=int, default=None)
-    attack_anim_length = attrib(type=int, default=None)
+    # attack_frame = attrib(type=int, default=None)
+    # attack_anim_length = attrib(type=int, default=None)
 
     def get_next_position(self, direction):
         new_position = pygame.Rect(self.position)
@@ -79,22 +79,23 @@ class MovementSystem(UserList):
             state = entity.state
             controller = entity.controller
 
-            if state.value.name == State.busy:
+            if state.value == State.busy:
+                state.frame_num += 1
                 continue
 
             #if mover.attack_frame is not None:
             if state.value == State.attacking:
-                mover.attack_frame += 1
-                if mover.attack_frame < mover.attack_anim_length:
+                state.frame_num += 1
+                if state.frame_num < state.animation_len:
                     continue
                 else:
-                    mover.attack_frame = None
-                    mover.attack_anim_length = None
+                    state.frame_num = None
+                    state.animation_len = None
                     state.value = State.walking
 
             if controller.fire:
                 state.value = State.start_attacking
-                mover.attack_frame = 0
+                state.frame_num = 0
                 continue
 
             direction = controller.direction
