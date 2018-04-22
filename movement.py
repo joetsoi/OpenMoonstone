@@ -40,9 +40,6 @@ class Movement:
     next_frame = attrib(type=int, default=0)
     move_frame = attrib(type=int, default=0)
 
-    # attack_frame = attrib(type=int, default=None)
-    # attack_anim_length = attrib(type=int, default=None)
-
     def get_next_position(self, direction):
         new_position = pygame.Rect(self.position)
 
@@ -79,39 +76,21 @@ class MovementSystem(UserList):
             state = entity.state
             controller = entity.controller
 
-            if state.value == State.busy:
-                state.frame_num += 1
-                continue
+            if state.value == State.walking:
+                direction = controller.direction
+                new_position, frame = mover.get_next_position(direction)
+                if direction.x:
+                    mover.facing = Direction(controller.direction.x)
 
-            #if mover.attack_frame is not None:
-            if state.value == State.attacking:
-                state.frame_num += 1
-                if state.frame_num < state.animation_len:
-                    continue
-                else:
-                    state.frame_num = None
-                    state.animation_len = None
-                    state.value = State.walking
+                x, y, new_position = mover.clamp_to_boundary(direction,
+                                                             new_position)
+                direction.x = x
+                direction.y = y
 
-            if controller.fire:
-                state.value = State.start_attacking
-                state.frame_num = 0
-                continue
-
-            direction = controller.direction
-            new_position, frame = mover.get_next_position(direction)
-            if direction.x:
-                mover.facing = Direction(controller.direction.x)
-
-            x, y, new_position = mover.clamp_to_boundary(direction,
-                                                         new_position)
-            direction.x = x
-            direction.y = y
-
-            frame = frame * ((direction.x | direction.y) & 1)
-            mover.next_frame = frame
-            mover.next_position = new_position
-            state.value = State.walking
+                frame = frame * ((direction.x | direction.y) & 1)
+                mover.next_frame = frame
+                mover.next_position = new_position
+                #state.value = State.walking
 
 
 movement_system = MovementSystem()

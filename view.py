@@ -19,7 +19,7 @@ from graphics import Graphic, Move, graphics_system
 from logic import Logic, logic_system
 from main import MainExe
 from movement import Movement, movement_system
-from state import AnimationState
+from state import AnimationState, state_system
 from piv import PivFile
 from t import TFile
 
@@ -125,6 +125,12 @@ def game_loop(screen):
     if logic_system.flags in knight_2.flags:
         logic_system.append(knight_2)
 
+    if state_system.flags in knight_1.flags:
+        state_system.append(knight_1)
+
+    if state_system.flags in knight_2.flags:
+        state_system.append(knight_2)
+
     clock = pygame.time.Clock()
     last_tick = pygame.time.get_ticks()
     while True:
@@ -141,6 +147,7 @@ def game_loop(screen):
         #    knights.update()
         #    last_tick = now
         controller_system.update()
+        state_system.update()
         movement_system.update()
         graphics_system.update()
         #collide.active.update()
