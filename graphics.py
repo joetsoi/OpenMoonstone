@@ -6,7 +6,8 @@ import pygame
 from attr import attrib, attrs
 
 import assets
-from movement import Direction, Movement, State
+from movement import Direction, Movement
+from state import GameState, State
 from system import SystemFlag
 
 active = pygame.sprite.Group()
@@ -171,7 +172,7 @@ class Graphic(pygame.sprite.Sprite):
 
 
 class GraphicsSystem(UserList):
-    flags = SystemFlag.controller + SystemFlag.movement + SystemFlag.graphics
+    flags = SystemFlag.controller + SystemFlag.state + SystemFlag.movement + SystemFlag.graphics
 
     def update(self):
         for entity in self.data:
@@ -179,7 +180,7 @@ class GraphicsSystem(UserList):
             graphic = entity.graphics
             movement = entity.movement
 
-            if entity.movement.state == State.attacking:
+            if entity.state.value == State.attacking:
                 animation_name = 'swing'
 
                 animation = graphic.animations[animation_name,
@@ -197,7 +198,7 @@ class GraphicsSystem(UserList):
                     movement.facing,
                 )
 
-            elif entity.movement.state == State.start_attacking:
+            elif entity.state.value == State.start_attacking:
                 GraphicsSystem.update_image(
                     graphic,
                     movement,
@@ -210,7 +211,7 @@ class GraphicsSystem(UserList):
                                                movement.facing]
                 movement.attack_anim_length = len(animation.order)
                 graphic.is_attacking = True
-                entity.movement.state = State.attacking
+                entity.state.value = State.attacking
                 # collide.attack.add(graphic)
             # elif movement.state == State.busy:
             #     animation = graphic.animations[animation_name,

@@ -7,3 +7,4 @@ class SystemFlag(IntFlag):
     graphics = 4
     collision = 8
     logic = 16
+    state = 32

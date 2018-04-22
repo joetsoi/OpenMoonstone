@@ -5,6 +5,7 @@ from controller import Controller
 from graphics import Graphic
 from logic import Logic
 from movement import Movement
+from state import GameState
 from system import SystemFlag
 
 
@@ -15,6 +16,7 @@ class Entity:
     graphics = attrib(type=Graphic, default=None)
     collision = attrib(type=Collision, default=None)
     logic = attrib(type=Logic, default=None)
+    state = attrib(type=GameState, default=None)
 
     @property
     def flags(self):

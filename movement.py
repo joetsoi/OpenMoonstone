@@ -1,9 +1,10 @@
 from collections import UserList
-from enum import auto, Enum
+from enum import Enum
 
 import pygame
 from attr import attrib, attrs
 
+from state import State
 from system import SystemFlag
 
 x_distances = (
@@ -24,13 +25,6 @@ class Direction(Enum):
     RIGHT = 1
 
 
-class State(Enum):
-    walking = auto()
-    start_attacking = auto()
-    attacking = auto()
-    busy = auto()
-
-
 @attrs(slots=True)
 class Movement:
     position = attrib(
@@ -49,8 +43,6 @@ class Movement:
 
     attack_frame = attrib(type=int, default=None)
     attack_anim_length = attrib(type=int, default=None)
-
-    state = attrib(type=State, default=State.walking)
 
     def get_next_position(self, direction):
         new_position = pygame.Rect(self.position)
@@ -80,14 +72,15 @@ class Movement:
 
 
 class MovementSystem(UserList):
-    flags = SystemFlag.controller + SystemFlag.movement
+    flags = SystemFlag.controller + SystemFlag.state + SystemFlag.movement
 
     def update(self):
         for entity in self.data:
             mover = entity.movement
+            state = entity.state
             controller = entity.controller
 
-            if mover.state == State.busy:
+            if state.value.name == State.busy:
                 continue
 
             if mover.attack_frame is not None:
@@ -97,10 +90,10 @@ class MovementSystem(UserList):
                 else:
                     mover.attack_frame = None
                     mover.attack_anim_length = None
-                    mover.state = State.walking
+                    state.value = State.walking
 
             if controller.fire:
-                mover.state = State.start_attacking
+                state.value = State.start_attacking
                 mover.attack_frame = 0
                 continue
 
@@ -117,7 +110,7 @@ class MovementSystem(UserList):
             frame = frame * ((direction.x | direction.y) & 1)
             mover.next_frame = frame
             mover.next_position = new_position
-            mover.state = State.walking
+            state.value = State.walking
 
 
 movement_system = MovementSystem()
