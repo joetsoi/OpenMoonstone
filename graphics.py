@@ -295,4 +295,27 @@ class GraphicsSystem(UserList):
         )
 
 
+def set_animation(animation_name, graphics, movement, state):
+    frame, x = graphics.get_frame(
+        animation_name=animation_name,
+        frame_number=0,
+        position=movement.position,
+        direction=movement.facing,
+    )
+    graphics.set_frame_image(
+        animation_name=animation_name,
+        frame_number=0,
+        position=movement,
+        x=x,
+        y=movement.position.y + frame.rect.y,
+        w=frame.rect.width,
+        h=frame.rect.height,
+        image=frame.surface,
+    )
+    animation = graphics.animations[animation_name, movement.facing]
+    state.animation_name = animation_name
+    state.animation_len = len(animation.order)
+    state.frame_num = 0
+
+
 graphics_system = GraphicsSystem()

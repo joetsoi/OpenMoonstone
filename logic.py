@@ -3,6 +3,7 @@ from collections import UserList
 from attr import attrib, attrs
 
 from collide import Collision
+from graphics import set_animation
 from state import State
 from system import SystemFlag
 
@@ -27,33 +28,15 @@ class LogicSystem(UserList):
             defender = attacker.collision.has_hit
             defender.logic.health -= attacker.logic.weapon_damage
 
-            damage_animation = 'some'
-            frame, x = defender.graphics.get_frame(
-                damage_animation,
-                0,
-                defender.movement.position,
-                defender.movement.facing
+            set_animation(
+                animation_name='some',
+                graphics=defender.graphics,
+                movement=defender.movement,
+                state=defender.state,
             )
-            defender.graphics.set_frame_image(
-                damage_animation,
-                0,
-                defender.movement,
-                x,
-                defender.movement.position.y + frame.rect.y,
-                frame.rect.width,
-                frame.rect.height,
-                frame.surface,
-            )
-            animation = defender.graphics.animations[damage_animation,
-                                                    defender.movement.facing]
-            defender.state.animation_name = damage_animation
-            defender.state.animation_len = len(animation.order)
-            defender.state.frame_num = 0
             defender.state.value = State.busy
 
-
             print(f"{defender.logic.health}")
-
 
 
 logic_system = LogicSystem()
