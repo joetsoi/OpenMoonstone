@@ -9,6 +9,7 @@ class Collide(IntFlag):
     COLLIDEE = 1
     COLLIDER = 2
     BLOOD = 128
+    BLOOD_STAIN = 144
 
 
 class ImagePosition(NamedTuple):
@@ -176,25 +177,32 @@ knight = {
     'some': AnimationDefinition(
         frames=(
             (
-                ImagePosition('kn3.ob', 10, -2, -26, Collide.COLLIDEE),
-                ImagePosition('kn3.ob', 9, -12, -16, Collide.COLLIDEE),
-                ImagePosition('kn3.ob', 11, 13, -26, Collide.COLLIDEE),
-                ImagePosition('kn4.ob', 0, -25, 5, Collide.COLLIDEE),
+                ImagePosition('kn3.ob', 10, -2, -26, Collide.NON_SOLID),
+                ImagePosition('kn3.ob', 9, -12, -16, Collide.NON_SOLID),
+                ImagePosition('kn3.ob', 11, 13, -26, Collide.BLOOD),
+                ImagePosition('kn4.ob', 0, -25, 5, Collide.NON_SOLID),
             ),
             (
-                ImagePosition('kn3.ob', 12, 0, -38, Collide.COLLIDEE),
-                ImagePosition('kn3.ob', 13, 21, -27, Collide.COLLIDEE),
-                ImagePosition('kn3.ob', 14, 24, -3, Collide.COLLIDEE),
+                ImagePosition('kn3.ob', 12, 0, -38, Collide.NON_SOLID),
+                ImagePosition('kn3.ob', 13, 21, -27, Collide.BLOOD),
+                ImagePosition('kn3.ob', 14, 24, -3, Collide.BLOOD),
+                ImagePosition('kn4.ob', 0, -15, -1, Collide.NON_SOLID),
+            ),
+            (
+                ImagePosition('kn3.ob', 12, 0, -38, Collide.NON_SOLID),
+                ImagePosition('kn3.ob', 15, 22, -24, Collide.BLOOD),
+                ImagePosition('kn3.ob', 16, 39, 19, Collide.BLOOD),
+                ImagePosition('kn3.ob', 17, 49, 17, Collide.BLOOD_STAIN),
                 ImagePosition('kn4.ob', 0, -15, -1, Collide.COLLIDEE),
             ),
             (
-                ImagePosition('kn3.ob', 12, 0, -38, Collide.COLLIDEE),
-                ImagePosition('kn3.ob', 15, 22, -24, Collide.COLLIDEE),
-                ImagePosition('kn3.ob', 16, 39, 19, Collide.COLLIDEE),
-                ImagePosition('kn3.ob', 17, 49, 17, Collide.COLLIDEE),
-                ImagePosition('kn4.ob', 0, -15, -1, Collide.COLLIDEE),
+                ImagePosition('kn3.ob', 18, 8, -37, Collide.NON_SOLID),
+                ImagePosition('kn3.ob', 19, 22, -18, Collide.BLOOD),
+                ImagePosition('kn3.ob', 17, 49, 17, Collide.BLOOD_STAIN),
+                ImagePosition('kn4.ob', 6, -5, -15, Collide.NON_SOLID),
             ),
         ),
+        order=(0, 1, 1, 2, 2, 3),
     ),
     'damage_2': AnimationDefinition(
         frames=(
@@ -226,6 +234,7 @@ knight = {
                 ImagePosition('kn4.ob', 1, -2, -7, Collide.NON_SOLID),
             ),
         ),
+        order=(0, 1, 1, 2, 2, 3),
     ),
     'death': AnimationDefinition(
         frames=(
@@ -236,4 +245,28 @@ knight = {
              ),
         ),
     ),
+    'recovery': AnimationDefinition(
+        frames=(
+            (
+                ImagePosition('kn1.ob', 19, 44, -21, Collide.COLLIDEE),
+                ImagePosition('kn1.ob', 18, -7, -14, Collide.COLLIDEE),
+                ImagePosition('kn4.ob', 1, -15, 12, Collide.NON_SOLID),
+            ),
+            (
+                ImagePosition('kn1.ob', 1, 45, -13, Collide.NON_SOLID),
+                ImagePosition('kn1.ob', 0, -9, -9, Collide.COLLIDEE),
+                ImagePosition('kn4.ob', 1, -6, 4, Collide.NON_SOLID),
+            ),
+        ),
+        order=(0, 1, 1),
+    ),
+     'end_attack': AnimationDefinition(
+         frames=(
+             (
+                 ImagePosition('kn1.ob', 1, 45, -13, Collide.COLLIDEE),
+                 ImagePosition('kn1.ob', 0, -9, -9, Collide.COLLIDEE),
+                 ImagePosition('kn4.ob', 1, -6, 4, Collide.COLLIDEE),
+             ),
+         ),
+     ),
 }
