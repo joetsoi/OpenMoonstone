@@ -152,12 +152,15 @@ def game_loop(screen):
         graphics_system.update()
         #collide.active.update()
 
+
+        image = lair.draw().copy()
+        y_sorted = pygame.sprite.Group()
+        y_sorted.add(sorted(iter(graphics.active), key=lambda s: s.rect.bottom))
+        y_sorted.draw(image)
+
         collision_system.update()
         #collide.check_collisions()
         logic_system.update()
-
-        image = lair.draw().copy()
-        graphics.active.draw(image)
 
         #pygame.draw.rect(
         #    image,
