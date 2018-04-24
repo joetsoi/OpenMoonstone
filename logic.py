@@ -23,20 +23,38 @@ class Logic:
 class LogicSystem(UserList):
     flags = SystemFlag.logic + SystemFlag.collision
     def update(self):
-        attackers = [e for e in self.data if e.collision.has_hit]
+        recover_after_attack = []
+        take_damage = []
+        attackers = [e for e in self.data if (e.collision.has_hit and e.state.value == State.attacking)]
         for attacker in attackers:
+            recover_after_attack.append(attacker)
             defender = attacker.collision.has_hit
+            take_damage.append(defender)
             defender.logic.health -= attacker.logic.weapon_damage
 
+        for entity in recover_after_attack:
+            set_animation(
+                animation_name='recovery',
+                frame_number=-1,
+                graphics=entity.graphics,
+                movement=entity.movement,
+                state=entity.state,
+
+            )
+            entity.state.value = State.busy
+
+        for entity in take_damage:
             set_animation(
                 animation_name='some',
-                graphics=defender.graphics,
-                movement=defender.movement,
-                state=defender.state,
+                frame_number=-1,
+                graphics=entity.graphics,
+                movement=entity.movement,
+                state=entity.state,
             )
-            defender.state.value = State.busy
+            entity.state.value = State.busy
+            print(f"{entity.logic.health}")
 
-            print(f"{defender.logic.health}")
+
 
 
 logic_system = LogicSystem()
