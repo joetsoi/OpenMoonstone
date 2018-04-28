@@ -123,6 +123,7 @@ class Graphic(pygame.sprite.Sprite):
         self.frames = animations
 
         self.animations = make_animations(animations, palette)
+        self.palette = palette
 
         self.groups = groups
 

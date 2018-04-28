@@ -11,8 +11,10 @@ import settings
 from assets import lairs, loading_screen
 from cli import print_hex_view
 from cmp import CmpFile
+from blood import blood_system, blood_stains
 from collide import Collider, Collision, collision_system
 from controller import Controller, controller_system, player_one, player_two
+from destroy import destroy_entites
 from entity import Entity
 from extract import extract_palette
 from graphics import Graphic, Move, graphics_system
@@ -101,6 +103,7 @@ def game_loop(screen):
 
     clock = pygame.time.Clock()
     last_tick = pygame.time.get_ticks()
+    background = lair.draw().copy()
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -121,7 +124,7 @@ def game_loop(screen):
         #collide.active.update()
 
 
-        image = lair.draw().copy()
+        image = background.copy()
         y_sorted = pygame.sprite.Group()
         y_sorted.add(sorted(iter(graphics.active), key=lambda s: s.rect.bottom))
         y_sorted.draw(image)
@@ -129,6 +132,10 @@ def game_loop(screen):
         collision_system.update()
         #collide.check_collisions()
         logic_system.update()
+        blood_system.update()
+        blood_stains.draw(background)
+        blood_stains.empty()
+        destroy_entites()
 
         #pygame.draw.rect(
         #    image,

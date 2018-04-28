@@ -1,26 +1,22 @@
 from attr import attrib, attrs
 
-from collide import Collision
-from controller import Controller
-from graphics import Graphic
-from logic import Logic
-from movement import Movement
-from state import AnimationState
 from system import SystemFlag
 
 
-@attrs(slots=True)
+@attrs(auto_attribs=True, slots=True)
 class Entity:
-    controller = attrib(type=Controller, default=None)
-    movement = attrib(type=Movement, default=None)
-    graphics = attrib(type=Graphic, default=None)
-    collision = attrib(type=Collision, default=None)
-    logic = attrib(type=Logic, default=None)
-    state = attrib(type=AnimationState, default=None)
+    controller: 'Controller' = attrib(default=None)
+    movement: 'Movement' = attrib(default=None)
+    graphics: 'Graphic' = attrib(default=None)
+    collision: 'Collision' = attrib(default=None)
+    logic: 'Logic' = attrib(default=None)
+    state: 'State' = attrib(default=None)
+    blood: 'Blood' = attrib(default=None)
 
     @property
     def flags(self):
         flags = 0
         for slot in self.__slots__:
-            flags += hasattr(self, slot) * getattr(SystemFlag, slot)
+            has_component = getattr(self, slot) is not None
+            flags += int(has_component) * getattr(SystemFlag, slot)
         return SystemFlag(flags)

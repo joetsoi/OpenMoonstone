@@ -11,6 +11,8 @@ class State(Enum):
     start_attacking = auto()
     attacking = auto()
     busy = auto()
+    loop_once = auto()
+    destroy = auto()
 
 
 @attrs(slots=True)
@@ -29,16 +31,19 @@ class AnimationStateSystem(UserList):
             controller = entity.controller
             state = entity.state
 
-            if state.value in [State.attacking, State.busy]:
+            if state.value in [State.attacking, State.busy, State.loop_once]:
                 state.frame_num += 1
                 if state.frame_num < state.animation_len:
                     continue
                 else:
-                    state.frame_num = None
-                    state.animation_len = None
-                    state.value = State.walking
+                    if state.value == State.loop_once:
+                        state.value = State.destroy
+                    else:
+                        state.frame_num = None
+                        state.animation_len = None
+                        state.value = State.walking
 
-            if controller.fire:
+            if controller and controller.fire:
                 state.value = State.start_attacking
                 state.frame_num = 0
                 continue

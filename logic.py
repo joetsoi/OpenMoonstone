@@ -6,6 +6,8 @@ from collide import Collision
 from graphics import set_animation
 from state import State
 from system import SystemFlag
+from blood import create_knight_blood_stain
+
 
 
 @attrs(slots=True)
@@ -53,8 +55,12 @@ class LogicSystem(UserList):
             )
             entity.state.value = State.busy
             print(f"{entity.logic.health}")
-
-
+            create_knight_blood_stain(
+                'some',
+                entity.graphics.palette,
+                entity.movement.facing,
+                entity.movement.position,
+            )
 
 
 logic_system = LogicSystem()
