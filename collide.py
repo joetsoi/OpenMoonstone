@@ -5,7 +5,7 @@ import pygame
 from attr import attrib, attrs
 
 import assets
-from assets.animation import Collide
+from assets.animation import FrameType
 # from graphics import Graphic
 from movement import Direction, Movement
 from state import State
@@ -22,7 +22,7 @@ class Collider:
         for name, animation in animations.items():
             rects = []
             for frame in animation:
-                collidees = [c for c in frame if c.collide == Collide.COLLIDEE]
+                collidees = [c for c in frame if c.collide == FrameType.COLLIDEE]
                 rects.append(
                     [Collider._make_image_rect(collidee) for collidee in collidees]
                 )
@@ -32,7 +32,7 @@ class Collider:
         for name, animation in animations.items():
             rects = []
             for frame in animation:
-                colliders = [c for c in frame if c.collide == Collide.COLLIDER]
+                colliders = [c for c in frame if c.collide == FrameType.COLLIDER]
                 rects.append([
                     (
                         Collider._make_image_rect(collider),
@@ -112,7 +112,7 @@ def check_collision(attacker, defender):
         return False
 
     defender_frame = defender.graphics.get_images()
-    defender_images = [i for i in defender_frame if i.collide == Collide.COLLIDEE]
+    defender_images = [i for i in defender_frame if i.collide == FrameType.COLLIDEE]
 
     defender_rects = defender.collision.collider.get_defend_rects(
         defender.graphics.animation_name, defender.graphics.frame_number
