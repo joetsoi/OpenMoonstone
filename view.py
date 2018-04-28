@@ -20,6 +20,7 @@ from logic import Logic, logic_system
 from main import MainExe
 from movement import Movement, movement_system
 from state import AnimationState, state_system
+from system import SystemFlag
 from piv import PivFile
 from t import TFile
 
@@ -44,92 +45,59 @@ def change_player_colour(colour: str, palette: list):
     return PivFile.make_palette(palette)
 
 
-def game_loop(screen):
-    lair = lairs[0]
-    one_up_controller = Controller(player_one)
-    movement_1 = Movement((100, 100))
-    graphics_1 = Graphic(
-        animations=assets.animation.knight,
-        position=movement_1.position,
-        palette=assets.files.backgrounds[lairs[0].background].palette,
-        lair=lair,
-        groups=[graphics.active],
-    )
-    collider_1 = Collision(
-        collider=Collider(assets.animation.knight, assets.collide_hit),
-    )
-    logic_1 = Logic()
-
-    knight_1 = Entity(
-        controller=one_up_controller,
-        movement=movement_1,
-        graphics=graphics_1,
-        collision=collider_1,
-        logic=logic_1,
-        state=AnimationState(),
-    )
+def create_player(colour: str, x: int, y: int, lair, control_map):
+    controller = Controller(control_map)
+    movement = Movement((x, y))
 
     palette = change_player_colour(
-        'blue',
-        assets.files.backgrounds[lairs[0].background].extracted_palette,
+        colour,
+        assets.files.backgrounds[lair.background].extracted_palette,
     )
-    two_up_controller = Controller(player_two)
-    movement_2 = Movement((200, 150))
-    graphics_2 = Graphic(
+    graphic = Graphic(
         animations=assets.animation.knight,
-        position=movement_2.position,
+        position=movement.position,
         palette=palette,
         lair=lair,
         groups=[graphics.active],
     )
-    collider_2 = Collision(
+    collider = Collision(
         collider=Collider(assets.animation.knight, assets.collide_hit),
     )
-    logic_2 = Logic()
+    logic = Logic()
 
-    knight_2 = Entity(
-        controller=two_up_controller,
-        movement=movement_2,
-        graphics=graphics_2,
-        collision=collider_2,
-        logic=logic_2,
+    knight = Entity(
+        controller=controller,
+        movement=movement,
+        graphics=graphic,
+        collision=collider,
+        logic=logic,
         state=AnimationState(),
     )
-    if controller_system.flags in knight_1.flags:
-        controller_system.append(knight_1)
 
-    if controller_system.flags in knight_2.flags:
-        controller_system.append(knight_2)
+    register_entity_with_systems(knight)
+    return knight
 
-    if movement_system.flags in knight_1.flags:
-        movement_system.append(knight_1)
 
-    if movement_system.flags in knight_2.flags:
-        movement_system.append(knight_2)
+def register_entity_with_systems(entity):
+    systems = {
+        SystemFlag.controller: controller_system,
+        SystemFlag.state: state_system,
+        SystemFlag.movement: movement_system,
+        SystemFlag.graphics: graphics_system,
+        SystemFlag.collision: collision_system,
+        SystemFlag.logic: logic_system,
+    }
 
-    if graphics_system.flags in knight_1.flags:
-        graphics_system.append(knight_1)
+    for flag, system in systems.items():
+        if flag in entity.flags:
+            system.append(entity)
 
-    if graphics_system.flags in knight_2.flags:
-        graphics_system.append(knight_2)
 
-    if collision_system.flags in knight_1.flags:
-        collision_system.append(knight_1)
+def game_loop(screen):
+    lair = lairs[0]
 
-    if collision_system.flags in knight_2.flags:
-        collision_system.append(knight_2)
-
-    if logic_system.flags in knight_1.flags:
-        logic_system.append(knight_1)
-
-    if logic_system.flags in knight_2.flags:
-        logic_system.append(knight_2)
-
-    if state_system.flags in knight_1.flags:
-        state_system.append(knight_1)
-
-    if state_system.flags in knight_2.flags:
-        state_system.append(knight_2)
+    create_player('blue', 100, 100, lair, player_one)
+    create_player('red', 200, 150, lair, player_two)
 
     clock = pygame.time.Clock()
     last_tick = pygame.time.get_ticks()
