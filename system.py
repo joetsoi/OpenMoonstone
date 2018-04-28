@@ -8,3 +8,4 @@ class SystemFlag(IntFlag):
     collision = 8
     logic = 16
     state = 32
+    blood = 64
