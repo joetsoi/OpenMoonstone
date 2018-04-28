@@ -12,7 +12,7 @@ from extract import extract_palette, grouper
 from font import FontFile  # , draw_string
 from main import MainExe
 from piv import PivFile
-from t import TFile
+from terrain import TFile
 
 scale_factor = 3
 

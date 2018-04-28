@@ -4,7 +4,7 @@ from cmp import CmpFile
 from font import FontFile
 from piv import PivFile
 from settings import MOONSTONE_DIR
-from t import TFile
+from terrain import TFile
 
 from .collide import parse_collision_file
 
