@@ -24,7 +24,7 @@ from movement import Movement, movement_system
 from state import AnimationState, state_system
 from system import SystemFlag
 from piv import PivFile
-from terrain import TFile
+from terrain import TerrainFile
 
 controls = {
     pygame.K_LEFT: Move.LEFT,

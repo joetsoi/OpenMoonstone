@@ -4,7 +4,7 @@ from cmp import CmpFile
 from font import FontFile
 from piv import PivFile
 from settings import MOONSTONE_DIR
-from terrain import TFile
+from terrain import TerrainFile
 
 from .collide import parse_collision_file
 
@@ -48,9 +48,9 @@ objects = {
 }
 
 terrain = {
-    'wa1': load_file(TFile, 'DISKB\WA1.T'),
-    'wa2': load_file(TFile, 'DISKB\WA2.T'),
-    'wa3': load_file(TFile, 'DISKB\WA3.T'),
+    'wa1': load_file(TerrainFile, 'DISKB\WA1.T'),
+    'wa2': load_file(TerrainFile, 'DISKB\WA2.T'),
+    'wa3': load_file(TerrainFile, 'DISKB\WA3.T'),
 }
 
 

@@ -11,7 +11,7 @@ from extract import extract_file
 CmpSubImage = namedtuple('CmpSubImage', ['cmp_file', 'image_number', 'x', 'y'])
 
 
-class TFile:
+class TerrainFile:
     def __init__(self, file_data):
         self.file_length = unpack('>I', file_data[:4])[0]
         self.extracted = extract_file(self.file_length, file_data[4:])
@@ -93,5 +93,5 @@ if __name__ == "__main__":
     file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                              sys.argv[1])
     with open(file_path, 'rb') as f:
-        t = TFile(f.read())
+        t = TerrainFile(f.read())
     #print_hex_view(t.extracted)
