@@ -44,9 +44,10 @@ class AnimationStateSystem(UserList):
                         state.value = State.walking
 
             if controller and controller.fire:
-                state.value = State.start_attacking
-                state.frame_num = 0
-                continue
+                if controller.direction.x or controller.direction.y:
+                    state.value = State.start_attacking
+                    state.frame_num = 0
+                    continue
 
 
 state_system = AnimationStateSystem()
