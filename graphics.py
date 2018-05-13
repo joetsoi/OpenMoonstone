@@ -44,7 +44,7 @@ direction_to_attack = {
     Move.LEFT: 'swing',
     Move.RIGHT: 'swing',
     Move.LEFT_UP: 'swing',
-    Move.RIGHT_UP: 'swing',
+    Move.RIGHT_UP: 'up_thrust',
     Move.LEFT_DOWN: 'swing',
     Move.RIGHT_DOWN: 'thrust',
 }

@@ -262,6 +262,33 @@ knight = {
         ),
         order=(0, 1, 1, 1, 2, 3, 4, 4, 4, 5, 6, 6),
     ),
+    'up_thrust': AnimationDefinition(
+        frames=(
+            (
+                ImagePosition('kn1.ob', 19, 44, -21, FrameType.COLLIDEE),
+                ImagePosition('kn1.ob', 18, -7, -14, FrameType.COLLIDEE),
+                ImagePosition('kn4.ob', 1, -15, 12, FrameType.COLLIDER),
+            ),
+            (
+                ImagePosition('kn2.ob', 3, 22, -15, FrameType.COLLIDEE),
+                ImagePosition('kn2.ob', 4, -2, 5, FrameType.COLLIDEE),
+                ImagePosition('kn2.ob', 5, -9, 20, FrameType.COLLIDEE),
+                ImagePosition('kn4.ob', 1, -35, 29, FrameType.COLLIDER),
+            ),
+            (
+                ImagePosition('kn2.ob', 3, 22, -15, FrameType.COLLIDEE),
+                ImagePosition('kn2.ob', 4, -2, 5, FrameType.COLLIDEE),
+                ImagePosition('kn2.ob', 5, -9, 20, FrameType.COLLIDEE),
+                ImagePosition('kn4.ob', 1, -35, 29, FrameType.COLLIDER),
+            ),
+            (
+                ImagePosition('kn1.ob', 19, 44, -21, FrameType.COLLIDEE),
+                ImagePosition('kn1.ob', 18, -7, -14, FrameType.COLLIDEE),
+                ImagePosition('kn4.ob', 1, -15, 12, FrameType.COLLIDER),
+            )
+        ),
+        order=(0, 1, 2, 2, 2, 2, 3),
+    ),
     'some': AnimationDefinition(
         frames=(
             (
