@@ -28,9 +28,11 @@ spritesheets = {
 }
 
 collide_type = {
-    0: 'Collide.NON_SOLID',
-    1: 'Collide.COLLIDEE',
-    2: 'Collide.COLLIDER',
+    0: 'FrameType.NON_SOLID',
+    1: 'FrameType.COLLIDEE',
+    2: 'FrameType.COLLIDER',
+    128: 'FrameType.BLOOD',
+    144: 'FrameType.BLOOD_STAIN',
 }
 
 
