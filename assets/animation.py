@@ -215,6 +215,53 @@ knight = {
         ),
         order=(0, 0, 0, 0, 1, 2, 3, 4, 5, 5, 5),
     ),
+    'chop': AnimationDefinition(
+        frames=(
+            (
+                ImagePosition('kn1.ob', 19, 44, -21, FrameType.COLLIDEE),
+                ImagePosition('kn1.ob', 18, -7, -14, FrameType.COLLIDEE),
+                ImagePosition('kn4.ob', 1, -15, 12, FrameType.COLLIDER),
+            ),
+            (
+                ImagePosition('kn1.ob', 43, -8, -16, FrameType.COLLIDEE),
+                ImagePosition('kn4.ob', 7, -17, -45, FrameType.COLLIDER),
+            ),
+            (
+                ImagePosition('kn1.ob', 45, 25, -14, FrameType.COLLIDEE),
+                ImagePosition('kn1.ob', 44, -17, -2, FrameType.COLLIDEE),
+                ImagePosition('kn4.ob', 0, -48, 4, FrameType.COLLIDER),
+                ImagePosition('kn4.ob', 20, -48, -7, FrameType.COLLIDER),
+                ImagePosition('kn4.ob', 19, -44, -32, FrameType.COLLIDER),
+            ),
+            (
+                ImagePosition('kn1.ob', 46, 21, -12, FrameType.COLLIDEE),
+                ImagePosition('kn1.ob', 37, 10, 26, FrameType.COLLIDEE),
+                ImagePosition('kn1.ob', 47, -5, 12, FrameType.COLLIDEE),
+                ImagePosition('kn4.ob', 5, 11, 49, FrameType.COLLIDER),
+                ImagePosition('kn4.ob', 22, -21, 71, FrameType.COLLIDER),
+                ImagePosition('kn4.ob', 21, -39, 45, FrameType.COLLIDER),
+            ),
+            (
+                ImagePosition('kn1.ob', 48, 25, -6, FrameType.COLLIDEE),
+                ImagePosition('kn1.ob', 49, 13, 21, FrameType.COLLIDEE),
+                ImagePosition('kn1.ob', 50, 3, 36, FrameType.COLLIDEE),
+                ImagePosition('kn4.ob', 8, 37, 52, FrameType.COLLIDER),
+            ),
+            (
+                ImagePosition('kn1.ob', 48, 25, -6, FrameType.COLLIDEE),
+                ImagePosition('kn1.ob', 49, 13, 21, FrameType.COLLIDEE),
+                ImagePosition('kn1.ob', 51, 5, 36, FrameType.COLLIDEE),
+                ImagePosition('kn4.ob', 8, 37, 52, FrameType.COLLIDER),
+            ),
+            (
+                ImagePosition('kn1.ob', 48, 25, -6, FrameType.COLLIDEE),
+                ImagePosition('kn1.ob', 49, 13, 21, FrameType.COLLIDEE),
+                ImagePosition('kn1.ob', 52, 12, 34, FrameType.COLLIDEE),
+                ImagePosition('kn4.ob', 8, 37, 52, FrameType.COLLIDER),
+            )
+        ),
+        order=(0, 1, 1, 1, 2, 3, 4, 4, 4, 5, 6, 6),
+    ),
     'some': AnimationDefinition(
         frames=(
             (

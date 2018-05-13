@@ -33,13 +33,15 @@ class Collider:
             rects = []
             for frame in animation:
                 colliders = [c for c in frame if c.collide == FrameType.COLLIDER]
-                rects.append([
-                    (
-                        Collider._make_image_rect(collider),
-                        *Collider._make_collide_rect(collider, collide_data),
-                    )
-                    for collider in colliders
-                ])
+                for collider in colliders:
+                    collider_rect = Collider._make_collide_rect(collider, collide_data)
+                    if collider_rect:
+                        rects.append([
+                            (
+                                Collider._make_image_rect(collider),
+                                *collider_rect
+                            )
+                        ])
             self.attack[name] = rects
 
     @staticmethod
@@ -56,17 +58,19 @@ class Collider:
     @staticmethod
     def _make_collide_rect(collider, collide_data):
         collide_pairs = collide_data[collider.spritesheet][collider.image_number]
+        if not collide_pairs:
+            return None
         collide_rects = [
             pygame.Rect(collider.x, collider.y, x, y)
             for x, y in collide_pairs
         ]
-        max = pygame.Rect(
+        max_rect = pygame.Rect(
             collider.x,
             collider.y,
             collide_pairs.max[0],
             collide_pairs.max[1],
         )
-        return max, collide_rects
+        return max_rect, collide_rects
 
     def get_defend_rects(self, animation_name, frame_number):
         return self.defend[animation_name][frame_number]
