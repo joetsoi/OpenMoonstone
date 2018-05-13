@@ -289,6 +289,85 @@ knight = {
         ),
         order=(0, 1, 2, 2, 2, 2, 3),
     ),
+    'back': AnimationDefinition(
+        frames=(
+            (
+                ImagePosition('kn1.ob', 19, 44, -21, FrameType.COLLIDEE),
+                ImagePosition('kn1.ob', 18, -7, -14, FrameType.COLLIDEE),
+                ImagePosition('kn4.ob', 1, -15, 12, FrameType.COLLIDER),
+            ),
+            (
+                ImagePosition('kn1.ob', 22, 45, -19, FrameType.NON_SOLID),
+                ImagePosition('kn1.ob', 21, 19, -17, FrameType.COLLIDEE),
+                ImagePosition('kn1.ob', 20, -8, -6, FrameType.COLLIDEE),
+                ImagePosition('kn4.ob', 2, 9, 14, FrameType.COLLIDER),
+                ImagePosition('kn4.ob', 11, -6, 27, FrameType.COLLIDER),
+            ),
+            (
+                ImagePosition('kn1.ob', 24, 46, -43, FrameType.NON_SOLID),
+                ImagePosition('kn1.ob', 23, -7, -23, FrameType.COLLIDEE),
+                ImagePosition('kn4.ob', 12, 19, -53, FrameType.COLLIDER),
+                ImagePosition('kn4.ob', 24, 17, -54, FrameType.COLLIDER),
+            ),
+            (
+                ImagePosition('kn1.ob', 24, 46, -43, FrameType.NON_SOLID),
+                ImagePosition('kn1.ob', 23, -7, -23, FrameType.COLLIDEE),
+                ImagePosition('kn4.ob', 24, 17, -54, FrameType.COLLIDER),
+            ),
+            (
+                ImagePosition('kn1.ob', 19, 44, -21, FrameType.COLLIDEE),
+                ImagePosition('kn1.ob', 18, -7, -14, FrameType.COLLIDEE),
+                ImagePosition('kn4.ob', 1, -15, 12, FrameType.NON_SOLID),
+            ),
+        ),
+        #TODO: fix set_next_frame AnimationBegin from ida dataseg:0xde6
+        order=(0, 1, 2, 3, 3, 3, 4)
+    ),
+    'dagger': AnimationDefinition(
+        frames=(
+            (
+                ImagePosition('kn1.ob', 27, 16, -14, FrameType.COLLIDEE),
+                ImagePosition('kn1.ob', 25, -14, -20, FrameType.COLLIDEE),
+                ImagePosition('kn1.ob', 26, 6, 0, FrameType.NON_SOLID),
+                ImagePosition('kn4.ob', 0, -21, 11, FrameType.NON_SOLID),
+                ImagePosition('kn4.ob', 9, -23, -29, FrameType.NON_SOLID),
+            ),
+            (
+                ImagePosition('kn1.ob', 27, 16, -14, FrameType.COLLIDEE),
+                ImagePosition('kn1.ob', 25, -14, -20, FrameType.COLLIDEE),
+                ImagePosition('kn1.ob', 26, 6, 0, FrameType.NON_SOLID),
+                ImagePosition('kn4.ob', 0, -21, 11, FrameType.NON_SOLID),
+                ImagePosition('kn4.ob', 9, -23, -29, FrameType.NON_SOLID),
+            ),
+            (
+                ImagePosition('kn1.ob', 30, 45, -10, FrameType.NON_SOLID),
+                ImagePosition('kn1.ob', 28, 20, -8, FrameType.COLLIDEE),
+                ImagePosition('kn1.ob', 29, -5, 3, FrameType.COLLIDEE),
+                ImagePosition('kn4.ob', 10, 7, 63, FrameType.COLLIDER),
+            ),
+        ),
+        order=(0, 0, 0, 1, 2),
+    ),
+    'dodge': AnimationDefinition(
+        frames=(
+            (
+                ImagePosition('kn2.ob', 8, 45, -23, FrameType.NON_SOLID),
+                ImagePosition('kn2.ob', 7, 20, -17, FrameType.COLLIDEE),
+                ImagePosition('kn2.ob', 6, -5, -32, FrameType.COLLIDEE),
+                ImagePosition('kn4.ob', 0, -22, -32, FrameType.NON_SOLID),
+            ),
+        ),
+    ),  # todo: fix broken collision with dodge and block (they're not actually attacks)
+    'block': AnimationDefinition(
+        frames=(
+            (
+                ImagePosition('kn1.ob', 22, 45, -19, FrameType.COLLIDEE),
+                ImagePosition('kn1.ob', 21, 19, -17, FrameType.COLLIDEE),
+                ImagePosition('kn1.ob', 20, -8, -6, FrameType.COLLIDEE),
+                ImagePosition('kn4.ob', 2, 9, 14, FrameType.NON_SOLID),
+            ),
+        ),
+    ),
     'some': AnimationDefinition(
         frames=(
             (

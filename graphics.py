@@ -40,12 +40,12 @@ controller_to_animation = {
 
 direction_to_attack = {
     Move.UP: 'chop',
-    Move.DOWN: 'swing',
-    Move.LEFT: 'swing',
+    Move.DOWN: 'dodge',
+    Move.LEFT: 'back',
     Move.RIGHT: 'swing',
-    Move.LEFT_UP: 'swing',
+    Move.LEFT_UP: 'dagger',
     Move.RIGHT_UP: 'up_thrust',
-    Move.LEFT_DOWN: 'swing',
+    Move.LEFT_DOWN: 'block',
     Move.RIGHT_DOWN: 'thrust',
 }
 
