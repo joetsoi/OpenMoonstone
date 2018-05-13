@@ -174,6 +174,47 @@ knight = {
         ),
         order=(0, 0, 1, 2, 3, 4, 5, 6)
     ),
+    'thrust': AnimationDefinition(
+        frames=(
+            (
+                ImagePosition('kn1.ob', 53, -7, -18, FrameType.COLLIDEE),
+                ImagePosition('kn4.ob', 5, 26, -7, FrameType.COLLIDER),
+            ),
+            (
+                ImagePosition('kn1.ob', 35, 27, -14, FrameType.COLLIDEE),
+                ImagePosition('kn1.ob', 36, 7, 17, FrameType.COLLIDEE),
+                ImagePosition('kn1.ob', 37, 22, 35, FrameType.COLLIDEE),
+                ImagePosition('kn1.ob', 38, 45, 33, FrameType.NON_SOLID),
+                ImagePosition('kn4.ob', 5, 23, 60, FrameType.COLLIDER),
+            ),
+            (
+                ImagePosition('kn1.ob', 54, 25, -12, FrameType.COLLIDEE),
+                ImagePosition('kn1.ob', 55, 10, 26, FrameType.COLLIDEE),
+                ImagePosition('kn1.ob', 56, 25, 50, FrameType.NON_SOLID),
+                ImagePosition('kn1.ob', 38, 46, 40, FrameType.NON_SOLID),
+                ImagePosition('kn4.ob', 5, 26, 66, FrameType.COLLIDER),
+            ),
+            (
+                ImagePosition('kn1.ob', 54, 25, -12, FrameType.COLLIDEE),
+                ImagePosition('kn1.ob', 57, 10, 26, FrameType.COLLIDEE),
+                ImagePosition('kn1.ob', 58, 25, 58, FrameType.NON_SOLID),
+                ImagePosition('kn1.ob', 38, 46, 40, FrameType.NON_SOLID),
+                ImagePosition('kn4.ob', 5, 27, 66, FrameType.COLLIDER),
+            ),
+            (
+                ImagePosition('kn1.ob', 54, 25, -12, FrameType.COLLIDEE),
+                ImagePosition('kn1.ob', 59, 18, 26, FrameType.COLLIDEE),
+                ImagePosition('kn1.ob', 56, 26, 49, FrameType.NON_SOLID),
+                ImagePosition('kn1.ob', 38, 46, 40, FrameType.NON_SOLID),
+                ImagePosition('kn4.ob', 5, 27, 65, FrameType.COLLIDER),
+            ),
+            (
+                ImagePosition('kn1.ob', 53, -7, -18, FrameType.COLLIDEE),
+                ImagePosition('kn4.ob', 5, 26, -7, FrameType.COLLIDER),
+            ),
+        ),
+        order=(0, 0, 0, 0, 1, 2, 3, 4, 5, 5, 5),
+    ),
     'some': AnimationDefinition(
         frames=(
             (

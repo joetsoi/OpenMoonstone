@@ -38,6 +38,18 @@ controller_to_animation = {
     Move.RIGHT_DOWN: 'walk',
 }
 
+direction_to_attack = {
+    Move.IDLE: ('idle', State.walking),
+    Move.UP: ('swing', State.attacking),
+    Move.DOWN: ('swing', State.attacking),
+    Move.LEFT: ('swing', State.attacking),
+    Move.RIGHT: ('swing', State.attacking),
+    Move.LEFT_UP: ('swing', State.attacking),
+    Move.RIGHT_UP: ('swing', State.attacking),
+    Move.LEFT_DOWN: ('swing', State.attacking),
+    Move.RIGHT_DOWN: ('thrust', State.attacking),
+}
+
 
 @attrs(slots=True)
 class Frame:
@@ -183,11 +195,15 @@ class GraphicsSystem(UserList):
             state = entity.state
 
             if entity.state.value == State.start_attacking:
-                state.animation_name = 'swing'
+                x = controller.direction.x * movement.facing.value
+                animation_name, new_state = direction_to_attack[
+                    Move((x, controller.direction.y))
+                ]
+                state.animation_name = animation_name
                 animation = graphic.animations[state.animation_name,
                                                movement.facing]
                 state.animation_len = len(animation.order)
-                entity.state.value = State.attacking
+                entity.state.value = new_state
 
             if entity.state.value == State.attacking:
                 animation_name = state.animation_name
