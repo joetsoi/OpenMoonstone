@@ -11,7 +11,7 @@ import settings
 from assets import lairs, loading_screen
 from cli import print_hex_view
 from cmp import CmpFile
-from blood import blood_system, blood_stains
+from blood import blood_system
 from collide import Collider, Collision, collision_system
 from controller import Controller, controller_system, player_one, player_two
 from destroy import destroy_entites
@@ -137,9 +137,7 @@ def game_loop(screen):
         collision_system.update()
         #collide.check_collisions()
         logic_system.update()
-        blood_system.update()
-        blood_stains.draw(background)
-        blood_stains.empty()
+        blood_system.update(background)  # TODO change background to world component
         destroy_entites()
 
         #pygame.draw.rect(

@@ -64,7 +64,7 @@ class BloodGraphic(pygame.sprite.Sprite):
 class BloodSystem(UserList):
     flags = SystemFlag.state + SystemFlag.blood
 
-    def update(self):
+    def update(self, background):
         for entity in self.data:
             blood = entity.blood
             state = entity.state
@@ -73,6 +73,9 @@ class BloodSystem(UserList):
             if draw_blood and blood.frames[state.frame_num]:
                 for stain in blood.frames:
                     BloodGraphic(blood, state.frame_num)
+        blood_stains.draw(background)
+        blood_stains.empty()
+
 
 
 blood_system = BloodSystem()
