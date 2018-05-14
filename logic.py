@@ -33,6 +33,7 @@ class LogicSystem(UserList):
             defender = attacker.collision.has_hit
             take_damage.append(defender)
             defender.logic.health -= attacker.logic.weapon_damage
+            attacker.collision.has_hit = None
 
         for entity in recover_after_attack:
             set_animation(
