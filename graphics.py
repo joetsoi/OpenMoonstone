@@ -214,7 +214,7 @@ class GraphicsSystem(UserList):
                     movement.position,
                     movement.facing,
                 )
-            elif entity.state.value == State.busy or entity.state.value == State.loop_once:
+            elif entity.state.value == State.busy:
                 animation_name = state.animation_name
                 GraphicsSystem.update_image(
                     graphic,
@@ -223,6 +223,16 @@ class GraphicsSystem(UserList):
                     state.frame_num,
                     movement.position,
                     movement.facing,
+                )
+            elif entity.state.value == State.loop_once:
+                animation_name = state.animation_name
+                GraphicsSystem.update_image(
+                    graphic,
+                    movement,
+                    animation_name,
+                    state.frame_num,
+                    movement.position,
+                    Direction(movement.facing.value * Direction.LEFT.value),
                 )
             elif entity.state.value == State.destroy:
                 background.blit(graphic.image, graphic.rect)
