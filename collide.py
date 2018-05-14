@@ -76,7 +76,11 @@ class Collider:
         return self.defend[animation_name][frame_number]
 
     def get_attacker_rects(self, attacker):
-        return self.attack[attacker.animation_name][attacker.frame_number]
+        rects = self.attack[attacker.animation_name]
+        if rects:
+            return rects[attacker.frame_number]
+        else:
+            return []
 
     def get_attack_rects(self, animation_name, image_number):
         return [i[2] for i in self.attack[animation_name][image_number]]
@@ -122,7 +126,8 @@ def check_collision(attacker, defender):
         defender.graphics.animation_name, defender.graphics.frame_number
     )
 
-    for image_rect, collide_max, collide_rects in attacker.collision.collider.get_attacker_rects(attacker.graphics):
+    for attacker_rects in attacker.collision.collider.get_attacker_rects(attacker.graphics):
+        image_rect, collide_max, collide_rects = attacker_rects
         max_rect = get_entity_collision_rect(attacker.movement, collide_max)
 
         rects.append(pygame.Rect(max_rect))
