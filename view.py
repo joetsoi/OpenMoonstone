@@ -125,7 +125,7 @@ def game_loop(screen):
         controller_system.update()
         state_system.update()
         movement_system.update()
-        graphics_system.update()
+        graphics_system.update(background)
         #collide.active.update()
 
 

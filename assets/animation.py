@@ -432,12 +432,39 @@ knight = {
     ),
     'death': AnimationDefinition(
         frames=(
-             (
-                 ImagePosition('kn3.ob', 23, 40, -59, FrameType.NON_SOLID),
-                 ImagePosition('kn3.ob', 22, 21, -28, FrameType.NON_SOLID),
-                 ImagePosition('kn3.ob', 28, -19, -25, FrameType.NON_SOLID),
-             ),
+            (
+                ImagePosition('kn3.ob', 21, 7, -28, FrameType.COLLIDEE),
+                ImagePosition('kn3.ob', 22, 21, -28, FrameType.COLLIDEE),
+                ImagePosition('kn3.ob', 23, 40, -59, FrameType.NON_SOLID),
+            ),
+            (
+                ImagePosition('kn3.ob', 25, 42, -52, FrameType.NON_SOLID),
+                ImagePosition('kn3.ob', 24, 44, -80, FrameType.NON_SOLID),
+                ImagePosition('kn3.ob', 26, 51, -62, FrameType.NON_SOLID),
+                ImagePosition('kn3.ob', 27, 56, -98, FrameType.NON_SOLID),
+                ImagePosition('kn3.ob', 58, 19, -51, FrameType.NON_SOLID),
+            ),
+            (
+                ImagePosition('kn3.ob', 25, 42, -52, FrameType.NON_SOLID),
+                ImagePosition('kn3.ob', 24, 44, -80, FrameType.NON_SOLID),
+                ImagePosition('kn3.ob', 26, 51, -62, FrameType.NON_SOLID),
+                ImagePosition('kn3.ob', 27, 56, -98, FrameType.NON_SOLID),
+            ),
+            # (
+            #     ImagePosition('kn3.ob', 25, 42, -52, FrameType.VM),
+            #     ImagePosition('kn3.ob', 24, 44, -80, FrameType.VM),
+            #     ImagePosition('kn3.ob', 26, 51, -62, FrameType.VM),
+            #     ImagePosition('kn3.ob', 27, 56, -98, FrameType.VM),
+            # ),
+            (
+                ImagePosition('kn3.ob', 25, 42, -52, FrameType.NON_SOLID),
+                ImagePosition('kn3.ob', 24, 44, -80, FrameType.NON_SOLID),
+                ImagePosition('kn3.ob', 26, 51, -62, FrameType.NON_SOLID),
+                ImagePosition('kn3.ob', 27, 56, -98, FrameType.NON_SOLID),
+            ),
         ),
+        order=(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+               1, 2, 3, 3, 3, 3, 3, 3, 3, 3,),
     ),
     'recovery': AnimationDefinition(
         frames=(

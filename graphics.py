@@ -186,7 +186,7 @@ class GraphicsSystem(UserList):
     flags = SystemFlag.controller + SystemFlag.state + SystemFlag.movement +\
             SystemFlag.graphics
 
-    def update(self):
+    def update(self, background):
         for entity in self.data:
             controller = entity.controller
             graphic = entity.graphics
@@ -214,7 +214,7 @@ class GraphicsSystem(UserList):
                     movement.position,
                     movement.facing,
                 )
-            elif entity.state.value == State.busy:
+            elif entity.state.value == State.busy or entity.state.value == State.loop_once:
                 animation_name = state.animation_name
                 GraphicsSystem.update_image(
                     graphic,
@@ -224,6 +224,9 @@ class GraphicsSystem(UserList):
                     movement.position,
                     movement.facing,
                 )
+            elif entity.state.value == State.destroy:
+                background.blit(graphic.image, graphic.rect)
+                active.remove([graphic])
             else:
                 GraphicsSystem.move(graphic, movement, controller.direction)
 

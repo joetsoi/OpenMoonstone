@@ -46,21 +46,31 @@ class LogicSystem(UserList):
             entity.state.value = State.busy
 
         for entity in take_damage:
-            set_animation(
-                animation_name='some',
-                frame_number=-1,
-                graphics=entity.graphics,
-                movement=entity.movement,
-                state=entity.state,
-            )
-            entity.state.value = State.busy
-            print(f"{entity.logic.health}")
-            create_knight_blood_stain(
-                'some',
-                entity.graphics.palette,
-                entity.movement.facing,
-                entity.movement.position,
-            )
+            if defender.logic.health <= 0:
+                set_animation(
+                    animation_name='death',
+                    frame_number=-1,
+                    graphics=entity.graphics,
+                    movement=entity.movement,
+                    state=entity.state,
+                )
+                entity.state.value = State.loop_once
+            else:
+                set_animation(
+                    animation_name='some',
+                    frame_number=-1,
+                    graphics=entity.graphics,
+                    movement=entity.movement,
+                    state=entity.state,
+                )
+                entity.state.value = State.busy
+                print(f"{entity.logic.health}")
+                create_knight_blood_stain(
+                    'some',
+                    entity.graphics.palette,
+                    entity.movement.facing,
+                    entity.movement.position,
+                )
 
 
 logic_system = LogicSystem()
