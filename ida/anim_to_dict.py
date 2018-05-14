@@ -31,6 +31,7 @@ collide_type = {
     0: 'FrameType.NON_SOLID',
     1: 'FrameType.COLLIDEE',
     2: 'FrameType.COLLIDER',
+    16: 'FrameType.VM',
     128: 'FrameType.BLOOD',
     144: 'FrameType.BLOOD_STAIN',
 }
