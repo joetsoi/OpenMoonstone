@@ -10,8 +10,6 @@ from movement import Direction, Movement
 from state import State
 from system import SystemFlag
 
-active = pygame.sprite.Group()
-
 
 class Move(Enum):
     IDLE = (0, 0)
@@ -186,6 +184,10 @@ class GraphicsSystem(UserList):
     flags = SystemFlag.controller + SystemFlag.state + SystemFlag.movement +\
             SystemFlag.graphics
 
+    def __init__(self, initlist=None):
+        super().__init__(initlist)
+        self.active = pygame.sprite.Group()
+
     def update(self, background):
         for entity in self.data:
             controller = entity.controller
@@ -236,9 +238,10 @@ class GraphicsSystem(UserList):
                 )
             elif entity.state.value == State.destroy:
                 background.blit(graphic.image, graphic.rect)
-                active.remove([graphic])
+                self.active.remove([graphic])
             else:
                 GraphicsSystem.move(graphic, movement, controller.direction)
+
 
     @staticmethod
     def update_image(

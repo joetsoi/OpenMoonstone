@@ -12,7 +12,6 @@ from state import State
 from system import SystemFlag
 
 
-rects = []
 attack = pygame.sprite.Group()
 
 
@@ -97,13 +96,17 @@ class Collision:
 class CollisionSystem(UserList):
     flags = SystemFlag.movement + SystemFlag.graphics + SystemFlag.collision + SystemFlag.state
 
+    def __init__(self, initlist=None):
+        super().__init__(initlist)
+        self.debug_rects = []
+
     def update(self):
         # attackers = [e for e in self.data if e.graphics.is_attacking]
         attackers = [e for e in self.data if e.state.value == State.attacking]
         for attacker in attackers:
             attacker.collision.has_hit = None
             for defender in self.data:
-                collided = check_collision(attacker, defender)
+                collided = check_collision(self, attacker, defender)
                 if collided:
                     attacker.collision.has_hit = defender
 
@@ -111,7 +114,7 @@ class CollisionSystem(UserList):
 collision_system = CollisionSystem()
 
 
-def check_collision(attacker, defender):
+def check_collision(system, attacker, defender):
     if defender == attacker:
         return False
 
@@ -129,18 +132,18 @@ def check_collision(attacker, defender):
         image_rect, collide_max, collide_rects = attacker_rects
         max_rect = get_entity_collision_rect(attacker.movement, collide_max)
 
-        rects.append(pygame.Rect(max_rect))
+        system.debug_rects.append(pygame.Rect(max_rect))
 
         for d_rect, d_image_position in zip(defender_rects, defender_images):
             defender_rect = get_entity_collision_rect(defender.movement, d_rect)
-            rects.append(pygame.Rect(defender_rect))
+            system.debug_rects.append(pygame.Rect(defender_rect))
 
             if not max_rect.colliderect(defender_rect):
                 continue
 
             for attacker_rect in collide_rects:
                 attacker_rect = get_entity_collision_rect(attacker.movement, attacker_rect)
-                rects.append(pygame.Rect(attacker_rect))
+                system.debug_rects.append(pygame.Rect(attacker_rect))
 
                 if not attacker_rect.colliderect(defender_rect):
                     continue

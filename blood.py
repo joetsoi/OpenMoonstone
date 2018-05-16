@@ -11,8 +11,6 @@ from movement import Direction
 from state import AnimationState, State, state_system
 from system import SystemFlag
 
-blood_stains = pygame.sprite.Group()
-
 
 def get_blood_frames(
         animations: dict,
@@ -38,8 +36,8 @@ class BloodStain:
 
 
 class BloodGraphic(pygame.sprite.Sprite):
-    def __init__(self, blood_stain: BloodStain, frame_num: int) -> None:
-        super().__init__([blood_stains])
+    def __init__(self, blood_stain: BloodStain, frame_num: int, groups) -> None:
+        super().__init__(groups)
 
         direction = blood_stain.facing
         position = blood_stain.position
@@ -64,6 +62,10 @@ class BloodGraphic(pygame.sprite.Sprite):
 class BloodSystem(UserList):
     flags = SystemFlag.state + SystemFlag.blood
 
+    def __init__(self, initlist=None):
+        super().__init__(initlist)
+        self.blood_stains = pygame.sprite.Group()
+
     def update(self, background):
         for entity in self.data:
             blood = entity.blood
@@ -72,9 +74,9 @@ class BloodSystem(UserList):
             draw_blood = state.value != State.destroy and state.frame_num > 0
             if draw_blood and blood.frames[state.frame_num]:
                 for stain in blood.frames:
-                    BloodGraphic(blood, state.frame_num)
-        blood_stains.draw(background)
-        blood_stains.empty()
+                    BloodGraphic(blood, state.frame_num, [self.blood_stains])
+        self.blood_stains.draw(background)
+        self.blood_stains.empty()
 
 
 

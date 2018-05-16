@@ -9,6 +9,7 @@ import collide
 import graphics
 import settings
 from assets import lairs, loading_screen
+from assets.manager import Manager
 from cli import print_hex_view
 from cmp import CmpFile
 from blood import blood_system
@@ -65,7 +66,7 @@ def create_player(colour: str, x: int, y: int, lair, control_map):
         position=movement.position,
         palette=palette,
         lair=lair,
-        groups=[graphics.active],
+        groups=[graphics_system.active],
     )
     collider = Collision(
         collider=Collider(assets.animation.knight, assets.collide_hit),
@@ -101,6 +102,8 @@ def register_entity_with_systems(entity):
 
 
 def game_loop(screen):
+    manager = Manager([assets.animation.knight])
+
     lair = lairs[0]
 
     create_player('blue', 100, 100, lair, player_one)
@@ -128,11 +131,11 @@ def game_loop(screen):
         graphics_system.update(background)
         #collide.active.update()
 
-
         image = background.copy()
         y_sorted = pygame.sprite.Group()
-        y_sorted.add(sorted(iter(graphics.active), key=lambda s: s.rect.bottom))
+        y_sorted.add(sorted(iter(graphics_system.active), key=lambda s: s.rect.bottom))
         y_sorted.draw(image)
+
 
         collision_system.update()
         #collide.check_collisions()
@@ -149,17 +152,14 @@ def game_loop(screen):
         #    1,
         #)
         #print("rects", rects)
-        freeze = False
-        for r in collide.rects:
-            freeze = True
-
+        for r in collision_system.debug_rects:
             pygame.draw.rect(
                 image,
                 (255, 255, 255),
                 r,
                 1,
             )
-        collide.rects = []
+        collision_system.debug_rects = []
 
         pygame.draw.rect(
             image,
@@ -176,8 +176,6 @@ def game_loop(screen):
         screen.blit(scaled, (0, 0))
 
         pygame.display.update()
-        if freeze:
-            test = 1
         #clock.tick(settings.FRAME_LIMIT)
         clock.tick(1000 / (1193182 / 21845 * 2))
 
