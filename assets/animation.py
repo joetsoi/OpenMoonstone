@@ -20,10 +20,16 @@ class ImagePosition(NamedTuple):
     collide: FrameType
 
 
+class FrameSound(NamedTuple):
+    sound: str
+    frame: int
+
+
 @attrs(slots=True, auto_attribs=True)
 class AnimationDefinition:
     frames: Tuple[Tuple[ImagePosition]]
     order: Optional[Tuple[int]] = None
+    sounds: Optional[Tuple[FrameSound]] = None
 
     def __iter__(self):
         order = self.order
@@ -172,7 +178,8 @@ knight = {
                 ImagePosition('kn4.ob', 1, -6, 4, FrameType.COLLIDEE),
             ),
         ),
-        order=(0, 0, 1, 2, 3, 4, 5, 6)
+        order=(0, 0, 1, 2, 3, 4, 5, 6),
+        sounds=(FrameSound('swish', 3), ),
     ),
     'thrust': AnimationDefinition(
         frames=(

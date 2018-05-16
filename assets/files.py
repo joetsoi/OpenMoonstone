@@ -1,5 +1,7 @@
 from pathlib import Path, PureWindowsPath
 
+from pygame.mixer import Sound
+
 from cmp import CmpFile
 from font import FontFile
 from piv import PivFile
@@ -20,6 +22,11 @@ def load_collision_file(filename):
     file_path = Path(MOONSTONE_DIR) / PureWindowsPath(filename)
     with open(file_path, 'r') as f:
         return parse_collision_file(f)
+
+
+def load_sound(filename):
+    file_path = Path(MOONSTONE_DIR) / PureWindowsPath(filename)
+    return Sound(str(file_path))
 
 
 backgrounds = {
@@ -56,3 +63,7 @@ terrain = {
 
 
 collide_hit = load_collision_file("COLLIDE.HIT")
+
+sounds = {
+    'swish': 'SAMPLES\\SWISH',
+}
