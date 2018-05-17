@@ -109,7 +109,7 @@ def game_loop(screen):
 
 
 if __name__ == "__main__":
-    pygame.mixer.pre_init(44100, -16, 2, 2048)
+    pygame.mixer.pre_init(16129, -16, 2, 2048)
     pygame.mixer.init()
     pygame.init()
     pygame.display.set_caption("OpenMoonstone")
