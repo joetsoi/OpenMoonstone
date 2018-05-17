@@ -416,6 +416,7 @@ knight = {
             ),
         ),
         order=(0, 1, 1, 2, 2, 3),
+        sounds=(FrameSound('swordcl', 0), ),
     ),
     'damage_2': AnimationDefinition(
         frames=(
@@ -448,6 +449,7 @@ knight = {
             ),
         ),
         order=(0, 1, 1, 2, 2, 3),
+        sounds=(FrameSound('swordcl', 0), ),
     ),
     'death': AnimationDefinition(
         frames=(
@@ -484,6 +486,7 @@ knight = {
         ),
         order=(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                1, 2, 3, 3, 3, 3, 3, 3, 3, 3),
+        sounds=(FrameSound('hit3', 0), ),
     ),
     'recovery': AnimationDefinition(
         frames=(

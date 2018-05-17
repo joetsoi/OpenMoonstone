@@ -65,8 +65,10 @@ terrain = {
 collide_hit = load_collision_file("COLLIDE.HIT")
 
 sounds = {
+    'hit3': 'SAMPLES\\HIT3',
     'grnt3': 'SAMPLES\\GRNT3',
     'kstep': 'SAMPLES\\KSTEP',
     'rjgrunt4': 'SAMPLES\\RJGRUNT4',
     'swish': 'SAMPLES\\SWISH',
+    'swordcl': 'SAMPLES\\SWORDCL',
 }
