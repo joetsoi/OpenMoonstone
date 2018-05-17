@@ -50,4 +50,3 @@ class ControllerSystem(UserList):
             controller.fire = keys[controller.mapping['fire']]
 
 
-controller_system = ControllerSystem()

@@ -48,6 +48,3 @@ class AnimationStateSystem(UserList):
                     state.value = State.start_attacking
                     state.frame_num = 0
                     continue
-
-
-state_system = AnimationStateSystem()

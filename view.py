@@ -12,17 +12,17 @@ from assets import lairs, loading_screen
 from assets.manager import Manager
 from cli import print_hex_view
 from cmp import CmpFile
-from blood import blood_system
-from collide import Collider, Collision, collision_system
-from controller import Controller, controller_system, player_one, player_two
-from destroy import destroy_entites
+from collide import Collider, Collision
+from controller import Controller, player_one, player_two
+#from destroy import destroy_entites
+from encounter import Encounter
 from entity import Entity
 from extract import extract_palette
-from graphics import Graphic, Move, graphics_system
-from logic import Logic, logic_system
+from graphics import Graphic, Move
+from logic import Logic
 from main import MainExe
-from movement import Movement, movement_system
-from state import AnimationState, state_system
+from movement import Movement
+from state import AnimationState
 from system import SystemFlag
 from piv import PivFile
 from terrain import TerrainFile
@@ -102,16 +102,11 @@ def register_entity_with_systems(entity):
 
 
 def game_loop(screen):
-    manager = Manager([assets.animation.knight])
-
-    lair = lairs[0]
-
-    create_player('blue', 100, 100, lair, player_one)
-    create_player('red', 200, 150, lair, player_two)
+    encounter = Encounter()
 
     clock = pygame.time.Clock()
     last_tick = pygame.time.get_ticks()
-    background = lair.draw().copy()
+    background = encounter.lair.draw().copy()
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -125,23 +120,23 @@ def game_loop(screen):
         #if time > 1000 / ((1193182 / 21845) * 2):
         #    knights.update()
         #    last_tick = now
-        controller_system.update()
-        state_system.update()
-        movement_system.update()
-        graphics_system.update(background)
+        encounter.controller_system.update()
+        encounter.state_system.update()
+        encounter.movement_system.update()
+        encounter.graphics_system.update(background)
         #collide.active.update()
 
         image = background.copy()
         y_sorted = pygame.sprite.Group()
-        y_sorted.add(sorted(iter(graphics_system.active), key=lambda s: s.rect.bottom))
+        y_sorted.add(sorted(iter(encounter.graphics_system.active), key=lambda s: s.rect.bottom))
         y_sorted.draw(image)
 
 
-        collision_system.update()
+        encounter.collision_system.update()
         #collide.check_collisions()
-        logic_system.update()
-        blood_system.update(background)  # TODO change background to world component
-        destroy_entites()
+        encounter.logic_system.update(encounter)
+        encounter.blood_system.update(background)  # TODO change background to world component
+        #destroy_entites()
 
         #pygame.draw.rect(
         #    image,
@@ -152,14 +147,14 @@ def game_loop(screen):
         #    1,
         #)
         #print("rects", rects)
-        for r in collision_system.debug_rects:
+        for r in encounter.collision_system.debug_rects:
             pygame.draw.rect(
                 image,
                 (255, 255, 255),
                 r,
                 1,
             )
-        collision_system.debug_rects = []
+        encounter.collision_system.debug_rects = []
 
         pygame.draw.rect(
             image,

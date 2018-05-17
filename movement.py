@@ -91,6 +91,3 @@ class MovementSystem(UserList):
                 mover.next_frame = frame
                 mover.next_position = new_position
                 #state.value = State.walking
-
-
-movement_system = MovementSystem()

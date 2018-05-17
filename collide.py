@@ -111,9 +111,6 @@ class CollisionSystem(UserList):
                     attacker.collision.has_hit = defender
 
 
-collision_system = CollisionSystem()
-
-
 def check_collision(system, attacker, defender):
     if defender == attacker:
         return False

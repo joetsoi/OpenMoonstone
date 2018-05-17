@@ -348,6 +348,3 @@ def set_animation(animation_name, frame_number, graphics, movement, state):
     state.animation_name = animation_name
     state.animation_len = len(animation.order)
     state.frame_num = frame_number
-
-
-graphics_system = GraphicsSystem()

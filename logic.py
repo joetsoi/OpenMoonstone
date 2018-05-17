@@ -24,7 +24,7 @@ class Logic:
 
 class LogicSystem(UserList):
     flags = SystemFlag.logic + SystemFlag.collision
-    def update(self):
+    def update(self, encounter):
         recover_after_attack = []
         take_damage = []
         attackers = [e for e in self.data if (e.collision.has_hit and e.state.value == State.attacking)]
@@ -66,12 +66,10 @@ class LogicSystem(UserList):
                 )
                 entity.state.value = State.busy
                 print(f"{entity.logic.health}")
-                create_knight_blood_stain(
+                blood_stain = create_knight_blood_stain(
                     'some',
                     entity.graphics.palette,
                     entity.movement.facing,
                     entity.movement.position,
                 )
-
-
-logic_system = LogicSystem()
+                encounter.register_entity(blood_stain)

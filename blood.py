@@ -8,7 +8,7 @@ from assets.animation import FrameType
 from entity import Entity
 from graphics import Frame
 from movement import Direction
-from state import AnimationState, State, state_system
+from state import AnimationState, State
 from system import SystemFlag
 
 
@@ -79,15 +79,9 @@ class BloodSystem(UserList):
         self.blood_stains.empty()
 
 
-
-blood_system = BloodSystem()
-
-
 def create_knight_blood_stain(animation_name, palette, facing, position):
     frames = get_blood_frames(assets.animation.knight, animation_name)
-    blood_entity = Entity(
+    return Entity(
         blood=BloodStain(position, frames, palette, facing),
         state=AnimationState(-1, animation_name, len(frames), State.loop_once),
     )
-    blood_system.append(blood_entity)
-    state_system.append(blood_entity)
