@@ -80,23 +80,24 @@ def game_loop(screen):
         #    1,
         #)
         #print("rects", rects)
-        for r in encounter.collision_system.debug_rects:
+        if settings.DEBUG:
+            for r in encounter.collision_system.debug_rects:
+                pygame.draw.rect(
+                    image,
+                    (255, 255, 255),
+                    r,
+                    1,
+                )
+            encounter.collision_system.debug_rects = []
+
             pygame.draw.rect(
                 image,
                 (255, 255, 255),
-                r,
+
+                #pygame.rect.Rect(knight.rect.x, knight.rect.y, 0, 0),
+                pygame.rect.Rect(0, 113, 320, 1),
                 1,
             )
-        encounter.collision_system.debug_rects = []
-
-        pygame.draw.rect(
-            image,
-            (255, 255, 255),
-
-            #pygame.rect.Rect(knight.rect.x, knight.rect.y, 0, 0),
-            pygame.rect.Rect(0, 113, 320, 1),
-            1,
-        )
         scaled = pygame.transform.scale(
             image,
             (320 * settings.SCALE_FACTOR, 200 * settings.SCALE_FACTOR)

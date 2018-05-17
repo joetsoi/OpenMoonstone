@@ -5,6 +5,7 @@ import pygame
 from attr import attrib, attrs
 
 import assets
+import settings
 from assets.animation import FrameType
 # from graphics import Graphic
 from movement import Direction, Movement
@@ -129,18 +130,21 @@ def check_collision(system, attacker, defender):
         image_rect, collide_max, collide_rects = attacker_rects
         max_rect = get_entity_collision_rect(attacker.movement, collide_max)
 
-        system.debug_rects.append(pygame.Rect(max_rect))
+        if settings.DEBUG:
+            system.debug_rects.append(pygame.Rect(max_rect))
 
         for d_rect, d_image_position in zip(defender_rects, defender_images):
             defender_rect = get_entity_collision_rect(defender.movement, d_rect)
-            system.debug_rects.append(pygame.Rect(defender_rect))
+            if settings.DEBUG:
+                system.debug_rects.append(pygame.Rect(defender_rect))
 
             if not max_rect.colliderect(defender_rect):
                 continue
 
             for attacker_rect in collide_rects:
                 attacker_rect = get_entity_collision_rect(attacker.movement, attacker_rect)
-                system.debug_rects.append(pygame.Rect(attacker_rect))
+                if settings.DEBUG:
+                    system.debug_rects.append(pygame.Rect(attacker_rect))
 
                 if not attacker_rect.colliderect(defender_rect):
                     continue
