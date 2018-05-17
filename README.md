@@ -1,10 +1,10 @@
 # OpenMoonstone
 An open source reimplementation of the Amiga/DOS game [Moonstone](https://en.wikipedia.org/wiki/Moonstone:_A_Hard_Days_Knight)
-## Source Install
 ## Configuration
 You need a DOS copy of the original moonstone. Extract it to your home dir
 either `~/games/moonstone` for linux or `C:\Users\username\games\moonstone`
 
+### settings.ini
 Change `MOONSTONE_DIR` in `settings.ini` to match that same directory. You can
 use `%(home_dir)s` to mean `~/` or `Users/<your user>`
 
@@ -16,3 +16,5 @@ window
 ```
 python view.py
 ````
+### Progress videos
+https://www.youtube.com/watch?v=41iNdWDJwUY&list=PLub5fMuLNSIoc0oVM2NJSzmA4HHv1k_Ue
