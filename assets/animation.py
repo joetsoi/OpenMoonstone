@@ -273,6 +273,11 @@ knight = {
             )
         ),
         order=(0, 1, 1, 1, 2, 3, 4, 4, 4, 5, 6, 6),
+        sounds=(
+            FrameSound('rjgrunt4', 1),
+            FrameSound('swish', 4),
+            FrameSound('kstep', 6),
+        ),
     ),
     'up_thrust': AnimationDefinition(
         frames=(
@@ -333,7 +338,8 @@ knight = {
             ),
         ),
         #TODO: fix set_next_frame AnimationBegin from ida dataseg:0xde6
-        order=(0, 1, 2, 3, 3, 3, 4)
+        order=(0, 1, 2, 3, 3, 3, 4),
+        sounds=(FrameSound('swish', 1), ),
     ),
     'dagger': AnimationDefinition(
         frames=(
@@ -359,6 +365,7 @@ knight = {
             ),
         ),
         order=(0, 0, 0, 1, 2),
+        sounds=(FrameSound('grnt3', 1), ),
     ),
     'dodge': AnimationDefinition(
         frames=(
