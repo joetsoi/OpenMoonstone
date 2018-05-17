@@ -9,3 +9,4 @@ class SystemFlag(IntFlag):
     logic = 16
     state = 32
     blood = 64
+    audio = 128

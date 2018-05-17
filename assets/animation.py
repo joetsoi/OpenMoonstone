@@ -45,6 +45,11 @@ class AnimationDefinition:
         else:
             return self.frames[i]
 
+    def __len__(self):
+        if self.order:
+            return len(self.order)
+        return len(self.frames)
+
 
 def hex_to_sign(value):
     if value >= 0x8000:
@@ -471,7 +476,7 @@ knight = {
             ),
         ),
         order=(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-               1, 2, 3, 3, 3, 3, 3, 3, 3, 3,),
+               1, 2, 3, 3, 3, 3, 3, 3, 3, 3),
     ),
     'recovery': AnimationDefinition(
         frames=(

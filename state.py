@@ -38,9 +38,11 @@ class AnimationStateSystem(UserList):
                 else:
                     if state.value == State.loop_once:
                         state.value = State.destroy
+                        state.frame_num = state.animation_len - 1
                     else:
-                        state.frame_num = None
-                        state.animation_len = None
+                        state.frame_num = 0
+                        state.animation_len = 1
+                        state.animation_name = 'idle'
                         state.value = State.walking
 
             if controller and controller.fire:

@@ -12,6 +12,7 @@ class Entity:
     logic: 'Logic' = attrib(default=None)
     state: 'State' = attrib(default=None)
     blood: 'Blood' = attrib(default=None)
+    audio: 'Audio' = attrib(default=None)
 
     @property
     def flags(self):

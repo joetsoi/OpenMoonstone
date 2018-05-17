@@ -33,74 +33,6 @@ controls = {
 }
 
 
-def change_player_colour(colour: str, palette: list):
-    colours = {
-        'blue': [0xa, 0x7, 0x4],
-        'orange': [0xf80, 0xc50, 0xa30],
-        'green': [0x8c6, 0x593, 0x251],
-        'red': [0xf22, 0xb22, 0x700],
-        'black': [0x206, 0x103, 1],
-    }
-    palette = copy.deepcopy(palette)
-    old_palette = extract_palette(palette, base=256)
-    # palette[0xc // 2:0xc // 2 + 2] = colours[colour]
-    palette[6:8] = colours[colour]
-    new_palette = extract_palette(palette, base=256)
-
-    # This is the blood colour, which is an incorrect orange in new_pallete
-    # investigate in ida if this gets overrriden later
-    new_palette[15] = old_palette[15]
-    return PivFile.make_palette(new_palette)
-
-
-def create_player(colour: str, x: int, y: int, lair, control_map):
-    controller = Controller(control_map)
-    movement = Movement((x, y))
-
-    palette = change_player_colour(
-        colour,
-        assets.files.backgrounds[lair.background].extracted_palette,
-    )
-    graphic = Graphic(
-        animations=assets.animation.knight,
-        position=movement.position,
-        palette=palette,
-        lair=lair,
-        groups=[graphics_system.active],
-    )
-    collider = Collision(
-        collider=Collider(assets.animation.knight, assets.collide_hit),
-    )
-    logic = Logic()
-
-    knight = Entity(
-        controller=controller,
-        movement=movement,
-        graphics=graphic,
-        collision=collider,
-        logic=logic,
-        state=AnimationState(),
-    )
-
-    register_entity_with_systems(knight)
-    return knight
-
-
-def register_entity_with_systems(entity):
-    systems = {
-        SystemFlag.controller: controller_system,
-        SystemFlag.state: state_system,
-        SystemFlag.movement: movement_system,
-        SystemFlag.graphics: graphics_system,
-        SystemFlag.collision: collision_system,
-        SystemFlag.logic: logic_system,
-    }
-
-    for flag, system in systems.items():
-        if flag in entity.flags:
-            system.append(entity)
-
-
 def game_loop(screen):
     encounter = Encounter()
 
@@ -124,6 +56,7 @@ def game_loop(screen):
         encounter.state_system.update()
         encounter.movement_system.update()
         encounter.graphics_system.update(background)
+        encounter.audio_system.update()
         #collide.active.update()
 
         image = background.copy()
@@ -176,6 +109,8 @@ def game_loop(screen):
 
 
 if __name__ == "__main__":
+    pygame.mixer.pre_init(44100, -16, 2, 2048)
+    pygame.mixer.init()
     pygame.init()
     pygame.display.set_caption("OpenMoonstone")
     screen = pygame.display.set_mode(
