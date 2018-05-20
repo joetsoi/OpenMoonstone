@@ -6,9 +6,10 @@ import pygame
 from attr import attrib, attrs
 
 import assets
-from movement import Direction, Movement
-from state import State
-from system import SystemFlag
+
+from .movement import Direction, Movement
+from .state import State
+from .system import SystemFlag
 
 
 class Move(Enum):

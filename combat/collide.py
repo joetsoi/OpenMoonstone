@@ -1,5 +1,4 @@
 from collections import UserList
-# from pprint import pprint
 
 import pygame
 from attr import attrib, attrs
@@ -7,10 +6,15 @@ from attr import attrib, attrs
 import assets
 import settings
 from assets.animation import FrameType
-# from graphics import Graphic
-from movement import Direction, Movement
-from state import State
-from system import SystemFlag
+
+# from .graphics import Graphic
+from .movement import Direction, Movement
+from .state import State
+from .system import SystemFlag
+
+# from pprint import pprint
+
+
 
 
 attack = pygame.sprite.Group()

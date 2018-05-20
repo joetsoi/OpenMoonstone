@@ -1,6 +1,6 @@
 from attr import attrib, attrs
 
-from system import SystemFlag
+from .system import SystemFlag
 
 
 @attrs(auto_attribs=True, slots=True)

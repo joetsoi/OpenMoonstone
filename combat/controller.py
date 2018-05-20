@@ -3,7 +3,7 @@ from collections import UserList
 import pygame
 from attr import Factory, attrib, attrs
 
-from system import SystemFlag
+from .system import SystemFlag
 
 player_one = {
     'direction': {
@@ -48,5 +48,3 @@ class ControllerSystem(UserList):
                     controller.direction.x += value[0]
                     controller.direction.y += value[1]
             controller.fire = keys[controller.mapping['fire']]
-
-

@@ -4,8 +4,8 @@ from enum import Enum
 import pygame
 from attr import attrib, attrs
 
-from state import State
-from system import SystemFlag
+from .state import State
+from .system import SystemFlag
 
 x_distances = (
     (25, 3, 23, 4),

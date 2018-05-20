@@ -2,12 +2,11 @@ from collections import UserList
 
 from attr import attrib, attrs
 
-from collide import Collision
-from graphics import set_animation
-from state import State
-from system import SystemFlag
-from blood import create_knight_blood_stain
-
+from .blood import create_knight_blood_stain
+from .collide import Collision
+from .graphics import set_animation
+from .state import State
+from .system import SystemFlag
 
 
 @attrs(slots=True)

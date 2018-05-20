@@ -1,20 +1,21 @@
 import copy
 
 import assets
-import graphics
 from assets.manager import Manager
-from audio import AudioSystem, Audio
-from blood import BloodSystem
-from collide import Collider, Collision, CollisionSystem
-from controller import Controller, ControllerSystem, player_one, player_two
-from entity import Entity
+from combat import graphics
 from extract import extract_palette
-from graphics import Graphic, GraphicsSystem
-from logic import Logic, LogicSystem
-from movement import Movement, MovementSystem
 from piv import PivFile
-from state import AnimationState, AnimationStateSystem
-from system import SystemFlag
+
+from .audio import Audio, AudioSystem
+from .blood import BloodSystem
+from .collide import Collider, Collision, CollisionSystem
+from .controller import Controller, ControllerSystem, player_one, player_two
+from .entity import Entity
+from .graphics import Graphic, GraphicsSystem
+from .logic import Logic, LogicSystem
+from .movement import Movement, MovementSystem
+from .state import AnimationState, AnimationStateSystem
+from .system import SystemFlag
 
 
 def change_player_colour(colour: str, palette: list):

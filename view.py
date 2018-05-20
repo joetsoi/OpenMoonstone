@@ -5,25 +5,24 @@ from pprint import pprint
 import pygame
 
 import assets
-import collide
-import graphics
 import settings
 from assets import lairs, loading_screen
 from assets.manager import Manager
 from cli import print_hex_view
 from cmp import CmpFile
-from collide import Collider, Collision
-from controller import Controller, player_one, player_two
+from combat import collide, graphics
+from combat.collide import Collider, Collision
+from combat.controller import Controller, player_one, player_two
 #from destroy import destroy_entites
-from encounter import Encounter
-from entity import Entity
+from combat.encounter import Encounter
+from combat.entity import Entity
+from combat.graphics import Graphic, Move
+from combat.logic import Logic
+from combat.movement import Movement
+from combat.state import AnimationState
+from combat.system import SystemFlag
 from extract import extract_palette
-from graphics import Graphic, Move
-from logic import Logic
 from main import MainExe
-from movement import Movement
-from state import AnimationState
-from system import SystemFlag
 from piv import PivFile
 from terrain import TerrainFile
 

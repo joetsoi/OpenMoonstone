@@ -4,8 +4,8 @@ from typing import Dict, List, Optional
 import pygame
 from attr import attrib, attrs
 
-from state import State
-from system import SystemFlag
+from .state import State
+from .system import SystemFlag
 
 
 def make_sound_list(animations):

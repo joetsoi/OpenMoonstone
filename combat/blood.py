@@ -5,11 +5,12 @@ from attr import attrib, attrs
 
 import assets
 from assets.animation import FrameType
-from entity import Entity
-from graphics import Frame
-from movement import Direction
-from state import AnimationState, State
-from system import SystemFlag
+
+from .entity import Entity
+from .graphics import Frame
+from .movement import Direction
+from .state import AnimationState, State
+from .system import SystemFlag
 
 
 def get_blood_frames(

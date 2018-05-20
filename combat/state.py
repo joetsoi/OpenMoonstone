@@ -3,7 +3,7 @@ from enum import Enum, auto
 
 from attr import attrib, attrs
 
-from system import SystemFlag
+from .system import SystemFlag
 
 
 class State(Enum):
