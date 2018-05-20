@@ -1,6 +1,6 @@
 import pygame
 
-import piv
+from .import piv
 
 
 class CmpFile(piv.PivFile):

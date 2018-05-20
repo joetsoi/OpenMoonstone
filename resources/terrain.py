@@ -6,7 +6,7 @@ from struct import iter_unpack, unpack, unpack_from
 import pygame
 
 from cli import print_hex_view
-from extract import extract_file
+from .extract import extract_file
 
 CmpSubImage = namedtuple('CmpSubImage', ['cmp_file', 'image_number', 'x', 'y'])
 

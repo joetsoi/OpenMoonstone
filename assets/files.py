@@ -2,11 +2,11 @@ from pathlib import Path, PureWindowsPath
 
 from pygame.mixer import Sound
 
-from cmp import CmpFile
-from font import FontFile
-from piv import PivFile
+from resources.cmp import CmpFile
+from resources.font import FontFile
+from resources.piv import PivFile
 from settings import MOONSTONE_DIR
-from terrain import TerrainFile
+from resources.terrain import TerrainFile
 
 from .collide import parse_collision_file
 

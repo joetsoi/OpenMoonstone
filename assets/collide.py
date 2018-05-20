@@ -2,7 +2,7 @@ from collections import UserList, defaultdict
 from enum import IntEnum, auto
 from pathlib import Path, PureWindowsPath
 
-from extract import grouper
+from resources.extract import grouper
 from settings import MOONSTONE_DIR
 
 

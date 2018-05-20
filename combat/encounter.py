@@ -3,8 +3,8 @@ import copy
 import assets
 from assets.manager import Manager
 from combat import graphics
-from extract import extract_palette
-from piv import PivFile
+from resources.extract import extract_palette
+from resources.piv import PivFile
 
 from .audio import Audio, AudioSystem
 from .blood import BloodSystem

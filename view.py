@@ -9,11 +9,9 @@ import settings
 from assets import lairs, loading_screen
 from assets.manager import Manager
 from cli import print_hex_view
-from cmp import CmpFile
 from combat import collide, graphics
 from combat.collide import Collider, Collision
 from combat.controller import Controller, player_one, player_two
-#from destroy import destroy_entites
 from combat.encounter import Encounter
 from combat.entity import Entity
 from combat.graphics import Graphic, Move
@@ -21,10 +19,6 @@ from combat.logic import Logic
 from combat.movement import Movement
 from combat.state import AnimationState
 from combat.system import SystemFlag
-from extract import extract_palette
-from main import MainExe
-from piv import PivFile
-from terrain import TerrainFile
 
 controls = {
     pygame.K_LEFT: Move.LEFT,

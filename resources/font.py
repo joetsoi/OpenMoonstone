@@ -7,9 +7,9 @@ from struct import iter_unpack, unpack
 import pygame
 from attr import attrib, attrs
 
-from extract import each_bit_in_byte, extract_file, grouper
+from .extract import each_bit_in_byte, extract_file, grouper
 # from cli import print_hex_view
-from piv import PivFile
+from .piv import PivFile
 
 # 4ce4:5ba7
 ds_8178 = {

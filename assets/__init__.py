@@ -1,4 +1,4 @@
-from font import StringFlag, String
+from resources.font import StringFlag, String
 from screen import ImageLocation, Screen, Lair
 from . import animation, files  # noqa
 from .files import collide_hit

@@ -4,7 +4,7 @@ from struct import unpack
 
 import pygame
 
-from extract import each_bit_in_byte, extract_file, extract_palette, grouper
+from .extract import each_bit_in_byte, extract_file, extract_palette, grouper
 from settings import MOONSTONE_DIR
 
 

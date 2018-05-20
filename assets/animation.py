@@ -513,3 +513,11 @@ knight = {
          ),
      ),
 }
+
+dagger = {
+    'fly': AnimationDefinition(
+        frames=(
+            ImagePosition('kn4.ob', 10, 8, 61, FrameType.COLLIDER),
+        )
+    ),
+}
