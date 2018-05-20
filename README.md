@@ -1,5 +1,12 @@
 # OpenMoonstone
 An open source reimplementation of the Amiga/DOS game [Moonstone](https://en.wikipedia.org/wiki/Moonstone:_A_Hard_Days_Knight)
+## Windows
+Download the latest release from https://github.com/joetsoi/OpenMoonstone/releases
+You'll need to edit the settings.ini file with the location of the original moonstone DOS version
+after that run moonstone.exe
+### Controls
+* Player one: arrow keys and space
+* Player two: WASD and F
 ## Configuration
 You need a DOS copy of the original moonstone. Extract it to your home dir
 either `~/games/moonstone` for linux or `C:\Users\username\games\moonstone`
