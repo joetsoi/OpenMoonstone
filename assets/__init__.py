@@ -33,6 +33,7 @@ spritesheets = {
     'kn2.ob': files.objects['kn2'],
     'kn3.ob': files.objects['kn3'],
     'kn4.ob': files.objects['kn4'],
+    'sel.cel': files.objects['sel'],
 }
 
 lairs = (
@@ -52,5 +53,21 @@ loading_screen = Screen(
         ImageLocation('bold.f', 73, 5, 20),
         ImageLocation('bold.f', 74, 22, 181),
         ImageLocation('bold.f', 75, 110, 190),
+    ],
+)
+
+main_menu = Screen(
+    background='ch',
+    text=[
+        String(86, 83, "Players", StringFlag.bordered, 'bold'),
+        String(86, 108, "Gore", StringFlag.bordered, 'bold'),
+        String(0, 150, "Practice", StringFlag.centered + StringFlag.bordered, 'bold'),
+        String(0, 170, "Select Knight", StringFlag.centered + StringFlag.bordered, 'bold'),
+        String(214, 83, "1", StringFlag.bordered, 'bold'),
+        String(214, 108, "On", StringFlag.bordered, 'bold'),
+    ],
+    images=[
+        ImageLocation('bold.f', 73, 5, 10),
+        ImageLocation('sel.cel', 0, 50, 85),
     ],
 )

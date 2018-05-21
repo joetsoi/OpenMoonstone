@@ -11,7 +11,7 @@ class Screen:
     images = attrib()
 
     def draw(self):
-        surface = assets.backgrounds[self.background].make_surface()
+        surface = assets.files.backgrounds[self.background].make_surface()
         for string in self.text:
             self.draw_string(surface, string)
         for image in self.images:
@@ -22,11 +22,15 @@ class Screen:
         spritesheet = assets.spritesheets[image_meta.spritesheet]
         image = spritesheet.images[image_meta.image_number]
         image_surface = pixel_to_surface(
-            image.width, image.height, image.pixels, assets.backgrounds[self.background].palette)
+            image.width,
+            image.height,
+            image.pixels,
+            assets.files.backgrounds[self.background].palette,
+        )
         background.blit(image_surface, (image_meta.x, image_meta.y))
 
     def draw_string(self, image, string):
-        font = assets.fonts[string.font]
+        font = assets.files.fonts[string.font]
         char_numbers = []
         char_widths = []
         ords = []
@@ -40,7 +44,7 @@ class Screen:
                 width = char_image.width
             char_numbers.append(char_number)
             char_widths.append(width)
-        print(f"new {string.text}", ords, char_numbers)
+        # print(f"new {string.text}", ords, char_numbers)
 
         string_width = sum(char_widths)
         if StringFlag.centered & string.flags:
@@ -52,7 +56,11 @@ class Screen:
         for i, w in zip(char_numbers, char_widths):
             char = font.images[i]
             char_surface = pixel_to_surface(
-                char.width, char.height, char.pixels, assets.backgrounds[self.background].palette)
+                char.width,
+                char.height,
+                char.pixels,
+                assets.files.backgrounds[self.background].palette,
+            )
             image.blit(char_surface, (x, string.y))
             x += w
 

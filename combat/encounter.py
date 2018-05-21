@@ -19,6 +19,7 @@ from .system import SystemFlag
 
 
 def change_player_colour(colour: str, palette: list):
+    # todo: consider moving this so combat never imports resources
     colours = {
         'blue': [0xa, 0x7, 0x4],
         'orange': [0xf80, 0xc50, 0xa30],

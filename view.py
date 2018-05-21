@@ -4,26 +4,10 @@ from pprint import pprint
 
 import pygame
 
-import assets
 import settings
-from assets import lairs, loading_screen
-from assets.manager import Manager
+from assets import main_menu
 from cli import print_hex_view
-from combat import collide, graphics
-from combat.collide import Collider, Collision
-from combat.controller import Controller, player_one, player_two
 from combat.encounter import Encounter
-from combat.entity import Entity
-from combat.graphics import Graphic, Move
-from combat.logic import Logic
-from combat.movement import Movement
-from combat.state import AnimationState
-from combat.system import SystemFlag
-
-controls = {
-    pygame.K_LEFT: Move.LEFT,
-    pygame.K_RIGHT: Move.RIGHT,
-}
 
 
 def game_loop(screen):
@@ -102,6 +86,31 @@ def game_loop(screen):
         clock.tick(1000 / (1193182 / 21845 * 2))
 
 
+def menu(screen):
+    clock = pygame.time.Clock()
+    background = main_menu.draw()
+    last_tick = pygame.time.get_ticks()
+    loop = True
+    while loop:
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                loop = False
+            elif event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        now = pygame.time.get_ticks()
+        time = now - last_tick
+
+        image = background.copy()
+        scaled = pygame.transform.scale(
+            image,
+            (320 * settings.SCALE_FACTOR, 200 * settings.SCALE_FACTOR)
+        )
+        screen.blit(scaled, (0, 0))
+        pygame.display.update()
+        clock.tick(1000 / (1193182 / 21845 * 2))
+
 if __name__ == "__main__":
     pygame.mixer.pre_init(16129, -16, 2, 2048)
     pygame.mixer.init()
@@ -110,4 +119,6 @@ if __name__ == "__main__":
     screen = pygame.display.set_mode(
         (320 * settings.SCALE_FACTOR, 200 * settings.SCALE_FACTOR)
     )
+
+    menu(screen)
     game_loop(screen)

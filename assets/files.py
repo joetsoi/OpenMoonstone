@@ -48,7 +48,7 @@ fonts = {
 }
 
 objects = {
-    'sel': load_file(FontFile, 'SEL.CEL'),
+    'sel': load_file(FontFile, 'DISKB\SEL.CEL'),
     'kn1': load_file(FontFile, 'DISKB\KN1.OB'),
     'kn2': load_file(FontFile, 'DISKB\KN2.OB'),
     'kn3': load_file(FontFile, 'DISKB\KN3.OB'),
