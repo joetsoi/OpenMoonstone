@@ -79,7 +79,7 @@ class Frame:
                 surface,
                 (rect.left - frame_rect.left, rect.top - frame_rect.top),
             )
-        return cls(frame_surface, frame_rect)
+        return cls(frame_surface.convert_alpha(), frame_rect)
 
 
 @attrs(slots=True, auto_attribs=True)

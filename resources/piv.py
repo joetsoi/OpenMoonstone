@@ -48,6 +48,7 @@ class PivFile(object):
 
         del pixel_array
         return surface
+        #return surface.convert_alpha()
 
     def extract(self):
         self.extracted_palette = self.extract_palette()

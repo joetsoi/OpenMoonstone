@@ -323,7 +323,7 @@ def pixel_to_surface(width, height, pixels, palette):
                 pixel_array[x, y] = palette[pixel]
 
     del pixel_array
-    return surface
+    return surface.convert_alpha()
 
 
 class StringFlag(IntFlag):
