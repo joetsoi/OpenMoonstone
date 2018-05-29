@@ -4,10 +4,10 @@ from struct import iter_unpack
 import pytest
 
 import assets
-from extract import extract_file, grouper
-from font import FontFile  # , draw_string
-from main import MainExe
-from piv import PivFile
+from resources.extract import extract_file, grouper
+from resources.font import FontFile  # , draw_string
+#from main import MainExe
+from resources.piv import PivFile
 
 #from sprite import SpriteSheetFile
 test_dir = os.path.dirname(os.path.realpath(__file__))
