@@ -99,7 +99,7 @@ class Collision:
 
 
 class CollisionSystem(UserList):
-    flags = SystemFlag.movement + SystemFlag.graphics + SystemFlag.collision + SystemFlag.state
+    flags = SystemFlag.MOVEMENT + SystemFlag.GRAPHICS + SystemFlag.COLLISION + SystemFlag.ANIMATIONSTATE
 
     def __init__(self, initlist=None):
         super().__init__(initlist)

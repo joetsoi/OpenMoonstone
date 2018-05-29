@@ -22,7 +22,7 @@ class Logic:
 
 
 class LogicSystem(UserList):
-    flags = SystemFlag.logic + SystemFlag.collision
+    flags = SystemFlag.LOGIC + SystemFlag.COLLISION
     def update(self, encounter):
         recover_after_attack = []
         take_damage = []

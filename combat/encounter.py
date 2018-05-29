@@ -11,7 +11,7 @@ from .blood import BloodSystem
 from .collide import Collider, Collision, CollisionSystem
 from .controller import Controller, ControllerSystem, player_one, player_two
 from .entity import Entity
-from .graphics import Graphic, GraphicsSystem
+from .graphics import Graphics, GraphicsSystem
 from .logic import Logic, LogicSystem
 from .movement import Movement, MovementSystem
 from .state import AnimationState, AnimationStateSystem
@@ -47,7 +47,7 @@ def create_player(colour: str, x: int, y: int, lair, control_map, sprite_groups)
         colour,
         assets.files.backgrounds[lair.background].extracted_palette,
     )
-    graphic = Graphic(
+    graphic = Graphics(
         animations=assets.animation.knight,
         position=movement.position,
         palette=palette,
@@ -94,14 +94,14 @@ class Encounter:
 
     def register_entity(self, entity):
         systems = {
-            SystemFlag.audio: self.audio_system,
-            SystemFlag.blood: self.blood_system,
-            SystemFlag.controller: self.controller_system,
-            SystemFlag.state: self.state_system,
-            SystemFlag.movement: self.movement_system,
-            SystemFlag.graphics: self.graphics_system,
-            SystemFlag.collision: self.collision_system,
-            SystemFlag.logic: self.logic_system,
+            SystemFlag.AUDIO: self.audio_system,
+            SystemFlag.BLOODSTAIN: self.blood_system,
+            SystemFlag.CONTROLLER: self.controller_system,
+            SystemFlag.ANIMATIONSTATE: self.state_system,
+            SystemFlag.MOVEMENT: self.movement_system,
+            SystemFlag.GRAPHICS: self.graphics_system,
+            SystemFlag.COLLISION: self.collision_system,
+            SystemFlag.LOGIC: self.logic_system,
         }
 
         for flag, system in systems.items():
@@ -110,14 +110,14 @@ class Encounter:
 
     def destroy_entites(self):
         systems = {
-            SystemFlag.audio: self.audio_system,
-            SystemFlag.blood: self.blood_system,
-            SystemFlag.controller: self.controller_system,
-            SystemFlag.state: self.state_system,
-            SystemFlag.movement: self.movement_system,
-            SystemFlag.graphics: self.graphics_system,
-            SystemFlag.collision: self.collision_system,
-            SystemFlag.logic: self.logic_system,
+            SystemFlag.AUDIO: self.audio_system,
+            SystemFlag.BLOODSTAIN: self.blood_system,
+            SystemFlag.CONTROLLER: self.controller_system,
+            SystemFlag.ANIMATIONSTATE: self.state_system,
+            SystemFlag.MOVEMENT: self.movement_system,
+            SystemFlag.GRAPHICS: self.graphics_system,
+            SystemFlag.COLLISION: self.collision_system,
+            SystemFlag.LOGIC: self.logic_system,
         }
         entities = [e for e in state_system if e.state.value == State.destroy]
         for entity in entities:

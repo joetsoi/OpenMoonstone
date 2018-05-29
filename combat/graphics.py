@@ -119,7 +119,7 @@ def make_animations(animation_definitions: dict, palette):
     return animations
 
 
-class Graphic(pygame.sprite.Sprite):
+class Graphics(pygame.sprite.Sprite):
     def __init__(self,
                  animations,
                  position,
@@ -182,8 +182,8 @@ class Graphic(pygame.sprite.Sprite):
 
 
 class GraphicsSystem(UserList):
-    flags = SystemFlag.controller + SystemFlag.state + SystemFlag.movement +\
-            SystemFlag.graphics
+    flags = SystemFlag.CONTROLLER + SystemFlag.ANIMATIONSTATE + SystemFlag.MOVEMENT +\
+            SystemFlag.GRAPHICS
 
     def __init__(self, initlist=None):
         super().__init__(initlist)
@@ -246,7 +246,7 @@ class GraphicsSystem(UserList):
 
     @staticmethod
     def update_image(
-            graphic: Graphic,
+            graphic: Graphics,
             movement: Movement,
             animation_name: str,
             frame_num: int,
@@ -271,7 +271,7 @@ class GraphicsSystem(UserList):
 
     @staticmethod
     def clamp_to_terrain(
-            graphic: Graphic,
+            graphic: Graphics,
             current_position: pygame.Rect,
             new_position: pygame.Rect,
             frame: Frame,

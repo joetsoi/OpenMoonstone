@@ -7,10 +7,10 @@ from .system import SystemFlag
 class Entity:
     controller: 'Controller' = attrib(default=None)
     movement: 'Movement' = attrib(default=None)
-    graphics: 'Graphic' = attrib(default=None)
+    graphics: 'Graphics' = attrib(default=None)
     collision: 'Collision' = attrib(default=None)
     logic: 'Logic' = attrib(default=None)
-    state: 'State' = attrib(default=None)
+    state: 'AnimationState' = attrib(default=None)
     blood: 'Blood' = attrib(default=None)
     audio: 'Audio' = attrib(default=None)
 
@@ -18,6 +18,10 @@ class Entity:
     def flags(self):
         flags = 0
         for slot in self.__slots__:
-            has_component = getattr(self, slot) is not None
-            flags += int(has_component) * getattr(SystemFlag, slot)
+            component = getattr(self, slot)
+            if component is not None:
+                component_type = type(component).__name__.upper()
+                flags += getattr(SystemFlag, component_type)
         return SystemFlag(flags)
+
+

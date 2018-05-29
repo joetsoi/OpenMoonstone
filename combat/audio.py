@@ -25,7 +25,7 @@ class Audio:
 
 
 class AudioSystem(UserList):
-    flags = SystemFlag.state + SystemFlag.audio
+    flags = SystemFlag.ANIMATIONSTATE + SystemFlag.AUDIO
 
     def __init__(self, initlist=None, assets=None):
         super().__init__(initlist)

@@ -24,7 +24,7 @@ class AnimationState:
 
 
 class AnimationStateSystem(UserList):
-    flags = SystemFlag.controller + SystemFlag.state
+    flags = SystemFlag.CONTROLLER + SystemFlag.ANIMATIONSTATE
 
     def update(self):
         for entity in self.data:

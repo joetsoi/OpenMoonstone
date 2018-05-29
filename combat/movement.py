@@ -68,7 +68,7 @@ class Movement:
 
 
 class MovementSystem(UserList):
-    flags = SystemFlag.controller + SystemFlag.state + SystemFlag.movement
+    flags = SystemFlag.CONTROLLER + SystemFlag.ANIMATIONSTATE + SystemFlag.MOVEMENT
 
     def update(self):
         for entity in self.data:

@@ -61,7 +61,7 @@ class BloodGraphic(pygame.sprite.Sprite):
 
 
 class BloodSystem(UserList):
-    flags = SystemFlag.state + SystemFlag.blood
+    flags = SystemFlag.ANIMATIONSTATE + SystemFlag.BLOODSTAIN
 
     def __init__(self, initlist=None):
         super().__init__(initlist)

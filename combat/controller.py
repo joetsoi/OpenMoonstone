@@ -36,7 +36,7 @@ class Controller:
 
 
 class ControllerSystem(UserList):
-    flags = SystemFlag.controller
+    flags = SystemFlag.CONTROLLER
 
     def update(self):
         keys = pygame.key.get_pressed()

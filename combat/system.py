@@ -2,11 +2,12 @@ from enum import IntFlag
 
 
 class SystemFlag(IntFlag):
-    controller = 1
-    movement = 2
-    graphics = 4
-    collision = 8
-    logic = 16
-    state = 32
-    blood = 64
-    audio = 128
+    CONTROLLER = 1
+    MOVEMENT = 2
+    GRAPHICS = 4
+    COLLISION = 8
+    LOGIC = 16
+    ANIMATIONSTATE = 32
+    BLOODSTAIN = 64
+    AUDIO = 128
+    AICONTROLLER = 256
