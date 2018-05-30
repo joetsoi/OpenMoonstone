@@ -23,5 +23,3 @@ class Entity:
                 component_type = type(component).__name__.upper()
                 flags += getattr(SystemFlag, component_type)
         return SystemFlag(flags)
-
-

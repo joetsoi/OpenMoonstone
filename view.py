@@ -30,6 +30,7 @@ def game_loop(screen):
         #    knights.update()
         #    last_tick = now
         encounter.controller_system.update()
+        encounter.ai_controller_system.update()
         encounter.state_system.update()
         encounter.movement_system.update()
         encounter.graphics_system.update(background)

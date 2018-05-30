@@ -6,6 +6,7 @@ from combat import graphics
 from resources.extract import extract_palette
 from resources.piv import PivFile
 
+from .ai_controller import AiController, AiControllerSystem
 from .audio import Audio, AudioSystem
 from .blood import BloodSystem
 from .collide import Collider, Collision, CollisionSystem
@@ -72,11 +73,45 @@ def create_player(colour: str, x: int, y: int, lair, control_map, sprite_groups)
     return knight
 
 
+def create_black_knight(colour: str, x: int, y: int, lair, opponent, sprite_groups):
+    controller = AiController(opponent, y_range=4, close_range=80, long_range=100)
+    movement = Movement((x, y))
+
+    palette = change_player_colour(
+        colour,
+        assets.files.backgrounds[lair.background].extracted_palette,
+    )
+    graphic = Graphics(
+        animations=assets.animation.knight,
+        position=movement.position,
+        palette=palette,
+        lair=lair,
+        groups=sprite_groups,
+    )
+    collider = Collision(
+        collider=Collider(assets.animation.knight, assets.collide_hit),
+    )
+    logic = Logic()
+
+    knight = Entity(
+        controller=controller,
+        movement=movement,
+        graphics=graphic,
+        collision=collider,
+        logic=logic,
+        state=AnimationState(),
+        audio=Audio(sounds=assets.animation.knight),
+    )
+
+    return knight
+
+
 class Encounter:
     def __init__(self):
         self.asset_manager = Manager([assets.animation.knight])
         self.lair = assets.lairs[0]
 
+        self.ai_controller_system = AiControllerSystem()
         self.audio_system = AudioSystem(assets=self.asset_manager)
         self.blood_system = BloodSystem()
         self.collision_system = CollisionSystem()
@@ -89,11 +124,12 @@ class Encounter:
 
         blue = create_player('blue', 100, 100, self.lair, player_one, [self.graphics_system.active])
         self.register_entity(blue)
-        red = create_player('red', 200, 150, self.lair, player_two, [self.graphics_system.active])
+        red = create_black_knight('red', 200, 150, self.lair, blue, [self.graphics_system.active])
         self.register_entity(red)
 
     def register_entity(self, entity):
         systems = {
+            SystemFlag.AICONTROLLER: self.ai_controller_system,
             SystemFlag.AUDIO: self.audio_system,
             SystemFlag.BLOODSTAIN: self.blood_system,
             SystemFlag.CONTROLLER: self.controller_system,
@@ -110,6 +146,7 @@ class Encounter:
 
     def destroy_entites(self):
         systems = {
+            SystemFlag.AICONTROLLER: self.ai_controller_system,
             SystemFlag.AUDIO: self.audio_system,
             SystemFlag.BLOODSTAIN: self.blood_system,
             SystemFlag.CONTROLLER: self.controller_system,
