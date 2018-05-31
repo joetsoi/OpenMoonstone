@@ -184,7 +184,7 @@ knight = {
             ),
         ),
         order=(0, 0, 1, 2, 3, 4, 5, 6),
-        sounds=(FrameSound('swish', 3), ),
+        sounds=(FrameSound('grnt3b', 0), FrameSound('swish', 3), ),
     ),
     'thrust': AnimationDefinition(
         frames=(
@@ -226,6 +226,7 @@ knight = {
             ),
         ),
         order=(0, 0, 0, 0, 1, 2, 3, 4, 5, 5, 5),
+        sounds=(FrameSound('grnt3b',4), )
     ),
     'chop': AnimationDefinition(
         frames=(
@@ -339,7 +340,7 @@ knight = {
         ),
         #TODO: fix set_next_frame AnimationBegin from ida dataseg:0xde6
         order=(0, 1, 2, 3, 3, 3, 4),
-        sounds=(FrameSound('swish', 1), ),
+        sounds=(FrameSound('grnt3b', 0), FrameSound('swish', 1), ),
     ),
     'dagger': AnimationDefinition(
         frames=(
@@ -416,7 +417,9 @@ knight = {
             ),
         ),
         order=(0, 1, 1, 2, 2, 3),
-        sounds=(FrameSound('swordcl', 0), ),
+        # DOS sound is swordcl, but amiga plays Hit3
+        # sounds=(FrameSound('swordcl', 0), ),
+        sounds=(FrameSound('hit3', 0), ),
     ),
     'damage_2': AnimationDefinition(
         frames=(

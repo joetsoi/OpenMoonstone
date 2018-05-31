@@ -66,7 +66,9 @@ collide_hit = load_collision_file("COLLIDE.HIT")
 
 sounds = {
     'hit3': 'SAMPLES\\HIT3',
+    'grnt1': 'SAMPLES\\GRNT1',
     'grnt3': 'SAMPLES\\GRNT3',
+    'grnt3b': 'SAMPLES\\GRNT3B',
     'kstep': 'SAMPLES\\KSTEP',
     'rjgrunt4': 'SAMPLES\\RJGRUNT4',
     'swish': 'SAMPLES\\SWISH',
