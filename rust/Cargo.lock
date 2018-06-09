@@ -1,0 +1,21 @@
+[[package]]
+name = "bv"
+version = "0.7.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "byteorder"
+version = "1.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "openmoonstone"
+version = "0.1.0"
+dependencies = [
+ "bv 0.7.4 (registry+https://github.com/rust-lang/crates.io-index)",
+ "byteorder 1.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[metadata]
+"checksum bv 0.7.4 (registry+https://github.com/rust-lang/crates.io-index)" = "d31c96a681465e7742cc04bb1961e732e21128bcf1dc9d5fe8cfc052b484f140"
+"checksum byteorder 1.2.3 (registry+https://github.com/rust-lang/crates.io-index)" = "74c0b906e9446b0a2e4f760cdb3fa4b2c48cdc6db8766a845c54b6ff063fd2e9"
