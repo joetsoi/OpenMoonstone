@@ -1,9 +1,11 @@
-use byteorder::{BigEndian, ByteOrder, ReadBytesExt};
 use std::error::Error;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::Cursor;
 use std::io::SeekFrom;
+
+use bv::BitSlice;
+use byteorder::{BigEndian, ByteOrder, ReadBytesExt};
 
 use lz77;
 
@@ -17,7 +19,7 @@ pub struct Colour {
 #[derive(Debug)]
 pub struct PivImage {
     palette: Vec<Colour>,
-    pixels: Vec<u8>,
+    pixels: Vec<usize>,
 }
 
 impl PivImage {
@@ -30,9 +32,11 @@ impl PivImage {
         let palette: Vec<Colour> =
             read_palette(header.bit_depth, &data[6..6 + (header.bit_depth * 2)])?;
 
+        let extracted = lz77::decompress(header.file_length, &data[6 + (header.bit_depth * 2)..])?;
+        let pixels = PivImage::combine_bit_planes(&extracted);
         Ok(PivImage {
             palette: palette,
-            pixels: lz77::decompress(header.file_length, &data[6 + (header.bit_depth * 2)..])?,
+            pixels: pixels,
         })
     }
 
@@ -44,6 +48,27 @@ impl PivImage {
             file_length: rdr.read_u16::<BigEndian>()?,
             bit_depth: 1usize.wrapping_shl(file_type as u32),
         })
+    }
+
+    fn combine_bit_planes(data: &[u8]) -> Vec<usize> {
+        let plane0 = BitSlice::from_slice(&data[..8000]);
+        let plane1 = BitSlice::from_slice(&data[8000..16000]);
+        let plane2 = BitSlice::from_slice(&data[16000..24000]);
+        let plane3 = BitSlice::from_slice(&data[24000..32000]);
+        let plane4 = BitSlice::from_slice(&data[32000..]);
+
+        let mut pixels: Vec<usize> = Vec::with_capacity(64000);
+        for i in (0..plane0.len()).map(|x| 7 - (x % 8) + x / 8 * 8) {
+            let mut sum = 0;
+            sum += plane0[i] as usize;
+            sum += (plane1[i] as usize) << 1;
+            sum += (plane2[i] as usize) << 2;
+            sum += (plane3[i] as usize) << 3;
+            sum += (plane4[i] as usize) << 4;
+
+            pixels.push(sum);
+        }
+        pixels
     }
 }
 
