@@ -29,6 +29,7 @@ def extract_file(file_length, file_data):
     extracted = bytearray()
     offset = 0
 
+    assert len(file_data) == file_length
     while(offset != file_length):
         header_block = unpack_from('>B', file_data, offset)[0]
         offset += 1
