@@ -7,9 +7,9 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     let filename = &args[1];
 
-    match openmoonstone::PivImage::from_file(filename) {
+    match openmoonstone::piv::PivImage::from_file(filename) {
         Ok(piv) => {
-            println!("{:?}", piv);
+            //println!("{:?}", piv);
             println!("done");
         }
         Err(e) => {
