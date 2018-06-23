@@ -8,7 +8,7 @@ from attr import attrib, attrs
 import assets
 
 from .movement import Direction, Movement
-from .state import State
+from .state import State, Attack
 from .system import SystemFlag
 
 
@@ -38,14 +38,14 @@ controller_to_animation = {
 }
 
 direction_to_attack = {
-    Move.UP: 'chop',
-    Move.DOWN: 'dodge',
-    Move.LEFT: 'back',
-    Move.RIGHT: 'swing',
-    Move.LEFT_UP: 'dagger',
-    Move.RIGHT_UP: 'up_thrust',
-    Move.LEFT_DOWN: 'block',
-    Move.RIGHT_DOWN: 'thrust',
+    Move.UP: Attack.chop,
+    Move.DOWN: Attack.dodge,
+    Move.LEFT: Attack.back,
+    Move.RIGHT: Attack.swing,
+    Move.LEFT_UP: Attack.dagger,
+    Move.RIGHT_UP: Attack.up_thrust,
+    Move.LEFT_DOWN: Attack.block,
+    Move.RIGHT_DOWN: Attack.thrust,
 }
 
 
@@ -201,7 +201,8 @@ class GraphicsSystem(UserList):
                 animation_name = direction_to_attack[
                     Move((x, controller.direction.y))
                 ]
-                state.animation_name = animation_name
+                state.animation_name = animation_name.name
+                state.attack_type = animation_name
                 animation = graphic.animations[state.animation_name,
                                                movement.facing]
                 state.animation_len = len(animation.order)

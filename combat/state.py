@@ -15,12 +15,24 @@ class State(Enum):
     destroy = auto()
 
 
+class Attack(Enum):
+    swing = auto()
+    chop = auto()
+    back = auto()
+    dodge = auto()
+    up_thrust = auto()
+    thrust = auto()
+    block = auto()
+    dagger = auto()
+
+
 @attrs(slots=True)
 class AnimationState:
     frame_num = attrib(type=int, default=None)
     animation_name = attrib(type=str, default=None)
     animation_len = attrib(type=int, default=None)
     value = attrib(type=State, default=State.walking)
+    attack_type = attrib(type=Attack, default=None)
 
 
 class AnimationStateSystem(UserList):
