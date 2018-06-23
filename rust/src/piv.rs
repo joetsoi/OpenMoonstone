@@ -11,9 +11,10 @@ use lz77;
 
 #[derive(Debug)]
 pub struct Colour {
-    r: usize,
-    g: usize,
-    b: usize,
+    r: u8,
+    g: u8,
+    b: u8,
+    a: u8,
 }
 
 #[derive(Debug)]
@@ -47,7 +48,7 @@ impl PivImage {
         let mut pixels: Vec<u8> = Vec::with_capacity(width * height * 4);
         for pel in self.pixels.iter() {
             let colour = &self.palette[*pel];
-            pixels.extend([colour.r as u8, colour.g as u8, colour.b as u8, 255u8].iter())
+            pixels.extend([colour.r, colour.g, colour.b, colour.a].iter())
         }
         pixels
     }
@@ -101,10 +102,15 @@ pub fn read_palette(bit_depth: usize, data: &[u8]) -> Result<Vec<Colour>, Box<Er
         .map(|pel| {
             let mut pel_bytes = [0u8; 2];
             BigEndian::write_u16(&mut pel_bytes, *pel);
+            let mut alpha = 0u8;
+            if *pel != 0u16 {
+                alpha = 255;
+            }
             Colour {
-                r: (pel_bytes[0] as usize) << 4,
-                g: (((pel_bytes[1] as usize) & 0xf0) >> 2) << 2,
-                b: ((pel_bytes[1] as usize) & 0x0f) << 4,
+                r: (pel_bytes[0]) << 4,
+                g: (((pel_bytes[1]) & 0xf0) >> 2) << 2,
+                b: ((pel_bytes[1]) & 0x0f) << 4,
+                a: alpha,
             }
         })
         .collect())
