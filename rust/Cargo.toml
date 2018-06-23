@@ -6,3 +6,4 @@ authors = ["Joe Tsoi <joetsoi@users.noreply.github.com>"]
 [dependencies]
 byteorder = "1.2.3"
 bv = "0.7.4"
+ggez = "0.4.3"
