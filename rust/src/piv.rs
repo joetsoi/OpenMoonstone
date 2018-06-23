@@ -40,6 +40,18 @@ impl PivImage {
         })
     }
 
+    pub fn to_rgba8(&self) -> Vec<u8> {
+        let width = 320;
+        let height = 240;
+
+        let mut pixels: Vec<u8> = Vec::with_capacity(width * height * 4);
+        for pel in self.pixels.iter() {
+            let colour = &self.palette[*pel];
+            pixels.extend([colour.r as u8, colour.g as u8, colour.b as u8, 255u8].iter())
+        }
+        pixels
+    }
+
     fn read_header(data: &[u8]) -> Result<Header, Box<Error>> {
         let mut rdr = Cursor::new(data);
         let file_type = rdr.read_u16::<BigEndian>()?;
