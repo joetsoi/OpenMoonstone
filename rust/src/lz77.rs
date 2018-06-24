@@ -1,12 +1,13 @@
 extern crate bv;
 extern crate byteorder;
 
-use bv::BitSlice;
-use byteorder::{BigEndian, ReadBytesExt};
-use std::error::Error;
+use std::io;
 use std::io::Cursor;
 
-pub fn decompress(file_length: u16, data: &[u8]) -> Result<Vec<u8>, Box<Error>> {
+use bv::BitSlice;
+use byteorder::{BigEndian, ReadBytesExt};
+
+pub fn decompress(file_length: u16, data: &[u8]) -> Result<Vec<u8>, io::Error> {
     let mut rdr = Cursor::new(data);
     let mut extracted: Vec<u8> = Vec::with_capacity(file_length as usize);
     while rdr.position() != file_length as u64 {

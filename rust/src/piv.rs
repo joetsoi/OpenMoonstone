@@ -1,5 +1,5 @@
-use std::error::Error;
 use std::fs::File;
+use std::io;
 use std::io::prelude::*;
 use std::io::Cursor;
 use std::io::SeekFrom;
@@ -24,7 +24,7 @@ pub struct PivImage {
 }
 
 impl PivImage {
-    pub fn from_file(filename: &String) -> Result<(PivImage), Box<Error>> {
+    pub fn from_file(filename: &String) -> Result<PivImage, io::Error> {
         let mut f = File::open(filename)?;
         let mut data: Vec<u8> = Vec::new();
         f.read_to_end(&mut data)?;
@@ -53,7 +53,7 @@ impl PivImage {
         pixels
     }
 
-    fn read_header(data: &[u8]) -> Result<Header, Box<Error>> {
+    fn read_header(data: &[u8]) -> Result<Header, io::Error> {
         let mut rdr = Cursor::new(data);
         let file_type = rdr.read_u16::<BigEndian>()?;
         rdr.seek(SeekFrom::Current(2))?;
@@ -91,7 +91,7 @@ struct Header {
     bit_depth: usize,
 }
 
-pub fn read_palette(bit_depth: usize, data: &[u8]) -> Result<Vec<Colour>, Box<Error>> {
+pub fn read_palette(bit_depth: usize, data: &[u8]) -> Result<Vec<Colour>, io::Error> {
     let mut rdr = Cursor::new(data);
     let mut palette = vec![0; bit_depth];
     rdr.read_u16_into::<BigEndian>(&mut palette)?;
