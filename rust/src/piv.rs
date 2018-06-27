@@ -2,14 +2,13 @@ use std::fs::File;
 use std::io;
 use std::io::prelude::*;
 use std::io::Cursor;
-use std::io::SeekFrom;
 
 use bv::BitSlice;
 use byteorder::{BigEndian, ByteOrder, ReadBytesExt};
 
 use lz77;
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct Colour {
     r: u8,
     g: u8,
@@ -28,10 +27,10 @@ impl PivImage {
         let mut f = File::open(filename)?;
         let mut data: Vec<u8> = Vec::new();
         f.read_to_end(&mut data)?;
-        let header = PivImage::read_header(&data[..6])?;
+        let header = PivImage::read_header(&data[..6]);
 
         let palette: Vec<Colour> =
-            read_palette(header.bit_depth, &data[6..6 + (header.bit_depth * 2)])?;
+            read_palette(header.bit_depth, &data[6..6 + (header.bit_depth * 2)]);
 
         let extracted = lz77::decompress(header.file_length, &data[6 + (header.bit_depth * 2)..])?;
         let pixels = PivImage::combine_bit_planes(&extracted);
@@ -53,14 +52,12 @@ impl PivImage {
         pixels
     }
 
-    fn read_header(data: &[u8]) -> Result<Header, io::Error> {
-        let mut rdr = Cursor::new(data);
-        let file_type = rdr.read_u16::<BigEndian>()?;
-        rdr.seek(SeekFrom::Current(2))?;
-        Ok(Header {
-            file_length: rdr.read_u16::<BigEndian>()?,
+    fn read_header(data: &[u8]) -> Header {
+        let file_type = BigEndian::read_u16(&data[..2]);
+        Header {
+            file_length: BigEndian::read_u16(&data[4..6]),
             bit_depth: 1usize.wrapping_shl(file_type as u32),
-        })
+        }
     }
 
     fn combine_bit_planes(data: &[u8]) -> Vec<usize> {
@@ -85,19 +82,18 @@ impl PivImage {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 struct Header {
     file_length: u16,
     bit_depth: usize,
 }
 
-pub fn read_palette(bit_depth: usize, data: &[u8]) -> Result<Vec<Colour>, io::Error> {
-    let mut rdr = Cursor::new(data);
+pub fn read_palette(bit_depth: usize, data: &[u8]) -> Vec<Colour> {
     let mut palette = vec![0; bit_depth];
-    rdr.read_u16_into::<BigEndian>(&mut palette)?;
+    BigEndian::read_u16_into(&data, &mut palette);
     let palette: Vec<u16> = palette.iter().map(|pel| pel & 0x7fff).collect();
 
-    Ok(palette
+    palette
         .iter()
         .map(|pel| {
             let mut pel_bytes = [0u8; 2];
@@ -113,5 +109,5 @@ pub fn read_palette(bit_depth: usize, data: &[u8]) -> Result<Vec<Colour>, io::Er
                 a: alpha,
             }
         })
-        .collect())
+        .collect()
 }
