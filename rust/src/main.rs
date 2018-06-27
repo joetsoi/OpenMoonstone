@@ -51,6 +51,7 @@ fn main() {
 
     let c = conf::Conf::new();
     let ctx = &mut Context::load_from_conf("openmoonstone", "joetsoi", c).unwrap();
+    graphics::set_default_filter(ctx, graphics::FilterMode::Nearest);
     let piv = openmoonstone::piv::PivImage::from_file(filename).unwrap();
     let image = Image::from_rgba8(ctx, 320, 200, &piv.to_rgba8()).unwrap();
 
