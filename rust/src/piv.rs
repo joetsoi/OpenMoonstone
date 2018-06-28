@@ -1,12 +1,11 @@
 use std::fs::File;
 use std::io;
 use std::io::prelude::*;
-use std::io::Cursor;
 
 use bv::BitSlice;
-use byteorder::{BigEndian, ByteOrder, ReadBytesExt};
+use byteorder::{BigEndian, ByteOrder};
 
-use lz77;
+use crate::lz77;
 
 #[derive(Debug, Copy, Clone)]
 pub struct Colour {

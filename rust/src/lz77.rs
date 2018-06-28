@@ -1,6 +1,3 @@
-extern crate bv;
-extern crate byteorder;
-
 use std::io;
 use std::io::Cursor;
 

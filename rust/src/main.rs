@@ -1,5 +1,5 @@
-extern crate ggez;
-extern crate openmoonstone;
+#![feature(rust_2018_preview)]
+#![warn(rust_2018_idioms)]
 
 use std::env;
 
