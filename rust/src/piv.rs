@@ -9,15 +9,15 @@ use crate::lz77;
 
 #[derive(Debug, Copy, Clone)]
 pub struct Colour {
-    r: u8,
-    g: u8,
-    b: u8,
-    a: u8,
+    pub r: u8,
+    pub g: u8,
+    pub b: u8,
+    pub a: u8,
 }
 
 #[derive(Debug)]
 pub struct PivImage {
-    palette: Vec<Colour>,
+    pub palette: Vec<Colour>,
     pixels: Vec<usize>,
 }
 
@@ -60,20 +60,14 @@ impl PivImage {
     }
 
     fn combine_bit_planes(data: &[u8]) -> Vec<usize> {
-        let plane0 = BitSlice::from_slice(&data[..8000]);
-        let plane1 = BitSlice::from_slice(&data[8000..16000]);
-        let plane2 = BitSlice::from_slice(&data[16000..24000]);
-        let plane3 = BitSlice::from_slice(&data[24000..32000]);
-        let plane4 = BitSlice::from_slice(&data[32000..]);
+        let planes: Vec<BitSlice<u8>> = data.chunks(8000).map(|p| BitSlice::from_slice(p)).collect();
 
         let mut pixels: Vec<usize> = Vec::with_capacity(64000);
-        for i in (0..plane0.len()).map(|x| 7 - (x % 8) + x / 8 * 8) {
+        for i in (0..64000).map(|x| 7 - (x % 8) + x / 8 * 8) {
             let mut sum = 0;
-            sum += plane0[i] as usize;
-            sum += (plane1[i] as usize) << 1;
-            sum += (plane2[i] as usize) << 2;
-            sum += (plane3[i] as usize) << 3;
-            sum += (plane4[i] as usize) << 4;
+            for (j, plane) in planes.iter().enumerate() {
+                sum += (plane[i] as usize) << j;
+            }
 
             pixels.push(sum);
         }
