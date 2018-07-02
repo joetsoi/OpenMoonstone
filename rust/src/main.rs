@@ -12,9 +12,12 @@ use ggez::timer;
 use ggez::{Context, GameResult};
 use image::{ImageBuffer, RgbaImage};
 
+use openmoonstone::objects::Rect;
+
 struct MainState {
     image: Image,
     test: Image,
+    rect: Rect,
 }
 
 impl event::EventHandler for MainState {
@@ -45,6 +48,12 @@ impl event::EventHandler for MainState {
             ctx,
             &self.test,
             graphics::DrawParam {
+                src: graphics::Rect {
+                    x: self.rect.x as f32 / 512.0,
+                    y: self.rect.y as f32 / 512.0,
+                    w: self.rect.w as f32 / 512.0,
+                    h: self.rect.h as f32 / 512.0,
+                },
                 dest: dest_point,
                 scale: graphics::Point2::new(3.0, 3.0),
                 ..Default::default()
@@ -66,12 +75,18 @@ fn main() {
     graphics::set_default_filter(ctx, graphics::FilterMode::Nearest);
     let piv = openmoonstone::piv::PivImage::from_file(filename).unwrap();
     let ob = openmoonstone::objects::ObjectsFile::from_file(ob).unwrap();
-    //let mut a: RgbaImage = ImageBuffer::from_raw(320, 200, piv.to_rgba8()).unwrap();
-    //a.save("test.png");
     //let image = Image::from_rgba8(ctx, 320, 200, &a.into_raw()).unwrap();
-    let image = Image::from_rgba8(ctx, 320, 200, &piv.to_rgba8()).unwrap();
 
-    let im1 = &ob.images[73];
+    //let mut packer =  TexturePacker::<MemoryRGBA8Texture, RGBA8>::new_skyline(config);
+    let atlas = ob.to_texture_atlas();
+    //let mut a: RgbaImage = ImageBuffer::from_raw(512, 512, atlas.image.to_rgba8(&piv.palette)).unwrap();
+    //a.save("test.png");
+
+    let background = Image::from_rgba8(ctx, 320, 200, &piv.to_rgba8()).unwrap();
+    let image = Image::from_rgba8(ctx, 512, 512, &atlas.image.to_rgba8(&piv.palette)).unwrap();
+
+
+    let im1 = &ob.images[0];
     let test = Image::from_rgba8(
         ctx,
         im1.width as u16,
@@ -80,8 +95,9 @@ fn main() {
     ).unwrap();
 
     let mut state = MainState {
-        image: image,
-        test: test,
+        image: background,
+        test: image,
+        rect: atlas.rects[73],
     };
     event::run(ctx, &mut state).unwrap();
 }

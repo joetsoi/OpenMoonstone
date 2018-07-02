@@ -6,6 +6,8 @@ use std::io::SeekFrom;
 
 use bv::BitSlice;
 use byteorder::{BigEndian, ByteOrder, ReadBytesExt};
+use rect_packer;
+use rect_packer::Packer;
 
 use crate::lz77;
 use crate::piv::Colour;
@@ -19,6 +21,20 @@ struct Header {
 #[derive(Debug)]
 pub struct ObjectsFile {
     pub images: Vec<Image>,
+}
+
+#[derive(Debug)]
+pub struct TextureAtlas {
+    pub image: Image,
+    pub rects: Vec<Rect>,
+}
+
+#[derive(Debug, Copy, Clone)]
+pub struct Rect {
+    pub x: usize,
+    pub y: usize,
+    pub w: usize,
+    pub h: usize,
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -47,6 +63,50 @@ impl ObjectsFile {
             images.push(Image::from_data(image_header, &extracted));
         }
         Ok(ObjectsFile { images: images })
+    }
+
+    pub fn to_texture_atlas(&self) -> TextureAtlas {
+        let config = rect_packer::Config {
+            width: 512,
+            height: 512,
+            border_padding: 5,
+            rectangle_padding: 10,
+        };
+        let mut atlas: Vec<usize> = vec![0; 512 * 512];
+        let mut packer = Packer::new(config);
+        let mut rects : Vec<Rect> = Vec::new();
+        for image in self.images.iter() {
+            if let Some(rect) = packer.pack(image.width as i32, image.height as i32, false) {
+                let rgba_image = &image.pixels;
+                for (y, image_row) in (0..rect.height).zip(rgba_image.chunks(image.width)) {
+
+                    let row = (y + rect.y) as usize * 512;
+                    let col = rect.x as usize;
+                    let start = row + col;
+                    let end = start + (rect.width as usize);
+                    for (i, pixel) in (start..end).zip(image_row) {
+                        atlas[i] = *pixel;
+                    }
+                }
+                rects.push(Rect { 
+                    x: rect.x as usize,
+                    y: rect.y as usize,
+                    w: rect.width as usize,
+                    h: rect.height as usize,
+                });
+            } else {
+                println!("BROKEN");
+
+            }
+        }
+        TextureAtlas {
+            image: Image{
+                width: 512,
+                height: 512,
+                pixels: atlas,
+            },
+            rects: rects,
+        }
     }
 
     fn read_header(data: &[u8]) -> Header {
