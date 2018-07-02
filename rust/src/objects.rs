@@ -74,12 +74,11 @@ impl ObjectsFile {
         };
         let mut atlas: Vec<usize> = vec![0; 512 * 512];
         let mut packer = Packer::new(config);
-        let mut rects : Vec<Rect> = Vec::new();
+        let mut rects: Vec<Rect> = Vec::new();
         for image in self.images.iter() {
             if let Some(rect) = packer.pack(image.width as i32, image.height as i32, false) {
                 let rgba_image = &image.pixels;
                 for (y, image_row) in (0..rect.height).zip(rgba_image.chunks(image.width)) {
-
                     let row = (y + rect.y) as usize * 512;
                     let col = rect.x as usize;
                     let start = row + col;
@@ -88,7 +87,7 @@ impl ObjectsFile {
                         atlas[i] = *pixel;
                     }
                 }
-                rects.push(Rect { 
+                rects.push(Rect {
                     x: rect.x as usize,
                     y: rect.y as usize,
                     w: rect.width as usize,
@@ -96,11 +95,10 @@ impl ObjectsFile {
                 });
             } else {
                 println!("BROKEN");
-
             }
         }
         TextureAtlas {
-            image: Image{
+            image: Image {
                 width: 512,
                 height: 512,
                 pixels: atlas,

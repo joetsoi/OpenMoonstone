@@ -2,6 +2,7 @@
 #![warn(rust_2018_idioms)]
 
 use std::env;
+use std::time::Duration;
 
 use ggez::conf;
 use ggez::event;
@@ -16,17 +17,18 @@ use openmoonstone::objects::Rect;
 
 struct MainState {
     image: Image,
-    test: Image,
-    rect: Rect,
+    batch: graphics::spritebatch::SpriteBatch,
+    rects: Vec<Rect>,
 }
 
 impl event::EventHandler for MainState {
     fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
         const DESIRED_FPS: u32 = 1000 / (1193182 / 21845 * 2);
         while timer::check_update_time(ctx, DESIRED_FPS) {
-            //println!("Delta frame time: {:?} ", timer::get_delta(ctx));
-            //println!("Average FPS: {}", timer::get_fps(ctx));
+            println!("Delta frame time: {:?} ", timer::get_delta(ctx));
+            println!("Average FPS: {}", timer::get_fps(ctx));
         }
+        timer::sleep(Duration::from_millis(109));
         Ok(())
     }
 
@@ -44,21 +46,55 @@ impl event::EventHandler for MainState {
                 ..Default::default()
             },
         )?;
+
+        let banner = &self.rects[73];
+        self.batch.add(graphics::DrawParam {
+            src: graphics::Rect {
+                x: banner.x as f32 / 512.0,
+                y: banner.y as f32 / 512.0,
+                w: banner.w as f32 / 512.0,
+                h: banner.h as f32 / 512.0,
+            },
+            dest: graphics::Point2::new(5.0, 20.0),
+            //scale: graphics::Point2::new(3.0, 3.0),
+            ..Default::default()
+        });
+
+        let copyright = &self.rects[74];
+        self.batch.add(graphics::DrawParam {
+            src: graphics::Rect {
+                x: copyright.x as f32 / 512.0,
+                y: copyright.y as f32 / 512.0,
+                w: copyright.w as f32 / 512.0,
+                h: copyright.h as f32 / 512.0,
+            },
+            dest: graphics::Point2::new(22.0, 181.0),
+            //scale: graphics::Point2::new(3.0, 3.0),
+            ..Default::default()
+        });
+
+        let rights = &self.rects[75];
+        self.batch.add(graphics::DrawParam {
+            src: graphics::Rect {
+                x: rights.x as f32 / 512.0,
+                y: rights.y as f32 / 512.0,
+                w: rights.w as f32 / 512.0,
+                h: rights.h as f32 / 512.0,
+            },
+            dest: graphics::Point2::new(110.0, 190.0),
+            //scale: graphics::Point2::new(3.0, 3.0),
+            ..Default::default()
+        });
         graphics::draw_ex(
             ctx,
-            &self.test,
+            &self.batch,
             graphics::DrawParam {
-                src: graphics::Rect {
-                    x: self.rect.x as f32 / 512.0,
-                    y: self.rect.y as f32 / 512.0,
-                    w: self.rect.w as f32 / 512.0,
-                    h: self.rect.h as f32 / 512.0,
-                },
                 dest: dest_point,
                 scale: graphics::Point2::new(3.0, 3.0),
                 ..Default::default()
             },
         )?;
+        self.batch.clear();
         graphics::present(ctx);
 
         timer::yield_now();
@@ -84,7 +120,7 @@ fn main() {
 
     let background = Image::from_rgba8(ctx, 320, 200, &piv.to_rgba8()).unwrap();
     let image = Image::from_rgba8(ctx, 512, 512, &atlas.image.to_rgba8(&piv.palette)).unwrap();
-
+    let batch = graphics::spritebatch::SpriteBatch::new(image);
 
     let im1 = &ob.images[0];
     let test = Image::from_rgba8(
@@ -96,8 +132,8 @@ fn main() {
 
     let mut state = MainState {
         image: background,
-        test: image,
-        rect: atlas.rects[73],
+        batch: batch,
+        rects: atlas.rects,
     };
     event::run(ctx, &mut state).unwrap();
 }

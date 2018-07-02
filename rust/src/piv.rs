@@ -60,7 +60,8 @@ impl PivImage {
     }
 
     fn combine_bit_planes(data: &[u8]) -> Vec<usize> {
-        let planes: Vec<BitSlice<u8>> = data.chunks(8000).map(|p| BitSlice::from_slice(p)).collect();
+        let planes: Vec<BitSlice<u8>> =
+            data.chunks(8000).map(|p| BitSlice::from_slice(p)).collect();
 
         let mut pixels: Vec<usize> = Vec::with_capacity(64000);
         for i in (0..64000).map(|x| 7 - (x % 8) + x / 8 * 8) {
