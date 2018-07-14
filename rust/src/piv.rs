@@ -22,10 +22,9 @@ pub struct PivImage {
 }
 
 impl PivImage {
-    pub fn from_file(filename: &String) -> Result<PivImage, io::Error> {
-        let mut f = File::open(filename)?;
+    pub fn from_reader<T: Read>(reader: &mut T) -> Result<PivImage, io::Error> {
         let mut data: Vec<u8> = Vec::new();
-        f.read_to_end(&mut data)?;
+        reader.read_to_end(&mut data)?;
         let header = PivImage::read_header(&data[..6]);
 
         let palette: Vec<Colour> =

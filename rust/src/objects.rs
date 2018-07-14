@@ -1,3 +1,5 @@
+use std::error::Error;
+use std::fmt;
 use std::fs::File;
 use std::io;
 use std::io::prelude::*;
@@ -46,11 +48,26 @@ struct ImageHeader {
     blit_type: u8,
 }
 
+#[derive(Debug, Clone)]
+pub struct TextureSizeTooSmall {
+    pub texture_size: i32,
+}
+
+impl Error for TextureSizeTooSmall {}
+impl fmt::Display for TextureSizeTooSmall {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "Increase texture size {} to the next power of 2",
+            self.texture_size
+        )
+    }
+}
+
 impl ObjectsFile {
-    pub fn from_file(filename: &String) -> Result<ObjectsFile, io::Error> {
-        let mut f = File::open(filename)?;
+    pub fn from_reader<T: Read>(reader: &mut T) -> Result<ObjectsFile, io::Error> {
         let mut data: Vec<u8> = Vec::new();
-        f.read_to_end(&mut data)?;
+        reader.read_to_end(&mut data)?;
 
         let header = ObjectsFile::read_header(&data[..6]);
         let image_header_len = header.image_count * 10;
@@ -65,21 +82,21 @@ impl ObjectsFile {
         Ok(ObjectsFile { images: images })
     }
 
-    pub fn to_texture_atlas(&self) -> TextureAtlas {
+    pub fn to_texture_atlas(&self, texture_size: i32) -> Result<TextureAtlas, TextureSizeTooSmall> {
         let config = rect_packer::Config {
-            width: 512,
-            height: 512,
-            border_padding: 5,
-            rectangle_padding: 10,
+            width: texture_size,
+            height: texture_size,
+            border_padding: 0,
+            rectangle_padding: 0,
         };
-        let mut atlas: Vec<usize> = vec![0; 512 * 512];
+        let mut atlas: Vec<usize> = vec![0; config.width as usize * config.height as usize];
         let mut packer = Packer::new(config);
         let mut rects: Vec<Rect> = Vec::new();
         for image in self.images.iter() {
             if let Some(rect) = packer.pack(image.width as i32, image.height as i32, false) {
                 let rgba_image = &image.pixels;
                 for (y, image_row) in (0..rect.height).zip(rgba_image.chunks(image.width)) {
-                    let row = (y + rect.y) as usize * 512;
+                    let row = (y + rect.y) as usize * config.width as usize;
                     let col = rect.x as usize;
                     let start = row + col;
                     let end = start + (rect.width as usize);
@@ -94,17 +111,17 @@ impl ObjectsFile {
                     h: rect.height as usize,
                 });
             } else {
-                println!("BROKEN");
+                return Err(TextureSizeTooSmall { texture_size });
             }
         }
-        TextureAtlas {
+        Ok(TextureAtlas {
             image: Image {
-                width: 512,
-                height: 512,
+                width: config.width as usize,
+                height: config.height as usize,
                 pixels: atlas,
             },
             rects: rects,
-        }
+        })
     }
 
     fn read_header(data: &[u8]) -> Header {
