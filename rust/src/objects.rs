@@ -1,6 +1,5 @@
 use std::error::Error;
 use std::fmt;
-use std::fs::File;
 use std::io;
 use std::io::prelude::*;
 use std::io::Cursor;

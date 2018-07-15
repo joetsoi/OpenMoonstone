@@ -6,6 +6,8 @@ scenes:
 scenery:
     fo1: DISKB/FO1.CMP
     fo2: DISKB/FO2.CMP
+    sw1: DISKB/SW1.CMP
+    wa1: DISKB/WA1.CMP
 
 terrain:
     wa1: DISKB/WA1.T
@@ -16,6 +18,10 @@ objects:
     sel.cel:
         file: DISKB/SEL.CEL
         texture_size: 256
+    blo.cel:
+        file: DISKB/BLO.CEL
+        texture_size: 256
+    # knight
     kn1.ob:
         file: DISKB/KN1.OB
         texture_size: 256
@@ -28,11 +34,7 @@ objects:
     kn4.ob:
         file: DISKB/KN4.OB
         texture_size: 128
-    blo.cel:
-        file: DISKB/BLO.CEL
-        texture_size: 256
-
-fonts:
+    # fonts
     bold.f:
         file: DISKA/BOLD.F
         texture_size: 512

@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use ggez::graphics::spritebatch::SpriteBatch;
 use specs::{Component, VecStorage};
-use specs_derive::*;
+//use specs_derive::*;
 
 #[derive(Debug)]
 pub struct Draw {
