@@ -19,11 +19,12 @@ use serde_yaml::Value;
 use specs::world::Builder;
 use specs::RunNow;
 use specs::World;
+use warmy::{LogicalKey, Store, StoreOpt};
 
 use openmoonstone::combat::components::{Draw, Position};
 use openmoonstone::combat::systems::{Movement, Renderer};
-use openmoonstone::manager::ResourceManager;
-use openmoonstone::objects::Rect;
+use openmoonstone::objects::{Rect, TextureAtlas};
+use openmoonstone::piv::PivImage;
 
 struct MainState {
     image: Image,
@@ -129,29 +130,32 @@ fn main() {
     let ctx = &mut Context::load_from_conf("openmoonstone", "joetsoi", c).unwrap();
     graphics::set_default_filter(ctx, graphics::FilterMode::Nearest);
 
-    let mut manager = ResourceManager::new(&mut ctx.filesystem).unwrap();
     let file = ctx.filesystem.open("/files.yaml").unwrap();
     let yaml: Value = serde_yaml::from_reader(file).unwrap();
 
-    manager.load_scene(filename, &mut ctx.filesystem);
-    manager.load_objects(ob, &mut ctx.filesystem);
+    let mut store: Store<Context> = Store::new(StoreOpt::default()).expect("store creation");
+    let piv = store
+        .get::<_, PivImage>(&LogicalKey::new(filename), ctx)
+        .unwrap();
 
-    let piv = manager.scenes.get(filename).unwrap();
-    let atlas = manager.objects.get(ob).unwrap();
+    let atlas = store
+        .get::<_, TextureAtlas>(&LogicalKey::new(ob), ctx)
+        .unwrap();
 
+    let atlas_dimension = atlas.borrow().image.width as u32;
     let mut a: RgbaImage = ImageBuffer::from_raw(
-        atlas.image.width as u32,
-        atlas.image.height as u32,
-        atlas.image.to_rgba8(&piv.palette),
+        atlas_dimension,
+        atlas_dimension,
+        atlas.borrow().image.to_rgba8(&*piv.borrow().palette),
     ).unwrap();
     a.save("test.png");
 
-    let background = Image::from_rgba8(ctx, 320, 200, &piv.to_rgba8()).unwrap();
+    let background = Image::from_rgba8(ctx, 320, 200, &*piv.borrow().to_rgba8()).unwrap();
     let image = Image::from_rgba8(
         ctx,
-        atlas.image.width as u16,
-        atlas.image.height as u16,
-        &atlas.image.to_rgba8(&piv.palette),
+        atlas_dimension as u16,
+        atlas_dimension as u16,
+        &atlas.borrow().image.to_rgba8(&*piv.borrow().palette),
     ).unwrap();
     //let test = image.clone();
     let batch = graphics::spritebatch::SpriteBatch::new(image);
@@ -166,7 +170,14 @@ fn main() {
 
     let mut encounter = World::new();
     encounter.register::<Position>();
-    //let knight = encounter.create_entity().with(Position { x: 100, y: 100 }).with(Draw { sprite_sheet: batch, rects: vec![73, 74, 75]}).build();
+    // let knight = encounter
+    //     .create_entity()
+    //     .with(Position { x: 100, y: 100 })
+    //     .with(Draw {
+    //         sprite_sheet: batch,
+    //         rects: vec![73, 74, 75],
+    //     })
+    //     .build();
     let knight = encounter
         .create_entity()
         .with(Position { x: 100, y: 100 })
@@ -181,7 +192,7 @@ fn main() {
     let mut state = MainState {
         image: background,
         batch: batch,
-        rects: atlas.rects.clone(),
+        rects: atlas.borrow().rects.clone(),
         encounter: encounter,
         systems: systems,
     };

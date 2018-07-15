@@ -15,6 +15,7 @@ specs = "0.12.0"
 specs-derive = "0.2.0"
 serde = "1.0.70"
 serde_yaml = "0.7.5"
+warmy = "0.7.2"
 
 [dependencies.ggez]
 version = "0.4.3"
