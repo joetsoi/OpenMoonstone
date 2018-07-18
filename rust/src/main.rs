@@ -21,11 +21,11 @@ use specs::RunNow;
 use specs::World;
 use warmy::{LogicalKey, Store, StoreOpt};
 
+use openmoonstone::animation::Animations;
 use openmoonstone::combat::components::{Draw, Position};
 use openmoonstone::combat::systems::{Movement, Renderer};
 use openmoonstone::objects::{Rect, TextureAtlas};
 use openmoonstone::piv::PivImage;
-use openmoonstone::animation::Animation;
 
 struct MainState {
     image: Image,
@@ -145,8 +145,9 @@ fn main() {
         .unwrap();
 
     let animation = store
-        .get::<_, Animation>(&LogicalKey::new("/knight.yaml"), ctx)
+        .get::<_, Animations>(&LogicalKey::new("/knight.yaml"), ctx)
         .unwrap();
+    println!("{:?}", animation.borrow());
 
     let atlas_dimension = atlas.borrow().image.width as u32;
     let mut a: RgbaImage = ImageBuffer::from_raw(
