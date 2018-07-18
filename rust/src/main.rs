@@ -25,6 +25,7 @@ use openmoonstone::combat::components::{Draw, Position};
 use openmoonstone::combat::systems::{Movement, Renderer};
 use openmoonstone::objects::{Rect, TextureAtlas};
 use openmoonstone::piv::PivImage;
+use openmoonstone::animation::Animation;
 
 struct MainState {
     image: Image,
@@ -121,6 +122,7 @@ impl event::EventHandler for MainState {
         Ok(())
     }
 }
+
 fn main() {
     let args: Vec<String> = env::args().collect();
     let filename = &args[1];
@@ -140,6 +142,10 @@ fn main() {
 
     let atlas = store
         .get::<_, TextureAtlas>(&LogicalKey::new(ob), ctx)
+        .unwrap();
+
+    let animation = store
+        .get::<_, Animation>(&LogicalKey::new("/knight.yaml"), ctx)
         .unwrap();
 
     let atlas_dimension = atlas.borrow().image.width as u32;

@@ -1,38 +1,57 @@
-use std::collections::hash_map::Entry;
-use std::collections::HashMap;
-use std::error;
-use std::fmt;
-use std::io::Error as IoError;
 use std::path::Path;
 
-use failure::{self, Fail};
-use failure_derive::*;
-use ggez::filesystem::Filesystem;
-use ggez::{Context, GameError};
-use serde_yaml::Error as YamlError;
+use failure;
+use failure_derive::Fail;
+use ggez::Context;
 use serde_yaml::Value;
 use warmy;
 
-use crate::objects::{ObjectsFile, TextureAtlas, TextureSizeTooSmall};
+use crate::error::{err_from, CompatError};
+use crate::objects::{ObjectsFile, TextureAtlas};
 use crate::piv::PivImage;
 
-fn err_from<F: Fail>(f: F) -> failure::Compat<failure::Error> {
-    failure::Error::from(f).compat()
+#[derive(Debug, Fail)]
+#[fail(display = "Failed to read game data: {}", message)]
+
+struct GameDataError {
+    message: String,
 }
 
-impl warmy::Load<Context> for PivImage {
+struct GameYaml {
+    pub yaml: Value,
+}
+
+impl warmy::Load<Context> for GameYaml {
     type Key = warmy::LogicalKey;
-    type Error = failure::Compat<failure::Error>;
+    type Error = CompatError;
+
     fn load(
         key: Self::Key,
         store: &mut warmy::Storage<ggez::Context>,
         ctx: &mut ggez::Context,
     ) -> Result<warmy::Loaded<Self>, Self::Error> {
         println!("key: {:?}, path: {:?}", key, store.root());
-        // TODO: load file.yaml from the store!
-        let file = ctx.filesystem.open("/files.yaml").map_err(err_from)?;
-        let yaml: Value = serde_yaml::from_reader(file).map_err(err_from)?;
-        let scenes = &yaml["scenes"];
+        let file = ctx.filesystem.open(key.as_str()).map_err(err_from)?;
+        Ok(warmy::Loaded::from(GameYaml {
+            yaml: serde_yaml::from_reader(file).map_err(err_from)?,
+        }))
+    }
+}
+
+impl warmy::Load<Context> for PivImage {
+    type Key = warmy::LogicalKey;
+    type Error = CompatError;
+
+    fn load(
+        key: Self::Key,
+        store: &mut warmy::Storage<ggez::Context>,
+        ctx: &mut ggez::Context,
+    ) -> Result<warmy::Loaded<Self>, Self::Error> {
+        println!("key: {:?}, path: {:?}", key, store.root());
+        let yaml = store
+            .get::<_, GameYaml>(&warmy::LogicalKey::new("/files.yaml"), ctx)
+            .map_err(err_from)?;
+        let scenes = &yaml.borrow().yaml["scenes"];
         let mut file = ctx
             .filesystem
             .open(
@@ -49,16 +68,17 @@ impl warmy::Load<Context> for PivImage {
 
 impl warmy::Load<Context> for TextureAtlas {
     type Key = warmy::LogicalKey;
-    type Error = failure::Compat<failure::Error>;
+    type Error = CompatError;
     fn load(
         key: Self::Key,
         store: &mut warmy::Storage<ggez::Context>,
         ctx: &mut ggez::Context,
     ) -> Result<warmy::Loaded<Self>, Self::Error> {
         println!("key: {:?}, path: {:?}", key, store.root());
-        let file = ctx.filesystem.open("/files.yaml").map_err(err_from)?;
-        let yaml: Value = serde_yaml::from_reader(file).map_err(err_from)?;
-        let object = &yaml["objects"][key.as_str()];
+        let yaml = store
+            .get::<_, GameYaml>(&warmy::LogicalKey::new("/files.yaml"), ctx)
+            .map_err(err_from)?;
+        let object = &yaml.borrow().yaml["objects"][key.as_str()];
         let mut file = ctx
             .filesystem
             .open(Path::new("/moonstone/").join(&object["file"].as_str().expect("yaml error")))
@@ -70,6 +90,10 @@ impl warmy::Load<Context> for TextureAtlas {
         objects
             .to_texture_atlas(texture_size as i32)
             .map(warmy::Loaded::from)
-            .map_err(err_from)
+            .map_err(|e| {
+                failure::Error::from(GameDataError {
+                    message: format!("Failed loading {}. {} in files.yaml", key.as_str(), e),
+                }).compat()
+            })
     }
 }
