@@ -16,6 +16,8 @@ specs-derive = "0.2.0"
 serde = "1.0.70"
 serde_yaml = "0.7.5"
 warmy = "0.7.2"
+failure = "0.1.1"
+failure_derive = "0.1.1"
 
 [dependencies.ggez]
 version = "0.4.3"
