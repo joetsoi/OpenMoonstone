@@ -62,7 +62,7 @@ terrain = {
 }
 
 
-collide_hit = load_collision_file("COLLIDE.HIT")
+collide_hit = load_collision_file("DISKB\COLLIDE.HIT")
 
 sounds = {
     'hit3': 'SAMPLES\\HIT3',
