@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use ggez::{Context, GameError};
+use ggez::Context;
 use serde_yaml::Value;
 use warmy;
 
@@ -13,12 +13,17 @@ pub enum ImageType {
 }
 
 #[derive(Debug)]
-pub struct Frame {
+pub struct Image {
     sheet: String,
     image: u32,
     x: i32,
     y: i32,
     image_type: ImageType,
+}
+
+#[derive(Debug)]
+pub struct Frame {
+    images: Vec<Image>,
 }
 
 #[derive(Debug)]
@@ -44,17 +49,22 @@ impl warmy::Load<Context> for Animations {
             let frame_values = animation["frames"].as_sequence().unwrap();
             let mut frames = Vec::new();
 
-            for image in frame_values {
-                frames.push(Frame {
-                    sheet: image["sheet"].as_str().unwrap().to_string(),
-                    image: image["image"].as_u64().unwrap() as u32,
-                    x: image["x"].as_i64().unwrap() as i32,
-                    y: image["y"].as_i64().unwrap() as i32,
-                    image_type: match image["type"].as_str().unwrap() {
-                        "NON_SOLID" => ImageType::NonSolid,
-                        _ => ImageType::Collidee,
-                    },
-                })
+            for image_values in frame_values {
+                let mut frame = Frame { images: Vec::new() };
+                for image in image_values.as_sequence().unwrap() {
+                    frame.images.push(Image {
+                        sheet: image["sheet"].as_str().unwrap().to_string(),
+                        image: image["image"].as_u64().unwrap() as u32,
+                        x: image["x"].as_i64().unwrap() as i32,
+                        y: image["y"].as_i64().unwrap() as i32,
+                        image_type: match image["type"].as_str().unwrap() {
+                            "NON_SOLID" => ImageType::NonSolid,
+                            "COLLIDEE" => ImageType::Collidee,
+                            _ => panic!("unknown image type"),
+                        },
+                    })
+                }
+                frames.push(frame);
             }
             animations.insert(key.as_str().unwrap().to_string(), frames);
         }
@@ -64,8 +74,3 @@ impl warmy::Load<Context> for Animations {
         }))
     }
 }
-
-// impl Frame {
-//     pub fn from_yaml(yaml: &Value) -> Frame{
-//     }
-// }

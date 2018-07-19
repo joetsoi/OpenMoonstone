@@ -2,20 +2,16 @@
 #![warn(rust_2018_idioms)]
 
 use std::env;
-use std::path::Path;
 use std::time::Duration;
 
 use ggez::conf;
 use ggez::event;
-use ggez::filesystem;
 use ggez::graphics;
 use ggez::graphics::Color;
 use ggez::graphics::Image;
 use ggez::timer;
 use ggez::{Context, GameResult};
 use image::{ImageBuffer, RgbaImage};
-use serde_yaml;
-use serde_yaml::Value;
 use specs::world::Builder;
 use specs::RunNow;
 use specs::World;
@@ -131,9 +127,6 @@ fn main() {
     let c = conf::Conf::new();
     let ctx = &mut Context::load_from_conf("openmoonstone", "joetsoi", c).unwrap();
     graphics::set_default_filter(ctx, graphics::FilterMode::Nearest);
-
-    let file = ctx.filesystem.open("/files.yaml").unwrap();
-    let yaml: Value = serde_yaml::from_reader(file).unwrap();
 
     let mut store: Store<Context> = Store::new(StoreOpt::default()).expect("store creation");
     let piv = store
