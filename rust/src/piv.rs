@@ -85,21 +85,21 @@ pub fn read_palette(bit_depth: usize, data: &[u8]) -> Vec<Colour> {
     BigEndian::read_u16_into(&data, &mut palette);
     let palette: Vec<u16> = palette.iter().map(|pel| pel & 0x7fff).collect();
 
-    palette
+    let mut palette: Vec<Colour> = palette
         .iter()
         .map(|pel| {
             let mut pel_bytes = [0u8; 2];
             BigEndian::write_u16(&mut pel_bytes, *pel);
-            let mut alpha = 0u8;
-            if *pel != 0u16 {
-                alpha = 255;
-            }
             Colour {
                 r: (pel_bytes[0]) << 4,
                 g: (((pel_bytes[1]) & 0xf0) >> 2) << 2,
                 b: ((pel_bytes[1]) & 0x0f) << 4,
-                a: alpha,
+                a: 255,
             }
         })
-        .collect()
+        .collect();
+    if let Some(first) = palette.get_mut(0) {
+        first.a = 0;
+    }
+    palette
 }
