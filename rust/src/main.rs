@@ -32,6 +32,7 @@ struct MainState {
     encounter: World,
     systems: Systems,
     store: Store<Context>,
+    images: HashMap<String, graphics::Image>,
 }
 
 struct Systems {
@@ -46,6 +47,7 @@ impl MainState {
         palette: &Vec<Colour>,
     ) -> SpriteBatch {
         let atlas_dimension = atlas.borrow().image.width as u32;
+        // todo: do not do this every draw frame
         let image = graphics::Image::from_rgba8(
             ctx,
             atlas_dimension as u16,
@@ -97,7 +99,19 @@ impl event::EventHandler for MainState {
                     Occupied(entry) => entry.into_mut(),
                     Vacant(entry) => {
                         batch_order.push(image.sheet.clone());
-                        entry.insert(Self::new_batch(&atlas, ctx, &self.palette))
+                        let atlas_dimension = atlas.borrow().image.width as u32;
+                        let image = match(self.images.entry(image.sheet.clone())) {
+                            Occupied(i) => i.into_mut(),
+                            Vacant(i) => {
+                                i.insert(graphics::Image::from_rgba8(
+                                    ctx,
+                                    atlas_dimension as u16,
+                                    atlas_dimension as u16,
+                                    &atlas.borrow().image.to_rgba8(&self.palette),
+                                ).unwrap())
+                            }
+                        };
+                        entry.insert(SpriteBatch::new(image.clone()))
                     }
                 };
 
@@ -211,12 +225,12 @@ fn main() {
         .unwrap();
 
     let atlas_dimension = atlas.borrow().image.width as u32;
-    let mut a: RgbaImage = ImageBuffer::from_raw(
-        atlas_dimension,
-        atlas_dimension,
-        atlas.borrow().image.to_rgba8(&*piv.borrow().palette),
-    ).unwrap();
-    a.save("test.png");
+    // let mut a: RgbaImage = ImageBuffer::from_raw(
+    //     atlas_dimension,
+    //     atlas_dimension,
+    //     atlas.borrow().image.to_rgba8(&*piv.borrow().palette),
+    // ).unwrap();
+    // a.save("test.png");
 
     let background = graphics::Image::from_rgba8(ctx, 320, 200, &*piv.borrow().to_rgba8()).unwrap();
     let image = graphics::Image::from_rgba8(
@@ -241,7 +255,7 @@ fn main() {
     encounter.register::<Draw>();
     let knight = encounter
         .create_entity()
-        .with(Position { x: 100, y: 150 })
+        .with(Position { x: 0, y: 200 })
         .with(Draw {
             frame: sprite.borrow().animations["idle"][0].clone(),
         })
@@ -261,6 +275,7 @@ fn main() {
         encounter: encounter,
         systems: systems,
         store: store,
+        images: HashMap::new(),
     };
 
     event::run(ctx, &mut state).unwrap();
