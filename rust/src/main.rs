@@ -32,30 +32,15 @@ struct MainState {
     encounter: World,
     systems: Systems,
     store: Store<Context>,
+
     images: HashMap<String, graphics::Image>,
+    batches: HashMap<String, graphics::spritebatch::SpriteBatch>,
+    batch_order: Vec<String>,
 }
 
 struct Systems {
     movement: Movement,
     //renderer: Renderer,
-}
-
-impl MainState {
-    fn new_batch(
-        atlas: &warmy::res::Res<TextureAtlas>,
-        ctx: &mut Context,
-        palette: &Vec<Colour>,
-    ) -> SpriteBatch {
-        let atlas_dimension = atlas.borrow().image.width as u32;
-        // todo: do not do this every draw frame
-        let image = graphics::Image::from_rgba8(
-            ctx,
-            atlas_dimension as u16,
-            atlas_dimension as u16,
-            &atlas.borrow().image.to_rgba8(palette),
-        ).unwrap();
-        SpriteBatch::new(image)
-    }
 }
 
 impl event::EventHandler for MainState {
@@ -85,8 +70,8 @@ impl event::EventHandler for MainState {
             },
         )?;
         //self.systems.renderer.run_now(&self.encounter.res, ctx: Context);
-        let mut batches: HashMap<String, graphics::spritebatch::SpriteBatch> = HashMap::new();
-        let mut batch_order: Vec<String> = vec![];
+        //let mut batches: HashMap<String, graphics::spritebatch::SpriteBatch> = HashMap::new();
+        //let mut batch_order: Vec<String> = vec![];
         let position_storage = self.encounter.read_storage::<Position>();
         let draw_storage = self.encounter.read_storage::<Draw>();
         for (position, draw) in (&position_storage, &draw_storage).join() {
@@ -95,21 +80,21 @@ impl event::EventHandler for MainState {
                     .store
                     .get::<_, TextureAtlas>(&LogicalKey::new(image.sheet.as_str()), ctx)
                     .unwrap();
-                let mut batch = match batches.entry(image.sheet.clone()) {
+                let mut batch = match self.batches.entry(image.sheet.clone()) {
                     Occupied(entry) => entry.into_mut(),
                     Vacant(entry) => {
-                        batch_order.push(image.sheet.clone());
+                        self.batch_order.push(image.sheet.clone());
                         let atlas_dimension = atlas.borrow().image.width as u32;
-                        let image = match(self.images.entry(image.sheet.clone())) {
+                        let image = match (self.images.entry(image.sheet.clone())) {
                             Occupied(i) => i.into_mut(),
-                            Vacant(i) => {
-                                i.insert(graphics::Image::from_rgba8(
+                            Vacant(i) => i.insert(
+                                graphics::Image::from_rgba8(
                                     ctx,
                                     atlas_dimension as u16,
                                     atlas_dimension as u16,
                                     &atlas.borrow().image.to_rgba8(&self.palette),
-                                ).unwrap())
-                            }
+                                ).unwrap(),
+                            ),
                         };
                         entry.insert(SpriteBatch::new(image.clone()))
                     }
@@ -133,8 +118,8 @@ impl event::EventHandler for MainState {
                 });
             }
         }
-        for batch_name in batch_order {
-            let mut batch = batches.get_mut(&batch_name).unwrap();
+        for batch_name in &self.batch_order {
+            let mut batch = self.batches.get_mut(batch_name).unwrap();
             graphics::draw_ex(
                 ctx,
                 batch,
@@ -276,6 +261,8 @@ fn main() {
         systems: systems,
         store: store,
         images: HashMap::new(),
+        batches: HashMap::new(),
+        batch_order: vec![],
     };
 
     event::run(ctx, &mut state).unwrap();
