@@ -24,7 +24,7 @@ objects:
     # knight
     kn1.ob:
         file: DISKB/KN1.OB
-        texture_size: 256
+        texture_size: 512
     kn2.ob:
         file: DISKB/KN2.OB
         texture_size: 256

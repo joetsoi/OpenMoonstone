@@ -1,17 +1,25 @@
-use specs::{ReadStorage, System};
+use ggez::Context;
+use specs::{Read, ReadStorage, Resources, System, Write};
+use warmy::{LogicalKey, Store, StoreOpt};
 
+use crate::combat::components::draw::Draw;
 use crate::combat::components::movement::Position;
+use crate::objects::{Rect, TextureAtlas};
 
-pub struct Renderer;
+pub struct Renderer {
+    store: Store<Context>,
+}
 
 impl<'a> System<'a> for Renderer {
-    type SystemData = ReadStorage<'a, Position>;
+    type SystemData = (
+        ReadStorage<'a, Position>,
+        ReadStorage<'a, Draw>,
+    );
 
-    fn run(&mut self, position: Self::SystemData) {
+    fn run(&mut self, (position, draw): Self::SystemData) {
         use specs::Join;
 
-        for position in position.join() {
-            println!("Drawing, {:?}", &position);
+        for (position, draw) in (&position, &draw).join() {
         }
     }
 }

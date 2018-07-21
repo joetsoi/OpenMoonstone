@@ -1,16 +1,12 @@
-use std::sync::Arc;
-
-use ggez::graphics::spritebatch::SpriteBatch;
 use specs::{Component, VecStorage};
 //use specs_derive::*;
+use crate::animation::Frame;
 
 #[derive(Debug)]
 pub struct Draw {
-    pub sprite_sheet: Arc<SpriteBatch>,
-    pub rects: Vec<u32>,
+    pub frame: Frame,
 }
 
-impl Component for Draw  {
+impl Component for Draw {
     type Storage = VecStorage<Self>;
 }
-

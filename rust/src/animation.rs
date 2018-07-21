@@ -6,32 +6,32 @@ use warmy;
 
 use crate::error::{err_from, CompatError};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum ImageType {
     NonSolid,
     Collidee,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Image {
-    sheet: String,
-    image: u32,
-    x: i32,
-    y: i32,
-    image_type: ImageType,
+    pub sheet: String,
+    pub image: usize,
+    pub x: i32,
+    pub y: i32,
+    pub image_type: ImageType,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Frame {
-    images: Vec<Image>,
+    pub images: Vec<Image>,
 }
 
 #[derive(Debug)]
-pub struct Animations {
-    animations: HashMap<String, Vec<Frame>>,
+pub struct Sprite {
+    pub animations: HashMap<String, Vec<Frame>>,
 }
 
-impl warmy::Load<Context> for Animations {
+impl warmy::Load<Context> for Sprite {
     type Key = warmy::LogicalKey;
     type Error = CompatError;
 
@@ -54,7 +54,7 @@ impl warmy::Load<Context> for Animations {
                 for image in image_values.as_sequence().unwrap() {
                     frame.images.push(Image {
                         sheet: image["sheet"].as_str().unwrap().to_string(),
-                        image: image["image"].as_u64().unwrap() as u32,
+                        image: image["image"].as_u64().unwrap() as usize,
                         x: image["x"].as_i64().unwrap() as i32,
                         y: image["y"].as_i64().unwrap() as i32,
                         image_type: match image["type"].as_str().unwrap() {
@@ -69,7 +69,7 @@ impl warmy::Load<Context> for Animations {
             animations.insert(key.as_str().unwrap().to_string(), frames);
         }
 
-        Ok(warmy::Loaded::from(Animations {
+        Ok(warmy::Loaded::from(Sprite {
             animations: animations,
         }))
     }
