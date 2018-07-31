@@ -15,11 +15,12 @@ use ggez::timer;
 use ggez::{Context, GameResult};
 use image::{ImageBuffer, RgbaImage};
 use specs::world::Builder;
+use specs::{world, Entities};
 use specs::{Dispatcher, DispatcherBuilder, Join, RunNow, World};
 use warmy::{LogicalKey, Store, StoreOpt};
 
 use openmoonstone::animation::{Image, Sprite};
-use openmoonstone::combat::components::{Draw, Position};
+use openmoonstone::combat::components::{Controller, Draw, Position};
 use openmoonstone::combat::systems::{Movement, Renderer};
 use openmoonstone::input;
 use openmoonstone::objects::{Rect, TextureAtlas};
@@ -40,20 +41,33 @@ struct MainState<'a> {
 
     input: input::InputState,
     input_binding: input::InputBinding,
+
+    knight_id: world::Index,
+}
+
+impl MainState<'a> {
+    fn update_controllers(&mut self) {
+        let entities = self.encounter.entities();
+        let mut controllers = self.encounter.write_storage::<Controller>();
+        for (e, controller) in (&*entities, &mut controllers).join() {
+            if e.id() == self.knight_id {
+                controller.x = self.input.get_axis_raw(input::Axis::Horz) as i32;
+                controller.y = self.input.get_axis_raw(input::Axis::Vert) as i32;
+                controller.fire = self.input.get_button_down(input::Button::Fire);
+            }
+        }
+    }
 }
 
 impl event::EventHandler for MainState<'a> {
     fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
         const DESIRED_FPS: u32 = 1000 / (1193182 / 21845 * 2);
         while timer::check_update_time(ctx, DESIRED_FPS) {
-            self.dispatcher.dispatch_par(&self.encounter.res);
             let delta = timer::get_delta(ctx);
             self.input
                 .update(delta.as_secs() as f32 + delta.subsec_millis() as f32 / 1000.0);
-            println!("input {:?}", self.input);
-
-            // println!("Delta frame time: {:?} ", timer::get_delta(ctx));
-            // println!("Average FPS: {}", timer::get_fps(ctx));
+            self.update_controllers();
+            self.dispatcher.dispatch_par(&self.encounter.res);
         }
         Ok(())
     }
@@ -186,7 +200,8 @@ impl event::EventHandler for MainState<'a> {
         //self.batch.clear();
         graphics::present(ctx);
 
-        //timer::yield_now();
+        // println!("Delta frame time: {:?} ", timer::get_delta(ctx));
+        // println!("Average FPS: {}", timer::get_fps(ctx));
         timer::sleep(Duration::from_millis(109));
         Ok(())
     }
@@ -199,9 +214,7 @@ impl event::EventHandler for MainState<'a> {
         _repeat: bool,
     ) {
         if let Some(ev) = self.input_binding.resolve(keycode) {
-            println!("{:?}", ev);
             self.input.update_effect(ev, true);
-            //self.input(ev, true);
         }
     }
 
@@ -213,7 +226,6 @@ impl event::EventHandler for MainState<'a> {
         _repeat: bool,
     ) {
         if let Some(ev) = self.input_binding.resolve(keycode) {
-            //self.input(ev, false);
             self.input.update_effect(ev, false);
         }
     }
@@ -268,10 +280,16 @@ fn main() {
     // ).unwrap();
 
     let mut encounter = World::new();
+    encounter.register::<Controller>();
     encounter.register::<Position>();
     encounter.register::<Draw>();
     let knight = encounter
         .create_entity()
+        .with(Controller {
+            x: 0,
+            y: 0,
+            fire: false,
+        })
         .with(Position { x: 100, y: 150 })
         .with(Draw {
             frame: sprite.borrow().animations["idle"][0].clone(),
@@ -298,6 +316,7 @@ fn main() {
         batch_order: vec![],
         input: input::InputState::new(),
         input_binding: input::create_input_binding(),
+        knight_id: knight.id(),
     };
 
     event::run(ctx, &mut state).unwrap();
