@@ -15,47 +15,51 @@ use ggez::timer;
 use ggez::{Context, GameResult};
 use image::{ImageBuffer, RgbaImage};
 use specs::world::Builder;
-use specs::{Join, RunNow, World};
+use specs::{Dispatcher, DispatcherBuilder, Join, RunNow, World};
 use warmy::{LogicalKey, Store, StoreOpt};
 
 use openmoonstone::animation::{Image, Sprite};
 use openmoonstone::combat::components::{Draw, Position};
 use openmoonstone::combat::systems::{Movement, Renderer};
+use openmoonstone::input;
 use openmoonstone::objects::{Rect, TextureAtlas};
 use openmoonstone::piv::{Colour, PivImage};
 
-struct MainState {
+struct MainState<'a> {
+    dispatcher: Dispatcher<'a, 'a>,
     palette: Vec<Colour>,
     image: graphics::Image,
     batch: graphics::spritebatch::SpriteBatch,
     rects: Vec<Rect>,
     encounter: World,
-    systems: Systems,
     store: Store<Context>,
 
     images: HashMap<String, graphics::Image>,
     batches: HashMap<String, graphics::spritebatch::SpriteBatch>,
     batch_order: Vec<String>,
+
+    input: input::InputState,
+    input_binding: input::InputBinding,
 }
 
-struct Systems {
-    movement: Movement,
-    //renderer: Renderer,
-}
-
-impl event::EventHandler for MainState {
+impl event::EventHandler for MainState<'a> {
     fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
         const DESIRED_FPS: u32 = 1000 / (1193182 / 21845 * 2);
         while timer::check_update_time(ctx, DESIRED_FPS) {
-            self.systems.movement.run_now(&self.encounter.res)
+            self.dispatcher.dispatch_par(&self.encounter.res);
+            let delta = timer::get_delta(ctx);
+            self.input
+                .update(delta.as_secs() as f32 + delta.subsec_millis() as f32 / 1000.0);
+            println!("input {:?}", self.input);
+
             // println!("Delta frame time: {:?} ", timer::get_delta(ctx));
             // println!("Average FPS: {}", timer::get_fps(ctx));
         }
-        timer::sleep(Duration::from_millis(109));
         Ok(())
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
+        self.dispatcher.dispatch_thread_local(&self.encounter.res);
         graphics::set_background_color(ctx, Color::from((0, 0, 0, 255)));
         graphics::clear(ctx);
 
@@ -182,8 +186,36 @@ impl event::EventHandler for MainState {
         //self.batch.clear();
         graphics::present(ctx);
 
-        timer::yield_now();
+        //timer::yield_now();
+        timer::sleep(Duration::from_millis(109));
         Ok(())
+    }
+
+    fn key_down_event(
+        &mut self,
+        _ctx: &mut Context,
+        keycode: event::Keycode,
+        _keymod: event::Mod,
+        _repeat: bool,
+    ) {
+        if let Some(ev) = self.input_binding.resolve(keycode) {
+            println!("{:?}", ev);
+            self.input.update_effect(ev, true);
+            //self.input(ev, true);
+        }
+    }
+
+    fn key_up_event(
+        &mut self,
+        _ctx: &mut Context,
+        keycode: event::Keycode,
+        _keymod: event::Mod,
+        _repeat: bool,
+    ) {
+        if let Some(ev) = self.input_binding.resolve(keycode) {
+            //self.input(ev, false);
+            self.input.update_effect(ev, false);
+        }
     }
 }
 
@@ -240,29 +272,32 @@ fn main() {
     encounter.register::<Draw>();
     let knight = encounter
         .create_entity()
-        .with(Position { x: 0, y: 200 })
+        .with(Position { x: 100, y: 150 })
         .with(Draw {
             frame: sprite.borrow().animations["idle"][0].clone(),
         })
         .build();
-    let movement = Movement;
-    //let renderer = Renderer { ctx: ctx };
-    let systems = Systems {
-        movement: movement,
-        //renderer: renderer,
-    };
+
+    let mut dispatcher = DispatcherBuilder::new()
+        .with(Movement, "movement", &[])
+        .with_thread_local(Renderer {
+            store: Store::new(StoreOpt::default()).expect("store creation"),
+        })
+        .build();
 
     let mut state = MainState {
+        dispatcher: dispatcher,
         palette: piv.borrow().palette.to_vec(),
         image: background,
         batch: batch,
         rects: atlas.borrow().rects.clone(),
         encounter: encounter,
-        systems: systems,
         store: store,
         images: HashMap::new(),
         batches: HashMap::new(),
         batch_order: vec![],
+        input: input::InputState::new(),
+        input_binding: input::create_input_binding(),
     };
 
     event::run(ctx, &mut state).unwrap();
