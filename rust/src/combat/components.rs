@@ -1,5 +1,5 @@
-pub mod movement;
 pub mod draw;
+pub mod movement;
 
-pub use self::movement::{Controller, Position};
 pub use self::draw::Draw;
+pub use self::movement::{Controller, Position, WalkingState};

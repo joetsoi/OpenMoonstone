@@ -20,7 +20,7 @@ use specs::{Dispatcher, DispatcherBuilder, Join, RunNow, World};
 use warmy::{LogicalKey, Store, StoreOpt};
 
 use openmoonstone::animation::{Image, Sprite};
-use openmoonstone::combat::components::{Controller, Draw, Position};
+use openmoonstone::combat::components::{Controller, Draw, Position, WalkingState};
 use openmoonstone::combat::systems::{Movement, Renderer};
 use openmoonstone::input;
 use openmoonstone::objects::{Rect, TextureAtlas};
@@ -281,8 +281,9 @@ fn main() {
 
     let mut encounter = World::new();
     encounter.register::<Controller>();
-    encounter.register::<Position>();
     encounter.register::<Draw>();
+    encounter.register::<Position>();
+    encounter.register::<WalkingState>();
     let knight = encounter
         .create_entity()
         .with(Controller {
@@ -294,13 +295,16 @@ fn main() {
         .with(Draw {
             frame: sprite.borrow().animations["idle"][0].clone(),
         })
+        .with(WalkingState {
+            ..Default::default()
+        })
         .build();
 
     let mut dispatcher = DispatcherBuilder::new()
         .with(Movement, "movement", &[])
-        .with_thread_local(Renderer {
-            store: Store::new(StoreOpt::default()).expect("store creation"),
-        })
+        // .with_thread_local(Renderer {
+        //     store: Store::new(StoreOpt::default()).expect("store creation"),
+        // })
         .build();
 
     let mut state = MainState {
