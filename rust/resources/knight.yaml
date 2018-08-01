@@ -1,0 +1,34 @@
+idle:
+  frames:
+    - - sheet: kn1.ob
+        image: 1
+        y: 45
+        x: -13
+        type: NON_SOLID
+      - sheet: kn1.ob
+        image: 0
+        y: -9
+        x: -9
+        type: COLLIDEE
+      - sheet: kn4.ob
+        image: 1
+        y: -6
+        x: 4
+        type: NON_SOLID
+walk:
+  frames:
+    - - sheet: kn1.ob
+        image: 3
+        y: 46
+        x: -13
+        type: NON_SOLID
+      - sheet: kn1.ob
+        image: 2
+        y: -9
+        x: -9
+        type: COLLIDEE
+      - sheet: kn4.ob
+        image: 1
+        y: -6
+        x: 3
+        type: NON_SOLID
