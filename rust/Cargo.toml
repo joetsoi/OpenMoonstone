@@ -7,21 +7,23 @@ version = "0.1.0"
 authors = ["Joe Tsoi <joetsoi@users.noreply.github.com>"]
 
 [dependencies]
-byteorder = "1.2.3"
-bv = "0.7.4"
-ggez-goodies = "0.1.0"
-failure = "0.1.1"
-failure_derive = "0.1.1"
-image = "0.19.0"
-rect_packer = "0.2.1"
-specs = "0.12.0"
-specs-derive = "0.2.0"
-serde = "1.0.70"
-serde_yaml = "0.7.5"
-warmy = "0.7.2"
+byteorder = "*"
+bv = "*"
+ggez-goodies = "*"
+failure = "*"
+failure_derive = "*"
+image = "*"
+rect_packer = "*"
+specs = "*"
+specs-derive = "*"
+serde = "*"
+serde_yaml = "*"
+warmy = "*"
+maplit = "*"
+lazy_static = "*"
 
 [dependencies.ggez]
-version = "0.4.3"
+version = "*"
 features = ["cargo-resource-root"]
 
 [dev-dependencies]
