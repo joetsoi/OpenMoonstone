@@ -13,27 +13,28 @@ use ggez::graphics::spritebatch::SpriteBatch;
 use ggez::graphics::Color;
 use ggez::timer;
 use ggez::{Context, GameResult};
-use image::{ImageBuffer, RgbaImage};
+//use image::{ImageBuffer, RgbaImage};
 use specs::world::Builder;
-use specs::{world, Entities};
-use specs::{Dispatcher, DispatcherBuilder, Join, RunNow, World};
+use specs::world;
+use specs::{Dispatcher, DispatcherBuilder, Join, World};
 use warmy::{LogicalKey, Store, StoreOpt};
 
-use openmoonstone::animation::{Image, Sprite};
+use openmoonstone::animation::Sprite;
 use openmoonstone::combat::components::{
     AnimationState, Controller, Direction, Draw, Position, WalkingState,
 };
-use openmoonstone::combat::systems::{Animation, Movement, Renderer};
+use openmoonstone::combat::systems::{Animation, Movement};
 use openmoonstone::input;
-use openmoonstone::objects::{Rect, TextureAtlas};
+//use openmoonstone::objects::{Rect, TextureAtlas};
+use openmoonstone::objects::TextureAtlas;
 use openmoonstone::piv::{Colour, PivImage};
 
 struct MainState<'a> {
     dispatcher: Dispatcher<'a, 'a>,
     palette: Vec<Colour>,
     image: graphics::Image,
-    batch: graphics::spritebatch::SpriteBatch,
-    rects: Vec<Rect>,
+    //batch: graphics::spritebatch::SpriteBatch,
+    //rects: Vec<Rect>,
     encounter: World,
     store: Store<Context>,
 
@@ -124,11 +125,11 @@ impl event::EventHandler for MainState<'a> {
                     .store
                     .get::<_, TextureAtlas>(&LogicalKey::new(image.sheet.as_str()), ctx)
                     .unwrap();
-                let mut batch = match self.batches.entry(image.sheet.clone()) {
+                let batch = match self.batches.entry(image.sheet.clone()) {
                     Occupied(entry) => entry.into_mut(),
                     Vacant(entry) => {
                         let atlas_dimension = atlas.borrow().image.width as u32;
-                        let image = match (self.images.entry(image.sheet.clone())) {
+                        let image = match self.images.entry(image.sheet.clone()) {
                             Occupied(i) => i.into_mut(),
                             Vacant(i) => i.insert(
                                 graphics::Image::from_rgba8(
@@ -163,7 +164,7 @@ impl event::EventHandler for MainState<'a> {
             }
         }
         for batch_name in &batch_order {
-            let mut batch = self.batches.get_mut(batch_name).unwrap();
+            let batch = self.batches.get_mut(batch_name).unwrap();
             graphics::draw_ex(
                 ctx,
                 batch,
@@ -260,7 +261,7 @@ impl event::EventHandler for MainState<'a> {
 fn main() {
     let args: Vec<String> = env::args().collect();
     let filename = &args[1];
-    let ob = &args[2];
+    //let ob = &args[2];
 
     let c = conf::Conf::new();
     let ctx = &mut Context::load_from_conf("openmoonstone", "joetsoi", c).unwrap();
@@ -271,15 +272,15 @@ fn main() {
         .get::<_, PivImage>(&LogicalKey::new(filename), ctx)
         .unwrap();
 
-    let atlas = store
-        .get::<_, TextureAtlas>(&LogicalKey::new(ob), ctx)
-        .unwrap();
+    // let atlas = store
+    //     .get::<_, TextureAtlas>(&LogicalKey::new(ob), ctx)
+    //     .unwrap();
 
     let sprite = store
         .get::<_, Sprite>(&LogicalKey::new("/knight.yaml"), ctx)
         .unwrap();
 
-    let atlas_dimension = atlas.borrow().image.width as u32;
+    //let atlas_dimension = atlas.borrow().image.width as u32;
     // let mut a: RgbaImage = ImageBuffer::from_raw(
     //     atlas_dimension,
     //     atlas_dimension,
@@ -288,14 +289,14 @@ fn main() {
     // a.save("test.png");
 
     let background = graphics::Image::from_rgba8(ctx, 320, 200, &*piv.borrow().to_rgba8()).unwrap();
-    let image = graphics::Image::from_rgba8(
-        ctx,
-        atlas_dimension as u16,
-        atlas_dimension as u16,
-        &atlas.borrow().image.to_rgba8(&*piv.borrow().palette),
-    ).unwrap();
+    // let image = graphics::Image::from_rgba8(
+    //     ctx,
+    //     atlas_dimension as u16,
+    //     atlas_dimension as u16,
+    //     &atlas.borrow().image.to_rgba8(&*piv.borrow().palette),
+    // ).unwrap();
     //let test = image.clone();
-    let batch = graphics::spritebatch::SpriteBatch::new(image);
+    //let batch = graphics::spritebatch::SpriteBatch::new(image);
 
     // let im1 = &ob.images[0];
     // let test = Image::from_rgba8(
@@ -328,7 +329,7 @@ fn main() {
             ..Default::default()
         }).build();
 
-    let mut dispatcher = DispatcherBuilder::new()
+    let dispatcher = DispatcherBuilder::new()
         .with(Movement, "movement", &[])
         .with(Animation, "animation", &["movement"])
         // .with_thread_local(Renderer {
@@ -340,8 +341,8 @@ fn main() {
         dispatcher: dispatcher,
         palette: piv.borrow().palette.to_vec(),
         image: background,
-        batch: batch,
-        rects: atlas.borrow().rects.clone(),
+        //batch: batch,
+        //rects: atlas.borrow().rects.clone(),
         encounter: encounter,
         store: store,
         images: HashMap::new(),
