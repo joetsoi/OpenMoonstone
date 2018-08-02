@@ -20,8 +20,8 @@ use specs::{Dispatcher, DispatcherBuilder, Join, RunNow, World};
 use warmy::{LogicalKey, Store, StoreOpt};
 
 use openmoonstone::animation::{Image, Sprite};
-use openmoonstone::combat::components::{Controller, Draw, Position, WalkingState};
-use openmoonstone::combat::systems::{Movement, Renderer};
+use openmoonstone::combat::components::{AnimationState, Controller, Draw, Position, WalkingState};
+use openmoonstone::combat::systems::{Animation, Movement, Renderer};
 use openmoonstone::input;
 use openmoonstone::objects::{Rect, TextureAtlas};
 use openmoonstone::piv::{Colour, PivImage};
@@ -57,6 +57,20 @@ impl MainState<'a> {
             }
         }
     }
+
+    fn update_images(&mut self, ctx: &mut Context) {
+        let mut draw_storage = self.encounter.write_storage::<Draw>();
+        let animation_storage = self.encounter.read_storage::<AnimationState>();
+
+        let sprite = self
+            .store
+            .get::<_, Sprite>(&LogicalKey::new("/knight.yaml"), ctx)
+            .unwrap();
+        for (draw, animation_state) in (&mut draw_storage, &animation_storage).join() {
+            draw.frame =
+                sprite.borrow().animations["walk"][animation_state.frame_number as usize].clone();
+        }
+    }
 }
 
 impl event::EventHandler for MainState<'a> {
@@ -90,6 +104,7 @@ impl event::EventHandler for MainState<'a> {
         //self.systems.renderer.run_now(&self.encounter.res, ctx: Context);
         //let mut batches: HashMap<String, graphics::spritebatch::SpriteBatch> = HashMap::new();
         //let mut batch_order: Vec<String> = vec![];
+        self.update_images(ctx);
         let position_storage = self.encounter.read_storage::<Position>();
         let draw_storage = self.encounter.read_storage::<Draw>();
         for (position, draw) in (&position_storage, &draw_storage).join() {
@@ -280,6 +295,7 @@ fn main() {
     // ).unwrap();
 
     let mut encounter = World::new();
+    encounter.register::<AnimationState>();
     encounter.register::<Controller>();
     encounter.register::<Draw>();
     encounter.register::<Position>();
@@ -293,15 +309,19 @@ fn main() {
         })
         .with(Position { x: 100, y: 150 })
         .with(Draw {
-            frame: sprite.borrow().animations["idle"][0].clone(),
+            frame: sprite.borrow().animations["walk"][0].clone(),
         })
         .with(WalkingState {
+            ..Default::default()
+        })
+        .with(AnimationState {
             ..Default::default()
         })
         .build();
 
     let mut dispatcher = DispatcherBuilder::new()
         .with(Movement, "movement", &[])
+        .with(Animation, "animation", &["movement"])
         // .with_thread_local(Renderer {
         //     store: Store::new(StoreOpt::default()).expect("store creation"),
         // })

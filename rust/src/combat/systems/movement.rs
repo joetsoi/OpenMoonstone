@@ -30,13 +30,12 @@ impl<'a> System<'a> for Movement {
             position.x = (position.x as i32 + x_delta) as u32;
             position.y = (position.y as i32 - y_delta) as u32;
             walking_state.step = step;
-            if controller.x == 1 {
-                walking_state.direction = Direction::Right;
-            } else if controller.x == -1 {
-                walking_state.direction = Direction::Left;
+            match controller.x {
+                1 => walking_state.direction = Direction::Right,
+                -1 => walking_state.direction = Direction::Left,
+                _ => (),
             }
+            println!("{:?}", walking_state);
         }
     }
 }
-
-impl Movement {}
