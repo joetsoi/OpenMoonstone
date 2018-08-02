@@ -34,7 +34,6 @@ impl<'a> System<'a> for Movement {
                 -1 => walking_state.direction = Direction::Left,
                 _ => (),
             }
-            println!("{:?}", walking_state);
         }
     }
 }

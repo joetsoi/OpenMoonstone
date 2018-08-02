@@ -39,7 +39,6 @@ struct MainState<'a> {
 
     images: HashMap<String, graphics::Image>,
     batches: HashMap<String, graphics::spritebatch::SpriteBatch>,
-    batch_order: Vec<String>,
 
     input: input::InputState,
     input_binding: input::InputBinding,
@@ -72,8 +71,14 @@ impl MainState<'a> {
         for (draw, animation_state, walking_state) in
             (&mut draw_storage, &animation_storage, &walking_storage).join()
         {
-            draw.frame =
-                sprite.borrow().animations["walk"][animation_state.frame_number as usize].clone();
+            let animation = draw.animation.as_str();
+            draw.frame = sprite
+                .borrow()
+                .animations
+                .get(animation)
+                .expect(format!("{} not found in yaml", animation).as_str())
+                [animation_state.frame_number as usize]
+                .clone();
             draw.direction = walking_state.direction;
         }
     }
@@ -109,7 +114,7 @@ impl event::EventHandler for MainState<'a> {
         )?;
         //self.systems.renderer.run_now(&self.encounter.res, ctx: Context);
         //let mut batches: HashMap<String, graphics::spritebatch::SpriteBatch> = HashMap::new();
-        //let mut batch_order: Vec<String> = vec![];
+        let mut batch_order: Vec<String> = vec![];
         self.update_images(ctx);
         let position_storage = self.encounter.read_storage::<Position>();
         let draw_storage = self.encounter.read_storage::<Draw>();
@@ -122,7 +127,6 @@ impl event::EventHandler for MainState<'a> {
                 let mut batch = match self.batches.entry(image.sheet.clone()) {
                     Occupied(entry) => entry.into_mut(),
                     Vacant(entry) => {
-                        self.batch_order.push(image.sheet.clone());
                         let atlas_dimension = atlas.borrow().image.width as u32;
                         let image = match (self.images.entry(image.sheet.clone())) {
                             Occupied(i) => i.into_mut(),
@@ -138,6 +142,7 @@ impl event::EventHandler for MainState<'a> {
                         entry.insert(SpriteBatch::new(image.clone()))
                     }
                 };
+                batch_order.push(image.sheet.clone());
 
                 let rect = atlas.borrow().rects[image.image];
                 let texture_size = atlas.borrow().image.width as f32;
@@ -157,7 +162,7 @@ impl event::EventHandler for MainState<'a> {
                 });
             }
         }
-        for batch_name in &self.batch_order {
+        for batch_name in &batch_order {
             let mut batch = self.batches.get_mut(batch_name).unwrap();
             graphics::draw_ex(
                 ctx,
@@ -312,19 +317,16 @@ fn main() {
             x: 0,
             y: 0,
             fire: false,
-        })
-        .with(Position { x: 100, y: 150 })
+        }).with(Position { x: 100, y: 150 })
         .with(Draw {
             frame: sprite.borrow().animations["walk"][0].clone(),
+            animation: "walk".to_string(),
             direction: Direction::default(),
-        })
-        .with(WalkingState {
+        }).with(WalkingState {
             ..Default::default()
-        })
-        .with(AnimationState {
+        }).with(AnimationState {
             ..Default::default()
-        })
-        .build();
+        }).build();
 
     let mut dispatcher = DispatcherBuilder::new()
         .with(Movement, "movement", &[])
@@ -344,7 +346,6 @@ fn main() {
         store: store,
         images: HashMap::new(),
         batches: HashMap::new(),
-        batch_order: vec![],
         input: input::InputState::new(),
         input_binding: input::create_input_binding(),
         knight_id: knight.id(),
