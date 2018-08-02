@@ -1,7 +1,6 @@
 use specs::{ReadStorage, System, WriteStorage};
 
-use crate::combat::components::movement::Direction;
-use crate::combat::components::{Controller, Position, WalkingState};
+use crate::combat::components::{Controller, Direction, Position, WalkingState};
 
 pub const X_STEP_SIZES: [[i32; 4]; 3] = [[25, 3, 23, 4], [0, 0, 0, 0], [25, 3, 23, 4]];
 pub const Y_STEP_SIZES: [[i32; 4]; 3] = [[2, 9, 2, 9], [0, 0, 0, 0], [8, 2, 9, 2]];

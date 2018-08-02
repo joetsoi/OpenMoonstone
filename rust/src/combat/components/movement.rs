@@ -1,17 +1,7 @@
 use specs::VecStorage;
 use specs_derive::*;
 
-#[derive(Debug)]
-pub enum Direction {
-    Left = -1,
-    Right= 1,
-}
-
-impl Default for Direction {
-    fn default() -> Direction {
-        Direction::Right
-    }
-}
+use super::Direction;
 
 #[derive(Component, Debug)]
 #[storage(VecStorage)]

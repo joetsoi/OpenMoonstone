@@ -20,7 +20,9 @@ use specs::{Dispatcher, DispatcherBuilder, Join, RunNow, World};
 use warmy::{LogicalKey, Store, StoreOpt};
 
 use openmoonstone::animation::{Image, Sprite};
-use openmoonstone::combat::components::{AnimationState, Controller, Draw, Position, WalkingState};
+use openmoonstone::combat::components::{
+    AnimationState, Controller, Direction, Draw, Position, WalkingState,
+};
 use openmoonstone::combat::systems::{Animation, Movement, Renderer};
 use openmoonstone::input;
 use openmoonstone::objects::{Rect, TextureAtlas};
@@ -61,14 +63,18 @@ impl MainState<'a> {
     fn update_images(&mut self, ctx: &mut Context) {
         let mut draw_storage = self.encounter.write_storage::<Draw>();
         let animation_storage = self.encounter.read_storage::<AnimationState>();
+        let walking_storage = self.encounter.read_storage::<WalkingState>();
 
         let sprite = self
             .store
             .get::<_, Sprite>(&LogicalKey::new("/knight.yaml"), ctx)
             .unwrap();
-        for (draw, animation_state) in (&mut draw_storage, &animation_storage).join() {
+        for (draw, animation_state, walking_state) in
+            (&mut draw_storage, &animation_storage, &walking_storage).join()
+        {
             draw.frame =
                 sprite.borrow().animations["walk"][animation_state.frame_number as usize].clone();
+            draw.direction = walking_state.direction;
         }
     }
 }
@@ -143,10 +149,10 @@ impl event::EventHandler for MainState<'a> {
                         h: rect.h as f32 / texture_size,
                     },
                     dest: graphics::Point2::new(
-                        (position.x as i32 + image.x) as f32,
+                        (position.x as i32 + (draw.direction as i32 * image.x)) as f32,
                         (position.y as i32 + image.y) as f32,
                     ),
-                    //scale: graphics::Point2::new(3.0, 3.0),
+                    scale: graphics::Point2::new((draw.direction as i32) as f32, 1.0),
                     ..Default::default()
                 });
             }
@@ -310,6 +316,7 @@ fn main() {
         .with(Position { x: 100, y: 150 })
         .with(Draw {
             frame: sprite.borrow().animations["walk"][0].clone(),
+            direction: Direction::default(),
         })
         .with(WalkingState {
             ..Default::default()
