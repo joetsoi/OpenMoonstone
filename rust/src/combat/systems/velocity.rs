@@ -22,20 +22,23 @@ impl<'a> System<'a> for VelocitySystem {
             (&controller, &mut velocity, &mut walking_state).join()
         {
             let is_moving = (controller.x | controller.y) & 1;
-            let step = ((walking_state.step + 1) % 4) * is_moving as u32;
-
-            velocity.x = X_STEP_SIZES[(controller.x + 1) as usize][step as usize] * controller.x;
-            velocity.y = Y_STEP_SIZES[(controller.y + 1) as usize][step as usize] * controller.y;
-
             if is_moving != 0 {
+                let step = ((walking_state.step + 1) % 4) * is_moving as u32;
+
+                velocity.x =
+                    X_STEP_SIZES[(controller.x + 1) as usize][step as usize] * controller.x;
+                velocity.y =
+                    Y_STEP_SIZES[(controller.y + 1) as usize][step as usize] * controller.y;
                 walking_state.step = step;
+            } else {
+                velocity.x = 0;
+                velocity.y = 0;
             }
             match controller.x {
                 1 => walking_state.direction = Direction::Right,
                 -1 => walking_state.direction = Direction::Left,
                 _ => (),
             }
-            println!("{:?}", walking_state);
         }
     }
 }
