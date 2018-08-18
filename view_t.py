@@ -7,12 +7,12 @@ import pygame
 import assets
 import settings
 from cli import print_hex_view
-from cmp import CmpFile
-from extract import extract_palette, grouper
-from font import FontFile  # , draw_string
+from resources.cmp import CmpFile
+from resources.extract import extract_palette, grouper
+from resources.font import FontFile  # , draw_string
 from main import MainExe
-from piv import PivFile
-from terrain import TFile
+from resources.piv import PivFile
+from resources.terrain import TerrainFile
 
 scale_factor = 3
 
@@ -62,7 +62,7 @@ if __name__ == "__main__":
                              sys.argv[4])
     with open(file_path, 'rb') as f:
         #font = FontFile(f.read())
-        positions = TFile(f.read())
+        positions = TerrainFile(f.read())
 
     main_exe = MainExe(
         file_path=os.path.join(settings.MOONSTONE_DIR,
@@ -116,16 +116,16 @@ if __name__ == "__main__":
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
-                    image_number = (image_number - 1) % font.image_count
-                elif event.key == pygame.K_RIGHT:
-                    image_number = (image_number + 1) % font.image_count
-                #elif event.key == pygame.K_UP:
-                #    piv.palette = copy.deepcopy(piv_palette)
-                #elif event.key == pygame.K_DOWN:
-                #    piv.palette == copy.deepcopy(default_palette)
-                print(image_number)
+            #elif event.type == pygame.KEYDOWN:
+            #    if event.key == pygame.K_LEFT:
+            #        image_number = (image_number - 1) % font.image_count
+            #    elif event.key == pygame.K_RIGHT:
+            #        image_number = (image_number + 1) % font.image_count
+            #    #elif event.key == pygame.K_UP:
+            #    #    piv.palette = copy.deepcopy(piv_palette)
+            #    #elif event.key == pygame.K_DOWN:
+            #    #    piv.palette == copy.deepcopy(default_palette)
+            #    print(image_number)
         piv.pixels = copy.deepcopy(pixels)
         #mouse = pygame.mouse.get_pos()
         #font.extract_subimage(piv, image_number, *mouse)
@@ -136,6 +136,7 @@ if __name__ == "__main__":
         image = piv.make_surface()
         image.blit(image, (0, 0))
         for pos in positions.positions:
+            import ipdb; ipdb.set_trace()
             cmp = assets.scenery[pos.cmp_file]
             image.blit(cmp.get_image(pos.image_number), (pos.x, pos.y))
 
