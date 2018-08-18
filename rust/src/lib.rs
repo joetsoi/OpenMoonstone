@@ -1,6 +1,7 @@
 pub mod animation;
 pub mod combat;
 pub mod error;
+pub mod game;
 pub mod input;
 pub mod lz77;
 pub mod manager;

@@ -14,16 +14,17 @@ use ggez::graphics::Color;
 use ggez::timer;
 use ggez::{Context, GameResult};
 //use image::{ImageBuffer, RgbaImage};
-use specs::world::Builder;
 use specs::world;
+use specs::world::Builder;
 use specs::{Dispatcher, DispatcherBuilder, Join, World};
 use warmy::{LogicalKey, Store, StoreOpt};
 
 use openmoonstone::animation::Sprite;
 use openmoonstone::combat::components::{
-    AnimationState, Controller, Direction, Draw, Position, WalkingState,
+    AnimationState, Controller, Direction, Draw, Position, Velocity, WalkingState,
 };
-use openmoonstone::combat::systems::{Animation, Movement};
+use openmoonstone::combat::systems::{Animation, Boundary, Movement, VelocitySystem};
+use openmoonstone::game::Game;
 use openmoonstone::input;
 //use openmoonstone::objects::{Rect, TextureAtlas};
 use openmoonstone::objects::TextureAtlas;
@@ -35,37 +36,34 @@ struct MainState<'a> {
     image: graphics::Image,
     //batch: graphics::spritebatch::SpriteBatch,
     //rects: Vec<Rect>,
-    encounter: World,
-    store: Store<Context>,
+    game: Game,
 
     images: HashMap<String, graphics::Image>,
     batches: HashMap<String, graphics::spritebatch::SpriteBatch>,
-
-    input: input::InputState,
-    input_binding: input::InputBinding,
 
     knight_id: world::Index,
 }
 
 impl MainState<'a> {
     fn update_controllers(&mut self) {
-        let entities = self.encounter.entities();
-        let mut controllers = self.encounter.write_storage::<Controller>();
+        let entities = self.game.world.entities();
+        let mut controllers = self.game.world.write_storage::<Controller>();
         for (e, controller) in (&*entities, &mut controllers).join() {
             if e.id() == self.knight_id {
-                controller.x = self.input.get_axis_raw(input::Axis::Horz) as i32;
-                controller.y = self.input.get_axis_raw(input::Axis::Vert) as i32;
-                controller.fire = self.input.get_button_down(input::Button::Fire);
+                controller.x = self.game.input.get_axis_raw(input::Axis::Horz) as i32;
+                controller.y = self.game.input.get_axis_raw(input::Axis::Vert) as i32;
+                controller.fire = self.game.input.get_button_down(input::Button::Fire);
             }
         }
     }
 
     fn update_images(&mut self, ctx: &mut Context) {
-        let mut draw_storage = self.encounter.write_storage::<Draw>();
-        let animation_storage = self.encounter.read_storage::<AnimationState>();
-        let walking_storage = self.encounter.read_storage::<WalkingState>();
+        let mut draw_storage = self.game.world.write_storage::<Draw>();
+        let animation_storage = self.game.world.read_storage::<AnimationState>();
+        let walking_storage = self.game.world.read_storage::<WalkingState>();
 
         let sprite = self
+            .game
             .store
             .get::<_, Sprite>(&LogicalKey::new("/knight.yaml"), ctx)
             .unwrap();
@@ -90,16 +88,17 @@ impl event::EventHandler for MainState<'a> {
         const DESIRED_FPS: u32 = 1000 / (1193182 / 21845 * 2);
         while timer::check_update_time(ctx, DESIRED_FPS) {
             let delta = timer::get_delta(ctx);
-            self.input
+            self.game
+                .input
                 .update(delta.as_secs() as f32 + delta.subsec_millis() as f32 / 1000.0);
             self.update_controllers();
-            self.dispatcher.dispatch_par(&self.encounter.res);
+            self.dispatcher.dispatch_par(&self.game.world.res);
         }
         Ok(())
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
-        self.dispatcher.dispatch_thread_local(&self.encounter.res);
+        self.dispatcher.dispatch_thread_local(&self.game.world.res);
         graphics::set_background_color(ctx, Color::from((0, 0, 0, 255)));
         graphics::clear(ctx);
 
@@ -113,15 +112,16 @@ impl event::EventHandler for MainState<'a> {
                 ..Default::default()
             },
         )?;
-        //self.systems.renderer.run_now(&self.encounter.res, ctx: Context);
+        //self.systems.renderer.run_now(&self.game.world.res, ctx: Context);
         //let mut batches: HashMap<String, graphics::spritebatch::SpriteBatch> = HashMap::new();
         let mut batch_order: Vec<String> = vec![];
         self.update_images(ctx);
-        let position_storage = self.encounter.read_storage::<Position>();
-        let draw_storage = self.encounter.read_storage::<Draw>();
+        let position_storage = self.game.world.read_storage::<Position>();
+        let draw_storage = self.game.world.read_storage::<Draw>();
         for (position, draw) in (&position_storage, &draw_storage).join() {
             for image in &draw.frame.images {
                 let atlas = self
+                    .game
                     .store
                     .get::<_, TextureAtlas>(&LogicalKey::new(image.sheet.as_str()), ctx)
                     .unwrap();
@@ -240,8 +240,8 @@ impl event::EventHandler for MainState<'a> {
         _keymod: event::Mod,
         _repeat: bool,
     ) {
-        if let Some(ev) = self.input_binding.resolve(keycode) {
-            self.input.update_effect(ev, true);
+        if let Some(ev) = self.game.input_binding.resolve(keycode) {
+            self.game.input.update_effect(ev, true);
         }
     }
 
@@ -252,8 +252,8 @@ impl event::EventHandler for MainState<'a> {
         _keymod: event::Mod,
         _repeat: bool,
     ) {
-        if let Some(ev) = self.input_binding.resolve(keycode) {
-            self.input.update_effect(ev, false);
+        if let Some(ev) = self.game.input_binding.resolve(keycode) {
+            self.game.input.update_effect(ev, false);
         }
     }
 }
@@ -267,8 +267,9 @@ fn main() {
     let ctx = &mut Context::load_from_conf("openmoonstone", "joetsoi", c).unwrap();
     graphics::set_default_filter(ctx, graphics::FilterMode::Nearest);
 
-    let mut store: Store<Context> = Store::new(StoreOpt::default()).expect("store creation");
-    let piv = store
+    let mut game = Game::new(ctx);
+    let piv = game
+        .store
         .get::<_, PivImage>(&LogicalKey::new(filename), ctx)
         .unwrap();
 
@@ -276,7 +277,8 @@ fn main() {
     //     .get::<_, TextureAtlas>(&LogicalKey::new(ob), ctx)
     //     .unwrap();
 
-    let sprite = store
+    let sprite = game
+        .store
         .get::<_, Sprite>(&LogicalKey::new("/knight.yaml"), ctx)
         .unwrap();
 
@@ -306,31 +308,30 @@ fn main() {
     //     &im1.to_rgba8(&piv.palette),
     // ).unwrap();
 
-    let mut encounter = World::new();
-    encounter.register::<AnimationState>();
-    encounter.register::<Controller>();
-    encounter.register::<Draw>();
-    encounter.register::<Position>();
-    encounter.register::<WalkingState>();
-    let knight = encounter
+    let knight = game
+        .world
         .create_entity()
         .with(Controller {
             x: 0,
             y: 0,
             fire: false,
-        }).with(Position { x: 100, y: 150 })
+        }).with(Position { x: 100, y: 100 })
         .with(Draw {
             frame: sprite.borrow().animations["walk"][0].clone(),
             animation: "walk".to_string(),
             direction: Direction::default(),
         }).with(WalkingState {
             ..Default::default()
+        }).with(Velocity {
+            ..Default::default()
         }).with(AnimationState {
             ..Default::default()
         }).build();
 
     let dispatcher = DispatcherBuilder::new()
-        .with(Movement, "movement", &[])
+        .with(Boundary, "boundary", &[])
+        .with(VelocitySystem, "velocity", &["boundary"])
+        .with(Movement, "movement", &["boundary"])
         .with(Animation, "animation", &["movement"])
         // .with_thread_local(Renderer {
         //     store: Store::new(StoreOpt::default()).expect("store creation"),
@@ -338,17 +339,14 @@ fn main() {
         .build();
 
     let mut state = MainState {
+        game: game,
         dispatcher: dispatcher,
         palette: piv.borrow().palette.to_vec(),
         image: background,
         //batch: batch,
         //rects: atlas.borrow().rects.clone(),
-        encounter: encounter,
-        store: store,
         images: HashMap::new(),
         batches: HashMap::new(),
-        input: input::InputState::new(),
-        input_binding: input::create_input_binding(),
         knight_id: knight.id(),
     };
 

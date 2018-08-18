@@ -6,4 +6,4 @@ pub mod movement;
 pub use self::animation::AnimationState;
 pub use self::direction::Direction;
 pub use self::draw::Draw;
-pub use self::movement::{Controller, Position, WalkingState};
+pub use self::movement::{Controller, Position, Velocity, WalkingState};
