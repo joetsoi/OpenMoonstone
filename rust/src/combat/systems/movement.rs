@@ -18,7 +18,7 @@ impl<'a> System<'a> for Movement {
             (&velocity, &mut position, &mut walking_state).join()
         {
             position.x = (position.x as i32 + velocity.x) as u32;
-            position.y = (position.y as i32 - velocity.y) as u32;
+            position.y = (position.y as i32 + velocity.y) as u32;
         }
     }
 }

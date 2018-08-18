@@ -26,19 +26,11 @@ impl<'a> System<'a> for Boundary {
         WriteStorage<'a, WalkingState>,
     );
 
-    fn run(
-        &mut self,
-        (position, velocity, mut controller, mut walking_state): Self::SystemData,
-    ) {
+    fn run(&mut self, (position, velocity, mut controller, mut walking_state): Self::SystemData) {
         use specs::Join;
 
-        for (position, velocity, controller, walking_state) in (
-            &position,
-            &velocity,
-            &mut controller,
-            &mut walking_state,
-        )
-            .join()
+        for (position, velocity, controller, walking_state) in
+            (&position, &velocity, &mut controller, &mut walking_state).join()
         {
             let new_x = position.x as i32 + velocity.x;
             if (new_x < LAIR_BOUNDARY.x && controller.x == -1)

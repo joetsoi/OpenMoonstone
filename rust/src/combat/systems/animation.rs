@@ -48,8 +48,11 @@ impl<'a> System<'a> for Animation {
         for (controller, walking_state, animation_state, draw) in
             (&controller, &walking_state, &mut animation_state, &mut draw).join()
         {
-            animation_state.frame_number = walking_state.step;
             draw.animation = controller_to_animation[&(controller.x, controller.y)].clone();
+            match draw.animation.as_str() {
+                "idle" => animation_state.frame_number = 0,
+                _ => animation_state.frame_number = walking_state.step,
+            }
         }
     }
 }

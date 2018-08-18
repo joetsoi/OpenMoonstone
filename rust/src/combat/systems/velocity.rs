@@ -27,12 +27,15 @@ impl<'a> System<'a> for VelocitySystem {
             velocity.x = X_STEP_SIZES[(controller.x + 1) as usize][step as usize] * controller.x;
             velocity.y = Y_STEP_SIZES[(controller.y + 1) as usize][step as usize] * controller.y;
 
-            walking_state.step = step;
+            if is_moving != 0 {
+                walking_state.step = step;
+            }
             match controller.x {
                 1 => walking_state.direction = Direction::Right,
                 -1 => walking_state.direction = Direction::Left,
                 _ => (),
             }
+            println!("{:?}", walking_state);
         }
     }
 }
