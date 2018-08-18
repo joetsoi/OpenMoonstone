@@ -1,163 +1,39 @@
 idle:
   frames:
-    - - sheet: kn1.ob
-        image: 1
-        y: 45
-        x: -13
-        type: NON_SOLID
-      - sheet: kn1.ob
-        image: 0
-        y: -9
-        x: -9
-        type: COLLIDEE
-      - sheet: kn4.ob
-        image: 1
-        y: -6
-        x: 4
-        type: NON_SOLID
+    - - {sheet: kn1.ob, image: 1, y: 45, x: -13, type: NON_SOLID}
+      - {sheet: kn1.ob, image: 0, y: -9, x: -9, type: COLLIDEE}
+      - {sheet: kn4.ob, image: 1, y: -6, x: 4, type: NON_SOLID}
 walk:
   frames:
-    - - sheet: kn1.ob
-        image: 3
-        y: 46
-        x: -13
-        type: NON_SOLID
-      - sheet: kn1.ob
-        image: 2
-        y: -9
-        x: -9
-        type: COLLIDEE
-      - sheet: kn4.ob
-        image: 1
-        y: -6
-        x: 3
-        type: NON_SOLID
-    - - sheet: kn1.ob
-        image: 5
-        y: 35
-        x: -13
-        type: NON_SOLID
-      - sheet: kn1.ob
-        image: 4
-        y: -9
-        x: -3
-        type: COLLIDEE
-      - sheet: kn4.ob
-        image: 1
-        y: -6
-        x: 6
-        type: NON_SOLID
-    - - sheet: kn1.ob
-        image: 7
-        y: 24
-        x: -13
-        type: NON_SOLID
-      - sheet: kn1.ob
-        image: 6
-        y: -8
-        x: -9
-        type: COLLIDEE
-      - sheet: kn4.ob
-        image: 1
-        y: -6
-        x: 1
-        type: NON_SOLID
-    - - sheet: kn1.ob
-        image: 9
-        y: 27
-        x: -13
-        type: NON_SOLID
-      - sheet: kn1.ob
-        image: 8
-        y: -9
-        x: -4
-        type: COLLIDEE
-      - sheet: kn4.ob
-        image: 1
-        y: -9
-        x: 12
-        type: NON_SOLID
+    - - {sheet: kn1.ob, image: 3, y: 46, x: -13, type: NON_SOLID}
+      - {sheet: kn1.ob, image: 2, y: -9, x: -9, type: COLLIDEE}
+      - {sheet: kn4.ob, image: 1, y: -6, x: 3, type: NON_SOLID}
+    - - {sheet: kn1.ob, image: 5, y: 35, x: -13, type: NON_SOLID}
+      - {sheet: kn1.ob, image: 4, y: -9, x: -3, type: COLLIDEE}
+      - {sheet: kn4.ob, image: 1, y: -6, x: 6, type: NON_SOLID}
+    - - {sheet: kn1.ob, image: 7, y: 24, x: -13, type: NON_SOLID}
+      - {sheet: kn1.ob, image: 6, y: -8, x: -9, type: COLLIDEE}
+      - {sheet: kn4.ob, image: 1, y: -6, x: 1, type: NON_SOLID}
+    - - {sheet: kn1.ob, image: 9, y: 27, x: -13, type: NON_SOLID}
+      - {sheet: kn1.ob, image: 8, y: -9, x: -4, type: COLLIDEE}
+      - {sheet: kn4.ob, image: 1, y: -9, x: 12, type: NON_SOLID}
 up:
   frames:
-    - - sheet: kn4.ob
-        image: 0
-        y: -19
-        x: 2
-        type: NON_SOLID
-      - sheet: kn1.ob
-        image: 10
-        y: -8
-        x: -10
-        type: COLLIDEE
-    - - sheet: kn4.ob
-        image: 0
-        y: -20
-        x: 3
-        type: NON_SOLID
-      - sheet: kn1.ob
-        image: 11
-        y: -10
-        x: -9
-        type: COLLIDEE
-    - - sheet: kn4.ob
-        image: 0
-        y: -18
-        x: 3
-        type: NON_SOLID
-      - sheet: kn1.ob
-        image: 12
-        y: -8
-        x: -9
-        type: COLLIDEE
-    - - sheet: kn4.ob
-        image: 0
-        y: -18
-        x: 2
-        type: NON_SOLID
-      - sheet: kn1.ob
-        image: 13
-        y: -8
-        x: -9
-        type: COLLIDEE
+    - - {sheet: kn4.ob, image: 0, y: -19, x: 2, type: NON_SOLID}
+      - {sheet: kn1.ob, image: 10, y: -8, x: -10, type: COLLIDEE}
+    - - {sheet: kn4.ob, image: 0, y: -20, x: 3, type: NON_SOLID}
+      - {sheet: kn1.ob, image: 11, y: -10, x: -9, type: COLLIDEE}
+    - - {sheet: kn4.ob, image: 0, y: -18, x: 3, type: NON_SOLID}
+      - {sheet: kn1.ob, image: 12, y: -8, x: -9, type: COLLIDEE}
+    - - {sheet: kn4.ob, image: 0, y: -18, x: 2, type: NON_SOLID}
+      - {sheet: kn1.ob, image: 13, y: -8, x: -9, type: COLLIDEE}
 down:
   frames:
-    - - sheet: kn1.ob
-        image: 14
-        y: -8
-        x: -12
-        type: COLLIDEE
-      - sheet: kn4.ob
-        image: 0
-        y: -14
-        x: -5
-        type: NON_SOLID
-    - - sheet: kn1.ob
-        image: 15
-        y: -7
-        x: -10
-        type: COLLIDEE
-      - sheet: kn4.ob
-        image: 0
-        y: -14
-        x: -2
-        type: NON_SOLID
-    - - sheet: kn1.ob
-        image: 16
-        y: -8
-        x: -13
-        type: COLLIDEE
-      - sheet: kn4.ob
-        image: 0
-        y: -15
-        x: -5
-        type: NON_SOLID
-    - - sheet: kn1.ob
-        image: 17
-        y: -8
-        x: -12
-        type: COLLIDEE
-      - sheet: kn4.ob
-        image: 0
-        y: -17
-        x: -6
-        type: NON_SOLID
+    - - {sheet: kn1.ob, image: 14, y: -8, x: -12, type: COLLIDEE}
+      - {sheet: kn4.ob, image: 0, y: -14, x: -5, type: NON_SOLID}
+    - - {sheet: kn1.ob, image: 15, y: -7, x: -10, type: COLLIDEE}
+      - {sheet: kn4.ob, image: 0, y: -14, x: -2, type: NON_SOLID}
+    - - {sheet: kn1.ob, image: 16, y: -8, x: -13, type: COLLIDEE}
+      - {sheet: kn4.ob, image: 0, y: -15, x: -5, type: NON_SOLID}
+    - - {sheet: kn1.ob, image: 17, y: -8, x: -12, type: COLLIDEE}
+      - {sheet: kn4.ob, image: 0, y: -17, x: -6, type: NON_SOLID}
