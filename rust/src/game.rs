@@ -4,7 +4,7 @@ use specs::{Dispatcher, DispatcherBuilder, Join, World};
 use warmy::{Store, StoreOpt};
 
 use crate::combat::components::{
-    AnimationState, Controller, Direction, Draw, Intent, Position, Velocity, WalkingState,
+    AnimationState, Controller, Facing, Draw, Intent, Position, Velocity, WalkingState,
 };
 use crate::input;
 

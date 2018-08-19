@@ -1,7 +1,7 @@
 use specs::VecStorage;
 use specs_derive::*;
 
-use super::Direction;
+use super::Facing;
 
 #[derive(Component, Debug)]
 #[storage(VecStorage)]
@@ -20,7 +20,7 @@ pub struct Velocity {
 #[derive(Component, Debug, Default)]
 #[storage(VecStorage)]
 pub struct WalkingState {
-    pub direction: Direction,
+    pub direction: Facing,
     pub step: u32,
 }
 

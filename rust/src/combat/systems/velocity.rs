@@ -4,7 +4,7 @@ use lazy_static::lazy_static;
 use maplit::hashmap;
 use specs::{ReadStorage, System, WriteStorage};
 
-use crate::combat::components::{Command, Direction, Intent, MoveCommand, Velocity, WalkingState};
+use crate::combat::components::{Command, Facing, Intent, MoveCommand, Velocity, WalkingState};
 
 pub const STEP_LEFT: [i32; 4] = [-25, -3, -23, -4];
 pub const STEP_RIGHT: [i32; 4] = [25, 3, 23, 4];
@@ -49,11 +49,11 @@ impl<'a> System<'a> for VelocitySystem {
                     match m {
                         MoveCommand::TryMoveLeft
                         | MoveCommand::TryMoveLeftUp
-                        | MoveCommand::TryMoveLeftDown => walking_state.direction = Direction::Left,
+                        | MoveCommand::TryMoveLeftDown => walking_state.direction = Facing::Left,
                         MoveCommand::TryMoveRight
                         | MoveCommand::TryMoveRightUp
                         | MoveCommand::TryMoveRightDown => {
-                            walking_state.direction = Direction::Right
+                            walking_state.direction = Facing::Right
                         }
                         _ => (),
                     }

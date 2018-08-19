@@ -21,7 +21,7 @@ use warmy::{LogicalKey, Store, StoreOpt};
 
 use openmoonstone::animation::Sprite;
 use openmoonstone::combat::components::{
-    AnimationState, Controller, Direction, Draw, Intent, Position, Velocity, WalkingState,
+    AnimationState, Controller, Facing, Draw, Intent, Position, Velocity, WalkingState,
 };
 use openmoonstone::combat::systems::{Animation, Commander, Boundary, Movement, VelocitySystem};
 use openmoonstone::game::Game;
@@ -319,7 +319,7 @@ fn main() {
         .with(Draw {
             frame: sprite.borrow().animations["walk"][0].clone(),
             animation: "walk".to_string(),
-            direction: Direction::default(),
+            direction: Facing::default(),
         }).with(Intent {
             ..Default::default()
         }).with(WalkingState {
