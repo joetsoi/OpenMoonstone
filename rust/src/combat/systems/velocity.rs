@@ -8,8 +8,8 @@ use crate::combat::components::{Command, Direction, Intent, MoveCommand, Velocit
 
 pub const STEP_LEFT: [i32; 4] = [-25, -3, -23, -4];
 pub const STEP_RIGHT: [i32; 4] = [25, 3, 23, 4];
-pub const STEP_UP: [i32; 4] = [-8, -2, -9, -2];
-pub const STEP_DOWN: [i32; 4] = [2, 9, 2, 9];
+pub const STEP_UP: [i32; 4] = [-2, -9, -2, -9];
+pub const STEP_DOWN: [i32; 4] = [8, 2, 9, 2];
 pub const NO_STEP: [i32; 4] = [0, 0, 0, 0];
 
 lazy_static! {
