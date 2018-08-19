@@ -21,9 +21,9 @@ use warmy::{LogicalKey, Store, StoreOpt};
 
 use openmoonstone::animation::Sprite;
 use openmoonstone::combat::components::{
-    AnimationState, Controller, Direction, Draw, Position, Velocity, WalkingState,
+    AnimationState, Controller, Direction, Draw, Intent, Position, Velocity, WalkingState,
 };
-use openmoonstone::combat::systems::{Animation, Boundary, Movement, VelocitySystem};
+use openmoonstone::combat::systems::{Animation, Commander, Boundary, Movement, VelocitySystem};
 use openmoonstone::game::Game;
 use openmoonstone::input;
 //use openmoonstone::objects::{Rect, TextureAtlas};
@@ -320,6 +320,8 @@ fn main() {
             frame: sprite.borrow().animations["walk"][0].clone(),
             animation: "walk".to_string(),
             direction: Direction::default(),
+        }).with(Intent {
+            ..Default::default()
         }).with(WalkingState {
             ..Default::default()
         }).with(Velocity {
@@ -329,7 +331,8 @@ fn main() {
         }).build();
 
     let dispatcher = DispatcherBuilder::new()
-        .with(Boundary, "boundary", &[])
+        .with(Commander, "commander", &[])
+        .with(Boundary, "boundary", &["commander"])
         .with(VelocitySystem, "velocity", &["boundary"])
         .with(Movement, "movement", &["boundary"])
         .with(Animation, "animation", &["movement"])
