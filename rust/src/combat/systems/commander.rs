@@ -4,7 +4,7 @@ use lazy_static::lazy_static;
 use maplit::hashmap;
 use specs::{ReadStorage, System, WriteStorage};
 
-use crate::combat::components::{Command, Controller, Intent, MoveCommand};
+use crate::combat::components::{Command, Controller, Intent, Direction};
 
 const IDLE: (i32, i32) = (0, 0);
 const UP: (i32, i32) = (0, -1);
@@ -19,14 +19,14 @@ const RIGHT_DOWN: (i32, i32) = (1, 1);
 lazy_static! {
     static ref controller_to_move: HashMap<(i32, i32), Command> = hashmap!{
         IDLE => Command::Idle,
-        UP => Command::Move(MoveCommand::TryMoveUp),
-        DOWN => Command::Move(MoveCommand::TryMoveDown),
-        LEFT => Command::Move(MoveCommand::TryMoveLeft),
-        RIGHT => Command::Move(MoveCommand::TryMoveRight),
-        LEFT_UP => Command::Move(MoveCommand::TryMoveLeftUp),
-        RIGHT_UP => Command::Move(MoveCommand::TryMoveRightUp),
-        LEFT_DOWN => Command::Move(MoveCommand::TryMoveLeftDown),
-        RIGHT_DOWN => Command::Move(MoveCommand::TryMoveRightDown),
+        UP => Command::Move(Direction::TryMoveUp),
+        DOWN => Command::Move(Direction::TryMoveDown),
+        LEFT => Command::Move(Direction::TryMoveLeft),
+        RIGHT => Command::Move(Direction::TryMoveRight),
+        LEFT_UP => Command::Move(Direction::TryMoveLeftUp),
+        RIGHT_UP => Command::Move(Direction::TryMoveRightUp),
+        LEFT_DOWN => Command::Move(Direction::TryMoveLeftDown),
+        RIGHT_DOWN => Command::Move(Direction::TryMoveRightDown),
     };
 }
 

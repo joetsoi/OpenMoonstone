@@ -4,7 +4,7 @@ use lazy_static::lazy_static;
 use maplit::hashmap;
 use specs::{ReadStorage, System, WriteStorage};
 
-use crate::combat::components::{Command, Facing, Intent, MoveCommand, Velocity, WalkingState};
+use crate::combat::components::{Command, Facing, Intent, Direction, Velocity, WalkingState};
 
 pub const STEP_LEFT: [i32; 4] = [-25, -3, -23, -4];
 pub const STEP_RIGHT: [i32; 4] = [25, 3, 23, 4];
@@ -13,15 +13,15 @@ pub const STEP_DOWN: [i32; 4] = [8, 2, 9, 2];
 pub const NO_STEP: [i32; 4] = [0, 0, 0, 0];
 
 lazy_static! {
-    static ref move_to_step: HashMap<MoveCommand, (&'static [i32; 4], &'static [i32; 4])> = hashmap!{
-        MoveCommand::TryMoveUp => (&NO_STEP, &STEP_UP),
-        MoveCommand::TryMoveDown => (&NO_STEP, &STEP_DOWN),
-        MoveCommand::TryMoveLeft => (&STEP_LEFT, &NO_STEP),
-        MoveCommand::TryMoveRight => (&STEP_RIGHT, &NO_STEP),
-        MoveCommand::TryMoveLeftUp => (&STEP_LEFT, &STEP_UP),
-        MoveCommand::TryMoveRightUp => (&STEP_RIGHT, &STEP_UP),
-        MoveCommand::TryMoveLeftDown => (&STEP_LEFT, &STEP_DOWN),
-        MoveCommand::TryMoveRightDown => (&STEP_RIGHT, &STEP_DOWN),
+    static ref move_to_step: HashMap<Direction, (&'static [i32; 4], &'static [i32; 4])> = hashmap!{
+        Direction::TryMoveUp => (&NO_STEP, &STEP_UP),
+        Direction::TryMoveDown => (&NO_STEP, &STEP_DOWN),
+        Direction::TryMoveLeft => (&STEP_LEFT, &NO_STEP),
+        Direction::TryMoveRight => (&STEP_RIGHT, &NO_STEP),
+        Direction::TryMoveLeftUp => (&STEP_LEFT, &STEP_UP),
+        Direction::TryMoveRightUp => (&STEP_RIGHT, &STEP_UP),
+        Direction::TryMoveLeftDown => (&STEP_LEFT, &STEP_DOWN),
+        Direction::TryMoveRightDown => (&STEP_RIGHT, &STEP_DOWN),
     };
 }
 
@@ -47,12 +47,12 @@ impl<'a> System<'a> for VelocitySystem {
                     velocity.y = step_vector.1[step as usize];
                     walking_state.step = step;
                     match m {
-                        MoveCommand::TryMoveLeft
-                        | MoveCommand::TryMoveLeftUp
-                        | MoveCommand::TryMoveLeftDown => walking_state.direction = Facing::Left,
-                        MoveCommand::TryMoveRight
-                        | MoveCommand::TryMoveRightUp
-                        | MoveCommand::TryMoveRightDown => {
+                        Direction::TryMoveLeft
+                        | Direction::TryMoveLeftUp
+                        | Direction::TryMoveLeftDown => walking_state.direction = Facing::Left,
+                        Direction::TryMoveRight
+                        | Direction::TryMoveRightUp
+                        | Direction::TryMoveRightDown => {
                             walking_state.direction = Facing::Right
                         }
                         _ => (),

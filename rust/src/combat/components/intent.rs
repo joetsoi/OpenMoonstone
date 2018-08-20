@@ -2,7 +2,7 @@ use specs::VecStorage;
 use specs_derive::*;
 
 #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
-pub enum MoveCommand {
+pub enum Direction {
     TryMoveUp,
     TryMoveDown,
     TryMoveLeft,
@@ -16,7 +16,7 @@ pub enum MoveCommand {
 #[derive(Debug, Copy, Clone)]
 pub enum Command {
     Idle,
-    Move(MoveCommand),
+    Move(Direction),
     TrySwing,
 }
 
