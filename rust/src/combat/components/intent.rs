@@ -13,7 +13,7 @@ pub enum Direction {
     TryMoveRightDown,
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
 pub enum Command {
     Idle,
     Move(Direction),
