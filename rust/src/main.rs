@@ -21,7 +21,7 @@ use warmy::{LogicalKey, Store, StoreOpt};
 
 use openmoonstone::animation::Sprite;
 use openmoonstone::combat::components::{
-    AnimationState, Controller, Facing, Draw, Intent, Position, Velocity, WalkingState,
+    AnimationState, Controller, Facing, Draw, Intent, Position, TouchingBoundary, Velocity, WalkingState,
 };
 use openmoonstone::combat::systems::{Animation, Commander, Boundary, Movement, VelocitySystem};
 use openmoonstone::game::Game;
@@ -325,6 +325,8 @@ fn main() {
         }).with(WalkingState {
             ..Default::default()
         }).with(Velocity {
+            ..Default::default()
+        }).with(TouchingBoundary {
             ..Default::default()
         }).with(AnimationState {
             ..Default::default()

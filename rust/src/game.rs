@@ -4,7 +4,8 @@ use specs::{Dispatcher, DispatcherBuilder, Join, World};
 use warmy::{Store, StoreOpt};
 
 use crate::combat::components::{
-    AnimationState, Controller, Facing, Draw, Intent, Position, Velocity, WalkingState,
+    AnimationState, Controller, Draw, Facing, Intent, Position, TouchingBoundary, Velocity,
+    WalkingState,
 };
 use crate::input;
 
@@ -25,6 +26,7 @@ impl Game {
         world.register::<Draw>();
         world.register::<Intent>();
         world.register::<Position>();
+        world.register::<TouchingBoundary>();
         world.register::<Velocity>();
         world.register::<WalkingState>();
         Game {

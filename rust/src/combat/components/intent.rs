@@ -2,26 +2,31 @@ use specs::VecStorage;
 use specs_derive::*;
 
 #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
-pub enum Direction {
-    TryMoveUp,
-    TryMoveDown,
-    TryMoveLeft,
-    TryMoveRight,
-    TryMoveLeftUp,
-    TryMoveRightUp,
-    TryMoveLeftDown,
-    TryMoveRightDown,
+pub enum XAxis {
+    Left = -1,
+    Centre = 0,
+    Right = 1,
+}
+
+#[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
+pub enum YAxis {
+    Up = -1,
+    Centre = 0,
+    Down = 1,
 }
 
 #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
 pub enum Command {
     Idle,
-    Move(Direction),
-    TrySwing,
+    Move { x: XAxis, y: YAxis },
+    Attack,
+    Defend,
 }
 
 impl Default for Command {
-    fn default() -> Command { Command::Idle }
+    fn default() -> Command {
+        Command::Idle
+    }
 }
 
 #[derive(Component, Debug, Default)]

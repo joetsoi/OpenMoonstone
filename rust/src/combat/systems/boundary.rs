@@ -1,6 +1,9 @@
 use specs::{ReadStorage, System, WriteStorage};
 
-use crate::combat::components::{Controller, Position, Velocity, WalkingState};
+use crate::combat::components::intent::{XAxis, YAxis};
+use crate::combat::components::{
+    Command, Intent, Position, TouchingBoundary, Velocity, WalkingState,
+};
 
 struct Rect {
     x: i32,
@@ -10,41 +13,48 @@ struct Rect {
 }
 
 const LAIR_BOUNDARY: Rect = Rect {
-    x: 0,   //10,
-    y: 0,   //30,
-    w: 320, // - 10,
+    x: 10, //10,
+    y: 0,  //30,
+    w: 320 - 10,
     h: 155, // - 30,
 };
-
 pub struct Boundary;
 
 impl<'a> System<'a> for Boundary {
     type SystemData = (
         ReadStorage<'a, Position>,
         ReadStorage<'a, Velocity>,
-        WriteStorage<'a, Controller>,
-        WriteStorage<'a, WalkingState>,
+        ReadStorage<'a, Intent>,
+        WriteStorage<'a, TouchingBoundary>,
     );
 
-    fn run(&mut self, (position, velocity, mut controller, mut walking_state): Self::SystemData) {
+    fn run(&mut self, (position, velocity, intent, mut touching_boundary): Self::SystemData) {
         use specs::Join;
 
-        for (position, velocity, controller, walking_state) in
-            (&position, &velocity, &mut controller, &mut walking_state).join()
+        for (position, velocity, intent, touching_boundary) in
+            (&position, &velocity, &intent, &mut touching_boundary).join()
         {
             let new_x = position.x as i32 + velocity.x;
-            if (new_x < LAIR_BOUNDARY.x && controller.x == -1)
-                || (new_x > LAIR_BOUNDARY.w && controller.x == 1)
-            {
-                controller.x = 0;
+            if let Command::Move { x, y } = intent.command {
+                if (new_x < LAIR_BOUNDARY.x && x == XAxis::Left) {
+                    touching_boundary.left = true;
+                } else if (new_x > LAIR_BOUNDARY.w && x == XAxis::Right) {
+                    touching_boundary.right = true;
+                } else {
+                    touching_boundary.left = false;
+                    touching_boundary.right = false;
+                }
+
+                let new_y = position.y as i32 - velocity.y;
+                if (new_y < LAIR_BOUNDARY.y && y == YAxis::Up) {
+                    touching_boundary.top = true;
+                } else if (new_y > LAIR_BOUNDARY.h && y == YAxis::Down) {
+                    touching_boundary.bottom = true;
+                } else {
+                    touching_boundary.top = false;
+                    touching_boundary.bottom = false;
+                }
             }
-            let new_y = position.y as i32 - velocity.y;
-            if (new_y < LAIR_BOUNDARY.y && controller.y == -1)
-                || (new_y > LAIR_BOUNDARY.h && controller.y == 1)
-            {
-                controller.y = 0;
-            }
-            //println!("{:?} {:?}", controller, position);
         }
     }
 }
