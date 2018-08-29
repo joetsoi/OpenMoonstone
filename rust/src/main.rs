@@ -44,7 +44,7 @@ struct MainState<'a> {
     knight_id: world::Index,
 }
 
-impl MainState<'a> {
+impl<'a> MainState<'a> {
     fn update_controllers(&mut self) {
         let entities = self.game.world.entities();
         let mut controllers = self.game.world.write_storage::<Controller>();
@@ -83,7 +83,7 @@ impl MainState<'a> {
     }
 }
 
-impl event::EventHandler for MainState<'a> {
+impl<'a> event::EventHandler for MainState<'a> {
     fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
         const DESIRED_FPS: u32 = 1000 / (1193182 / 21845 * 2);
         while timer::check_update_time(ctx, DESIRED_FPS) {

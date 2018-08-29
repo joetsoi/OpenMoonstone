@@ -12,7 +12,7 @@ bv = "*"
 ggez-goodies = "*"
 failure = "*"
 failure_derive = "*"
-image = "*"
+#image = "*"
 rect_packer = "*"
 specs = "*"
 specs-derive = "*"
@@ -27,4 +27,4 @@ version = "*"
 features = ["cargo-resource-root"]
 
 [dev-dependencies]
-rustfmt-nightly = "0.8.2"
+rustfmt-nightly = "*"
