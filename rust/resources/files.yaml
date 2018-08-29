@@ -2,6 +2,9 @@ scenes:
     ch: DISKB/CH.PIV
     mindscape: DISKA/MINDSCAP
     wab1: DISKB/WAB1.CMP
+    fob1: DISKB/FOB1.CMP
+    glb1: DISKB/GLB1.CMP
+    swb1: DISKB/SWB1.CMP
 
 scenery:
     fo1: DISKB/FO1.CMP
@@ -15,32 +18,15 @@ terrain:
     wa3: DISKB/WA3.T
 
 objects:
-    sel.cel:
-        file: DISKB/SEL.CEL
-        texture_size: 256
-    blo.cel:
-        file: DISKB/BLO.CEL
-        texture_size: 256
+    sel.cel: {file: DISKB/SEL.CEL, texture_size: 256}
+    blo.cel: {file: DISKB/BLO.CEL, texture_size: 256}
     # knight
-    kn1.ob:
-        file: DISKB/KN1.OB
-        texture_size: 512
-    kn2.ob:
-        file: DISKB/KN2.OB
-        texture_size: 256
-    kn3.ob:
-        file: DISKB/KN3.OB
-        texture_size: 256
-    kn4.ob:
-        file: DISKB/KN4.OB
-        texture_size: 128
+    kn1.ob: {file: DISKB/KN1.OB, texture_size: 512}
+    kn2.ob: {file: DISKB/KN2.OB, texture_size: 256}
+    kn3.ob: {file: DISKB/KN3.OB, texture_size: 256}
+    kn4.ob: {file: DISKB/KN4.OB, texture_size: 128}
     # fonts
-    bold.f:
-        file: DISKA/BOLD.F
-        texture_size: 512
-
-    small.f:
-        file: DISKB/SMALL.FON
-        texture_size: 128
+    bold.f: {file: DISKA/BOLD.F, texture_size: 512}
+    small.f: {file: DISKB/SMALL.FON, texture_size: 128}
 
 collide: DISKB/COLLIDE.HIT

@@ -37,3 +37,35 @@ down:
       - {sheet: kn4.ob, image: 0, y: -15, x: -5, type: NON_SOLID}
     - - {sheet: kn1.ob, image: 17, y: -8, x: -12, type: COLLIDEE}
       - {sheet: kn4.ob, image: 0, y: -17, x: -6, type: NON_SOLID}
+swing:
+  frames:
+    - - {sheet: kn1.ob, image: 32, y: 44, x: -22, type: COLLIDEE}
+      - {sheet: kn1.ob, image: 31, y: -4, x: -18, type: COLLIDEE}
+      - {sheet: kn4.ob, image: 3, y: 25, x: -22, type: COLLIDER}
+    - - {sheet: kn1.ob, image: 34, y: -3, x: 4, type: COLLIDEE}
+      - {sheet: kn1.ob, image: 33, y: 24, x: -14, type: COLLIDEE}
+      - {sheet: kn4.ob, image: 4, y: 21, x: 15, type: COLLIDER}
+      - {sheet: kn4.ob, image: 14, y: 34, x: 10, type: NON_SOLID}
+    - - {sheet: kn1.ob, image: 35, y: 27, x: -14, type: COLLIDEE}
+      - {sheet: kn1.ob, image: 36, y: 7, x: 17, type: COLLIDEE}
+      - {sheet: kn1.ob, image: 37, y: 22, x: 35, type: COLLIDEE}
+      - {sheet: kn1.ob, image: 38, y: 45, x: 33, type: NON_SOLID}
+      - {sheet: kn4.ob, image: 5, y: 23, x: 60, type: COLLIDER}
+      - {sheet: kn4.ob, image: 15, y: 25, x: 41, type: COLLIDER}
+    - - {sheet: kn1.ob, image: 39, y: 20, x: -12, type: COLLIDEE}
+      - {sheet: kn4.ob, image: 1, y: -7, x: 18, type: COLLIDER}
+      - {sheet: kn1.ob, image: 40, y: 2, x: 15, type: COLLIDEE}
+      - {sheet: kn4.ob, image: 16, y: -6, x: 34, type: COLLIDER}
+      - {sheet: kn4.ob, image: 17, y: 3, x: 61, type: COLLIDER}
+    - - {sheet: kn1.ob, image: 41, y: -1, x: -13, type: COLLIDEE}
+      - {sheet: kn1.ob, image: 42, y: 21, x: 15, type: COLLIDEE}
+      - {sheet: kn4.ob, image: 18, y: -21, x: -23, type: COLLIDER}
+      - {sheet: kn4.ob, image: 6, y: -22, x: -25, type: COLLIDER}
+    - - {sheet: kn1.ob, image: 41, y: -1, x: -13, type: COLLIDEE}
+      - {sheet: kn1.ob, image: 42, y: 21, x: 15, type: COLLIDEE}
+      - {sheet: kn4.ob, image: 6, y: -22, x: -25, type: COLLIDER}
+        # set next frame AnimationBegin}
+    - - {sheet: kn1.ob, image: 1, y: 45, x: -13, type: COLLIDEE}
+      - {sheet: kn1.ob, image: 0, y: -9, x: -9, type: COLLIDEE}
+      - {sheet: kn4.ob, image: 1, y: -6, x: 4, type: COLLIDEE}
+  order: [0, 0, 1, 2, 3, 4, 5, 6]

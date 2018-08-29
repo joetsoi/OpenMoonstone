@@ -16,11 +16,22 @@ pub enum YAxis {
 }
 
 #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
+pub enum AttackType {
+    Swing,
+}
+
+#[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
+pub enum DefendType {
+    Block,
+    Dodge,
+}
+
+#[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
 pub enum Command {
     Idle,
     Move { x: XAxis, y: YAxis },
-    Attack,
-    Defend,
+    Attack(AttackType),
+    Defend(DefendType),
 }
 
 impl Default for Command {

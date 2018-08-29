@@ -1,7 +1,7 @@
 use specs::{ReadStorage, System, WriteStorage};
 
 use crate::combat::components::{Command, Controller, Intent};
-use crate::combat::components::intent::{XAxis, YAxis};
+use crate::combat::components::intent::{AttackType, XAxis, YAxis};
 
 pub struct Commander;
 
@@ -14,7 +14,7 @@ impl<'a> System<'a> for Commander {
         for (controller, intent) in (&controller, &mut intent).join() {
             if controller.x == 0 && controller.y == 0 {
                 intent.command = Command::Idle;
-            } else {
+            } else if controller.fire == false {
                 let x = match controller.x {
                     -1 => XAxis::Left,
                     1 => XAxis::Right,
@@ -31,7 +31,9 @@ impl<'a> System<'a> for Commander {
                     y: y,
                 };
             }
-            //println!("{:?}", intent);
+            else {
+                intent.command = Command::Attack(AttackType::Swing)
+            }
         }
     }
 }

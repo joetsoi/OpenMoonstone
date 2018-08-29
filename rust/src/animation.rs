@@ -10,6 +10,7 @@ use crate::error::{err_from, CompatError};
 pub enum ImageType {
     NonSolid,
     Collidee,
+    Collider,
 }
 
 #[derive(Debug, Clone)]
@@ -60,6 +61,7 @@ impl warmy::Load<Context> for Sprite {
                         image_type: match image["type"].as_str().unwrap() {
                             "NON_SOLID" => ImageType::NonSolid,
                             "COLLIDEE" => ImageType::Collidee,
+                            "COLLIDER" => ImageType::Collider,
                             _ => panic!("unknown image type"),
                         },
                     })

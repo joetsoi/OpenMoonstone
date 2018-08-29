@@ -4,7 +4,7 @@ use lazy_static::lazy_static;
 use maplit::hashmap;
 use specs::{ReadStorage, System, WriteStorage};
 
-use crate::combat::components::intent::{XAxis, YAxis};
+use crate::combat::components::intent::{AttackType, XAxis, YAxis};
 use crate::combat::components::{
     AnimationState, Command, Draw, Intent, TouchingBoundary, WalkingState,
 };
@@ -21,6 +21,7 @@ lazy_static! {
         Command::Move { x: XAxis::Right, y: YAxis::Up } => "walk".to_string(),
         Command::Move { x: XAxis::Left, y: YAxis::Down } => "walk".to_string(),
         Command::Move { x: XAxis::Right, y: YAxis::Down } => "walk".to_string(),
+        Command::Attack(AttackType::Swing) => "swing".to_string(),
     };
 }
 
