@@ -1,10 +1,8 @@
-use specs::{Component, VecStorage};
+use specs::VecStorage;
+use specs_derive::*;
 
-#[derive(Debug, Default)]
+#[derive(Component, Debug, Default)]
+#[storage(VecStorage)]
 pub struct AnimationState {
     pub frame_number: u32,
-}
-
-impl Component for AnimationState {
-    type Storage = VecStorage<Self>;
 }

@@ -6,22 +6,22 @@ use specs::{ReadStorage, System, WriteStorage};
 
 use crate::combat::components::intent::{AttackType, XAxis, YAxis};
 use crate::combat::components::{
-    AnimationState, Command, Draw, Intent, TouchingBoundary, WalkingState,
+    Action, AnimationState, Command, Draw, Intent, State, TouchingBoundary, WalkingState,
 };
 
 lazy_static! {
-    static ref command_to_animation: HashMap<Command, String> = hashmap!{
-        Command::Idle => "idle".to_string(),
-        Command::Move { x: XAxis::Centre, y: YAxis::Centre } => "idle".to_string(),
-        Command::Move { x: XAxis::Centre, y: YAxis::Up } => "up".to_string(),
-        Command::Move { x: XAxis::Centre, y: YAxis::Down } => "down".to_string(),
-        Command::Move { x: XAxis::Left, y: YAxis::Centre } => "walk".to_string(),
-        Command::Move { x: XAxis::Right, y: YAxis::Centre } => "walk".to_string(),
-        Command::Move { x: XAxis::Left, y: YAxis::Up } => "walk".to_string(),
-        Command::Move { x: XAxis::Right, y: YAxis::Up } => "walk".to_string(),
-        Command::Move { x: XAxis::Left, y: YAxis::Down } => "walk".to_string(),
-        Command::Move { x: XAxis::Right, y: YAxis::Down } => "walk".to_string(),
-        Command::Attack(AttackType::Swing) => "swing".to_string(),
+    static ref action_to_animation: HashMap<Action, String> = hashmap!{
+        Action::Idle => "idle".to_string(),
+        //Action::Move { x: XAxis::Centre, y: YAxis::Centre } => "idle".to_string(),
+        Action::Move { x: XAxis::Centre, y: YAxis::Up } => "up".to_string(),
+        Action::Move { x: XAxis::Centre, y: YAxis::Down } => "down".to_string(),
+        Action::Move { x: XAxis::Left, y: YAxis::Centre } => "walk".to_string(),
+        Action::Move { x: XAxis::Right, y: YAxis::Centre } => "walk".to_string(),
+        Action::Move { x: XAxis::Left, y: YAxis::Up } => "walk".to_string(),
+        Action::Move { x: XAxis::Right, y: YAxis::Up } => "walk".to_string(),
+        Action::Move { x: XAxis::Left, y: YAxis::Down } => "walk".to_string(),
+        Action::Move { x: XAxis::Right, y: YAxis::Down } => "walk".to_string(),
+        Action::Attack { name: "swing".to_string() } => "swing".to_string(),
     };
 }
 
@@ -34,44 +34,34 @@ impl<'a> System<'a> for Animation {
         ReadStorage<'a, TouchingBoundary>,
         WriteStorage<'a, AnimationState>,
         WriteStorage<'a, Draw>,
+        ReadStorage<'a, State>,
     );
 
     fn run(
         &mut self,
-        (intent, walking_state, touching_boundary, mut animation_state, mut draw): Self::SystemData,
-    ) {
+        (intent, walking_state, touching_boundary, mut animation_state, mut draw, state): Self::SystemData,
+){
         use specs::Join;
-        for (intent, walking_state, touching_boundary, animation_state, draw) in (
+        for (intent, walking_state, touching_boundary, animation_state, draw, state) in (
             &intent,
             &walking_state,
             &touching_boundary,
             &mut animation_state,
             &mut draw,
+            &state,
         )
             .join()
         {
-            let command = match intent.command {
-                Command::Move { x, y } => {
-                    let mut actual_x = x;
-                    let mut actual_y = y;
-                    if touching_boundary.left || touching_boundary.right {
-                        actual_x = XAxis::Centre;
-                    }
-                    if touching_boundary.top || touching_boundary.bottom {
-                        actual_y = YAxis::Centre;
-                    }
-                    Command::Move {
-                        x: actual_x,
-                        y: actual_y,
-                    }
+            match state.action {
+                Action::Idle => {
+                    animation_state.frame_number = 0;
                 }
-                _ => intent.command.clone(),
-            };
-            draw.animation = command_to_animation[&command].clone();
-            match draw.animation.as_str() {
-                "idle" => animation_state.frame_number = 0,
+                Action::Attack { .. } => {
+                    animation_state.frame_number = state.ticks;
+                }
                 _ => animation_state.frame_number = walking_state.step,
             }
+            draw.animation = action_to_animation[&state.action].clone();
         }
     }
 }

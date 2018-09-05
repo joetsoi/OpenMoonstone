@@ -1,4 +1,3 @@
-#![feature(rust_2018_preview)]
 #![warn(rust_2018_idioms)]
 
 use std::collections::hash_map::Entry::{Occupied, Vacant};
@@ -21,9 +20,12 @@ use warmy::{LogicalKey, Store, StoreOpt};
 
 use openmoonstone::animation::Sprite;
 use openmoonstone::combat::components::{
-    AnimationState, Controller, Facing, Draw, Intent, Position, TouchingBoundary, Velocity, WalkingState,
+    AnimationState, Controller, Draw, Facing, Intent, Position, State, TouchingBoundary, Velocity,
+    WalkingState,
 };
-use openmoonstone::combat::systems::{Animation, Commander, Boundary, Movement, VelocitySystem};
+use openmoonstone::combat::systems::{
+    ActionSystem, Animation, Boundary, Commander, Movement, StateUpdater, VelocitySystem,
+};
 use openmoonstone::game::Game;
 use openmoonstone::input;
 //use openmoonstone::objects::{Rect, TextureAtlas};
@@ -60,25 +62,26 @@ impl<'a> MainState<'a> {
     fn update_images(&mut self, ctx: &mut Context) {
         let mut draw_storage = self.game.world.write_storage::<Draw>();
         let animation_storage = self.game.world.read_storage::<AnimationState>();
-        let walking_storage = self.game.world.read_storage::<WalkingState>();
+        let mut state_storage = self.game.world.write_storage::<State>();
 
         let sprite = self
             .game
             .store
             .get::<_, Sprite>(&LogicalKey::new("/knight.yaml"), ctx)
             .unwrap();
-        for (draw, animation_state, walking_state) in
-            (&mut draw_storage, &animation_storage, &walking_storage).join()
+        for (draw, animation_state, state) in
+            (&mut draw_storage, &animation_storage, &mut state_storage).join()
         {
             let animation = draw.animation.as_str();
-            draw.frame = sprite
-                .borrow()
+            let sprite_resource = sprite.borrow();
+            let images = sprite_resource
                 .animations
                 .get(animation)
-                .expect(format!("{} not found in yaml", animation).as_str())
-                [animation_state.frame_number as usize]
-                .clone();
-            draw.direction = walking_state.direction;
+                .expect(format!("{} not found in yaml", animation).as_str());
+            println!("{:?}, {:?}", animation_state, animation);
+            draw.frame = images[animation_state.frame_number as usize].clone();
+            draw.direction = state.direction;
+            state.length = images.len() as u32;
         }
     }
 }
@@ -98,7 +101,7 @@ impl<'a> event::EventHandler for MainState<'a> {
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
-        self.dispatcher.dispatch_thread_local(&self.game.world.res);
+        //self.dispatcher.dispatch_thread_local(&self.game.world.res);
         graphics::set_background_color(ctx, Color::from((0, 0, 0, 255)));
         graphics::clear(ctx);
 
@@ -229,7 +232,9 @@ impl<'a> event::EventHandler for MainState<'a> {
 
         // println!("Delta frame time: {:?} ", timer::get_delta(ctx));
         // println!("Average FPS: {}", timer::get_fps(ctx));
-        timer::sleep(Duration::from_millis(109));
+        //timer::sleep(Duration::from_millis(55));
+        timer::sleep(Duration::from_millis(100));
+        //timer::sleep(Duration::from_millis(109));
         Ok(())
     }
 
@@ -330,14 +335,18 @@ fn main() {
             ..Default::default()
         }).with(AnimationState {
             ..Default::default()
+        }).with(State {
+            ..Default::default()
         }).build();
 
     let dispatcher = DispatcherBuilder::new()
         .with(Commander, "commander", &[])
         .with(Boundary, "boundary", &["commander"])
+        .with(ActionSystem, "action", &["commander"])
         .with(VelocitySystem, "velocity", &["boundary"])
         .with(Movement, "movement", &["boundary"])
         .with(Animation, "animation", &["movement"])
+        .with(StateUpdater, "state_updater", &["animation"])
         // .with_thread_local(Renderer {
         //     store: Store::new(StoreOpt::default()).expect("store creation"),
         // })
@@ -355,5 +364,5 @@ fn main() {
         knight_id: knight.id(),
     };
 
-    event::run(ctx, &mut state).unwrap();
+    event::run(ctx, &mut state).unwrap();;
 }
