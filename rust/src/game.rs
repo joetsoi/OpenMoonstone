@@ -1,10 +1,9 @@
 use ggez::Context;
-use specs::world;
-use specs::{Dispatcher, DispatcherBuilder, Join, World};
+use specs::World;
 use warmy::{Store, StoreOpt};
 
 use crate::combat::components::{
-    AnimationState, Controller, Draw, Facing, Intent, Position, State, TouchingBoundary, Velocity,
+    AnimationState, Controller, Draw, Intent, Position, State, TouchingBoundary, Velocity,
     WalkingState,
 };
 use crate::input;

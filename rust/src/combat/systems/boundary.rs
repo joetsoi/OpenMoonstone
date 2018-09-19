@@ -2,7 +2,7 @@ use specs::{ReadStorage, System, WriteStorage};
 
 use crate::combat::components::intent::{XAxis, YAxis};
 use crate::combat::components::{
-    Command, Intent, Position, TouchingBoundary, Velocity, WalkingState,
+    Command, Intent, Position, TouchingBoundary, Velocity,
 };
 
 struct Rect {
@@ -36,9 +36,9 @@ impl<'a> System<'a> for Boundary {
         {
             let new_x = position.x as i32 + velocity.x;
             if let Command::Move { x, y } = intent.command {
-                if (new_x < LAIR_BOUNDARY.x && x == XAxis::Left) {
+                if new_x < LAIR_BOUNDARY.x && x == XAxis::Left {
                     touching_boundary.left = true;
-                } else if (new_x > LAIR_BOUNDARY.w && x == XAxis::Right) {
+                } else if new_x > LAIR_BOUNDARY.w && x == XAxis::Right {
                     touching_boundary.right = true;
                 } else {
                     touching_boundary.left = false;
@@ -46,9 +46,9 @@ impl<'a> System<'a> for Boundary {
                 }
 
                 let new_y = position.y as i32 - velocity.y;
-                if (new_y < LAIR_BOUNDARY.y && y == YAxis::Up) {
+                if new_y < LAIR_BOUNDARY.y && y == YAxis::Up {
                     touching_boundary.top = true;
-                } else if (new_y > LAIR_BOUNDARY.h && y == YAxis::Down) {
+                } else if new_y > LAIR_BOUNDARY.h && y == YAxis::Down {
                     touching_boundary.bottom = true;
                 } else {
                     touching_boundary.top = false;

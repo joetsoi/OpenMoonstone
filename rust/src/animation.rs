@@ -38,7 +38,7 @@ impl warmy::Load<Context> for Sprite {
 
     fn load(
         key: Self::Key,
-        store: &mut warmy::Storage<ggez::Context>,
+        _store: &mut warmy::Storage<ggez::Context>,
         ctx: &mut ggez::Context,
     ) -> Result<warmy::Loaded<Self>, Self::Error> {
         let file = ctx.filesystem.open(key.as_str()).map_err(err_from)?;

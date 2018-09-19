@@ -4,9 +4,9 @@ use lazy_static::lazy_static;
 use maplit::hashmap;
 use specs::{ReadStorage, System, WriteStorage};
 
-use crate::combat::components::intent::{AttackType, XAxis, YAxis};
+use crate::combat::components::intent::{XAxis, YAxis};
 use crate::combat::components::{
-    Action, AnimationState, Command, Draw, Intent, State, TouchingBoundary, WalkingState,
+    Action, AnimationState, Draw, State, TouchingBoundary, WalkingState
 };
 
 lazy_static! {
@@ -29,7 +29,7 @@ pub struct Animation;
 
 impl<'a> System<'a> for Animation {
     type SystemData = (
-        ReadStorage<'a, Intent>,
+        //ReadStorage<'a, Intent>,
         ReadStorage<'a, WalkingState>,
         ReadStorage<'a, TouchingBoundary>,
         WriteStorage<'a, AnimationState>,
@@ -39,11 +39,11 @@ impl<'a> System<'a> for Animation {
 
     fn run(
         &mut self,
-        (intent, walking_state, touching_boundary, mut animation_state, mut draw, state): Self::SystemData,
+        (walking_state, touching_boundary, mut animation_state, mut draw, state): Self::SystemData,
 ){
         use specs::Join;
-        for (intent, walking_state, touching_boundary, animation_state, draw, state) in (
-            &intent,
+        for (walking_state, touching_boundary, animation_state, draw, state) in (
+            //&intent,
             &walking_state,
             &touching_boundary,
             &mut animation_state,

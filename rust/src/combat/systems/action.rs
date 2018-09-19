@@ -12,7 +12,7 @@ impl<'a> System<'a> for ActionSystem {
 
         for (intent, state) in (&intent, &mut state).join() {
             match intent.command {
-                Command::Attack(attack_type) => {
+                Command::Attack(_attack_type) => {
                     match state.action {
                         Action::Idle | Action::Move {..} => {
                             state.action = Action::Attack {

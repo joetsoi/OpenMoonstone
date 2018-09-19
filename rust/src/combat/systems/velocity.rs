@@ -63,7 +63,7 @@ impl<'a> System<'a> for VelocitySystem {
                                 y: move_y,
                             };
 
-                            let step = ((walking_state.step + 1) % 4);
+                            let step = (walking_state.step + 1) % 4;
                             velocity.x = X_STEP_SIZES[(x as i32 + 1) as usize][step as usize];
                             velocity.y = Y_STEP_SIZES[(y as i32 + 1) as usize][step as usize];
                             walking_state.step = step;
