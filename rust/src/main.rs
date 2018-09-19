@@ -105,12 +105,13 @@ impl<'a> event::EventHandler for MainState<'a> {
         graphics::set_background_color(ctx, Color::from((0, 0, 0, 255)));
         graphics::clear(ctx);
 
-        let dest_point = graphics::Point2::new(0.0, 0.0);
+        let screen_origin = graphics::Point2::new(0.0, 0.0);
+        // draw background
         graphics::draw_ex(
             ctx,
             &self.image,
             graphics::DrawParam {
-                dest: dest_point,
+                dest: screen_origin,
                 scale: graphics::Point2::new(3.0, 3.0),
                 ..Default::default()
             },
@@ -128,56 +129,41 @@ impl<'a> event::EventHandler for MainState<'a> {
                     .store
                     .get::<_, TextureAtlas>(&LogicalKey::new(image.sheet.as_str()), ctx)
                     .unwrap();
-                let batch = match self.batches.entry(image.sheet.clone()) {
-                    Occupied(entry) => entry.into_mut(),
-                    Vacant(entry) => {
-                        let atlas_dimension = atlas.borrow().image.width as u32;
-                        let image = match self.images.entry(image.sheet.clone()) {
-                            Occupied(i) => i.into_mut(),
-                            Vacant(i) => i.insert(
-                                graphics::Image::from_rgba8(
-                                    ctx,
-                                    atlas_dimension as u16,
-                                    atlas_dimension as u16,
-                                    &atlas.borrow().image.to_rgba8(&self.palette),
-                                ).unwrap(),
-                            ),
-                        };
-                        entry.insert(SpriteBatch::new(image.clone()))
-                    }
+
+                let atlas_dimension = atlas.borrow().image.width as u32;
+                let ggez_image = match self.images.entry(image.sheet.clone()) {
+                    Occupied(i) => i.into_mut(),
+                    Vacant(i) => i.insert(
+                        graphics::Image::from_rgba8(
+                            ctx,
+                            atlas_dimension as u16,
+                            atlas_dimension as u16,
+                            &atlas.borrow().image.to_rgba8(&self.palette),
+                        ).unwrap(),
+                    ),
                 };
-                batch_order.push(image.sheet.clone());
 
                 let rect = atlas.borrow().rects[image.image];
                 let texture_size = atlas.borrow().image.width as f32;
-                batch.add(graphics::DrawParam {
-                    src: graphics::Rect {
-                        x: rect.x as f32 / texture_size,
-                        y: rect.y as f32 / texture_size,
-                        w: rect.w as f32 / texture_size,
-                        h: rect.h as f32 / texture_size,
-                    },
-                    dest: graphics::Point2::new(
-                        (position.x as i32 + (draw.direction as i32 * image.x)) as f32,
-                        (position.y as i32 + image.y) as f32,
-                    ),
-                    scale: graphics::Point2::new((draw.direction as i32) as f32, 1.0),
-                    ..Default::default()
-                });
+                graphics::draw_ex(
+                    ctx,
+                    ggez_image,
+                    graphics::DrawParam {
+                        src: graphics::Rect {
+                            x: rect.x as f32 / texture_size,
+                            y: rect.y as f32 / texture_size,
+                            w: rect.w as f32 / texture_size,
+                            h: rect.h as f32 / texture_size,
+                        },
+                        dest: graphics::Point2::new(
+                            (position.x as i32 + (draw.direction as i32 * image.x)) as f32 * 3.0,
+                            (position.y as i32 + image.y) as f32 * 3.0,
+                        ),
+                        scale: graphics::Point2::new((draw.direction as i32 * 3) as f32, 3.0),
+                        ..Default::default()
+                        },
+                )?;
             }
-        }
-        for batch_name in &batch_order {
-            let batch = self.batches.get_mut(batch_name).unwrap();
-            graphics::draw_ex(
-                ctx,
-                batch,
-                graphics::DrawParam {
-                    dest: dest_point,
-                    scale: graphics::Point2::new(3.0, 3.0),
-                    ..Default::default()
-                },
-            )?;
-            batch.clear();
         }
 
         //let banner = &self.rects[73];
