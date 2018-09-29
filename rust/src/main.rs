@@ -44,6 +44,7 @@ struct MainState<'a> {
     batches: HashMap<String, graphics::spritebatch::SpriteBatch>,
 
     knight_id: world::Index,
+    player_2: world::Index,
 }
 
 impl<'a> MainState<'a> {
@@ -52,9 +53,13 @@ impl<'a> MainState<'a> {
         let mut controllers = self.game.world.write_storage::<Controller>();
         for (e, controller) in (&*entities, &mut controllers).join() {
             if e.id() == self.knight_id {
-                controller.x = self.game.input.get_axis_raw(input::Axis::Horz) as i32;
-                controller.y = self.game.input.get_axis_raw(input::Axis::Vert) as i32;
-                controller.fire = self.game.input.get_button_down(input::Button::Fire);
+                controller.x = self.game.input.get_axis_raw(input::Axis::Horz1) as i32;
+                controller.y = self.game.input.get_axis_raw(input::Axis::Vert1) as i32;
+                controller.fire = self.game.input.get_button_down(input::Button::Fire1);
+            } else if e.id() == self.player_2 {
+                controller.x = self.game.input.get_axis_raw(input::Axis::Horz2) as i32;
+                controller.y = self.game.input.get_axis_raw(input::Axis::Vert2) as i32;
+                controller.fire = self.game.input.get_button_down(input::Button::Fire2);
             }
         }
     }
@@ -122,7 +127,13 @@ impl<'a> event::EventHandler for MainState<'a> {
         self.update_images(ctx);
         let position_storage = self.game.world.read_storage::<Position>();
         let draw_storage = self.game.world.read_storage::<Draw>();
-        for (position, draw) in (&position_storage, &draw_storage).join() {
+
+        let mut storage = (&position_storage, &draw_storage)
+            .join()
+            .collect::<Vec<_>>();
+        storage.sort_by(|&a, &b| a.0.y.cmp(&b.0.y));
+
+        for (position, draw) in storage {
             for image in &draw.frame.images {
                 let atlas = self
                     .game
@@ -161,7 +172,7 @@ impl<'a> event::EventHandler for MainState<'a> {
                         ),
                         scale: graphics::Point2::new((draw.direction as i32 * 3) as f32, 3.0),
                         ..Default::default()
-                        },
+                    },
                 )?;
             }
         }
@@ -325,6 +336,32 @@ fn main() {
             ..Default::default()
         }).build();
 
+    let player_2 = game
+        .world
+        .create_entity()
+        .with(Controller {
+            x: 0,
+            y: 0,
+            fire: false,
+        }).with(Position { x: 200, y: 100 })
+        .with(Draw {
+            frame: sprite.borrow().animations["walk"][0].clone(),
+            animation: "walk".to_string(),
+            direction: Facing::default(),
+        }).with(Intent {
+            ..Default::default()
+        }).with(WalkingState {
+            ..Default::default()
+        }).with(Velocity {
+            ..Default::default()
+        }).with(TouchingBoundary {
+            ..Default::default()
+        }).with(AnimationState {
+            ..Default::default()
+        }).with(State {
+            ..Default::default()
+        }).build();
+
     let dispatcher = DispatcherBuilder::new()
         .with(Commander, "commander", &[])
         .with(Boundary, "boundary", &["commander"])
@@ -348,6 +385,7 @@ fn main() {
         images: HashMap::new(),
         batches: HashMap::new(),
         knight_id: knight.id(),
+        player_2: player_2.id(),
     };
 
     event::run(ctx, &mut state).unwrap();;
