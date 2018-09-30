@@ -1,5 +1,6 @@
 pub mod animation;
 pub mod boundary;
+pub mod collision;
 pub mod direction;
 pub mod draw;
 pub mod intent;
@@ -8,6 +9,7 @@ pub mod state;
 
 pub use self::animation::AnimationState;
 pub use self::boundary::TouchingBoundary;
+pub use self::collision::Collision;
 pub use self::direction::Facing;
 pub use self::draw::Draw;
 pub use self::intent::{Command, Intent};

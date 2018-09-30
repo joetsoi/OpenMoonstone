@@ -12,6 +12,7 @@ use rect_packer::Packer;
 
 use crate::lz77;
 use crate::piv::Colour;
+use crate::rect::Rect;
 
 #[derive(Debug)]
 struct Header {
@@ -28,14 +29,6 @@ pub struct ObjectsFile {
 pub struct TextureAtlas {
     pub image: Image,
     pub rects: Vec<Rect>,
-}
-
-#[derive(Debug, Copy, Clone)]
-pub struct Rect {
-    pub x: usize,
-    pub y: usize,
-    pub w: usize,
-    pub h: usize,
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -104,10 +97,10 @@ impl ObjectsFile {
                     }
                 }
                 rects.push(Rect {
-                    x: rect.x as usize,
-                    y: rect.y as usize,
-                    w: rect.width as usize,
-                    h: rect.height as usize,
+                    x: rect.x as u32,
+                    y: rect.y as u32,
+                    w: rect.width as u32,
+                    h: rect.height as u32,
                 });
             } else {
                 return Err(TextureSizeTooSmall { texture_size });

@@ -25,6 +25,10 @@ objects:
     kn2.ob: {file: DISKB/KN2.OB, texture_size: 256}
     kn3.ob: {file: DISKB/KN3.OB, texture_size: 256}
     kn4.ob: {file: DISKB/KN4.OB, texture_size: 128}
+    # he
+    he1.ob: {file: DISKB/HE1.OB, texture_size: 512}
+    he2.ob: {file: DISKB/HE2.OB, texture_size: 256}
+    he3.ob: {file: DISKB/HE3.OB, texture_size: 256}
     # fonts
     bold.f: {file: DISKA/BOLD.F, texture_size: 512}
     small.f: {file: DISKB/SMALL.FON, texture_size: 128}

@@ -79,14 +79,14 @@ impl<'a> MainState<'a> {
         {
             let animation = draw.animation.as_str();
             let sprite_resource = sprite.borrow();
-            let images = sprite_resource
+            let animation = sprite_resource
                 .animations
                 .get(animation)
                 .expect(format!("{} not found in yaml", animation).as_str());
-            println!("{:?}, {:?}", animation_state, animation);
-            draw.frame = images[animation_state.frame_number as usize].clone();
+            //println!("{:?}, {:?}", animation_state, animation);
+            draw.frame = animation.frames[animation_state.frame_number as usize].clone();
             draw.direction = state.direction;
-            state.length = images.len() as u32;
+            state.length = animation.frames.len() as u32;
         }
     }
 }
@@ -319,7 +319,7 @@ fn main() {
             fire: false,
         }).with(Position { x: 100, y: 100 })
         .with(Draw {
-            frame: sprite.borrow().animations["walk"][0].clone(),
+            frame: sprite.borrow().animations["walk"].frames[0].clone(),
             animation: "walk".to_string(),
             direction: Facing::default(),
         }).with(Intent {
@@ -345,7 +345,7 @@ fn main() {
             fire: false,
         }).with(Position { x: 200, y: 100 })
         .with(Draw {
-            frame: sprite.borrow().animations["walk"][0].clone(),
+            frame: sprite.borrow().animations["walk"].frames[0].clone(),
             animation: "walk".to_string(),
             direction: Facing::default(),
         }).with(Intent {
