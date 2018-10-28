@@ -26,6 +26,7 @@ use openmoonstone::combat::components::{
 use openmoonstone::combat::systems::{
     ActionSystem, Animation, Boundary, Commander, Movement, StateUpdater, VelocitySystem,
 };
+use openmoonstone::files::collide::CollisionBoxes;
 use openmoonstone::game::Game;
 use openmoonstone::input;
 //use openmoonstone::objects::{Rect, TextureAtlas};
@@ -284,6 +285,11 @@ fn main() {
         .get::<_, Sprite>(&LogicalKey::new("/knight.yaml"), ctx)
         .unwrap();
 
+    let collide_hit = game
+        .store
+        .get::<_, CollisionBoxes>(&LogicalKey::new("collide"), ctx)
+        .unwrap();
+
     //let atlas_dimension = atlas.borrow().image.width as u32;
     // let mut a: RgbaImage = ImageBuffer::from_raw(
     //     atlas_dimension,
@@ -309,6 +315,7 @@ fn main() {
     //     im1.height as u16,
     //     &im1.to_rgba8(&piv.palette),
     // ).unwrap();
+    //
 
     let knight = game
         .world

@@ -1,0 +1,23 @@
+newline = _{ "\n" }
+
+filename = { (ASCII_DIGIT | ASCII_ALPHA)+ ~ "." ~ (ASCII_DIGIT | ASCII_ALPHA)+ }
+fileline = _{ filename ~ newline }
+
+count = { ASCII_DIGIT{2} }
+countline = _{ count ~ newline }
+padding = _{ "00" ~ newline }
+number = { ASCII_DIGIT{3} }
+
+coordinate = { number ~ number }
+coordinates = _{ (coordinate)+ }
+coordinatesline = _{ coordinates ~ newline }
+
+empty = {"00"}
+emptyline = _{empty ~ newline}
+end = _{ "99" ~ newline }
+
+bounding_boxes = { countline ~ padding ~ coordinatesline }
+collision_entry = _{ emptyline | bounding_boxes }
+collisions = { collision_entry+ }
+named_collision = { fileline ~ collisions ~ end }
+named_collisions = _{ named_collision+ }
