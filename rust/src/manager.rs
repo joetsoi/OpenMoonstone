@@ -58,7 +58,7 @@ impl warmy::Load<Context> for PivImage {
             .filesystem
             .open(
                 // todo: remove expect
-                Path::new("/moonstone/").join(&scenes[key.as_str()].as_str().expect("yaml error")),
+                Path::new("/moonstone/").join(&scenes[key.as_str()].as_str().expect(&format!("yaml error for {}", key.as_str()))),
             ).map_err(err_from)?;
 
         Ok(warmy::Loaded::from(
