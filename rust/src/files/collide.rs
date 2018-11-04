@@ -1,9 +1,7 @@
 use std::collections::HashMap;
-use std::io;
 use std::io::Read;
 
 use failure::err_msg;
-use failure::format_err;
 use failure::Error;
 use pest::Parser;
 use pest_derive::*;
@@ -38,7 +36,7 @@ pub fn parse_collide_hit<T: Read>(reader: &mut T) -> Result<CollisionBoxes, Erro
                 Rule::empty => collision_boxes.push(None),
                 Rule::bounding_boxes => {
                     let mut inner_bounding_boxes = collision_entry.into_inner();
-                    let count = inner_bounding_boxes
+                    let _count = inner_bounding_boxes
                         .next()
                         .ok_or_else(|| err_msg("No count for bounding boxes"))?
                         .as_str();
@@ -65,5 +63,5 @@ pub fn parse_collide_hit<T: Read>(reader: &mut T) -> Result<CollisionBoxes, Erro
         }
         data.insert(filename.to_string(), collision_boxes);
     }
-    Ok(CollisionBoxes { data: data })
+    Ok(CollisionBoxes { data })
 }

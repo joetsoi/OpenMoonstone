@@ -31,10 +31,7 @@ impl PivImage {
 
         let extracted = lz77::decompress(header.file_length, &data[6 + (header.bit_depth * 2)..])?;
         let pixels = PivImage::combine_bit_planes(&extracted);
-        Ok(PivImage {
-            palette: palette,
-            pixels: pixels,
-        })
+        Ok(PivImage { palette, pixels })
     }
 
     pub fn to_rgba8(&self) -> Vec<u8> {
@@ -96,8 +93,7 @@ pub fn read_palette(bit_depth: usize, data: &[u8]) -> Vec<Colour> {
                 b: ((pel_bytes[1]) & 0x0f) << 4,
                 a: 255,
             }
-        })
-        .collect();
+        }).collect();
     if let Some(first) = palette.get_mut(0) {
         first.a = 0;
     }

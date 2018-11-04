@@ -32,8 +32,8 @@ impl Game {
         Game {
             input: input::InputState::new(),
             input_binding: input::create_input_binding(),
-            store: store,
-            world: world,
+            store,
+            world,
         }
     }
 }

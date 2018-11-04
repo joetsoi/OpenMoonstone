@@ -1,7 +1,7 @@
 use specs::{ReadStorage, System, WriteStorage};
 
-use crate::combat::components::{Command, Controller, Intent};
 use crate::combat::components::intent::{AttackType, XAxis, YAxis};
+use crate::combat::components::{Command, Controller, Intent};
 
 pub struct Commander;
 
@@ -24,14 +24,9 @@ impl<'a> System<'a> for Commander {
                     -1 => YAxis::Up,
                     1 => YAxis::Down,
                     _ => YAxis::Centre,
-
                 };
-                intent.command = Command::Move {
-                    x: x,
-                    y: y,
-                };
-            }
-            else {
+                intent.command = Command::Move { x, y };
+            } else {
                 intent.command = Command::Attack(AttackType::Swing)
             }
         }

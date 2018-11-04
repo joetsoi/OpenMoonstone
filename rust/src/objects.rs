@@ -71,7 +71,7 @@ impl ObjectsFile {
         for image_header in image_headers {
             images.push(Image::from_data(image_header, &extracted));
         }
-        Ok(ObjectsFile { images: images })
+        Ok(ObjectsFile { images })
     }
 
     pub fn to_texture_atlas(&self, texture_size: i32) -> Result<TextureAtlas, TextureSizeTooSmall> {
@@ -112,7 +112,7 @@ impl ObjectsFile {
                 height: config.height as usize,
                 pixels: atlas,
             },
-            rects: rects,
+            rects,
         })
     }
 
@@ -176,7 +176,7 @@ impl Image {
         Image {
             width: unpacked_image_width,
             height: header.height,
-            pixels: pixels,
+            pixels,
         }
     }
 
