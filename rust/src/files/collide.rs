@@ -6,6 +6,7 @@ use failure::Error;
 use pest::Parser;
 use pest_derive::*;
 
+#[derive(Default, Clone, Debug)]
 pub struct CollisionBoxes {
     pub data: HashMap<String, Vec<Option<Vec<(u32, u32)>>>>,
 }

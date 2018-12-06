@@ -7,6 +7,11 @@ use warmy;
 
 use crate::error::{err_from, CompatError};
 
+#[derive(Default, Debug, Clone)]
+pub struct SpriteData {
+    pub sprites: HashMap<String, Sprite>,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum ImageType {
     NonSolid,
@@ -35,7 +40,7 @@ pub struct Animation {
     pub order: Option<Vec<i32>>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Sprite {
     pub animations: HashMap<String, Animation>,
 }

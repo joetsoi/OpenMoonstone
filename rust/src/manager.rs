@@ -18,7 +18,8 @@ struct GameDataError {
     message: String,
 }
 
-struct GameYaml {
+#[derive(Debug, Clone)]
+pub struct GameYaml {
     pub yaml: Value,
 }
 

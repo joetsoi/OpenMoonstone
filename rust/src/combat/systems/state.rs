@@ -20,7 +20,6 @@ impl<'a> System<'a> for StateUpdater {
                 }
                 _ => (),
             }
-            //println!("{:?}", state);
         }
     }
 }

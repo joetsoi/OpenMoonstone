@@ -8,5 +8,6 @@ use specs_derive::*;
 pub struct Draw {
     pub frame: Frame,
     pub animation: String,
+    pub resource_name: String,
     pub direction: Facing,
 }

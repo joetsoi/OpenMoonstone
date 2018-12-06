@@ -20,11 +20,12 @@ use warmy::{LogicalKey, Store, StoreOpt};
 
 use openmoonstone::animation::Sprite;
 use openmoonstone::combat::components::{
-    AnimationState, Controller, Draw, Facing, Intent, Position, State, TouchingBoundary, Velocity,
-    WalkingState,
+    AnimationState, Collision, Controller, Draw, Facing, Intent, Position, State, TouchingBoundary,
+    Velocity, WalkingState,
 };
 use openmoonstone::combat::systems::{
-    ActionSystem, Animation, Boundary, Commander, Movement, StateUpdater, VelocitySystem,
+    ActionSystem, Animation, Boundary, Commander, Movement, StateUpdater, UpdateBoundingBoxes,
+    UpdateImage, VelocitySystem,
 };
 use openmoonstone::files::collide::CollisionBoxes;
 use openmoonstone::game::Game;
@@ -64,32 +65,6 @@ impl<'a> MainState<'a> {
             }
         }
     }
-
-    fn update_images(&mut self, ctx: &mut Context) {
-        let mut draw_storage = self.game.world.write_storage::<Draw>();
-        let animation_storage = self.game.world.read_storage::<AnimationState>();
-        let mut state_storage = self.game.world.write_storage::<State>();
-
-        let sprite = self
-            .game
-            .store
-            .get::<_, Sprite>(&LogicalKey::new("/knight.yaml"), ctx)
-            .unwrap();
-        for (draw, animation_state, state) in
-            (&mut draw_storage, &animation_storage, &mut state_storage).join()
-        {
-            let animation = draw.animation.as_str();
-            let sprite_resource = sprite.borrow();
-            let animation = sprite_resource
-                .animations
-                .get(animation)
-                .expect(format!("{} not found in yaml", animation).as_str());
-            //println!("{:?}, {:?}", animation_state, animation);
-            draw.frame = animation.frames[animation_state.frame_number as usize].clone();
-            draw.direction = state.direction;
-            state.length = animation.frames.len() as u32;
-        }
-    }
 }
 
 impl<'a> event::EventHandler for MainState<'a> {
@@ -125,7 +100,6 @@ impl<'a> event::EventHandler for MainState<'a> {
         //self.systems.renderer.run_now(&self.game.world.res, ctx: Context);
         //let mut batches: HashMap<String, graphics::spritebatch::SpriteBatch> = HashMap::new();
         let mut batch_order: Vec<String> = vec![];
-        self.update_images(ctx);
         let position_storage = self.game.world.read_storage::<Position>();
         let draw_storage = self.game.world.read_storage::<Draw>();
 
@@ -151,7 +125,8 @@ impl<'a> event::EventHandler for MainState<'a> {
                             atlas_dimension as u16,
                             atlas_dimension as u16,
                             &atlas.borrow().image.to_rgba8(&self.palette),
-                        ).unwrap(),
+                        )
+                        .unwrap(),
                     ),
                 };
 
@@ -270,7 +245,7 @@ fn main() {
     let ctx = &mut Context::load_from_conf("openmoonstone", "joetsoi", c).unwrap();
     graphics::set_default_filter(ctx, graphics::FilterMode::Nearest);
 
-    let mut game = Game::new(ctx);
+    let mut game = Game::new(ctx, &["knight"]).expect("failed to initialize game");
     let piv = game
         .store
         .get::<_, PivImage>(&LogicalKey::new(filename), ctx)
@@ -289,6 +264,7 @@ fn main() {
         .store
         .get::<_, CollisionBoxes>(&LogicalKey::new("collide"), ctx)
         .unwrap();
+    game.world.add_resource(collide_hit.borrow().clone());
 
     //let atlas_dimension = atlas.borrow().image.width as u32;
     // let mut a: RgbaImage = ImageBuffer::from_raw(
@@ -324,24 +300,36 @@ fn main() {
             x: 0,
             y: 0,
             fire: false,
-        }).with(Position { x: 100, y: 100 })
+        })
+        .with(Position { x: 100, y: 100 })
         .with(Draw {
             frame: sprite.borrow().animations["walk"].frames[0].clone(),
             animation: "walk".to_string(),
+            resource_name: "knight".to_string(),
             direction: Facing::default(),
-        }).with(Intent {
+        })
+        .with(Intent {
             ..Default::default()
-        }).with(WalkingState {
+        })
+        .with(WalkingState {
             ..Default::default()
-        }).with(Velocity {
+        })
+        .with(Velocity {
             ..Default::default()
-        }).with(TouchingBoundary {
+        })
+        .with(TouchingBoundary {
             ..Default::default()
-        }).with(AnimationState {
+        })
+        .with(AnimationState {
             ..Default::default()
-        }).with(State {
+        })
+        .with(State {
             ..Default::default()
-        }).build();
+        })
+        .with(Collision {
+            ..Default::default()
+        })
+        .build();
 
     let player_2 = game
         .world
@@ -350,24 +338,36 @@ fn main() {
             x: 0,
             y: 0,
             fire: false,
-        }).with(Position { x: 200, y: 100 })
+        })
+        .with(Position { x: 200, y: 100 })
         .with(Draw {
             frame: sprite.borrow().animations["walk"].frames[0].clone(),
             animation: "walk".to_string(),
+            resource_name: "knight".to_string(),
             direction: Facing::default(),
-        }).with(Intent {
+        })
+        .with(Intent {
             ..Default::default()
-        }).with(WalkingState {
+        })
+        .with(WalkingState {
             ..Default::default()
-        }).with(Velocity {
+        })
+        .with(Velocity {
             ..Default::default()
-        }).with(TouchingBoundary {
+        })
+        .with(TouchingBoundary {
             ..Default::default()
-        }).with(AnimationState {
+        })
+        .with(AnimationState {
             ..Default::default()
-        }).with(State {
+        })
+        .with(State {
             ..Default::default()
-        }).build();
+        })
+        .with(Collision {
+            ..Default::default()
+        })
+        .build();
 
     let dispatcher = DispatcherBuilder::new()
         .with(Commander, "commander", &[])
@@ -377,6 +377,8 @@ fn main() {
         .with(Movement, "movement", &["boundary"])
         .with(Animation, "animation", &["movement"])
         .with(StateUpdater, "state_updater", &["animation"])
+        .with(UpdateImage, "update_image", &["state_updater"])
+        .with_thread_local(UpdateBoundingBoxes)
         // .with_thread_local(Renderer {
         //     store: Store::new(StoreOpt::default()).expect("store creation"),
         // })
