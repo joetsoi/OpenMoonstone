@@ -97,8 +97,8 @@ impl ObjectsFile {
                     }
                 }
                 rects.push(Rect {
-                    x: rect.x as u32,
-                    y: rect.y as u32,
+                    x: rect.x,
+                    y: rect.y,
                     w: rect.width as u32,
                     h: rect.height as u32,
                 });

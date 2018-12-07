@@ -1,7 +1,7 @@
 #[derive(Debug, Copy, Clone)]
 pub struct Rect {
-    pub x: u32,
-    pub y: u32,
+    pub x: i32,
+    pub y: i32,
     pub w: u32,
     pub h: u32,
 }
