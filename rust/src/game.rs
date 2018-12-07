@@ -7,8 +7,8 @@ use warmy::{Store, StoreOpt};
 
 use crate::animation::{Sprite, SpriteData};
 use crate::combat::components::{
-    AnimationState, AttackCollider, Collision, Controller, Draw, Intent, Position, State,
-    TouchingBoundary, Velocity, WalkingState,
+    AnimationState, Body, Controller, Draw, Intent, Position, State, TouchingBoundary, Velocity,
+    WalkingState, Weapon,
 };
 use crate::input;
 use crate::manager::GameYaml;
@@ -24,9 +24,8 @@ impl Game {
     pub fn new(ctx: &mut Context, entity_names: &[&str]) -> Result<Game, Error> {
         let mut store: Store<Context> = Store::new(StoreOpt::default())?;
         let mut world = World::new();
-        world.register::<AttackCollider>();
         world.register::<AnimationState>();
-        world.register::<Collision>();
+        world.register::<Body>();
         world.register::<Controller>();
         world.register::<Draw>();
         world.register::<Intent>();
@@ -35,6 +34,7 @@ impl Game {
         world.register::<State>();
         world.register::<Velocity>();
         world.register::<WalkingState>();
+        world.register::<Weapon>();
 
         let entities_yaml =
             store.get::<_, GameYaml>(&warmy::LogicalKey::new("/entities.yaml"), ctx)?;

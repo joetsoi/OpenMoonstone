@@ -20,8 +20,8 @@ use warmy::{LogicalKey, Store, StoreOpt};
 
 use openmoonstone::animation::Sprite;
 use openmoonstone::combat::components::{
-    AnimationState, AttackCollider, Collision, Controller, Draw, Facing, Intent, Position, State,
-    TouchingBoundary, Velocity, WalkingState,
+    AnimationState, Body, Controller, Draw, Facing, Intent, Position, State, TouchingBoundary,
+    Velocity, WalkingState, Weapon,
 };
 use openmoonstone::combat::systems::{
     ActionSystem, Animation, Boundary, Commander, Movement, StateUpdater, UpdateBoundingBoxes,
@@ -326,10 +326,10 @@ fn main() {
         .with(State {
             ..Default::default()
         })
-        .with(Collision {
+        .with(Body {
             ..Default::default()
         })
-        .with(AttackCollider {
+        .with(Weapon {
             ..Default::default()
         })
         .build();
@@ -367,10 +367,10 @@ fn main() {
         .with(State {
             ..Default::default()
         })
-        .with(Collision {
+        .with(Body {
             ..Default::default()
         })
-        .with(AttackCollider {
+        .with(Weapon{
             ..Default::default()
         })
         .build();

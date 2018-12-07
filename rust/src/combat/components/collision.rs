@@ -5,12 +5,12 @@ use crate::rect::Rect;
 
 #[derive(Component, Debug, Default)]
 #[storage(VecStorage)]
-pub struct Collision {
-    pub bounding_boxes: Vec<Rect>,
+pub struct Body {
+    pub collision_boxes: Vec<Rect>,
 }
 
 #[derive(Component, Debug, Default)]
 #[storage(VecStorage)]
-pub struct AttackCollider {
-    pub bounding_boxes: Vec<Rect>,
+pub struct Weapon {
+    pub collision_boxes: Vec<Rect>,
 }
