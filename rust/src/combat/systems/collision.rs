@@ -40,10 +40,10 @@ impl<'a> System<'a> for UpdateBoundingBoxes {
                         if let Some(collision_sheet) = collision_data.get(&image.sheet) {
                             if let Some(collision) = &collision_sheet[image.image] {
                                 weapon_boxes.extend(collision.iter().map(|(w, h)| Rect {
-                                    x: image.x,
+                                    x: image.x * state.direction as i32,
                                     y: image.y,
-                                    w: *w,
-                                    h: *h,
+                                    w: *w as i32 * state.direction as i32,
+                                    h: *h as i32,
                                 }))
                             }
                         }
@@ -52,9 +52,9 @@ impl<'a> System<'a> for UpdateBoundingBoxes {
                         if let Some(images_meta) = image_sizes.get(&image.sheet) {
                             let image_meta = &images_meta[image.image];
                             body_boxes.push(Rect {
-                                x: image.x,
+                                x: image.x * state.direction as i32,
                                 y: image.y,
-                                w: image_meta.w,
+                                w: image_meta.w * state.direction as i32,
                                 h: image_meta.h,
                             })
                         }

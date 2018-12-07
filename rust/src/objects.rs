@@ -99,8 +99,8 @@ impl ObjectsFile {
                 rects.push(Rect {
                     x: rect.x,
                     y: rect.y,
-                    w: rect.width as u32,
-                    h: rect.height as u32,
+                    w: rect.width,
+                    h: rect.height,
                 });
             } else {
                 return Err(TextureSizeTooSmall { texture_size });

@@ -153,6 +153,47 @@ impl<'a> event::EventHandler for MainState<'a> {
             }
         }
 
+        let body_storage = self.game.world.read_storage::<Body>();
+
+        let mut storage = (&position_storage, &body_storage)
+            .join()
+            .collect::<Vec<_>>();
+
+        graphics::set_color(ctx, graphics::Color::new(1.0, 1.0, 1.0, 1.0))?;
+        for (position, body) in storage {
+            if let Some(boxes) = &body.collision_boxes {
+                for collision_box in boxes {
+                    graphics::rectangle(ctx, graphics::DrawMode::Line(1.0), graphics::Rect {
+                        x: (position.x as i32 + collision_box.x) as f32 * 3.0,
+                        y: (position.y as i32 + collision_box.y) as f32 * 3.0,
+                        w: collision_box.w as f32 * 3.0,
+                        h: collision_box.h as f32 * 3.0,
+                    })?;
+
+                }
+            }
+        }
+
+        let weapon_storage = self.game.world.read_storage::<Weapon>();
+
+        let mut storage = (&position_storage, &weapon_storage)
+            .join()
+            .collect::<Vec<_>>();
+
+        graphics::set_color(ctx, graphics::Color::new(1.0, 1.0, 1.0, 1.0))?;
+        for (position, weapon) in storage {
+            if let Some(boxes) = &weapon.collision_boxes {
+                for collision_box in boxes {
+                    graphics::rectangle(ctx, graphics::DrawMode::Line(1.0), graphics::Rect {
+                        x: ((position.x as i32 + collision_box.x) * 3) as f32,
+                        y: ((position.y as i32 + collision_box.y) * 3) as f32,
+                        w: collision_box.w as f32 * 3.0,
+                        h: collision_box.h as f32 * 3.0,
+                    })?;
+                }
+            }
+        }
+
         //let banner = &self.rects[73];
         //self.batch.add(graphics::DrawParam {
         //    src: graphics::Rect {
@@ -370,7 +411,7 @@ fn main() {
         .with(Body {
             ..Default::default()
         })
-        .with(Weapon{
+        .with(Weapon {
             ..Default::default()
         })
         .build();
