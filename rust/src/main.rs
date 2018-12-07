@@ -20,8 +20,8 @@ use warmy::{LogicalKey, Store, StoreOpt};
 
 use openmoonstone::animation::Sprite;
 use openmoonstone::combat::components::{
-    AnimationState, Collision, Controller, Draw, Facing, Intent, Position, State, TouchingBoundary,
-    Velocity, WalkingState,
+    AnimationState, AttackCollider, Collision, Controller, Draw, Facing, Intent, Position, State,
+    TouchingBoundary, Velocity, WalkingState,
 };
 use openmoonstone::combat::systems::{
     ActionSystem, Animation, Boundary, Commander, Movement, StateUpdater, UpdateBoundingBoxes,
@@ -329,6 +329,9 @@ fn main() {
         .with(Collision {
             ..Default::default()
         })
+        .with(AttackCollider {
+            ..Default::default()
+        })
         .build();
 
     let player_2 = game
@@ -367,6 +370,9 @@ fn main() {
         .with(Collision {
             ..Default::default()
         })
+        .with(AttackCollider {
+            ..Default::default()
+        })
         .build();
 
     let dispatcher = DispatcherBuilder::new()
@@ -378,7 +384,11 @@ fn main() {
         .with(Animation, "animation", &["movement"])
         .with(StateUpdater, "state_updater", &["animation"])
         .with(UpdateImage, "update_image", &["state_updater"])
-        .with_thread_local(UpdateBoundingBoxes)
+        .with(
+            UpdateBoundingBoxes,
+            "update_bounding_boxes",
+            &["update_image"],
+        )
         // .with_thread_local(Renderer {
         //     store: Store::new(StoreOpt::default()).expect("store creation"),
         // })
