@@ -99,8 +99,8 @@ impl ObjectsFile {
                 rects.push(Rect {
                     x: rect.x,
                     y: rect.y,
-                    w: rect.width,
-                    h: rect.height,
+                    w: rect.width as u32,
+                    h: rect.height as u32,
                 });
             } else {
                 return Err(TextureSizeTooSmall { texture_size });
@@ -144,7 +144,7 @@ impl ObjectsFile {
 pub struct Image {
     pub width: usize,
     pub height: usize,
-    pixels: Vec<usize>,
+    pub pixels: Vec<usize>,
 }
 
 impl Image {

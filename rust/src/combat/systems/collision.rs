@@ -1,8 +1,8 @@
 use specs::{Entities, Read, ReadStorage, System, WriteStorage};
 
 use crate::animation::ImageType;
-use crate::combat::components::collision::Points;
-use crate::combat::components::{Action, Body, Draw, Position, State, Weapon};
+use crate::combat::components::collision::{CollisionBox, Points};
+use crate::combat::components::{Action, Body, Draw, Facing, Position, State, Weapon};
 use crate::files::collide::CollisionBoxes;
 use crate::game::EncounterTextures;
 use crate::rect::{Point, Rect};
@@ -39,23 +39,27 @@ impl<'a> System<'a> for UpdateBoundingBoxes {
             (&draw, &position, &state, &mut body, &mut weapon).join()
         {
             let mut weapon_boxes: Vec<Points> = vec![];
-            let mut body_boxes: Vec<Rect> = vec![];
+            let mut body_boxes: Vec<CollisionBox> = vec![];
             for image in draw.frame.images.iter() {
                 match image.image_type {
                     ImageType::Collider => {
                         if let Some(collision_points) = collision_data.get(&image.sheet) {
                             if let Some(points) = &collision_points.points[image.image] {
-                                let image_global_x: i32 =
+                                let mut image_global_x: i32 =
                                     position.x as i32 + image.x * state.direction as i32;
                                 let image_global_y: i32 = position.y as i32 + image.y;
+                                image_global_x = match state.direction {
+                                    Facing::Left => image_global_x - points.max_x as i32,
+                                    Facing::Right => image_global_x,
+                                };
                                 weapon_boxes.push(Points {
                                     bounding: Rect {
                                         // x: image.x * state.direction as i32,
                                         // y: image.y,
                                         x: image_global_x,
                                         y: image_global_y,
-                                        w: points.max_x as i32 * state.direction as i32,
-                                        h: points.max_y as i32,
+                                        w: points.max_x,
+                                        h: points.max_y,
                                     },
                                     points: points
                                         .data
@@ -74,11 +78,21 @@ impl<'a> System<'a> for UpdateBoundingBoxes {
                     ImageType::Collidee => {
                         if let Some(texture) = textures.get(&image.sheet) {
                             let rect = &texture.rects[image.image];
-                            body_boxes.push(Rect {
-                                x: position.x as i32 + image.x * state.direction as i32,
-                                y: position.y as i32 + image.y,
-                                w: rect.w * state.direction as i32,
-                                h: rect.h,
+                            let mut image_global_x: i32 =
+                                position.x as i32 + image.x * state.direction as i32;
+                            image_global_x = match state.direction {
+                                Facing::Left => image_global_x - rect.w as i32,
+                                Facing::Right => image_global_x,
+                            };
+                            body_boxes.push(CollisionBox {
+                                rect: Rect {
+                                    x: image_global_x,
+                                    y: position.y as i32 + image.y,
+                                    w: rect.w,
+                                    h: rect.h,
+                                },
+                                sheet: image.sheet.clone(),
+                                image_num: image.image as u32,
                             })
                         }
                     }
@@ -133,14 +147,26 @@ impl<'a> System<'a> for CheckCollisions {
                         .collision_boxes
                         .iter() // Option.iter()
                         .flat_map(|v| v)
-                        .filter(|b| weapon_part.bounding.intersects(b))
-                        //.filter(|b| weapon_part.points.iter().any(|p| b.contains_point(p)))
+                        .filter(|b| weapon_part.bounding.intersects(&b.rect))
                     {
-
-                        println!("hit");
-                        // for point in weapon_part.points.iter() {
-                        //     println!("{:?} {:?}", point, body_part);
-                        // }
+                        for point in weapon_part
+                            .points
+                            .iter()
+                            .filter(|p| body_part.rect.contains_point(p))
+                        {
+                            let hit_x = point.x - body_part.rect.x;
+                            let hit_y = point.y - body_part.rect.y;
+                            let texture = textures.get(&body_part.sheet).expect(
+                                "Encounter hasn't loaded correct textures to as world resource",
+                            );
+                            let collision_lookup =
+                                hit_x as usize * texture.image.width + hit_y as usize;
+                            let pixel = texture.image.pixels[collision_lookup];
+                            if pixel > 0 {
+                                println!("hit xy: {:?}", pixel);
+                                break;
+                            }
+                        }
                     }
                 }
             }

@@ -10,23 +10,23 @@ pub struct Point {
 pub struct Rect {
     pub x: i32,
     pub y: i32,
-    pub w: i32,
-    pub h: i32,
+    pub w: u32,
+    pub h: u32,
 }
 
 impl Rect {
     pub fn intersects(&self, other: &Rect) -> bool {
-        self.x < other.x + other.w
-            && self.x + other.w > other.x
-            && self.y < other.y + other.h
-            && self.h + self.y > other.y
+        self.x < other.x + other.w as i32
+            && self.x + other.w as i32 > other.x
+            && self.y < other.y + other.h as i32
+            && self.h as i32 + self.y > other.y
     }
 
     pub fn contains_point(&self, point: &Point) -> bool {
         point.x > self.x
-            && point.x < self.x + self.w
+            && point.x < self.x + self.w as i32
             && point.y > self.y
-            && point.y > self.y + self.h
+            && point.y < self.y + self.h as i32
     }
 }
 
