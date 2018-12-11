@@ -1,6 +1,7 @@
 use specs::{Read, ReadStorage, System, WriteStorage};
 
 use crate::animation::{ImageType, SpriteData};
+use crate::combat::components::collision::Points;
 use crate::combat::components::{Body, Draw, Position, State, Weapon};
 use crate::files::collide::CollisionBoxes;
 use crate::game::ImageMetadata;
@@ -31,20 +32,23 @@ impl<'a> System<'a> for UpdateBoundingBoxes {
         for (draw, position, state, body, weapon) in
             (&draw, &position, &state, &mut body, &mut weapon).join()
         {
-            let mut weapon_boxes: Vec<Rect> = vec![];
+            let mut weapon_boxes: Vec<Points> = vec![];
             let mut body_boxes: Vec<Rect> = vec![];
             for image in draw.frame.images.iter() {
                 // TODO: facing
                 match image.image_type {
                     ImageType::Collider => {
-                        if let Some(collision_sheet) = collision_data.get(&image.sheet) {
-                            if let Some(collision) = &collision_sheet[image.image] {
-                                weapon_boxes.extend(collision.iter().map(|(w, h)| Rect {
-                                    x: image.x * state.direction as i32,
-                                    y: image.y,
-                                    w: *w as i32 * state.direction as i32,
-                                    h: *h as i32,
-                                }))
+                        if let Some(collision_points) = collision_data.get(&image.sheet) {
+                            if let Some(points) = &collision_points.points[image.image] {
+                                weapon_boxes.push(Points {
+                                    bounding: Rect {
+                                        x: image.x * state.direction as i32,
+                                        y: image.y,
+                                        w: points.max_x as i32 * state.direction as i32,
+                                        h: points.max_y as i32,
+                                    },
+                                    points: points.data.clone(),
+                                })
                             }
                         }
                     }
@@ -64,9 +68,9 @@ impl<'a> System<'a> for UpdateBoundingBoxes {
             }
 
             if weapon_boxes.is_empty() {
-                weapon.collision_boxes = None;
+                weapon.collision_points = None;
             } else {
-                weapon.collision_boxes = Some(weapon_boxes);
+                weapon.collision_points = Some(weapon_boxes);
             }
 
             if body_boxes.is_empty() {

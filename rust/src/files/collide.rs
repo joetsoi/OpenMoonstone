@@ -6,9 +6,27 @@ use failure::Error;
 use pest::Parser;
 use pest_derive::*;
 
+#[derive(Default, Copy, Clone, Debug)]
+pub struct Point {
+    pub x: u32,
+    pub y: u32,
+}
+
+#[derive(Default, Clone, Debug)]
+pub struct Points {
+    pub data: Vec<Point>,
+    pub max_x: u32,
+    pub max_y: u32,
+}
+
+#[derive(Default, Clone, Debug)]
+pub struct CollisionPoints {
+    pub points: Vec<Option<Points>>,
+}
+
 #[derive(Default, Clone, Debug)]
 pub struct CollisionBoxes {
-    pub data: HashMap<String, Vec<Option<Vec<(u32, u32)>>>>,
+    pub data: HashMap<String, CollisionPoints>,
 }
 
 #[derive(Parser)]
@@ -31,7 +49,7 @@ pub fn parse_collide_hit<T: Read>(reader: &mut T) -> Result<CollisionBoxes, Erro
             .next()
             .ok_or_else(|| err_msg("no collisions parsing collide.hit"))?;
 
-        let mut collision_boxes: Vec<Option<Vec<(u32, u32)>>> = Vec::new();
+        let mut collision_boxes: Vec<Option<Points>> = Vec::new();
         for collision_entry in collisions.into_inner() {
             match collision_entry.as_rule() {
                 Rule::empty => collision_boxes.push(None),
@@ -42,7 +60,9 @@ pub fn parse_collide_hit<T: Read>(reader: &mut T) -> Result<CollisionBoxes, Erro
                         .ok_or_else(|| err_msg("No count for bounding boxes"))?
                         .as_str();
 
-                    let mut boxes: Vec<(u32, u32)> = Vec::new();
+                    let mut points: Vec<Point> = Vec::new();
+                    let mut max_x: u32 = 0;
+                    let mut max_y: u32 = 0;
                     for coordinates in inner_bounding_boxes {
                         let mut inner_rules = coordinates.into_inner();
                         let x: u32 = inner_rules
@@ -55,14 +75,30 @@ pub fn parse_collide_hit<T: Read>(reader: &mut T) -> Result<CollisionBoxes, Erro
                             .ok_or_else(|| err_msg("Couldn't parse y coord"))?
                             .as_str()
                             .parse::<u32>()?;
-                        boxes.push((x, y));
+
+                        points.push(Point { x, y });
+                        if x > max_x {
+                            max_x = x;
+                        }
+                        if y > max_y {
+                            max_y = y;
+                        }
                     }
-                    collision_boxes.push(Some(boxes));
+                    collision_boxes.push(Some(Points {
+                        data: points,
+                        max_x,
+                        max_y,
+                    }));
                 }
                 _ => (),
             }
         }
-        data.insert(filename.to_string(), collision_boxes);
+        data.insert(
+            filename.to_string(),
+            CollisionPoints {
+                points: collision_boxes,
+            },
+        );
     }
     Ok(CollisionBoxes { data })
 }

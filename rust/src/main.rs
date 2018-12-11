@@ -69,7 +69,8 @@ impl<'a> MainState<'a> {
 
 impl<'a> event::EventHandler for MainState<'a> {
     fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
-        const DESIRED_FPS: u32 = 1000 / (1193182 / 21845 * 2);
+        //const DESIRED_FPS: u32 = 1000 / (1193182 / 21845 * 2);
+        const DESIRED_FPS: u32 = 1;
         while timer::check_update_time(ctx, DESIRED_FPS) {
             let delta = timer::get_delta(ctx);
             self.game
@@ -159,20 +160,20 @@ impl<'a> event::EventHandler for MainState<'a> {
             .join()
             .collect::<Vec<_>>();
 
-        graphics::set_color(ctx, graphics::Color::new(1.0, 1.0, 1.0, 1.0))?;
-        for (position, body) in storage {
-            if let Some(boxes) = &body.collision_boxes {
-                for collision_box in boxes {
-                    graphics::rectangle(ctx, graphics::DrawMode::Line(1.0), graphics::Rect {
-                        x: (position.x as i32 + collision_box.x) as f32 * 3.0,
-                        y: (position.y as i32 + collision_box.y) as f32 * 3.0,
-                        w: collision_box.w as f32 * 3.0,
-                        h: collision_box.h as f32 * 3.0,
-                    })?;
+        // graphics::set_color(ctx, graphics::Color::new(1.0, 1.0, 1.0, 1.0))?;
+        // for (position, body) in storage {
+        //     if let Some(boxes) = &body.collision_boxes {
+        //         for collision_box in boxes {
+        //             graphics::rectangle(ctx, graphics::DrawMode::Line(1.0), graphics::Rect {
+        //                 x: (position.x as i32 + collision_box.x) as f32 * 3.0,
+        //                 y: (position.y as i32 + collision_box.y) as f32 * 3.0,
+        //                 w: collision_box.w as f32 * 3.0,
+        //                 h: collision_box.h as f32 * 3.0,
+        //             })?;
 
-                }
-            }
-        }
+        //         }
+        //     }
+        // }
 
         let weapon_storage = self.game.world.read_storage::<Weapon>();
 
@@ -182,14 +183,32 @@ impl<'a> event::EventHandler for MainState<'a> {
 
         graphics::set_color(ctx, graphics::Color::new(1.0, 1.0, 1.0, 1.0))?;
         for (position, weapon) in storage {
-            if let Some(boxes) = &weapon.collision_boxes {
-                for collision_box in boxes {
-                    graphics::rectangle(ctx, graphics::DrawMode::Line(1.0), graphics::Rect {
-                        x: ((position.x as i32 + collision_box.x) * 3) as f32,
-                        y: ((position.y as i32 + collision_box.y) * 3) as f32,
-                        w: collision_box.w as f32 * 3.0,
-                        h: collision_box.h as f32 * 3.0,
-                    })?;
+            if let Some(collision_rects) = &weapon.collision_points {
+                for rect in collision_rects {
+                    graphics::rectangle(
+                        ctx,
+                        graphics::DrawMode::Line(1.0),
+                        graphics::Rect {
+                            x: ((position.x as i32 + rect.bounding.x) * 3) as f32,
+                            y: ((position.y as i32 + rect.bounding.y) * 3) as f32,
+                            w: rect.bounding.w as f32 * 3.0,
+                            h: rect.bounding.h as f32 * 3.0,
+                        },
+                    )?;
+                    for point in &rect.points {
+                        graphics::rectangle(
+                            ctx,
+                            graphics::DrawMode::Line(1.0),
+                            graphics::Rect {
+                                x: ((position.x as i32 + rect.bounding.x + point.x as i32) * 3)
+                                    as f32,
+                                y: ((position.y as i32 + rect.bounding.y + point.y as i32) * 3)
+                                    as f32,
+                                w: 3.0,
+                                h: 3.0,
+                            },
+                        )?;
+                    }
                 }
             }
         }
