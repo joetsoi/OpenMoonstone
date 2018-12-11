@@ -69,8 +69,8 @@ impl<'a> MainState<'a> {
 
 impl<'a> event::EventHandler for MainState<'a> {
     fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
-        //const DESIRED_FPS: u32 = 1000 / (1193182 / 21845 * 2);
-        const DESIRED_FPS: u32 = 1;
+        const DESIRED_FPS: u32 = 1000 / (1193182 / 21845 * 2);
+        // const DESIRED_FPS: u32 = 1;
         while timer::check_update_time(ctx, DESIRED_FPS) {
             let delta = timer::get_delta(ctx);
             self.game
@@ -181,7 +181,7 @@ impl<'a> event::EventHandler for MainState<'a> {
             .join()
             .collect::<Vec<_>>();
 
-        graphics::set_color(ctx, graphics::Color::new(1.0, 1.0, 1.0, 1.0))?;
+        graphics::set_color(ctx, graphics::Color::new(1.0, 0.0, 1.0, 1.0))?;
         for (position, weapon) in storage {
             if let Some(collision_rects) = &weapon.collision_points {
                 for rect in collision_rects {
@@ -212,6 +212,7 @@ impl<'a> event::EventHandler for MainState<'a> {
                 }
             }
         }
+        graphics::set_color(ctx, graphics::Color::new(1.0, 1.0, 1.0, 1.0))?;
 
         //let banner = &self.rects[73];
         //self.batch.add(graphics::DrawParam {
@@ -265,8 +266,8 @@ impl<'a> event::EventHandler for MainState<'a> {
 
         // println!("Delta frame time: {:?} ", timer::get_delta(ctx));
         // println!("Average FPS: {}", timer::get_fps(ctx));
-        //timer::sleep(Duration::from_millis(55));
-        timer::sleep(Duration::from_millis(100));
+        timer::sleep(Duration::from_millis(50));
+        //timer::sleep(Duration::from_millis(100));
         //timer::sleep(Duration::from_millis(109));
         Ok(())
     }

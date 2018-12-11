@@ -3,7 +3,7 @@ use specs::{Read, ReadStorage, System, WriteStorage};
 use crate::animation::{ImageType, SpriteData};
 use crate::combat::components::collision::Points;
 use crate::combat::components::{Body, Draw, Position, State, Weapon};
-use crate::files::collide::CollisionBoxes;
+use crate::files::collide::{CollisionBoxes, Point};
 use crate::game::ImageMetadata;
 use crate::rect::Rect;
 
@@ -47,7 +47,14 @@ impl<'a> System<'a> for UpdateBoundingBoxes {
                                         w: points.max_x as i32 * state.direction as i32,
                                         h: points.max_y as i32,
                                     },
-                                    points: points.data.clone(),
+                                    points: points
+                                        .data
+                                        .iter()
+                                        .map(|p| Point {
+                                            x: p.x * state.direction as i32,
+                                            y: p.y,
+                                        })
+                                        .collect(),
                                 })
                             }
                         }

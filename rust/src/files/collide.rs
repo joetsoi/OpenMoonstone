@@ -8,15 +8,15 @@ use pest_derive::*;
 
 #[derive(Default, Copy, Clone, Debug)]
 pub struct Point {
-    pub x: u32,
-    pub y: u32,
+    pub x: i32,
+    pub y: i32,
 }
 
 #[derive(Default, Clone, Debug)]
 pub struct Points {
     pub data: Vec<Point>,
-    pub max_x: u32,
-    pub max_y: u32,
+    pub max_x: i32,
+    pub max_y: i32,
 }
 
 #[derive(Default, Clone, Debug)]
@@ -61,20 +61,20 @@ pub fn parse_collide_hit<T: Read>(reader: &mut T) -> Result<CollisionBoxes, Erro
                         .as_str();
 
                     let mut points: Vec<Point> = Vec::new();
-                    let mut max_x: u32 = 0;
-                    let mut max_y: u32 = 0;
+                    let mut max_x: i32 = 0;
+                    let mut max_y: i32 = 0;
                     for coordinates in inner_bounding_boxes {
                         let mut inner_rules = coordinates.into_inner();
-                        let x: u32 = inner_rules
+                        let x: i32 = inner_rules
                             .next()
                             .ok_or_else(|| err_msg("Couldn't parse x coord"))?
                             .as_str()
-                            .parse::<u32>()?;
-                        let y: u32 = inner_rules
+                            .parse::<i32>()?;
+                        let y: i32 = inner_rules
                             .next()
                             .ok_or_else(|| err_msg("Couldn't parse y coord"))?
                             .as_str()
-                            .parse::<u32>()?;
+                            .parse::<i32>()?;
 
                         points.push(Point { x, y });
                         if x > max_x {
