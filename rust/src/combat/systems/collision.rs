@@ -136,14 +136,16 @@ impl<'a> System<'a> for CheckCollisions {
     ) {
         use specs::Join;
         let textures = &encounter_textures.data;
-        for (state, attacker_position, weapon, attacker) in
-            (&state, &position, &weapons, &*entities)
-                .join()
-                .filter(|(s, ..)| s.action.is_attack())
+        for (state, att_pos, weapon, attacker) in (&state, &position, &weapons, &*entities)
+            .join()
+            .filter(|(s, ..)| s.action.is_attack())
         {
             for (defender, body, defender_position) in (&*entities, &bodies, &position)
                 .join()
+                // ignore self for collision checking.
                 .filter(|(defender, ..)| attacker.id() != defender.id())
+                // ignore entities outside a 10 pixel y range.
+                .filter(|(_, _, d_pos)| (att_pos.y as i32 - d_pos.y as i32).abs() < 10)
             {
                 let hit = check_collision(&textures, weapon, body);
                 if hit {
