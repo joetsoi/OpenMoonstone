@@ -1,4 +1,4 @@
-use specs::VecStorage;
+use specs::{Entity, VecStorage};
 use specs_derive::*;
 
 use crate::rect::{Point, Rect};
@@ -26,4 +26,10 @@ pub struct Points {
 #[storage(VecStorage)]
 pub struct Weapon {
     pub collision_points: Option<Vec<Points>>,
+}
+
+#[derive(Component, Debug)]
+#[storage(VecStorage)]
+pub struct HasHit {
+    pub target: Entity,
 }

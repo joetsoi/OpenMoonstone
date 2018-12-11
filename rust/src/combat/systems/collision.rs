@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use specs::{Entities, Read, ReadStorage, System, WriteStorage};
 
 use crate::animation::ImageType;
@@ -5,6 +7,7 @@ use crate::combat::components::collision::{CollisionBox, Points};
 use crate::combat::components::{Action, Body, Draw, Facing, Position, State, Weapon};
 use crate::files::collide::CollisionBoxes;
 use crate::game::EncounterTextures;
+use crate::objects::TextureAtlas;
 use crate::rect::{Point, Rect};
 
 pub struct UpdateBoundingBoxes;
@@ -142,34 +145,43 @@ impl<'a> System<'a> for CheckCollisions {
                 .join()
                 .filter(|(defender, ..)| attacker.id() != defender.id())
             {
-                for weapon_part in weapon.collision_points.iter().flat_map(|v| v) {
-                    for body_part in body
-                        .collision_boxes
-                        .iter() // Option.iter()
-                        .flat_map(|v| v)
-                        .filter(|b| weapon_part.bounding.intersects(&b.rect))
-                    {
-                        for point in weapon_part
-                            .points
-                            .iter()
-                            .filter(|p| body_part.rect.contains_point(p))
-                        {
-                            let hit_x = point.x - body_part.rect.x;
-                            let hit_y = point.y - body_part.rect.y;
-                            let texture = textures.get(&body_part.sheet).expect(
-                                "Encounter hasn't loaded correct textures to as world resource",
-                            );
-                            let collision_lookup =
-                                hit_x as usize * texture.image.width + hit_y as usize;
-                            let pixel = texture.image.pixels[collision_lookup];
-                            if pixel > 0 {
-                                println!("hit xy: {:?}", pixel);
-                                break;
-                            }
-                        }
-                    }
+                let hit = check_collision(&textures, weapon, body);
+                if hit {
+                    println!("hit");
                 }
             }
         }
     }
+}
+
+fn check_collision(textures: &HashMap<String, TextureAtlas>, weapon: &Weapon, body: &Body) -> bool {
+    for weapon_part in weapon.collision_points.iter().flat_map(|v| v) {
+        // each attacking image in the attacker
+        for body_part in body
+            .collision_boxes
+            .iter() // Option.iter()
+            .flat_map(|v| v)
+            .filter(|b| weapon_part.bounding.intersects(&b.rect))
+        {
+            // check that against each defending image in the defender
+            for point in weapon_part
+                .points
+                .iter()
+                .filter(|p| body_part.rect.contains_point(p))
+            {
+                // check the points collide and the pixel in the image is a part of the target
+                let hit_x = point.x - body_part.rect.x;
+                let hit_y = point.y - body_part.rect.y;
+                let texture = textures
+                    .get(&body_part.sheet)
+                    .expect("Encounter hasn't loaded correct textures to as world resource");
+                let collision_lookup = hit_x as usize * texture.image.width + hit_y as usize;
+                let pixel = texture.image.pixels[collision_lookup];
+                if pixel > 0 {
+                    return true;
+                }
+            }
+        }
+    }
+    false
 }
