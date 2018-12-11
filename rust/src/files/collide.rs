@@ -6,11 +6,7 @@ use failure::Error;
 use pest::Parser;
 use pest_derive::*;
 
-#[derive(Default, Copy, Clone, Debug)]
-pub struct Point {
-    pub x: i32,
-    pub y: i32,
-}
+use crate::rect::Point;
 
 #[derive(Default, Clone, Debug)]
 pub struct Points {

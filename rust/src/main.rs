@@ -24,8 +24,8 @@ use openmoonstone::combat::components::{
     Velocity, WalkingState, Weapon,
 };
 use openmoonstone::combat::systems::{
-    ActionSystem, Animation, Boundary, Commander, Movement, StateUpdater, UpdateBoundingBoxes,
-    UpdateImage, VelocitySystem,
+    ActionSystem, Animation, Boundary, CheckCollisions, Commander, Movement, StateUpdater,
+    UpdateBoundingBoxes, UpdateImage, VelocitySystem,
 };
 use openmoonstone::files::collide::CollisionBoxes;
 use openmoonstone::game::Game;
@@ -189,8 +189,8 @@ impl<'a> event::EventHandler for MainState<'a> {
                         ctx,
                         graphics::DrawMode::Line(1.0),
                         graphics::Rect {
-                            x: ((position.x as i32 + rect.bounding.x) * 3) as f32,
-                            y: ((position.y as i32 + rect.bounding.y) * 3) as f32,
+                            x: (rect.bounding.x * 3) as f32,
+                            y: (rect.bounding.y * 3) as f32,
                             w: rect.bounding.w as f32 * 3.0,
                             h: rect.bounding.h as f32 * 3.0,
                         },
@@ -200,10 +200,8 @@ impl<'a> event::EventHandler for MainState<'a> {
                             ctx,
                             graphics::DrawMode::Line(1.0),
                             graphics::Rect {
-                                x: ((position.x as i32 + rect.bounding.x + point.x as i32) * 3)
-                                    as f32,
-                                y: ((position.y as i32 + rect.bounding.y + point.y as i32) * 3)
-                                    as f32,
+                                x: (point.x as i32 * 3) as f32,
+                                y: (point.y as i32 * 3) as f32,
                                 w: 3.0,
                                 h: 3.0,
                             },
@@ -449,6 +447,11 @@ fn main() {
             UpdateBoundingBoxes,
             "update_bounding_boxes",
             &["update_image"],
+        )
+        .with(
+            CheckCollisions,
+            "check_collisions",
+            &["update_bounding_boxes"],
         )
         // .with_thread_local(Renderer {
         //     store: Store::new(StoreOpt::default()).expect("store creation"),

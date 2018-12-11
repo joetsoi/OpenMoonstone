@@ -1,8 +1,7 @@
 use specs::VecStorage;
 use specs_derive::*;
 
-use crate::rect::Rect;
-use crate::files::collide::Point;
+use crate::rect::{Point, Rect};
 
 #[derive(Component, Debug, Default)]
 #[storage(VecStorage)]
