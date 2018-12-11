@@ -25,7 +25,7 @@ pub struct ObjectsFile {
     pub images: Vec<Image>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TextureAtlas {
     pub image: Image,
     pub rects: Vec<Rect>,
@@ -140,7 +140,7 @@ impl ObjectsFile {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Image {
     pub width: usize,
     pub height: usize,

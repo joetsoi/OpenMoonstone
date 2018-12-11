@@ -20,6 +20,11 @@ pub struct ImageMetadata {
     pub data: HashMap<String, Vec<Rect>>,
 }
 
+#[derive(Debug, Default, Clone)]
+pub struct EncounterTextures {
+    pub data: HashMap<String, TextureAtlas>,
+}
+
 pub struct Game {
     pub input: input::InputState,
     pub input_binding: input::InputBinding,
@@ -70,14 +75,18 @@ impl Game {
         world.add_resource(SpriteData { sprites });
 
         let mut image_sizes: HashMap<String, Vec<Rect>> = HashMap::new();
+        let mut texture_atlases: HashMap<String, TextureAtlas> = HashMap::new();
         for atlas_name in atlas_names {
             let atlas = store
                 .get::<_, TextureAtlas>(&LogicalKey::new(atlas_name.clone()), ctx)
                 .unwrap();
             image_sizes.insert(atlas_name.clone(), atlas.borrow().rects.clone());
+            texture_atlases.insert(atlas_name.clone(), atlas.borrow().clone());
         }
         world.add_resource(ImageMetadata { data: image_sizes });
-
+        world.add_resource(EncounterTextures {
+            data: texture_atlases,
+        });
 
         Ok(Game {
             input: input::InputState::new(),
