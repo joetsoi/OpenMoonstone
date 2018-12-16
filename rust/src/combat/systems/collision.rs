@@ -4,7 +4,9 @@ use specs::{Entities, Read, ReadStorage, System, WriteStorage};
 
 use crate::animation::ImageType;
 use crate::combat::components::collision::{CollisionBox, Points};
-use crate::combat::components::{Action, Body, Collided, Draw, Facing, Position, State, Weapon};
+use crate::combat::components::{
+    Action, Body, Collided, Draw, Facing, Health, Position, State, Weapon,
+};
 use crate::files::collide::CollisionBoxes;
 use crate::game::EncounterTextures;
 use crate::objects::TextureAtlas;
@@ -189,12 +191,20 @@ fn check_collision(textures: &HashMap<String, TextureAtlas>, weapon: &Weapon, bo
 pub struct ResolveCollisions;
 
 impl<'a> System<'a> for ResolveCollisions {
-    type SystemData = (WriteStorage<'a, Collided>, Entities<'a>);
+    type SystemData = (
+        WriteStorage<'a, Collided>,
+        WriteStorage<'a, Health>,
+        Entities<'a>,
+    );
 
-    fn run(&mut self, (mut collided_data, entities): Self::SystemData) {
+    fn run(&mut self, (mut collided_storage, mut health_storage, entities): Self::SystemData) {
         use specs::Join;
-        for (collided, entity) in (collided_data.drain(), &*entities).join() {
-            println!("collided {:?}", collided);
+        for (collided, entity) in (collided_storage.drain(), &*entities).join() {
+            let health: Option<&mut Health> = health_storage.get_mut(entity);
+            if let Some(health) = health {
+                health.points -= 3; // TODO: change hard coded weapon damage
+                println!("collided {:?}", health);
+            }
         }
     }
 }

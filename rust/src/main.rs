@@ -20,7 +20,7 @@ use warmy::{LogicalKey, Store, StoreOpt};
 
 use openmoonstone::animation::Sprite;
 use openmoonstone::combat::components::{
-    AnimationState, Body, Collided, Controller, Draw, Facing, Intent, Position, State,
+    AnimationState, Body, Collided, Controller, Draw, Facing, Health, Intent, Position, State,
     TouchingBoundary, Velocity, WalkingState, Weapon,
 };
 use openmoonstone::combat::systems::{
@@ -361,6 +361,9 @@ fn main() {
             fire: false,
         })
         .with(Position { x: 100, y: 100 })
+        .with(Health {
+            ..Default::default()
+        })
         .with(Draw {
             frame: sprite.borrow().animations["walk"].frames[0].clone(),
             animation: "walk".to_string(),
@@ -402,6 +405,9 @@ fn main() {
             fire: false,
         })
         .with(Position { x: 200, y: 100 })
+        .with(Health {
+            ..Default::default()
+        })
         .with(Draw {
             frame: sprite.borrow().animations["walk"].frames[0].clone(),
             animation: "walk".to_string(),
