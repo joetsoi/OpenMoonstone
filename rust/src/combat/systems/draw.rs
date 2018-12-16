@@ -26,7 +26,6 @@ impl<'a> System<'a> for UpdateImage {
                     .animations
                     .get(animation)
                     .expect(format!("{} not found in yaml", animation).as_str());
-                //println!("{:?}, {:?}", animation_state, animation);
                 draw.frame = animation.frames[animation_state.frame_number as usize].clone();
                 draw.direction = state.direction;
                 state.length = animation.frames.len() as u32;

@@ -23,6 +23,7 @@ lazy_static! {
         Action::Move { x: XAxis::Left, y: YAxis::Down } => "walk".to_string(),
         Action::Move { x: XAxis::Right, y: YAxis::Down } => "walk".to_string(),
         Action::Attack { name: "swing".to_string() } => "swing".to_string(),
+        Action::AttackRecovery => "recovery".to_string(),
     };
 }
 
@@ -57,7 +58,7 @@ impl<'a> System<'a> for Animation {
                 Action::Idle => {
                     animation_state.frame_number = 0;
                 }
-                Action::Attack { .. } | Action::Hit { .. } => {
+                Action::Attack { .. } | Action::Hit { .. } | Action::AttackRecovery => {
                     animation_state.frame_number = state.ticks;
                 }
                 _ => animation_state.frame_number = walking_state.step,

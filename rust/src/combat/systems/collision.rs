@@ -195,7 +195,7 @@ impl<'a> System<'a> for ResolveCollisions {
         Read<'a, SpriteData>,
         WriteStorage<'a, Collided>,
         WriteStorage<'a, Health>,
-        WriteStorage<'a, Draw>,
+        ReadStorage<'a, Draw>,
         WriteStorage<'a, State>,
         Entities<'a>,
     );
@@ -206,7 +206,7 @@ impl<'a> System<'a> for ResolveCollisions {
             sprite_data,
             mut collided_storage,
             mut health_storage,
-            mut draw_storage,
+            draw_storage,
             mut state_storage,
             entities,
         ): Self::SystemData,
@@ -218,7 +218,7 @@ impl<'a> System<'a> for ResolveCollisions {
                 // set defender animation
                 let target = &collided.target;
                 let target_health: Option<&mut Health> = health_storage.get_mut(*target);
-                let target_draw: Option<&mut Draw> = draw_storage.get_mut(*target);
+                let target_draw: Option<&Draw> = draw_storage.get(*target);
                 let target_state: Option<&mut State> = state_storage.get_mut(*target);
                 if let (Some(target_health), Some(target_draw), Some(target_state)) =
                     (target_health, target_draw, target_state)
@@ -229,9 +229,8 @@ impl<'a> System<'a> for ResolveCollisions {
                     if let Some(sprite) = sprite_resource {
                         let animation = sprite
                             .animations
-                            .get("hit")
+                            .get("hit") // TODO find a way of dealing with this in animation system
                             .expect(format!("hit not found in yaml").as_str());
-                        target_draw.frame = animation.frames[0].clone();
                         target_state.length = animation.frames.len() as u32;
                         target_state.action = Action::Hit {
                             name: "hit".to_string(),
@@ -242,7 +241,7 @@ impl<'a> System<'a> for ResolveCollisions {
             }
             {
                 // set attacker animation
-                let draw: Option<&mut Draw> = draw_storage.get_mut(entity);
+                let draw: Option<&Draw> = draw_storage.get(entity);
                 let state: Option<&mut State> = state_storage.get_mut(entity);
                 if let (Some(draw), Some(state)) = (draw, state) {
                     let sprite_resource = sprites.get(&draw.resource_name);
@@ -251,9 +250,8 @@ impl<'a> System<'a> for ResolveCollisions {
                             .animations
                             .get("recovery")
                             .expect(format!("hit not found in yaml").as_str());
-                        draw.frame = animation.frames[0].clone();
                         state.length = animation.frames.len() as u32;
-                        state.action = Action::Idle;
+                        state.action = Action::AttackRecovery;
                         state.ticks = 0;
                     }
                 }

@@ -9,6 +9,7 @@ pub enum Action {
     Idle,
     Move { x: XAxis, y: YAxis },
     Attack { name: String },
+    AttackRecovery,
     Defend { name: String },
     Hit { name: String },
     Death { name: String },
