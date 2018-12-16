@@ -15,7 +15,13 @@ impl<'a> System<'a> for StateUpdater {
                 Action::Attack { .. } | Action::Hit { .. } | Action::AttackRecovery => {
                     state.ticks += 1;
                     if state.ticks == state.length && state.length != 0 {
-                        state.action = Action::Idle;
+                        // assuming: that all states that match this arm have a
+                        // length > 1 means we don't need to update state.length
+                        // in the ResolveCollisions with the animation length
+                        // whenever that system changes state of an entity.
+                        if state.ticks > 1 {
+                            state.action = Action::Idle;
+                        }
                     }
                 }
                 _ => (),
