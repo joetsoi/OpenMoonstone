@@ -4,7 +4,7 @@ use specs::{Entities, Read, ReadStorage, System, WriteStorage};
 
 use crate::animation::ImageType;
 use crate::combat::components::collision::{CollisionBox, Points};
-use crate::combat::components::{Action, Body, Draw, Facing, Position, State, Weapon};
+use crate::combat::components::{Action, Body, Collided, Draw, Facing, Position, State, Weapon};
 use crate::files::collide::CollisionBoxes;
 use crate::game::EncounterTextures;
 use crate::objects::TextureAtlas;
@@ -124,12 +124,13 @@ impl<'a> System<'a> for CheckCollisions {
         ReadStorage<'a, Position>,
         ReadStorage<'a, Body>,
         ReadStorage<'a, Weapon>,
+        WriteStorage<'a, Collided>,
         Entities<'a>,
     );
 
     fn run(
         &mut self,
-        (encounter_textures, state, position, bodies, weapons, entities): Self::SystemData,
+        (encounter_textures, state, position, bodies, weapons, mut collided, entities): Self::SystemData,
     ) {
         use specs::Join;
         let textures = &encounter_textures.data;
@@ -146,7 +147,7 @@ impl<'a> System<'a> for CheckCollisions {
             {
                 let hit = check_collision(&textures, weapon, body);
                 if hit {
-                    println!("hit");
+                    let result = collided.insert(attacker, Collided { target: defender });
                 }
             }
         }
@@ -183,4 +184,17 @@ fn check_collision(textures: &HashMap<String, TextureAtlas>, weapon: &Weapon, bo
         }
     }
     false
+}
+
+pub struct ResolveCollisions;
+
+impl<'a> System<'a> for ResolveCollisions {
+    type SystemData = (WriteStorage<'a, Collided>, Entities<'a>);
+
+    fn run(&mut self, (mut collided_data, entities): Self::SystemData) {
+        use specs::Join;
+        for (collided, entity) in (collided_data.drain(), &*entities).join() {
+            println!("collided {:?}", collided);
+        }
+    }
 }

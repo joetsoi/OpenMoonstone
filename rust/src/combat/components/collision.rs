@@ -30,6 +30,6 @@ pub struct Weapon {
 
 #[derive(Component, Debug)]
 #[storage(VecStorage)]
-pub struct HasHit {
+pub struct Collided {
     pub target: Entity,
 }

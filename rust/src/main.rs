@@ -20,12 +20,12 @@ use warmy::{LogicalKey, Store, StoreOpt};
 
 use openmoonstone::animation::Sprite;
 use openmoonstone::combat::components::{
-    AnimationState, Body, Controller, Draw, Facing, Intent, Position, State, TouchingBoundary,
-    Velocity, WalkingState, Weapon,
+    AnimationState, Body, Collided, Controller, Draw, Facing, Intent, Position, State,
+    TouchingBoundary, Velocity, WalkingState, Weapon,
 };
 use openmoonstone::combat::systems::{
-    ActionSystem, Animation, Boundary, CheckCollisions, Commander, Movement, StateUpdater,
-    UpdateBoundingBoxes, UpdateImage, VelocitySystem,
+    ActionSystem, Animation, Boundary, CheckCollisions, Commander, Movement, ResolveCollisions,
+    StateUpdater, UpdateBoundingBoxes, UpdateImage, VelocitySystem,
 };
 use openmoonstone::files::collide::CollisionBoxes;
 use openmoonstone::game::Game;
@@ -452,6 +452,11 @@ fn main() {
             CheckCollisions,
             "check_collisions",
             &["update_bounding_boxes"],
+        )
+        .with(
+            ResolveCollisions,
+            "resolve_collisions",
+            &["check_collisions"],
         )
         // .with_thread_local(Renderer {
         //     store: Store::new(StoreOpt::default()).expect("store creation"),
