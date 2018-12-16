@@ -12,7 +12,7 @@ impl<'a> System<'a> for StateUpdater {
 
         for state in (&mut state).join() {
             match state.action {
-                Action::Attack { .. } => {
+                Action::Attack { .. } | Action::Hit { .. } => {
                     state.ticks += 1;
                     if state.ticks == state.length && state.length != 0 {
                         state.action = Action::Idle;

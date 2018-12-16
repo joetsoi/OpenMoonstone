@@ -6,12 +6,13 @@ use specs::{ReadStorage, System, WriteStorage};
 
 use crate::combat::components::intent::{XAxis, YAxis};
 use crate::combat::components::{
-    Action, AnimationState, Draw, State, TouchingBoundary, WalkingState
+    Action, AnimationState, Draw, State, TouchingBoundary, WalkingState,
 };
 
 lazy_static! {
     static ref action_to_animation: HashMap<Action, String> = hashmap!{
         Action::Idle => "idle".to_string(),
+        Action::Hit { name: "hit".to_string() } => "hit".to_string(),
         //Action::Move { x: XAxis::Centre, y: YAxis::Centre } => "idle".to_string(),
         Action::Move { x: XAxis::Centre, y: YAxis::Up } => "up".to_string(),
         Action::Move { x: XAxis::Centre, y: YAxis::Down } => "down".to_string(),
@@ -40,7 +41,7 @@ impl<'a> System<'a> for Animation {
     fn run(
         &mut self,
         (walking_state, touching_boundary, mut animation_state, mut draw, state): Self::SystemData,
-){
+    ) {
         use specs::Join;
         for (walking_state, touching_boundary, animation_state, draw, state) in (
             //&intent,
@@ -56,7 +57,7 @@ impl<'a> System<'a> for Animation {
                 Action::Idle => {
                     animation_state.frame_number = 0;
                 }
-                Action::Attack { .. } => {
+                Action::Attack { .. } | Action::Hit { .. } => {
                     animation_state.frame_number = state.ticks;
                 }
                 _ => animation_state.frame_number = walking_state.step,

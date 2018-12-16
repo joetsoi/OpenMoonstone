@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use specs::{Entities, Read, ReadStorage, System, WriteStorage};
 
-use crate::animation::ImageType;
+use crate::animation::{ImageType, SpriteData};
 use crate::combat::components::collision::{CollisionBox, Points};
 use crate::combat::components::{
     Action, Body, Collided, Draw, Facing, Health, Position, State, Weapon,
@@ -192,18 +192,71 @@ pub struct ResolveCollisions;
 
 impl<'a> System<'a> for ResolveCollisions {
     type SystemData = (
+        Read<'a, SpriteData>,
         WriteStorage<'a, Collided>,
         WriteStorage<'a, Health>,
+        WriteStorage<'a, Draw>,
+        WriteStorage<'a, State>,
         Entities<'a>,
     );
 
-    fn run(&mut self, (mut collided_storage, mut health_storage, entities): Self::SystemData) {
+    fn run(
+        &mut self,
+        (
+            sprite_data,
+            mut collided_storage,
+            mut health_storage,
+            mut draw_storage,
+            mut state_storage,
+            entities,
+        ): Self::SystemData,
+    ) {
         use specs::Join;
+        let sprites = &sprite_data.sprites;
         for (collided, entity) in (collided_storage.drain(), &*entities).join() {
-            let health: Option<&mut Health> = health_storage.get_mut(entity);
-            if let Some(health) = health {
-                health.points -= 3; // TODO: change hard coded weapon damage
-                println!("collided {:?}", health);
+            {
+                // set defender animation
+                let target = &collided.target;
+                let target_health: Option<&mut Health> = health_storage.get_mut(*target);
+                let target_draw: Option<&mut Draw> = draw_storage.get_mut(*target);
+                let target_state: Option<&mut State> = state_storage.get_mut(*target);
+                if let (Some(target_health), Some(target_draw), Some(target_state)) =
+                    (target_health, target_draw, target_state)
+                {
+                    target_health.points -= 3; // TODO: change hard coded weapon damage
+                    println!("collided {:?}", target_health);
+                    let sprite_resource = sprites.get(&target_draw.resource_name);
+                    if let Some(sprite) = sprite_resource {
+                        let animation = sprite
+                            .animations
+                            .get("hit")
+                            .expect(format!("hit not found in yaml").as_str());
+                        target_draw.frame = animation.frames[0].clone();
+                        target_state.length = animation.frames.len() as u32;
+                        target_state.action = Action::Hit {
+                            name: "hit".to_string(),
+                        };
+                        target_state.ticks = 0;
+                    }
+                }
+            }
+            {
+                // set attacker animation
+                let draw: Option<&mut Draw> = draw_storage.get_mut(entity);
+                let state: Option<&mut State> = state_storage.get_mut(entity);
+                if let (Some(draw), Some(state)) = (draw, state) {
+                    let sprite_resource = sprites.get(&draw.resource_name);
+                    if let Some(sprite) = sprite_resource {
+                        let animation = sprite
+                            .animations
+                            .get("recovery")
+                            .expect(format!("hit not found in yaml").as_str());
+                        draw.frame = animation.frames[0].clone();
+                        state.length = animation.frames.len() as u32;
+                        state.action = Action::Idle;
+                        state.ticks = 0;
+                    }
+                }
             }
         }
     }

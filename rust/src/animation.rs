@@ -17,6 +17,8 @@ pub enum ImageType {
     NonSolid,
     Collidee,
     Collider,
+    Blood,
+    BloodStain,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
