@@ -46,36 +46,33 @@ impl<'a> System<'a> for UpdateBoundingBoxes {
             for image in draw.frame.images.iter() {
                 match image.image_type {
                     ImageType::Collider => {
-                        if let Some(collision_points) = collision_data.get(&image.sheet) {
-                            if let Some(points) = &collision_points.points[image.image] {
-                                let mut image_global_x: i32 =
-                                    position.x as i32 + image.x * state.direction as i32;
-                                let image_global_y: i32 = position.y as i32 + image.y;
-                                image_global_x = match state.direction {
-                                    Facing::Left => image_global_x - points.max_x as i32,
-                                    Facing::Right => image_global_x,
-                                };
-                                weapon_boxes.push(Points {
-                                    bounding: Rect {
-                                        // x: image.x * state.direction as i32,
-                                        // y: image.y,
-                                        x: image_global_x,
-                                        y: image_global_y,
-                                        w: points.max_x,
-                                        h: points.max_y,
-                                    },
-                                    points: points
-                                        .data
-                                        .iter()
-                                        .map(|p| Point {
-                                            x: image_global_x + p.x * state.direction as i32,
-                                            y: image_global_y + p.y,
-                                            // x: p.x * state.direction as i32,
-                                            // y: p.y,
-                                        })
-                                        .collect(),
-                                })
-                            }
+                        if let Some(Some(points)) = &collision_data
+                            .get(&image.sheet)
+                            .and_then(|v| v.points.get(image.image))
+                        {
+                            let direction = state.direction as i32;
+                            let image_global_x: i32 = position.x as i32 + image.x * direction;
+                            let image_global_y: i32 = position.y as i32 + image.y;
+                            let rect_x = match state.direction {
+                                Facing::Left => image_global_x - points.max_x as i32,
+                                Facing::Right => image_global_x,
+                            };
+                            weapon_boxes.push(Points {
+                                bounding: Rect {
+                                    x: rect_x,
+                                    y: image_global_y,
+                                    w: points.max_x,
+                                    h: points.max_y,
+                                },
+                                points: points
+                                    .data
+                                    .iter()
+                                    .map(|p| Point {
+                                        x: image_global_x + p.x * direction,
+                                        y: image_global_y + p.y,
+                                    })
+                                    .collect(),
+                            })
                         }
                     }
                     ImageType::Collidee => {
