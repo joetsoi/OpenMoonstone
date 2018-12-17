@@ -18,7 +18,7 @@ use specs::world::Builder;
 use specs::{Dispatcher, DispatcherBuilder, Join, World};
 use warmy::{LogicalKey, Store, StoreOpt};
 
-use openmoonstone::animation::Sprite;
+use openmoonstone::animation::{ImageType, Sprite};
 use openmoonstone::combat::components::{
     AnimationState, Body, Collided, Controller, Draw, Facing, Health, Intent, Position, State,
     TouchingBoundary, Velocity, WalkingState, Weapon,
@@ -89,12 +89,13 @@ impl<'a> event::EventHandler for MainState<'a> {
 
         let screen_origin = graphics::Point2::new(0.0, 0.0);
         // draw background
-        let lair = self.game.world.read_resource::<Lair>();
+        let lair = &self.game.background;
         graphics::draw_ex(
             ctx,
-            &lair.background,
+            lair,
             graphics::DrawParam {
                 dest: screen_origin,
+                // TODO: this shouldn't be need investigate why it is.
                 scale: graphics::Point2::new(3.0, 3.0),
                 ..Default::default()
             },
@@ -134,24 +135,30 @@ impl<'a> event::EventHandler for MainState<'a> {
 
                 let rect = atlas.borrow().rects[image.image];
                 let texture_size = atlas.borrow().image.width as f32;
-                graphics::draw_ex(
-                    ctx,
-                    ggez_image,
-                    graphics::DrawParam {
-                        src: graphics::Rect {
-                            x: rect.x as f32 / texture_size,
-                            y: rect.y as f32 / texture_size,
-                            w: rect.w as f32 / texture_size,
-                            h: rect.h as f32 / texture_size,
-                        },
-                        dest: graphics::Point2::new(
-                            (position.x as i32 + (draw.direction as i32 * image.x)) as f32 * 3.0,
-                            (position.y as i32 + image.y) as f32 * 3.0,
-                        ),
-                        scale: graphics::Point2::new((draw.direction as i32 * 3) as f32, 3.0),
-                        ..Default::default()
+                let draw_params = graphics::DrawParam {
+                    src: graphics::Rect {
+                        x: rect.x as f32 / texture_size,
+                        y: rect.y as f32 / texture_size,
+                        w: rect.w as f32 / texture_size,
+                        h: rect.h as f32 / texture_size,
                     },
-                )?;
+                    dest: graphics::Point2::new(
+                        (position.x as i32 + (draw.direction as i32 * image.x)) as f32 * 3.0,
+                        (position.y as i32 + image.y) as f32 * 3.0,
+                    ),
+                    scale: graphics::Point2::new((draw.direction as i32 * 3) as f32, 3.0),
+                    ..Default::default()
+                };
+
+                graphics::draw_ex(ctx, ggez_image, draw_params)?;
+                match image.image_type {
+                    ImageType::BloodStain => {
+                        graphics::set_canvas(ctx, Some(&self.game.background));
+                        graphics::draw_ex(ctx, ggez_image, draw_params)?;
+                        graphics::set_canvas(ctx, None);
+                    }
+                    _ => (),
+                }
             }
         }
 

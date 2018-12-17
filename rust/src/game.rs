@@ -1,6 +1,7 @@
 use std::collections::{HashMap, HashSet};
 
 use failure::Error;
+use ggez::conf::NumSamples;
 use ggez::graphics;
 use ggez::Context;
 use specs::World;
@@ -27,6 +28,7 @@ pub struct EncounterTextures {
     pub data: HashMap<String, TextureAtlas>,
 }
 
+#[derive(Debug)]
 pub struct Lair {
     pub background: graphics::Image,
 }
@@ -36,6 +38,7 @@ pub struct Game {
     pub input_binding: input::InputBinding,
     pub store: Store<Context>,
     pub world: World,
+    pub background: graphics::Canvas,
 }
 
 impl Game {
@@ -103,15 +106,29 @@ impl Game {
         let piv = store
             .get::<_, PivImage>(&LogicalKey::new(background_name), ctx)
             .unwrap();
-        let background =
+        let background_image =
             graphics::Image::from_rgba8(ctx, 320, 200, &*piv.borrow().to_rgba8()).unwrap();
-        world.add_resource(Lair { background });
+        //world.add_resource(Lair { background });
+        let background = graphics::Canvas::new(ctx, 320, 200, NumSamples::One)?;
+        graphics::set_canvas(ctx, Some(&background));
+        let screen_origin = graphics::Point2::new(0.0, 0.0);
+        graphics::draw_ex(
+            ctx,
+            &background_image,
+            graphics::DrawParam {
+                dest: screen_origin,
+                scale: graphics::Point2::new(3.0, 3.0),
+                ..Default::default()
+            },
+        )?;
+        graphics::set_canvas(ctx, None);
 
         Ok(Game {
             input: input::InputState::new(),
             input_binding: input::create_input_binding(),
             store,
             world,
+            background,
         })
     }
 }
