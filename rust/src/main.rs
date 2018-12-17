@@ -28,7 +28,7 @@ use openmoonstone::combat::systems::{
     StateUpdater, UpdateBoundingBoxes, UpdateImage, VelocitySystem,
 };
 use openmoonstone::files::collide::CollisionBoxes;
-use openmoonstone::game::Game;
+use openmoonstone::game::{Game, Lair};
 use openmoonstone::input;
 //use openmoonstone::objects::{Rect, TextureAtlas};
 use openmoonstone::objects::TextureAtlas;
@@ -37,7 +37,7 @@ use openmoonstone::piv::{Colour, PivImage};
 struct MainState<'a> {
     dispatcher: Dispatcher<'a, 'a>,
     palette: Vec<Colour>,
-    image: graphics::Image,
+    //image: graphics::Image,
     //batch: graphics::spritebatch::SpriteBatch,
     //rects: Vec<Rect>,
     game: Game,
@@ -69,8 +69,8 @@ impl<'a> MainState<'a> {
 
 impl<'a> event::EventHandler for MainState<'a> {
     fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
-        //const DESIRED_FPS: u32 = 1000 / (1193182 / 21845 * 2);
-        const DESIRED_FPS: u32 = 1;
+        const DESIRED_FPS: u32 = 1000 / (1193182 / 21845 * 2);
+        // const DESIRED_FPS: u32 = 1;
         while timer::check_update_time(ctx, DESIRED_FPS) {
             let delta = timer::get_delta(ctx);
             self.game
@@ -89,9 +89,10 @@ impl<'a> event::EventHandler for MainState<'a> {
 
         let screen_origin = graphics::Point2::new(0.0, 0.0);
         // draw background
+        let lair = self.game.world.read_resource::<Lair>();
         graphics::draw_ex(
             ctx,
-            &self.image,
+            &lair.background,
             graphics::DrawParam {
                 dest: screen_origin,
                 scale: graphics::Point2::new(3.0, 3.0),
@@ -304,7 +305,7 @@ fn main() {
     let ctx = &mut Context::load_from_conf("openmoonstone", "joetsoi", c).unwrap();
     graphics::set_default_filter(ctx, graphics::FilterMode::Nearest);
 
-    let mut game = Game::new(ctx, &["knight"]).expect("failed to initialize game");
+    let mut game = Game::new(ctx, &["knight"], filename).expect("failed to initialize game");
     let piv = game
         .store
         .get::<_, PivImage>(&LogicalKey::new(filename), ctx)
@@ -333,7 +334,7 @@ fn main() {
     // ).unwrap();
     // a.save("test.png");
 
-    let background = graphics::Image::from_rgba8(ctx, 320, 200, &*piv.borrow().to_rgba8()).unwrap();
+    //let background = graphics::Image::from_rgba8(ctx, 320, 200, &*piv.borrow().to_rgba8()).unwrap();
     // let image = graphics::Image::from_rgba8(
     //     ctx,
     //     atlas_dimension as u16,
@@ -473,7 +474,7 @@ fn main() {
         game: game,
         dispatcher: dispatcher,
         palette: piv.borrow().palette.to_vec(),
-        image: background,
+        //image: background,
         //batch: batch,
         //rects: atlas.borrow().rects.clone(),
         images: HashMap::new(),

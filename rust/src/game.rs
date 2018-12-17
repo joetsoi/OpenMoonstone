@@ -1,6 +1,7 @@
 use std::collections::{HashMap, HashSet};
 
 use failure::Error;
+use ggez::graphics;
 use ggez::Context;
 use specs::World;
 use warmy::{LogicalKey, Store, StoreOpt};
@@ -13,6 +14,7 @@ use crate::combat::components::{
 use crate::input;
 use crate::manager::GameYaml;
 use crate::objects::TextureAtlas;
+use crate::piv::PivImage;
 use crate::rect::Rect;
 
 #[derive(Debug, Default, Clone)]
@@ -25,6 +27,10 @@ pub struct EncounterTextures {
     pub data: HashMap<String, TextureAtlas>,
 }
 
+pub struct Lair {
+    pub background: graphics::Image,
+}
+
 pub struct Game {
     pub input: input::InputState,
     pub input_binding: input::InputBinding,
@@ -33,7 +39,11 @@ pub struct Game {
 }
 
 impl Game {
-    pub fn new(ctx: &mut Context, entity_names: &[&str]) -> Result<Game, Error> {
+    pub fn new(
+        ctx: &mut Context,
+        entity_names: &[&str],
+        background_name: &str,
+    ) -> Result<Game, Error> {
         let mut store: Store<Context> = Store::new(StoreOpt::default())?;
         let mut world = World::new();
         world.register::<AnimationState>();
@@ -89,6 +99,13 @@ impl Game {
         world.add_resource(EncounterTextures {
             data: texture_atlases,
         });
+
+        let piv = store
+            .get::<_, PivImage>(&LogicalKey::new(background_name), ctx)
+            .unwrap();
+        let background =
+            graphics::Image::from_rgba8(ctx, 320, 200, &*piv.borrow().to_rgba8()).unwrap();
+        world.add_resource(Lair { background });
 
         Ok(Game {
             input: input::InputState::new(),
