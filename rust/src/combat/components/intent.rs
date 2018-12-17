@@ -17,7 +17,12 @@ pub enum YAxis {
 
 #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
 pub enum AttackType {
+    BackSwing,
+    Chop,
     Swing,
+    ThrowDagger,
+    Thrust,
+    UpThrust
 }
 
 #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]
