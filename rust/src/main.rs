@@ -69,8 +69,8 @@ impl<'a> MainState<'a> {
 
 impl<'a> event::EventHandler for MainState<'a> {
     fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
-        const DESIRED_FPS: u32 = 1000 / (1193182 / 21845 * 2);
-        //const DESIRED_FPS: u32 = 1;
+        //const DESIRED_FPS: u32 = 1000 / (1193182 / 21845 * 2);
+        const DESIRED_FPS: u32 = 1;
         while timer::check_update_time(ctx, DESIRED_FPS) {
             let delta = timer::get_delta(ctx);
             self.game

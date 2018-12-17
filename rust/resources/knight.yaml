@@ -123,3 +123,4 @@ recovery:
         - {sheet:kn1.ob, image: 1, y: 45, x: -13, image_type: NonSolid}
         - {sheet:kn1.ob, image: 0, y: -9, x: -9, image_type: Collidee}
         - {sheet:kn4.ob, image: 1, y: -6, x: 4, image_type: NonSolid}
+  order: [0, 1, 1]

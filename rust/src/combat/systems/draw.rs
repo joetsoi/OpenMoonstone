@@ -26,9 +26,21 @@ impl<'a> System<'a> for UpdateImage {
                     .animations
                     .get(animation)
                     .expect(format!("{} not found in yaml", animation).as_str());
-                draw.frame = animation.frames[animation_state.frame_number as usize].clone();
-                draw.direction = state.direction;
-                state.length = animation.frames.len() as u32;
+                match &animation.order {
+                    None => {
+                        draw.frame =
+                            animation.frames[animation_state.frame_number as usize].clone();
+                        draw.direction = state.direction;
+                        state.length = animation.frames.len() as u32;
+                    }
+                    Some(order) => {
+                        let frame_num: usize =
+                            order[animation_state.frame_number as usize] as usize;
+                        draw.frame = animation.frames[frame_num].clone();
+                        draw.direction = state.direction;
+                        state.length = order.len() as u32;
+                    }
+                }
             }
         }
     }
