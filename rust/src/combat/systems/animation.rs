@@ -4,7 +4,7 @@ use lazy_static::lazy_static;
 use maplit::hashmap;
 use specs::{ReadStorage, System, WriteStorage};
 
-use crate::combat::components::intent::{AttackType, XAxis, YAxis};
+use crate::combat::components::intent::{AttackType, DefendType, XAxis, YAxis};
 use crate::combat::components::state::HitType;
 use crate::combat::components::{
     Action, AnimationState, Draw, State, TouchingBoundary, WalkingState,
@@ -30,6 +30,8 @@ lazy_static! {
         Action::Attack(AttackType::Thrust) => "thrust".to_string(),
         Action::Attack(AttackType::UpThrust) => "up_thrust".to_string(),
         Action::AttackRecovery => "recovery".to_string(),
+        Action::Defend(DefendType::Block) => "block".to_string(),
+        Action::Defend(DefendType::Dodge) => "dodge".to_string(),
     };
 }
 
@@ -61,13 +63,14 @@ impl<'a> System<'a> for Animation {
             .join()
         {
             match state.action {
-                Action::Idle => {
+                Action::Idle | Action::Defend(..) => {
                     animation_state.frame_number = 0;
                 }
                 Action::Attack(..) | Action::Hit(..) | Action::AttackRecovery => {
                     animation_state.frame_number = state.ticks;
                 }
-                _ => animation_state.frame_number = walking_state.step,
+                Action::Move { .. } => animation_state.frame_number = walking_state.step,
+                _ => panic!("action not handled yet"),
             }
             draw.animation = action_to_animation[&state.action].clone();
         }

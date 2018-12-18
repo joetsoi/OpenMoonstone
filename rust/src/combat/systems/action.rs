@@ -23,6 +23,16 @@ impl<'a> System<'a> for ActionSystem {
                         _ => (),
                     }
                 },
+                Command::Defend(defend_type) => {
+                    match state.action {
+                        Action::Idle | Action::Move {..} => {
+                            state.action = Action::Defend(defend_type);
+                            state.length = 0;
+                            state.ticks = 0;
+                        },
+                        _ => (),
+                    }
+                },
                 _ => (),
             }
         }

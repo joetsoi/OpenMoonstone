@@ -24,6 +24,11 @@ impl<'a> System<'a> for StateUpdater {
                         }
                     }
                 }
+                Action::Defend(..) => {
+                    // defend actions are 1 frame long, so we switch to idle
+                    // immediately
+                    state.action = Action::Idle;
+                }
                 _ => (),
             }
         }
