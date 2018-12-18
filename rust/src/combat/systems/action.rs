@@ -13,10 +13,10 @@ impl<'a> System<'a> for ActionSystem {
 
         for (intent, state) in (&intent, &mut state).join() {
             match intent.command {
-                Command::Attack(_attack_type) => {
+                Command::Attack(attack_type) => {
                     match state.action {
                         Action::Idle | Action::Move {..} => {
-                            state.action = Action::Attack(AttackType::Swing);
+                            state.action = Action::Attack(attack_type);
                             state.length = 0;
                             state.ticks = 0;
                         },

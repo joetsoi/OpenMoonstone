@@ -23,7 +23,12 @@ lazy_static! {
         Action::Move { x: XAxis::Right, y: YAxis::Up } => "walk".to_string(),
         Action::Move { x: XAxis::Left, y: YAxis::Down } => "walk".to_string(),
         Action::Move { x: XAxis::Right, y: YAxis::Down } => "walk".to_string(),
+        Action::Attack(AttackType::BackSwing) => "back_swing".to_string(),
+        Action::Attack(AttackType::Chop) => "chop".to_string(),
         Action::Attack(AttackType::Swing) => "swing".to_string(),
+        Action::Attack(AttackType::ThrowDagger) => "throw_dagger".to_string(),
+        Action::Attack(AttackType::Thrust) => "thrust".to_string(),
+        Action::Attack(AttackType::UpThrust) => "up_thrust".to_string(),
         Action::AttackRecovery => "recovery".to_string(),
     };
 }
