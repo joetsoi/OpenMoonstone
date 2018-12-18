@@ -1,23 +1,23 @@
 use specs::VecStorage;
 use specs_derive::*;
 
-use super::intent::{XAxis, YAxis};
+use super::intent::{AttackType, DefendType, XAxis, YAxis};
 use super::Facing;
 
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
 pub enum Action {
     Idle,
     Move { x: XAxis, y: YAxis },
-    Attack { name: String },
+    Attack(AttackType),
     AttackRecovery,
-    Defend { name: String },
+    Defend(DefendType),
     Hit { name: String },
     Death { name: String },
 }
 
 impl Action {
     pub fn is_attack(&self) -> bool {
-        if let Action::Attack { .. } = self {
+        if let Action::Attack(..) = self {
             true
         } else {
             false

@@ -4,7 +4,7 @@ use lazy_static::lazy_static;
 use maplit::hashmap;
 use specs::{ReadStorage, System, WriteStorage};
 
-use crate::combat::components::intent::{XAxis, YAxis};
+use crate::combat::components::intent::{AttackType, XAxis, YAxis};
 use crate::combat::components::{
     Action, AnimationState, Draw, State, TouchingBoundary, WalkingState,
 };
@@ -22,7 +22,7 @@ lazy_static! {
         Action::Move { x: XAxis::Right, y: YAxis::Up } => "walk".to_string(),
         Action::Move { x: XAxis::Left, y: YAxis::Down } => "walk".to_string(),
         Action::Move { x: XAxis::Right, y: YAxis::Down } => "walk".to_string(),
-        Action::Attack { name: "swing".to_string() } => "swing".to_string(),
+        Action::Attack(AttackType::Swing) => "swing".to_string(),
         Action::AttackRecovery => "recovery".to_string(),
     };
 }
@@ -58,7 +58,7 @@ impl<'a> System<'a> for Animation {
                 Action::Idle => {
                     animation_state.frame_number = 0;
                 }
-                Action::Attack { .. } | Action::Hit { .. } | Action::AttackRecovery => {
+                Action::Attack(..) | Action::Hit { .. } | Action::AttackRecovery => {
                     animation_state.frame_number = state.ticks;
                 }
                 _ => animation_state.frame_number = walking_state.step,

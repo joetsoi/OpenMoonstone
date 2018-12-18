@@ -12,7 +12,7 @@ impl<'a> System<'a> for StateUpdater {
 
         for state in (&mut state).join() {
             match state.action {
-                Action::Attack { .. } | Action::Hit { .. } | Action::AttackRecovery => {
+                Action::Attack(..) | Action::Hit { .. } | Action::AttackRecovery => {
                     state.ticks += 1;
                     if state.ticks == state.length && state.length != 0 {
                         // assuming: that all states that match this arm have a
