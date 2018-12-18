@@ -4,6 +4,7 @@ use specs::{Entities, Read, ReadStorage, System, WriteStorage};
 
 use crate::animation::ImageType;
 use crate::combat::components::collision::{CollisionBox, Points};
+use crate::combat::components::state::HitType;
 use crate::combat::components::{
     Action, Body, Collided, Draw, Facing, Health, Position, State, Weapon,
 };
@@ -212,9 +213,7 @@ impl<'a> System<'a> for ResolveCollisions {
                 if let (Some(target_health), Some(target_state)) = (target_health, target_state) {
                     target_health.points -= 3; // TODO: change hard coded weapon damage
                     println!("collided {:?}", target_health);
-                    target_state.action = Action::Hit {
-                        name: "hit".to_string(),
-                    };
+                    target_state.action = Action::Hit(HitType::Sliced);
                     target_state.ticks = 0;
                 }
             }

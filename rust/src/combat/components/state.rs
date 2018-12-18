@@ -5,13 +5,19 @@ use super::intent::{AttackType, DefendType, XAxis, YAxis};
 use super::Facing;
 
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
+pub enum HitType {
+    Chopped,
+    Sliced,
+}
+
+#[derive(Debug, Clone, Hash, Eq, PartialEq)]
 pub enum Action {
     Idle,
     Move { x: XAxis, y: YAxis },
     Attack(AttackType),
     AttackRecovery,
     Defend(DefendType),
-    Hit { name: String },
+    Hit(HitType),
     Death { name: String },
 }
 
