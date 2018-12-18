@@ -113,6 +113,159 @@ hit:
       - {sheet:kn3.ob, image: 17, y: 49, x: 17, image_type: BloodStain}
       - {sheet:kn4.ob, image: 6, y: -5, x: -15, image_type: NonSolid}
   order: [0, 1, 1, 2, 2, 3]
+thrust:
+  frames:
+    - images:
+      - {sheet: kn1.ob, image: 53, y: -7, x: -18, image_type: Collidee}
+      - {sheet: kn4.ob, image: 5, y: 26, x: -7, image_type: Collider}
+    - images:
+      - {sheet: kn1.ob, image: 35, y: 27, x: -14, image_type: Collidee}
+      - {sheet: kn1.ob, image: 36, y: 7, x: 17, image_type: Collidee}
+      - {sheet: kn1.ob, image: 37, y: 22, x: 35, image_type: Collidee}
+      - {sheet: kn1.ob, image: 38, y: 45, x: 33, image_type: NonSolid}
+      - {sheet: kn4.ob, image: 5, y: 23, x: 60, image_type: Collider}
+    - images:
+      - {sheet: kn1.ob, image: 54, y: 25, x: -12, image_type: Collidee}
+      - {sheet: kn1.ob, image: 55, y: 10, x: 26, image_type: Collidee}
+      - {sheet: kn1.ob, image: 56, y: 25, x: 50, image_type: NonSolid}
+      - {sheet: kn1.ob, image: 38, y: 46, x: 40, image_type: NonSolid}
+      - {sheet: kn4.ob, image: 5, y: 26, x: 66, image_type: Collider}
+    - images:
+      - {sheet: kn1.ob, image: 54, y: 25, x: -12, image_type: Collidee}
+      - {sheet: kn1.ob, image: 57, y: 10, x: 26, image_type: Collidee}
+      - {sheet: kn1.ob, image: 58, y: 25, x: 58, image_type: NonSolid}
+      - {sheet: kn1.ob, image: 38, y: 46, x: 40, image_type: NonSolid}
+      - {sheet: kn4.ob, image: 5, y: 27, x: 66, image_type: Collider}
+    - images:
+      - {sheet: kn1.ob, image: 54, y: 25, x: -12, image_type: Collidee}
+      - {sheet: kn1.ob, image: 59, y: 18, x: 26, image_type: Collidee}
+      - {sheet: kn1.ob, image: 56, y: 26, x: 49, image_type: NonSolid}
+      - {sheet: kn1.ob, image: 38, y: 46, x: 40, image_type: NonSolid}
+      - {sheet: kn4.ob, image: 5, y: 27, x: 65, image_type: Collider}
+    - images:
+      - {sheet: kn1.ob, image: 53, y: -7, x: -18, image_type: Collidee}
+      - {sheet: kn4.ob, image: 5, y: 26, x: -7, image_type: Collider}
+  order: [0, 0, 0, 0, 1, 2, 3, 4, 5, 5, 5]
+chop:
+  frames:
+    - images:
+      - {sheet: kn1.ob, image: 19, y: 44, x: -21, image_type: Collidee}
+      - {sheet: kn1.ob, image: 18, y: -7, x: -14, image_type: Collidee}
+      - {sheet: kn4.ob, image: 1, y: -15, x: 12, image_type: Collider}
+    - images:
+      - {sheet: kn1.ob, image: 43, y: -8, x: -16, image_type: Collidee}
+      - {sheet: kn4.ob, image: 7, y: -17, x: -45, image_type: Collider}
+    - images:
+      - {sheet: kn1.ob, image: 45, y: 25, x: -14, image_type: Collidee}
+      - {sheet: kn1.ob, image: 44, y: -17, x: -2, image_type: Collidee}
+      - {sheet: kn4.ob, image: 0, y: -48, x: 4, image_type: Collider}
+      - {sheet: kn4.ob, image: 20, y: -48, x: -7, image_type: Collider}
+      - {sheet: kn4.ob, image: 19, y: -44, x: -32, image_type: Collider}
+    - images:
+      - {sheet: kn1.ob, image: 46, y: 21, x: -12, image_type: Collidee}
+      - {sheet: kn1.ob, image: 37, y: 10, x: 26, image_type: Collidee}
+      - {sheet: kn1.ob, image: 47, y: -5, x: 12, image_type: Collidee}
+      - {sheet: kn4.ob, image: 5, y: 11, x: 49, image_type: Collider}
+      - {sheet: kn4.ob, image: 22, y: -21, x: 71, image_type: Collider}
+      - {sheet: kn4.ob, image: 21, y: -39, x: 45, image_type: Collider}
+    - images:
+      - {sheet: kn1.ob, image: 48, y: 25, x: -6, image_type: Collidee}
+      - {sheet: kn1.ob, image: 49, y: 13, x: 21, image_type: Collidee}
+      - {sheet: kn1.ob, image: 50, y: 3, x: 36, image_type: Collidee}
+      - {sheet: kn4.ob, image: 8, y: 37, x: 52, image_type: Collider}
+    - images:
+      - {sheet: kn1.ob, image: 48, y: 25, x: -6, image_type: Collidee}
+      - {sheet: kn1.ob, image: 49, y: 13, x: 21, image_type: Collidee}
+      - {sheet: kn1.ob, image: 51, y: 5, x: 36, image_type: Collidee}
+      - {sheet: kn4.ob, image: 8, y: 37, x: 52, image_type: Collider}
+    - images:
+      - {sheet: kn1.ob, image: 48, y: 25, x: -6, image_type: Collidee}
+      - {sheet: kn1.ob, image: 49, y: 13, x: 21, image_type: Collidee}
+      - {sheet: kn1.ob, image: 52, y: 12, x: 34, image_type: Collidee}
+      - {sheet: kn4.ob, image: 8, y: 37, x: 52, image_type: Collider}
+  order: [0, 1, 1, 1, 2, 3, 4, 4, 4, 5, 6, 6]
+up_thrust:
+  frames:
+    - images:
+      - {sheet: kn1.ob, image: 19, y: 44, x: -21, image_type: Collidee}
+      - {sheet: kn1.ob, image: 18, y: -7, x: -14, image_type: Collidee}
+      - {sheet: kn4.ob, image: 1, y: -15, x: 12, image_type: Collider}
+    - images:
+      - {sheet: kn2.ob, image: 3, y: 22, x: -15, image_type: Collidee}
+      - {sheet: kn2.ob, image: 4, y: -2, x: 5, image_type: Collidee}
+      - {sheet: kn2.ob, image: 5, y: -9, x: 20, image_type: Collidee}
+      - {sheet: kn4.ob, image: 1, y: -35, x: 29, image_type: Collider}
+    - images:
+      - {sheet: kn2.ob, image: 3, y: 22, x: -15, image_type: Collidee}
+      - {sheet: kn2.ob, image: 4, y: -2, x: 5, image_type: Collidee}
+      - {sheet: kn2.ob, image: 5, y: -9, x: 20, image_type: Collidee}
+      - {sheet: kn4.ob, image: 1, y: -35, x: 29, image_type: Collider}
+    - images:
+      - {sheet: kn1.ob, image: 19, y: 44, x: -21, image_type: Collidee}
+      - {sheet: kn1.ob, image: 18, y: -7, x: -14, image_type: Collidee}
+      - {sheet: kn4.ob, image: 1, y: -15, x: 12, image_type: Collider}
+  order: [0, 1, 2, 2, 2, 2, 3]
+back_swing:
+  frames:
+    - images:
+      - {sheet: kn1.ob, image: 19, y: 44, x: -21, image_type: Collidee}
+      - {sheet: kn1.ob, image: 18, y: -7, x: -14, image_type: Collidee}
+      - {sheet: kn4.ob, image: 1, y: -15, x: 12, image_type: Collider}
+    - images:
+      - {sheet: kn1.ob, image: 22, y: 45, x: -19, image_type: NonSolid}
+      - {sheet: kn1.ob, image: 21, y: 19, x: -17, image_type: Collidee}
+      - {sheet: kn1.ob, image: 20, y: -8, x: -6, image_type: Collidee}
+      - {sheet: kn4.ob, image: 2, y: 9, x: 14, image_type: Collider}
+      - {sheet: kn4.ob, image: 11, y: -6, x: 27, image_type: Collider}
+    - images:
+      - {sheet: kn1.ob, image: 24, y: 46, x: -43, image_type: NonSolid}
+      - {sheet: kn1.ob, image: 23, y: -7, x: -23, image_type: Collidee}
+      - {sheet: kn4.ob, image: 12, y: 19, x: -53, image_type: Collider}
+      - {sheet: kn4.ob, image: 24, y: 17, x: -54, image_type: Collider}
+    - images:
+      - {sheet: kn1.ob, image: 24, y: 46, x: -43, image_type: NonSolid}
+      - {sheet: kn1.ob, image: 23, y: -7, x: -23, image_type: Collidee}
+      - {sheet: kn4.ob, image: 24, y: 17, x: -54, image_type: Collider}
+    - images:
+      - {sheet: kn1.ob, image: 19, y: 44, x: -21, image_type: Collidee}
+      - {sheet: kn1.ob, image: 18, y: -7, x: -14, image_type: Collidee}
+      - {sheet: kn4.ob, image: 1, y: -15, x: 12, image_type: NonSolid}
+      #TODO: fix set_next_frame AnimationBegin from ida dataseg:0xde6
+  order: [0, 1, 2, 3, 3, 3, 4]
+throw_dagger:
+  frames:
+    - images:
+      - {sheet: kn1.ob, image: 27, y: 16, x: -14, image_type: Collidee}
+      - {sheet: kn1.ob, image: 25, y: -14, x: -20, image_type: Collidee}
+      - {sheet: kn1.ob, image: 26, y: 6, x: 0, image_type: NonSolid}
+      - {sheet: kn4.ob, image: 0, y: -21, x: 11, image_type: NonSolid}
+      - {sheet: kn4.ob, image: 9, y: -23, x: -29, image_type: NonSolid}
+    - images:
+      - {sheet: kn1.ob, image: 27, y: 16, x: -14, image_type: Collidee}
+      - {sheet: kn1.ob, image: 25, y: -14, x: -20, image_type: Collidee}
+      - {sheet: kn1.ob, image: 26, y: 6, x: 0, image_type: NonSolid}
+      - {sheet: kn4.ob, image: 0, y: -21, x: 11, image_type: NonSolid}
+      - {sheet: kn4.ob, image: 9, y: -23, x: -29, image_type: NonSolid}
+    - images:
+      - {sheet: kn1.ob, image: 30, y: 45, x: -10, image_type: NonSolid}
+      - {sheet: kn1.ob, image: 28, y: 20, x: -8, image_type: Collidee}
+      - {sheet: kn1.ob, image: 29, y: -5, x: 3, image_type: Collidee}
+      - {sheet: kn4.ob, image: 10, y: 7, x: 63, image_type: Collider}
+  order: [0, 0, 0, 1, 2]
+dodge:
+  frames:
+    - images:
+      - {sheet: kn2.ob, image: 8, y: 45, x: -23, image_type: NonSolid}
+      - {sheet: kn2.ob, image: 7, y: 20, x: -17, image_type: Collidee}
+      - {sheet: kn2.ob, image: 6, y: -5, x: -32, image_type: Collidee}
+      - {sheet: kn4.ob, image: 0, y: -22, x: -32, image_type: NonSolid}
+block:
+  frames:
+    - images:
+      - {sheet: kn1.ob, image: 22, y: 45, x: -19, image_type: Collidee}
+      - {sheet: kn1.ob, image: 21, y: 19, x: -17, image_type: Collidee}
+      - {sheet: kn1.ob, image: 20, y: -8, x: -6, image_type: Collidee}
+      - {sheet: kn4.ob, image: 2, y: 9, x: 14, image_type: NonSolid}
 recovery:
   frames:
     - images:

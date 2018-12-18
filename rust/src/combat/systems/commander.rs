@@ -47,7 +47,6 @@ impl<'a> System<'a> for Commander {
 
                     (_, _) => Command::Idle,
                 };
-                println!("{:?}", attack_type);
                 intent.command = attack_type;
             }
         }
