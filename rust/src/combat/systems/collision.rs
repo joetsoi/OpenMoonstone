@@ -1,9 +1,12 @@
 use std::collections::HashMap;
 
+use lazy_static::lazy_static;
+use maplit::hashmap;
 use specs::{Entities, Read, ReadStorage, System, WriteStorage};
 
 use crate::animation::ImageType;
 use crate::combat::components::collision::{CollisionBox, Points};
+use crate::combat::components::intent::{AttackType, DefendType};
 use crate::combat::components::state::HitType;
 use crate::combat::components::{
     Action, Body, Collided, Draw, Facing, Health, Position, State, Weapon,
@@ -148,7 +151,7 @@ impl<'a> System<'a> for CheckCollisions {
                 // ignore entities outside a 10 pixel y range.
                 .filter(|(_, _, d_pos)| (att_pos.y as i32 - d_pos.y as i32).abs() < 10)
             {
-                let hit = check_collision(&textures, weapon, body);
+                let hit = CheckCollisions::check_collision(&textures, weapon, body);
                 if hit {
                     let result = collided.insert(attacker, Collided { target: defender });
                 }
@@ -157,36 +160,53 @@ impl<'a> System<'a> for CheckCollisions {
     }
 }
 
-fn check_collision(textures: &HashMap<String, TextureAtlas>, weapon: &Weapon, body: &Body) -> bool {
-    for weapon_part in weapon.collision_points.iter().flat_map(|v| v) {
-        // each attacking image in the attacker
-        for body_part in body
-            .collision_boxes
-            .iter() // Option.iter()
-            .flat_map(|v| v)
-            .filter(|b| weapon_part.bounding.intersects(&b.rect))
-        {
-            // check that against each defending image in the defender
-            for point in weapon_part
-                .points
-                .iter()
-                .filter(|p| body_part.rect.contains_point(p))
+impl CheckCollisions {
+    fn check_collision(
+        textures: &HashMap<String, TextureAtlas>,
+        weapon: &Weapon,
+        body: &Body,
+    ) -> bool {
+        for weapon_part in weapon.collision_points.iter().flat_map(|v| v) {
+            // each attacking image in the attacker
+            for body_part in body
+                .collision_boxes
+                .iter() // Option.iter()
+                .flat_map(|v| v)
+                .filter(|b| weapon_part.bounding.intersects(&b.rect))
             {
-                // check the points collide and the pixel in the image is a part of the target
-                let hit_x = point.x - body_part.rect.x;
-                let hit_y = point.y - body_part.rect.y;
-                let texture = textures
-                    .get(&body_part.sheet)
-                    .expect("Encounter hasn't loaded correct textures to as world resource");
-                let collision_lookup = hit_x as usize * texture.image.width + hit_y as usize;
-                let pixel = texture.image.pixels[collision_lookup];
-                if pixel > 0 {
-                    return true;
+                // check that against each defending image in the defender
+                for point in weapon_part
+                    .points
+                    .iter()
+                    .filter(|p| body_part.rect.contains_point(p))
+                {
+                    // check the points collide and the pixel in the image is a part of the target
+                    let hit_x = point.x - body_part.rect.x;
+                    let hit_y = point.y - body_part.rect.y;
+                    let texture = textures
+                        .get(&body_part.sheet)
+                        .expect("Encounter hasn't loaded correct textures to as world resource");
+                    let collision_lookup = hit_x as usize * texture.image.width + hit_y as usize;
+                    let pixel = texture.image.pixels[collision_lookup];
+                    if pixel > 0 {
+                        return true;
+                    }
                 }
             }
         }
+        false
     }
-    false
+}
+
+lazy_static! {
+    static ref blocks_attack: HashMap<Action, Action> = hashmap! {
+        Action::Attack(AttackType::Swing) => Action::Defend(DefendType::Block),
+        Action::Attack(AttackType::BackSwing) => Action::Defend(DefendType::Block),
+        Action::Attack(AttackType::Thrust) => Action::Defend(DefendType::Dodge),
+        Action::Attack(AttackType::Chop) => Action::Defend(DefendType::Dodge),
+        Action::Attack(AttackType::UpThrust) => Action::Defend(DefendType::Dodge),
+        Action::Attack(AttackType::ThrowDagger) => Action::Defend(DefendType::Dodge),
+    };
 }
 
 pub struct ResolveCollisions;
@@ -205,24 +225,47 @@ impl<'a> System<'a> for ResolveCollisions {
     ) {
         use specs::Join;
         for (collided, entity) in (collided_storage.drain(), &*entities).join() {
+            let mut has_defended = false;
+            let mut target_used_block = false;
+
+            let target = &collided.target;
             {
-                // set defender animation
-                let target = &collided.target;
-                let target_health: Option<&mut Health> = health_storage.get_mut(*target);
-                let target_state: Option<&mut State> = state_storage.get_mut(*target);
-                if let (Some(target_health), Some(target_state)) = (target_health, target_state) {
-                    target_health.points -= 3; // TODO: change hard coded weapon damage
-                    println!("collided {:?}", target_health);
-                    target_state.action = Action::Hit(HitType::Sliced);
-                    target_state.ticks = 0;
+                let state: Option<&State> = state_storage.get(entity);
+                let target_state: Option<&State> = state_storage.get(*target);
+                if let (Some(state), Some(target_state)) = (state, target_state) {
+                    has_defended = blocks_attack
+                        .get(&state.action)
+                        .and_then(|a| Some(a == &target_state.action))
+                        .expect(&format!(
+                            "attack {:?} not in blocks_attack lookup",
+                            &state.action
+                        ));
+                    target_used_block = target_state.action == Action::Defend(DefendType::Block)
+                }
+            }
+
+            {
+                if !has_defended {
+                    // set defender animation
+                    let target = &collided.target;
+                    let target_health: Option<&mut Health> = health_storage.get_mut(*target);
+                    let target_state: Option<&mut State> = state_storage.get_mut(*target);
+                    if let (Some(target_health), Some(target_state)) = (target_health, target_state)
+                    {
+                        target_health.points -= 3; // TODO: change hard coded weapon damage
+                        target_state.action = Action::Hit(HitType::Sliced);
+                        target_state.ticks = 0;
+                    }
                 }
             }
             {
                 // set attacker state
                 let state: Option<&mut State> = state_storage.get_mut(entity);
                 if let Some(state) = state {
-                    state.action = Action::AttackRecovery;
-                    state.ticks = 0;
+                    if !has_defended || target_used_block {
+                        state.action = Action::AttackRecovery;
+                        state.ticks = 0;
+                    }
                 }
             }
         }

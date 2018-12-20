@@ -168,20 +168,20 @@ impl<'a> event::EventHandler for MainState<'a> {
             .join()
             .collect::<Vec<_>>();
 
-        // graphics::set_color(ctx, graphics::Color::new(1.0, 1.0, 1.0, 1.0))?;
-        // for (position, body) in storage {
-        //     if let Some(boxes) = &body.collision_boxes {
-        //         for collision_box in boxes {
-        //             graphics::rectangle(ctx, graphics::DrawMode::Line(1.0), graphics::Rect {
-        //                 x: (position.x as i32 + collision_box.x) as f32 * 3.0,
-        //                 y: (position.y as i32 + collision_box.y) as f32 * 3.0,
-        //                 w: collision_box.w as f32 * 3.0,
-        //                 h: collision_box.h as f32 * 3.0,
-        //             })?;
+        graphics::set_color(ctx, graphics::Color::new(0.4, 1.0, 0.0, 1.0))?;
+        for (position, body) in storage {
+            if let Some(boxes) = &body.collision_boxes {
+                for collision_box in boxes {
+                    graphics::rectangle(ctx, graphics::DrawMode::Line(1.0), graphics::Rect {
+                        x: (collision_box.rect.x) as f32 * 3.0,
+                        y: (collision_box.rect.y) as f32 * 3.0,
+                        w: collision_box.rect.w as f32 * 3.0,
+                        h: collision_box.rect.h as f32 * 3.0,
+                    })?;
 
-        //         }
-        //     }
-        // }
+                }
+            }
+        }
 
         let weapon_storage = self.game.world.read_storage::<Weapon>();
 
@@ -455,8 +455,8 @@ fn main() {
         .with(VelocitySystem, "velocity", &["boundary"])
         .with(Movement, "movement", &["boundary"])
         .with(Animation, "animation", &["movement"])
-        .with(StateUpdater, "state_updater", &["animation"])
-        .with(UpdateImage, "update_image", &["state_updater"])
+        //.with(StateUpdater, "state_updater", &["animation"])
+        .with(UpdateImage, "update_image", &["animation"])
         .with(
             UpdateBoundingBoxes,
             "update_bounding_boxes",
@@ -472,6 +472,7 @@ fn main() {
             "resolve_collisions",
             &["check_collisions"],
         )
+        .with(StateUpdater, "state_updater", &["resolve_collisions"])
         // .with_thread_local(Renderer {
         //     store: Store::new(StoreOpt::default()).expect("store creation"),
         // })
