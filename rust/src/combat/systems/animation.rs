@@ -6,9 +6,7 @@ use specs::{ReadStorage, System, WriteStorage};
 
 use crate::combat::components::intent::{AttackType, DefendType, XAxis, YAxis};
 use crate::combat::components::state::HitType;
-use crate::combat::components::{
-    Action, AnimationState, Draw, State, TouchingBoundary, WalkingState,
-};
+use crate::combat::components::{Action, AnimationState, Draw, State, WalkingState};
 
 lazy_static! {
     static ref action_to_animation: HashMap<Action, String> = hashmap!{
@@ -41,21 +39,16 @@ impl<'a> System<'a> for Animation {
     type SystemData = (
         //ReadStorage<'a, Intent>,
         ReadStorage<'a, WalkingState>,
-        ReadStorage<'a, TouchingBoundary>,
         WriteStorage<'a, AnimationState>,
         WriteStorage<'a, Draw>,
         ReadStorage<'a, State>,
     );
 
-    fn run(
-        &mut self,
-        (walking_state, touching_boundary, mut animation_state, mut draw, state): Self::SystemData,
-    ) {
+    fn run(&mut self, (walking_state, mut animation_state, mut draw, state): Self::SystemData) {
         use specs::Join;
-        for (walking_state, touching_boundary, animation_state, draw, state) in (
+        for (walking_state, animation_state, draw, state) in (
             //&intent,
             &walking_state,
-            &touching_boundary,
             &mut animation_state,
             &mut draw,
             &state,

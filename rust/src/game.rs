@@ -9,8 +9,8 @@ use warmy::{LogicalKey, Store, StoreOpt};
 
 use crate::animation::{Frame, Sprite, SpriteData};
 use crate::combat::components::{
-    AnimationState, Body, Collided, Controller, Draw, Health, Intent, Position, State,
-    TouchingBoundary, Velocity, WalkingState, Weapon,
+    AnimationState, Body, Collided, Controller, Draw, Health, Intent, Position, State, Velocity,
+    WalkingState, Weapon,
 };
 use crate::input;
 use crate::manager::GameYaml;
@@ -57,7 +57,6 @@ impl Game {
         world.register::<Health>();
         world.register::<Intent>();
         world.register::<Position>();
-        world.register::<TouchingBoundary>();
         world.register::<State>();
         world.register::<Velocity>();
         world.register::<WalkingState>();

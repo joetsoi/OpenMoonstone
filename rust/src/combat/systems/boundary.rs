@@ -1,9 +1,6 @@
 use specs::{ReadStorage, System, WriteStorage};
 
-use crate::combat::components::intent::{XAxis, YAxis};
-use crate::combat::components::{
-    Command, Intent, Position, TouchingBoundary, Velocity,
-};
+use crate::combat::components::{Position, Velocity};
 
 struct Rect {
     x: i32,
@@ -12,48 +9,35 @@ struct Rect {
     h: i32,
 }
 
+// TODO: change to be SystemData
 const LAIR_BOUNDARY: Rect = Rect {
     x: 10, //10,
     y: 0,  //30,
     w: 320 - 10,
     h: 155, // - 30,
 };
-pub struct Boundary;
 
-impl<'a> System<'a> for Boundary {
-    type SystemData = (
-        ReadStorage<'a, Position>,
-        ReadStorage<'a, Velocity>,
-        ReadStorage<'a, Intent>,
-        WriteStorage<'a, TouchingBoundary>,
-    );
+pub struct RestrictMovementToBoundary;
+// takes a velocity and restricts velocity if the resulting movement would
+// collide with a boundary
 
-    fn run(&mut self, (position, velocity, intent, mut touching_boundary): Self::SystemData) {
+impl<'a> System<'a> for RestrictMovementToBoundary {
+    type SystemData = (ReadStorage<'a, Position>, WriteStorage<'a, Velocity>);
+    fn run(&mut self, (position, mut velocity): Self::SystemData) {
         use specs::Join;
-
-        for (position, velocity, intent, touching_boundary) in
-            (&position, &velocity, &intent, &mut touching_boundary).join()
-        {
+        for (position, velocity) in (&position, &mut velocity).join() {
             let new_x = position.x as i32 + velocity.x;
-            if let Command::Move { x, y } = intent.command {
-                if new_x < LAIR_BOUNDARY.x && x == XAxis::Left {
-                    touching_boundary.left = true;
-                } else if new_x > LAIR_BOUNDARY.w && x == XAxis::Right {
-                    touching_boundary.right = true;
-                } else {
-                    touching_boundary.left = false;
-                    touching_boundary.right = false;
-                }
+            if new_x < LAIR_BOUNDARY.x && velocity.x < 0
+                || new_x > LAIR_BOUNDARY.w && velocity.x > 0
+            {
+                velocity.x = 0;
+            }
 
-                let new_y = position.y as i32 - velocity.y;
-                if new_y < LAIR_BOUNDARY.y && y == YAxis::Up {
-                    touching_boundary.top = true;
-                } else if new_y > LAIR_BOUNDARY.h && y == YAxis::Down {
-                    touching_boundary.bottom = true;
-                } else {
-                    touching_boundary.top = false;
-                    touching_boundary.bottom = false;
-                }
+            let new_y = position.y as i32 - velocity.y;
+            if new_y < LAIR_BOUNDARY.y && velocity.y < 0
+                || new_y > LAIR_BOUNDARY.h && velocity.y > 0
+            {
+                velocity.y = 0;
             }
         }
     }

@@ -21,11 +21,12 @@ use warmy::{LogicalKey, Store, StoreOpt};
 use openmoonstone::animation::{ImageType, Sprite};
 use openmoonstone::combat::components::{
     AnimationState, Body, Collided, Controller, Draw, Facing, Health, Intent, Position, State,
-    TouchingBoundary, Velocity, WalkingState, Weapon,
+    Velocity, WalkingState, Weapon,
 };
 use openmoonstone::combat::systems::{
-    ActionSystem, Animation, Boundary, CheckCollisions, Commander, Movement, ResolveCollisions,
-    StateUpdater, UpdateBoundingBoxes, UpdateImage, VelocitySystem,
+    ActionSystem, Animation, CheckCollisions, Commander, ConfirmVelocity, Movement,
+    ResolveCollisions, RestrictMovementToBoundary, StateUpdater, UpdateBoundingBoxes, UpdateImage,
+    VelocitySystem,
 };
 use openmoonstone::files::collide::CollisionBoxes;
 use openmoonstone::game::{Game, Lair};
@@ -172,13 +173,16 @@ impl<'a> event::EventHandler for MainState<'a> {
         for (position, body) in storage {
             if let Some(boxes) = &body.collision_boxes {
                 for collision_box in boxes {
-                    graphics::rectangle(ctx, graphics::DrawMode::Line(1.0), graphics::Rect {
-                        x: (collision_box.rect.x) as f32 * 3.0,
-                        y: (collision_box.rect.y) as f32 * 3.0,
-                        w: collision_box.rect.w as f32 * 3.0,
-                        h: collision_box.rect.h as f32 * 3.0,
-                    })?;
-
+                    graphics::rectangle(
+                        ctx,
+                        graphics::DrawMode::Line(1.0),
+                        graphics::Rect {
+                            x: (collision_box.rect.x) as f32 * 3.0,
+                            y: (collision_box.rect.y) as f32 * 3.0,
+                            w: collision_box.rect.w as f32 * 3.0,
+                            h: collision_box.rect.h as f32 * 3.0,
+                        },
+                    )?;
                 }
             }
         }
@@ -387,9 +391,6 @@ fn main() {
         .with(Velocity {
             ..Default::default()
         })
-        .with(TouchingBoundary {
-            ..Default::default()
-        })
         .with(AnimationState {
             ..Default::default()
         })
@@ -431,9 +432,6 @@ fn main() {
         .with(Velocity {
             ..Default::default()
         })
-        .with(TouchingBoundary {
-            ..Default::default()
-        })
         .with(AnimationState {
             ..Default::default()
         })
@@ -450,10 +448,19 @@ fn main() {
 
     let dispatcher = DispatcherBuilder::new()
         .with(Commander, "commander", &[])
-        .with(Boundary, "boundary", &["commander"])
         .with(ActionSystem, "action", &["commander"])
-        .with(VelocitySystem, "velocity", &["boundary"])
-        .with(Movement, "movement", &["boundary"])
+        .with(VelocitySystem, "velocity", &["commander"])
+        .with(
+            RestrictMovementToBoundary,
+            "restrict_movement_to_boundary",
+            &["velocity"],
+        )
+        .with(
+            ConfirmVelocity,
+            "confirm_velocity",
+            &["restrict_movement_to_boundary"],
+        )
+        .with(Movement, "movement", &["confirm_velocity"])
         .with(Animation, "animation", &["movement"])
         //.with(StateUpdater, "state_updater", &["animation"])
         .with(UpdateImage, "update_image", &["animation"])
