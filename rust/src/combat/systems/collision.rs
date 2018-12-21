@@ -263,8 +263,13 @@ impl<'a> System<'a> for ResolveCollisions {
                 let state: Option<&mut State> = state_storage.get_mut(entity);
                 if let Some(state) = state {
                     if !has_defended || target_used_block {
-                        state.action = Action::AttackRecovery;
-                        state.ticks = 0;
+                        match state.action {
+                            Action::Attack(AttackType::UpThrust) => (),
+                            _ =>  {
+                                state.action = Action::AttackRecovery;
+                                state.ticks = 0;
+                            }
+                        }
                     }
                 }
             }
