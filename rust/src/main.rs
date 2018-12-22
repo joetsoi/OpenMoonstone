@@ -24,9 +24,9 @@ use openmoonstone::combat::components::{
     Velocity, WalkingState, Weapon,
 };
 use openmoonstone::combat::systems::{
-    EntityEntityCollision, ActionSystem, Animation, CheckCollisions, Commander, ConfirmVelocity, Movement,
-    ResolveCollisions, RestrictMovementToBoundary, StateUpdater, UpdateBoundingBoxes, UpdateImage,
-    VelocitySystem,
+    ActionSystem, Animation, CheckCollisions, Commander, ConfirmVelocity, EntityDeath,
+    EntityEntityCollision, Movement, ResolveCollisions, RestrictMovementToBoundary, StateUpdater,
+    UpdateBoundingBoxes, UpdateImage, VelocitySystem,
 };
 use openmoonstone::files::collide::CollisionBoxes;
 use openmoonstone::game::{Game, Lair};
@@ -449,6 +449,7 @@ fn main() {
     let dispatcher = DispatcherBuilder::new()
         .with(Commander, "commander", &[])
         .with(ActionSystem, "action", &["commander"])
+        .with(EntityDeath, "entity_death", &["action"])
         .with(VelocitySystem, "velocity", &["commander"])
         .with(EntityEntityCollision, "entity_collision", &["velocity"])
         .with(

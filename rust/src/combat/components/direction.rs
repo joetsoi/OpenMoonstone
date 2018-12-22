@@ -9,3 +9,14 @@ impl Default for Facing {
         Facing::Right
     }
 }
+
+impl Facing {
+    pub fn flip(&self) -> Facing {
+        let value = *self as i32 * -1;
+        match value {
+            -1 => Facing::Left,
+            1 => Facing::Right,
+            _ => panic!("not a valid facing value, this should never happen"),
+        }
+    }
+}

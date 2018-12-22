@@ -30,6 +30,8 @@ lazy_static! {
         Action::AttackRecovery => "recovery".to_string(),
         Action::Defend(DefendType::Block) => "block".to_string(),
         Action::Defend(DefendType::Dodge) => "dodge".to_string(),
+        Action::Death => "death".to_string(),
+        Action::Dead => "dead".to_string(),
     };
 }
 
@@ -63,9 +65,18 @@ impl<'a> System<'a> for Animation {
                     animation_state.frame_number = state.ticks;
                 }
                 Action::Move { .. } => animation_state.frame_number = walking_state.step,
+                Action::Death => {
+                    animation_state.frame_number = state.ticks;
+                }
+                Action::Dead => {
+                    animation_state.frame_number = 0;
+                }
                 _ => panic!("action not handled yet"),
             }
-            draw.animation = action_to_animation[&state.action].clone();
+            draw.animation = action_to_animation
+                .get(&state.action)
+                .expect("animation not found in action_to_animation")
+                .clone();
         }
     }
 }

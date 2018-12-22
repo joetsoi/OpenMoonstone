@@ -277,3 +277,38 @@ recovery:
         - {sheet:kn1.ob, image: 0, y: -9, x: -9, image_type: Collidee}
         - {sheet:kn4.ob, image: 1, y: -6, x: 4, image_type: NonSolid}
   order: [0, 1, 1]
+death:
+  frames:
+    - images:
+      - {sheet: kn3.ob, image: 21, y: 7, x: -28, image_type: Collidee}
+      - {sheet: kn3.ob, image: 22, y: 21, x: -28, image_type: Collidee}
+      - {sheet: kn3.ob, image: 23, y: 40, x: -59, image_type: NonSolid}
+    - images:
+      - {sheet: kn3.ob, image: 25, y: 42, x: -52, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 24, y: 44, x: -80, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 26, y: 51, x: -62, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 27, y: 56, x: -98, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 58, y: 19, x: -51, image_type: NonSolid}
+    - images:
+      - {sheet: kn3.ob, image: 25, y: 42, x: -52, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 24, y: 44, x: -80, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 26, y: 51, x: -62, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 27, y: 56, x: -98, image_type: NonSolid}
+      #- images:
+      #- {sheet: kn3.ob, image: 25, y: 42, x: -52, image_type: VM}
+      #- {sheet: kn3.ob, image: 24, y: 44, x: -80, image_type: VM}
+      #- {sheet: kn3.ob, image: 26, y: 51, x: -62, image_type: VM}
+      #- {sheet: kn3.ob, image: 27, y: 56, x: -98, image_type: VM}
+    - images:
+      - {sheet: kn3.ob, image: 25, y: 42, x: -52, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 24, y: 44, x: -80, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 26, y: 51, x: -62, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 27, y: 56, x: -98, image_type: NonSolid}
+  order: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 3, 3, 3, 3, 3, 3, 3]
+dead:
+  frames:
+    - images:
+      - {sheet: kn3.ob, image: 25, y: 42, x: -52, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 24, y: 44, x: -80, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 26, y: 51, x: -62, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 27, y: 56, x: -98, image_type: NonSolid}

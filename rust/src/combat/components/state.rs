@@ -18,7 +18,8 @@ pub enum Action {
     AttackRecovery,
     Defend(DefendType),
     Hit(HitType),
-    Death { name: String },
+    Death,
+    Dead,
 }
 
 impl Action {
