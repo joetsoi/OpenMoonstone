@@ -331,7 +331,10 @@ impl<'a> System<'a> for ResolveCollisions {
                             "attack {:?} not in blocks_attack lookup",
                             &state.action
                         ));
-                    target_used_block = target_state.action == Action::Defend(DefendType::Block)
+                    target_used_block = target_state.action == Action::Defend(DefendType::Block);
+                    if target_used_block && target_state.direction == state.direction {
+                        has_defended = false;
+                    }
                 }
             }
 
