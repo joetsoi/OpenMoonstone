@@ -11,7 +11,9 @@ pub mod velocity;
 pub use self::action::ActionSystem;
 pub use self::animation::Animation;
 pub use self::boundary::RestrictMovementToBoundary;
-pub use self::collision::{CheckCollisions, ResolveCollisions, UpdateBoundingBoxes};
+pub use self::collision::{
+    CheckCollisions, EntityEntityCollision, ResolveCollisions, UpdateBoundingBoxes,
+};
 pub use self::commander::Commander;
 pub use self::draw::UpdateImage;
 pub use self::movement::Movement;

@@ -14,6 +14,7 @@ pub struct CollisionBox {
 #[storage(VecStorage)]
 pub struct Body {
     pub collision_boxes: Option<Vec<CollisionBox>>,
+    pub rect: Option<Rect>,
 }
 
 #[derive(Clone, Debug)]

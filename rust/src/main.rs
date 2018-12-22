@@ -24,7 +24,7 @@ use openmoonstone::combat::components::{
     Velocity, WalkingState, Weapon,
 };
 use openmoonstone::combat::systems::{
-    ActionSystem, Animation, CheckCollisions, Commander, ConfirmVelocity, Movement,
+    EntityEntityCollision, ActionSystem, Animation, CheckCollisions, Commander, ConfirmVelocity, Movement,
     ResolveCollisions, RestrictMovementToBoundary, StateUpdater, UpdateBoundingBoxes, UpdateImage,
     VelocitySystem,
 };
@@ -450,6 +450,7 @@ fn main() {
         .with(Commander, "commander", &[])
         .with(ActionSystem, "action", &["commander"])
         .with(VelocitySystem, "velocity", &["commander"])
+        .with(EntityEntityCollision, "entity_collision", &["velocity"])
         .with(
             RestrictMovementToBoundary,
             "restrict_movement_to_boundary",
@@ -458,7 +459,7 @@ fn main() {
         .with(
             ConfirmVelocity,
             "confirm_velocity",
-            &["restrict_movement_to_boundary"],
+            &["restrict_movement_to_boundary", "entity_collision"],
         )
         .with(Movement, "movement", &["confirm_velocity"])
         .with(Animation, "animation", &["movement"])

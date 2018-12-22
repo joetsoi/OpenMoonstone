@@ -9,12 +9,82 @@ use crate::combat::components::collision::{CollisionBox, Points};
 use crate::combat::components::intent::{AttackType, DefendType};
 use crate::combat::components::state::HitType;
 use crate::combat::components::{
-    Action, Body, Collided, Draw, Facing, Health, Position, State, Weapon,
+    Action, Body, Collided, Draw, Facing, Health, Position, State, Velocity, Weapon,
 };
 use crate::files::collide::CollisionBoxes;
 use crate::game::EncounterTextures;
 use crate::objects::TextureAtlas;
-use crate::rect::{Point, Rect};
+use crate::rect::{Interval, Point, Rect};
+
+pub struct EntityEntityCollision;
+
+impl<'a> System<'a> for EntityEntityCollision {
+    type SystemData = (
+        ReadStorage<'a, Body>,
+        ReadStorage<'a, Position>,
+        WriteStorage<'a, Velocity>,
+        Entities<'a>,
+    );
+
+    fn run(
+        &mut self,
+        (body_storage, position_storage, mut velocity_storage, entities): Self::SystemData,
+    ) {
+        use specs::Join;
+        for (body, position_1, velocity, entity_1) in (
+            &body_storage,
+            &position_storage,
+            &mut velocity_storage,
+            &*entities,
+        )
+            .join()
+        {
+            for (other, position_2, entity_2) in (&body_storage, &position_storage, &*entities)
+                .join()
+                .filter(|(.., e)| e.id() != entity_1.id())
+            {
+                if let (Some(body_rect), Some(other_rect)) = (body.rect, other.rect) {
+                    let y_delta: i32 = position_1.y as i32 - position_2.y as i32;
+                    let new_rect = body_rect + (velocity.x, velocity.y);
+                    if y_delta.abs() <= 20 {
+                        if new_rect.intersects(&other_rect) {
+                            let other_x = Interval {
+                                a: other_rect.x,
+                                b: other_rect.x + other_rect.w as i32,
+                            };
+                            if velocity.x < 0 && other_x.contains_point(new_rect.x) {
+                                velocity.x = 0;
+                            } else if velocity.x > 0
+                                && other_x.contains_point(new_rect.x + new_rect.w as i32)
+                            {
+                                velocity.x = 0;
+                            }
+
+                            let other_y = Interval {
+                                a: other_rect.y,
+                                b: other_rect.y + new_rect.h as i32,
+                            };
+                            if velocity.y < 0 && other_y.contains_point(new_rect.y) {
+                                velocity.y = 0;
+                            } else if velocity.y > 0
+                                && other_y.contains_point(new_rect.y + new_rect.h as i32)
+                            {
+                                velocity.y = 0;
+                            }
+
+                        }
+                    }
+
+                    // let y_delta: i32 = position_1.y as i32 - position_2.y as i32;
+                    // if y_delta.abs() <= 10 && new_y.intersects(&other_y) {
+                    //     println!("{:?}", new_y);
+                    //     velocity.y = 0;
+                    // }
+                }
+            }
+        }
+    }
+}
 
 pub struct UpdateBoundingBoxes;
 
@@ -115,7 +185,28 @@ impl<'a> System<'a> for UpdateBoundingBoxes {
             if body_boxes.is_empty() {
                 body.collision_boxes = None;
             } else {
+                let mut contains_all: Option<Rect> = None;
+                for body_box in &body_boxes {
+                    match contains_all {
+                        Some(ref mut rect) => {
+                            if body_box.rect.w > rect.w {
+                                rect.w = body_box.rect.w
+                            }
+                            if body_box.rect.h > rect.h {
+                                rect.h = body_box.rect.h
+                            }
+                            if body_box.rect.x < rect.x {
+                                rect.x = body_box.rect.x
+                            }
+                            if body_box.rect.y < rect.x {
+                                rect.y = body_box.rect.y
+                            }
+                        }
+                        None => contains_all = Some(body_box.rect.clone()),
+                    }
+                }
                 body.collision_boxes = Some(body_boxes);
+                body.rect = contains_all;
             }
         }
     }
@@ -265,7 +356,7 @@ impl<'a> System<'a> for ResolveCollisions {
                     if !has_defended || target_used_block {
                         match state.action {
                             Action::Attack(AttackType::UpThrust) => (),
-                            _ =>  {
+                            _ => {
                                 state.action = Action::AttackRecovery;
                                 state.ticks = 0;
                             }

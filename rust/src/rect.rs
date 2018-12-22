@@ -43,15 +43,27 @@ impl Add<Point> for Rect {
     }
 }
 
-impl Add<(u32, u32)> for Rect {
+impl Add<(i32, i32)> for Rect {
     type Output = Rect;
 
-    fn add(self, other: (u32, u32)) -> Rect {
+    fn add(self, other: (i32, i32)) -> Rect {
         Rect {
-            x: self.x + other.0 as i32,
-            y: self.y + other.1 as i32,
+            x: self.x + other.0,
+            y: self.y + other.1,
             w: self.w,
             h: self.h,
         }
+    }
+}
+
+#[derive(Default, Copy, Clone, Debug)]
+pub struct Interval {
+    pub a: i32,
+    pub b: i32,
+}
+
+impl Interval {
+    pub fn contains_point(&self, other: i32) -> bool {
+        self.a <= other && self.b >= other
     }
 }

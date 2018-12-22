@@ -11,9 +11,9 @@ struct Rect {
 
 // TODO: change to be SystemData
 const LAIR_BOUNDARY: Rect = Rect {
-    x: 10, //10,
+    x: 0, //10,
     y: 0,  //30,
-    w: 320 - 10,
+    w: 320,// - 10,
     h: 155, // - 30,
 };
 
