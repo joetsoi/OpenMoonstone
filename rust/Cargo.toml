@@ -21,7 +21,7 @@ serde_derive = "*"
 serde_yaml = "*"
 warmy = "0.8.0"
 maplit = "*"
-lazy_static = "1.1.0"
+lazy_static = "1.2.0"
 
 [dependencies.ggez]
 version = "*"
