@@ -1,7 +1,6 @@
 use specs::{ReadStorage, System, WriteStorage};
 
 use crate::combat::components::{Action, Command, Intent, State};
-use crate::combat::components::intent::{AttackType, DefendType};
 
 pub struct ActionSystem;
 
@@ -13,25 +12,21 @@ impl<'a> System<'a> for ActionSystem {
 
         for (intent, state) in (&intent, &mut state).join() {
             match intent.command {
-                Command::Attack(attack_type) => {
-                    match state.action {
-                        Action::Idle | Action::Move {..} => {
-                            state.action = Action::Attack(attack_type);
-                            state.length = 0;
-                            state.ticks = 0;
-                        },
-                        _ => (),
+                Command::Attack(attack_type) => match state.action {
+                    Action::Idle | Action::Move { .. } => {
+                        state.action = Action::Attack(attack_type);
+                        state.length = 0;
+                        state.ticks = 0;
                     }
+                    _ => (),
                 },
-                Command::Defend(defend_type) => {
-                    match state.action {
-                        Action::Idle | Action::Move {..} => {
-                            state.action = Action::Defend(defend_type);
-                            state.length = 0;
-                            state.ticks = 0;
-                        },
-                        _ => (),
+                Command::Defend(defend_type) => match state.action {
+                    Action::Idle | Action::Move { .. } => {
+                        state.action = Action::Defend(defend_type);
+                        state.length = 0;
+                        state.ticks = 0;
                     }
+                    _ => (),
                 },
                 _ => (),
             }

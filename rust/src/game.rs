@@ -1,22 +1,11 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 use failure::Error;
-use ggez::conf::NumSamples;
 use ggez::graphics;
 use ggez::Context;
-use specs::World;
-use warmy::{LogicalKey, Store, StoreOpt};
+use warmy::{Store, StoreOpt};
 
-use crate::animation::{Frame, Sprite, SpriteData};
-use crate::combat::components::{
-    AnimationState, Body, Collided, Controller, Draw, Health, Intent, Position, State, Velocity,
-    WalkingState, Weapon,
-};
 use crate::input;
-use crate::manager::GameYaml;
-use crate::objects::TextureAtlas;
-use crate::piv::PivImage;
-use crate::rect::Rect;
 
 pub struct Game {
     pub input: input::InputState,
@@ -25,13 +14,11 @@ pub struct Game {
 }
 
 impl Game {
-    pub fn new(ctx: &mut Context) -> Result<Game, Error> {
-        let mut store: Store<Context> = Store::new(StoreOpt::default())?;
-
+    pub fn new() -> Result<Game, Error> {
         Ok(Game {
             input: input::InputState::new(),
             images: HashMap::new(),
-            store,
+            store: Store::new(StoreOpt::default())?,
         })
     }
 }

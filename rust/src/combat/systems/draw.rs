@@ -2,7 +2,6 @@ use specs::{ReadExpect, ReadStorage, System, WriteStorage};
 
 use crate::animation::SpriteData;
 use crate::combat::components::{AnimationState, Draw, State};
-use crate::files::collide::CollisionBoxes;
 
 pub struct UpdateImage;
 

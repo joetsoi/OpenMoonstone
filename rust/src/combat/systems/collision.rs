@@ -39,9 +39,9 @@ impl<'a> System<'a> for EntityEntityCollision {
         )
             .join()
         {
-            for (other, position_2, entity_2) in (&body_storage, &position_storage, &*entities)
+            for (other, position_2, _entity_2) in (&body_storage, &position_storage, &*entities)
                 .join()
-                .filter(|(.., e)| e.id() != entity_1.id())
+                .filter(|(.., entity_2)| entity_2.id() != entity_1.id())
             {
                 if let (Some(body_rect), Some(other_rect)) = (body.rect, other.rect) {
                     let y_delta: i32 = position_1.y as i32 - position_2.y as i32;
@@ -231,11 +231,11 @@ impl<'a> System<'a> for CheckCollisions {
     ) {
         use specs::Join;
         let textures = &encounter_textures.data;
-        for (state, att_pos, weapon, attacker) in (&state, &position, &weapons, &*entities)
+        for (_state, att_pos, weapon, attacker) in (&state, &position, &weapons, &*entities)
             .join()
-            .filter(|(s, ..)| s.action.is_attack())
+            .filter(|(state, ..)| state.action.is_attack())
         {
-            for (defender, body, defender_position) in (&*entities, &bodies, &position)
+            for (defender, body, _defender_position) in (&*entities, &bodies, &position)
                 .join()
                 // ignore self for collision checking.
                 .filter(|(defender, ..)| attacker.id() != defender.id())
@@ -244,7 +244,7 @@ impl<'a> System<'a> for CheckCollisions {
             {
                 let hit = CheckCollisions::check_collision(&textures, weapon, body);
                 if hit {
-                    let result = collided.insert(attacker, Collided { target: defender });
+                    let _result = collided.insert(attacker, Collided { target: defender });
                 }
             }
         }

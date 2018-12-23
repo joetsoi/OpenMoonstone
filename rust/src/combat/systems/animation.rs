@@ -71,7 +71,6 @@ impl<'a> System<'a> for Animation {
                 Action::Dead => {
                     animation_state.frame_number = 0;
                 }
-                _ => panic!("action not handled yet"),
             }
             draw.animation = action_to_animation
                 .get(&state.action)

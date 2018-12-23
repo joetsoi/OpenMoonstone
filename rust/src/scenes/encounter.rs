@@ -5,16 +5,14 @@ use std::time::Duration;
 use failure::Error;
 use ggez::conf::NumSamples;
 use ggez::graphics;
-use ggez::graphics::Color;
 use ggez::timer;
 use ggez::{Context, GameResult};
 use ggez_goodies::scene;
-use specs::world;
-use specs::world::Builder;
+use specs::world::{Builder, Index};
 use specs::{Dispatcher, DispatcherBuilder, Join, World};
-use warmy::{LogicalKey, Store, StoreOpt};
+use warmy::{LogicalKey, Store};
 
-use crate::animation::{Frame, ImageType, Sprite, SpriteData};
+use crate::animation::{ImageType, Sprite, SpriteData};
 use crate::combat::components::{
     AnimationState, Body, Collided, Controller, Draw, Facing, Health, Intent, Position, State,
     Velocity, WalkingState, Weapon,
@@ -44,8 +42,8 @@ pub struct EncounterScene<'a> {
     pub background: graphics::Canvas,
     pub palette: Vec<Colour>,
 
-    knight_id: world::Index,
-    player_2: world::Index,
+    knight_id: Index,
+    player_2: Index,
 }
 
 impl<'a> EncounterScene<'a> {
@@ -294,7 +292,7 @@ impl<'a> scene::Scene<Game, input::InputEvent> for EncounterScene<'a> {
     fn draw(&mut self, game: &mut Game, ctx: &mut Context) -> GameResult<()> {
         //fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         //self.dispatcher.dispatch_thread_local(&self.game.world.res);
-        graphics::set_background_color(ctx, Color::from((0, 0, 0, 255)));
+        graphics::set_background_color(ctx, graphics::Color::from((0, 0, 0, 255)));
         graphics::clear(ctx);
 
         let screen_origin = graphics::Point2::new(0.0, 0.0);
@@ -310,9 +308,6 @@ impl<'a> scene::Scene<Game, input::InputEvent> for EncounterScene<'a> {
                 ..Default::default()
             },
         )?;
-        //self.systems.renderer.run_now(&self.game.world.res, ctx: Context);
-        //let mut batches: HashMap<String, graphics::spritebatch::SpriteBatch> = HashMap::new();
-        let mut batch_order: Vec<String> = vec![];
         let position_storage = self.specs_world.read_storage::<Position>();
         let draw_storage = self.specs_world.read_storage::<Draw>();
 
@@ -373,12 +368,8 @@ impl<'a> scene::Scene<Game, input::InputEvent> for EncounterScene<'a> {
 
         let body_storage = self.specs_world.read_storage::<Body>();
 
-        let mut storage = (&position_storage, &body_storage)
-            .join()
-            .collect::<Vec<_>>();
-
         graphics::set_color(ctx, graphics::Color::new(0.4, 1.0, 0.0, 1.0))?;
-        for (position, body) in storage {
+        for body in (&body_storage).join() {
             if let Some(boxes) = &body.collision_boxes {
                 for collision_box in boxes {
                     graphics::rectangle(
@@ -397,12 +388,8 @@ impl<'a> scene::Scene<Game, input::InputEvent> for EncounterScene<'a> {
 
         let weapon_storage = self.specs_world.read_storage::<Weapon>();
 
-        let mut storage = (&position_storage, &weapon_storage)
-            .join()
-            .collect::<Vec<_>>();
-
         graphics::set_color(ctx, graphics::Color::new(1.0, 0.0, 1.0, 1.0))?;
-        for (position, weapon) in storage {
+        for weapon in (&weapon_storage).join() {
             if let Some(collision_rects) = &weapon.collision_points {
                 for rect in collision_rects {
                     graphics::rectangle(
@@ -494,7 +481,7 @@ impl<'a> scene::Scene<Game, input::InputEvent> for EncounterScene<'a> {
         "Encounter"
     }
 
-    fn input(&mut self, gameworld: &mut Game, event: input::InputEvent, started: bool) {
-         // gameworld.input.update_effect(event, started);
+    fn input(&mut self, _gameworld: &mut Game, _event: input::InputEvent, _started: bool) {
+        // gameworld.input.update_effect(event, started);
     }
 }
