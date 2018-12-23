@@ -47,12 +47,7 @@ pub struct EncounterScene<'a> {
 }
 
 impl<'a> EncounterScene<'a> {
-    pub fn new(
-        ctx: &mut Context,
-        store: &mut Store<Context>,
-        entity_names: &[&str],
-        background_name: &str,
-    ) -> Result<Self, Error> {
+    fn build_world() -> World {
         let mut world = World::new();
         world.register::<AnimationState>();
         world.register::<Body>();
@@ -66,6 +61,58 @@ impl<'a> EncounterScene<'a> {
         world.register::<Velocity>();
         world.register::<WalkingState>();
         world.register::<Weapon>();
+        world
+    }
+
+    fn build_dispatcher() -> Dispatcher<'a, 'a> {
+        DispatcherBuilder::new()
+            .with(Commander, "commander", &[])
+            .with(ActionSystem, "action", &["commander"])
+            .with(EntityDeath, "entity_death", &["action"])
+            .with(VelocitySystem, "velocity", &["commander"])
+            .with(EntityEntityCollision, "entity_collision", &["velocity"])
+            .with(
+                RestrictMovementToBoundary,
+                "restrict_movement_to_boundary",
+                &["velocity"],
+            )
+            .with(
+                ConfirmVelocity,
+                "confirm_velocity",
+                &["restrict_movement_to_boundary", "entity_collision"],
+            )
+            .with(Movement, "movement", &["confirm_velocity"])
+            .with(Animation, "animation", &["movement"])
+            //.with(StateUpdater, "state_updater", &["animation"])
+            .with(UpdateImage, "update_image", &["animation"])
+            .with(
+                UpdateBoundingBoxes,
+                "update_bounding_boxes",
+                &["update_image"],
+            )
+            .with(
+                CheckCollisions,
+                "check_collisions",
+                &["update_bounding_boxes"],
+            )
+            .with(
+                ResolveCollisions,
+                "resolve_collisions",
+                &["check_collisions"],
+            )
+            .with(StateUpdater, "state_updater", &["resolve_collisions"])
+            // .with_thread_local(Renderer {
+            //     store: Store::new(StoreOpt::default()).expect("store creation"),
+            // })
+            .build()
+    }
+
+    fn load_sprite_data(
+        ctx: &mut Context,
+        store: &mut Store<Context>,
+        world: &mut World,
+        entity_names: &[&str],
+    ) -> Result<(), Error> {
         let entities_yaml =
             store.get::<_, GameYaml>(&warmy::LogicalKey::new("/entities.yaml"), ctx)?;
 
@@ -91,7 +138,6 @@ impl<'a> EncounterScene<'a> {
             }
         }
         world.add_resource(SpriteData { sprites });
-
         let mut image_sizes: HashMap<String, Vec<Rect>> = HashMap::new();
         let mut texture_atlases: HashMap<String, TextureAtlas> = HashMap::new();
         for atlas_name in atlas_names {
@@ -104,6 +150,17 @@ impl<'a> EncounterScene<'a> {
         world.add_resource(EncounterTextures {
             data: texture_atlases,
         });
+        Ok(())
+    }
+
+    pub fn new(
+        ctx: &mut Context,
+        store: &mut Store<Context>,
+        entity_names: &[&str],
+        background_name: &str,
+    ) -> Result<Self, Error> {
+        let mut world = EncounterScene::build_world();
+        EncounterScene::load_sprite_data(ctx, store, &mut world, entity_names)?;
 
         let piv = store
             .get::<_, PivImage>(&LogicalKey::new(background_name), ctx)
@@ -215,50 +272,10 @@ impl<'a> EncounterScene<'a> {
             })
             .build();
 
-        let dispatcher = DispatcherBuilder::new()
-            .with(Commander, "commander", &[])
-            .with(ActionSystem, "action", &["commander"])
-            .with(EntityDeath, "entity_death", &["action"])
-            .with(VelocitySystem, "velocity", &["commander"])
-            .with(EntityEntityCollision, "entity_collision", &["velocity"])
-            .with(
-                RestrictMovementToBoundary,
-                "restrict_movement_to_boundary",
-                &["velocity"],
-            )
-            .with(
-                ConfirmVelocity,
-                "confirm_velocity",
-                &["restrict_movement_to_boundary", "entity_collision"],
-            )
-            .with(Movement, "movement", &["confirm_velocity"])
-            .with(Animation, "animation", &["movement"])
-            //.with(StateUpdater, "state_updater", &["animation"])
-            .with(UpdateImage, "update_image", &["animation"])
-            .with(
-                UpdateBoundingBoxes,
-                "update_bounding_boxes",
-                &["update_image"],
-            )
-            .with(
-                CheckCollisions,
-                "check_collisions",
-                &["update_bounding_boxes"],
-            )
-            .with(
-                ResolveCollisions,
-                "resolve_collisions",
-                &["check_collisions"],
-            )
-            .with(StateUpdater, "state_updater", &["resolve_collisions"])
-            // .with_thread_local(Renderer {
-            //     store: Store::new(StoreOpt::default()).expect("store creation"),
-            // })
-            .build();
         Ok(Self {
             palette,
             specs_world: world,
-            dispatcher: dispatcher,
+            dispatcher: EncounterScene::build_dispatcher(),
             background,
             knight_id: knight.id(),
             player_2: player_2.id(),
