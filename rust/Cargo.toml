@@ -27,5 +27,9 @@ lazy_static = "1.2.0"
 version = "*"
 features = ["cargo-resource-root"]
 
+[dependencies.shred]
+version = "*"
+features = ["nightly"]
+
 [dev-dependencies]
 rustfmt-nightly = "*"

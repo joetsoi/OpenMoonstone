@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use lazy_static::lazy_static;
 use maplit::hashmap;
-use specs::{Entities, Read, ReadStorage, System, WriteStorage};
+use specs::{Entities, ReadExpect, ReadStorage, System, WriteStorage};
 
 use crate::animation::ImageType;
 use crate::combat::components::collision::{CollisionBox, Points};
@@ -12,7 +12,7 @@ use crate::combat::components::{
     Action, Body, Collided, Draw, Facing, Health, Position, State, Velocity, Weapon,
 };
 use crate::files::collide::CollisionBoxes;
-use crate::game::EncounterTextures;
+use crate::scenes::encounter::EncounterTextures;
 use crate::objects::TextureAtlas;
 use crate::rect::{Interval, Point, Rect};
 
@@ -90,8 +90,8 @@ pub struct UpdateBoundingBoxes;
 
 impl<'a> System<'a> for UpdateBoundingBoxes {
     type SystemData = (
-        Read<'a, CollisionBoxes>,
-        Read<'a, EncounterTextures>,
+        ReadExpect<'a, CollisionBoxes>,
+        ReadExpect<'a, EncounterTextures>,
         ReadStorage<'a, Draw>,
         ReadStorage<'a, Position>,
         ReadStorage<'a, State>,
@@ -216,7 +216,7 @@ pub struct CheckCollisions;
 
 impl<'a> System<'a> for CheckCollisions {
     type SystemData = (
-        Read<'a, EncounterTextures>,
+        ReadExpect<'a, EncounterTextures>,
         ReadStorage<'a, State>,
         ReadStorage<'a, Position>,
         ReadStorage<'a, Body>,

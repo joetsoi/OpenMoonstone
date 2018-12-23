@@ -1,4 +1,4 @@
-use specs::{Read, ReadStorage, System, WriteStorage};
+use specs::{ReadExpect, ReadStorage, System, WriteStorage};
 
 use crate::animation::SpriteData;
 use crate::combat::components::{AnimationState, Draw, State};
@@ -8,7 +8,7 @@ pub struct UpdateImage;
 
 impl<'a> System<'a> for UpdateImage {
     type SystemData = (
-        Read<'a, SpriteData>,
+        ReadExpect<'a, SpriteData>,
         WriteStorage<'a, Draw>,
         ReadStorage<'a, AnimationState>,
         WriteStorage<'a, State>,
