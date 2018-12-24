@@ -11,8 +11,7 @@ use ggez::{Context, GameResult};
 use openmoonstone::game::Game;
 use openmoonstone::input;
 use openmoonstone::scenes;
-use openmoonstone::scenes::encounter::EncounterScene;
-use openmoonstone::scenes::FSceneStack;
+use openmoonstone::scenes::{EncounterScene, FSceneStack, Menu};
 
 struct MainState {
     input_binding: input::InputBinding,
@@ -81,7 +80,9 @@ fn main() {
         EncounterScene::new(ctx, &mut scene_stack.world.store, &["knight"], filename)
             .expect("failed to init game");
     scene_stack.push(Box::new(encounter_scene));
-    println!("built encounter");
+
+    let menu = Menu::new(ctx, &mut scene_stack.world.store).unwrap();
+    scene_stack.push(Box::new(menu));
 
     let mut state = MainState {
         scene_stack,

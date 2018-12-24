@@ -167,7 +167,6 @@ impl<'a> EncounterScene<'a> {
             .unwrap();
         let background_image =
             graphics::Image::from_rgba8(ctx, 320, 200, &*piv.borrow().to_rgba8()).unwrap();
-        //world.add_resource(Lair { background });
         let background = graphics::Canvas::new(ctx, 320, 200, NumSamples::One)?;
         graphics::set_canvas(ctx, Some(&background));
         let screen_origin = graphics::Point2::new(0.0, 0.0);
