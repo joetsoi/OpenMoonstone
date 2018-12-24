@@ -308,8 +308,8 @@ impl<'a> scene::Scene<Game, input::InputEvent> for EncounterScene<'a> {
     fn draw(&mut self, game: &mut Game, ctx: &mut Context) -> GameResult<()> {
         //fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         //self.dispatcher.dispatch_thread_local(&self.game.world.res);
-        graphics::set_background_color(ctx, graphics::Color::from((0, 0, 0, 255)));
-        graphics::clear(ctx);
+        // graphics::set_background_color(ctx, graphics::Color::from((0, 0, 0, 255)));
+        // graphics::clear(ctx);
 
         let screen_origin = graphics::Point2::new(0.0, 0.0);
         // draw background

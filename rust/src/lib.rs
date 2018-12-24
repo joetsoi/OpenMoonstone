@@ -10,3 +10,4 @@ pub mod objects;
 pub mod piv;
 pub mod rect;
 pub mod scenes;
+pub mod text;

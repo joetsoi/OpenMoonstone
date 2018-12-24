@@ -9,6 +9,7 @@ use crate::game::Game;
 use crate::input::{Button, InputEvent};
 use crate::piv::PivImage;
 use crate::scenes::FSceneSwitch;
+use crate::text::Screen;
 
 pub struct Menu {
     background: graphics::Image,
@@ -19,6 +20,7 @@ impl Menu {
     pub fn new(ctx: &mut Context, store: &mut Store<Context>) -> Result<Self, Error> {
         let piv = store.get::<_, PivImage>(&LogicalKey::new("ch"), ctx)?;
         let background = graphics::Image::from_rgba8(ctx, 320, 200, &*piv.borrow().to_rgba8())?;
+        let menu_yaml = store.get::<_, Screen>(&warmy::LogicalKey::new("/menu.yaml"), ctx)?;
         Ok(Self {
             done: false,
             background,
