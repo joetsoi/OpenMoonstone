@@ -29,6 +29,7 @@ pub struct ObjectsFile {
 pub struct TextureAtlas {
     pub image: Image,
     pub rects: Vec<Rect>,
+    pub visible_widths: Vec<u32>,
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -84,6 +85,7 @@ impl ObjectsFile {
         let mut atlas: Vec<usize> = vec![0; config.width as usize * config.height as usize];
         let mut packer = Packer::new(config);
         let mut rects: Vec<Rect> = Vec::new();
+        let mut visible_widths: Vec<u32> = Vec::new();
         for image in self.images.iter() {
             if let Some(rect) = packer.pack(image.width as i32, image.height as i32, false) {
                 let rgba_image = &image.pixels;
@@ -102,6 +104,7 @@ impl ObjectsFile {
                     w: rect.width as u32,
                     h: rect.height as u32,
                 });
+                visible_widths.push(image.visible_width);
             } else {
                 return Err(TextureSizeTooSmall { texture_size });
             }
@@ -109,10 +112,12 @@ impl ObjectsFile {
         Ok(TextureAtlas {
             image: Image {
                 width: config.width as usize,
+                visible_width: config.width as u32,
                 height: config.height as usize,
                 pixels: atlas,
             },
             rects,
+            visible_widths,
         })
     }
 
@@ -143,6 +148,7 @@ impl ObjectsFile {
 #[derive(Debug, Clone)]
 pub struct Image {
     pub width: usize,
+    pub visible_width: u32,
     pub height: usize,
     pub pixels: Vec<usize>,
 }
@@ -175,6 +181,7 @@ impl Image {
 
         Image {
             width: unpacked_image_width,
+            visible_width: header.width as u32,
             height: header.height,
             pixels,
         }

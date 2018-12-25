@@ -5,25 +5,33 @@ use ggez::{graphics, timer, Context, GameResult};
 use ggez_goodies::scene::{Scene, SceneSwitch};
 use warmy::{LogicalKey, Store};
 
+use crate::error::{err_from, CompatError};
 use crate::game::Game;
 use crate::input::{Button, InputEvent};
+use crate::piv::Colour;
 use crate::piv::PivImage;
 use crate::scenes::FSceneSwitch;
 use crate::text::Screen;
 
 pub struct Menu {
     background: graphics::Image,
+    palette: Vec<Colour>,
     done: bool,
+    screen: Screen,
 }
 
 impl Menu {
     pub fn new(ctx: &mut Context, store: &mut Store<Context>) -> Result<Self, Error> {
         let piv = store.get::<_, PivImage>(&LogicalKey::new("ch"), ctx)?;
         let background = graphics::Image::from_rgba8(ctx, 320, 200, &*piv.borrow().to_rgba8())?;
-        let menu_yaml = store.get::<_, Screen>(&warmy::LogicalKey::new("/menu.yaml"), ctx)?;
+        let screen_res = store.get::<_, Screen>(&warmy::LogicalKey::new("/menu.yaml"), ctx)?;
+        let screen = screen_res.borrow().clone();
+        let palette = piv.borrow().palette.to_vec();
         Ok(Self {
             done: false,
             background,
+            palette,
+            screen,
         })
     }
 }
@@ -49,6 +57,23 @@ impl Scene<Game, InputEvent> for Menu {
                 ..Default::default()
             },
         )?;
+
+        for text in &self.screen.text {
+            let mut batch: graphics::spritebatch::SpriteBatch = text
+                .as_sprite_batch(ctx, game, &self.palette)
+                .expect("error drawing text to screen");
+            graphics::draw_ex(
+                ctx,
+                &batch,
+                graphics::DrawParam {
+                    dest: graphics::Point2::new(0.0, 0.0),
+                    scale: graphics::Point2::new(3.0, 3.0),
+                    ..Default::default()
+                },
+            )?;
+            batch.clear();
+        }
+
         graphics::present(ctx);
         timer::sleep(Duration::from_millis(50));
         Ok(())

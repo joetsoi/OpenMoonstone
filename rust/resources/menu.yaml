@@ -2,7 +2,7 @@ background: ch
 text:
   - {string: "Players", font: bold.f, bordered: true, centered: false, x: 86, y: 83}
   - {string: "Gore", font: bold.f, bordered: true, centered: false, x: 86, y: 108}
-  - {string: "Practice", font: bold.f, bordered: true, centered: true, x: 86, y: 108}
+  - {string: "Practice", font: bold.f, bordered: true, centered: true, x: 0, y: 150}
   - {string: "Select Knight", font: bold.f, bordered: true, centered: true, x: 0, y: 170}
   - {string: "1", font: bold.f, bordered: true, centered: false, x: 214, y: 83}
   - {string: "On", font: bold.f, bordered: true, centered: false, x: 214, y: 108}
