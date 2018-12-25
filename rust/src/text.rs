@@ -46,6 +46,7 @@ lazy_static! {
 pub struct Screen {
     pub background: String,
     pub text: Vec<Text>,
+    pub images: Vec<Image>,
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
@@ -150,7 +151,7 @@ impl Text {
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct Image {
     pub sheet: String,
-    pub image: u32,
+    pub image: usize,
     pub x: i32,
     pub y: i32,
 }

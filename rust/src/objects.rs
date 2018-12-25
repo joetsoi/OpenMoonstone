@@ -190,8 +190,13 @@ impl Image {
     pub fn to_rgba8(&self, palette: &[Colour]) -> Vec<u8> {
         let mut pixels: Vec<u8> = Vec::with_capacity(self.width * self.height * 4);
         for pel in self.pixels.iter() {
-            let colour = palette[*pel];
-            pixels.extend([colour.r, colour.g, colour.b, colour.a].iter())
+            match palette.get(*pel) {
+                Some(colour) => pixels.extend([colour.r, colour.g, colour.b, colour.a].iter()),
+                None => {
+                    println!("couldn't find pixel colour {}, defaulting to black", pel);
+                    pixels.extend([0, 0, 0, 0].iter());
+                }
+            }
         }
         pixels
     }

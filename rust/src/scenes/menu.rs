@@ -1,3 +1,4 @@
+use std::collections::hash_map::Entry::{Occupied, Vacant};
 use std::time::Duration;
 
 use failure::Error;
@@ -8,6 +9,7 @@ use warmy::{LogicalKey, Store};
 use crate::error::{err_from, CompatError};
 use crate::game::Game;
 use crate::input::{Button, InputEvent};
+use crate::objects::TextureAtlas;
 use crate::piv::Colour;
 use crate::piv::PivImage;
 use crate::scenes::FSceneSwitch;
@@ -72,6 +74,42 @@ impl Scene<Game, InputEvent> for Menu {
                 },
             )?;
             batch.clear();
+        }
+
+        for image in &self.screen.images {
+            let atlas = game
+                .store
+                .get::<_, TextureAtlas>(&LogicalKey::new(image.sheet.as_str()), ctx)
+                .unwrap();
+
+            let atlas_dimension = atlas.borrow().image.width as u32;
+            let ggez_image = match game.images.entry(image.sheet.clone()) {
+                Occupied(i) => i.into_mut(),
+                Vacant(i) => i.insert(
+                    graphics::Image::from_rgba8(
+                        ctx,
+                        atlas_dimension as u16,
+                        atlas_dimension as u16,
+                        &atlas.borrow().image.to_rgba8(&self.palette),
+                    )
+                    .unwrap(),
+                ),
+            };
+
+            let rect = atlas.borrow().rects[image.image];
+            let texture_size = atlas.borrow().image.width as f32;
+            let draw_params = graphics::DrawParam {
+                src: graphics::Rect {
+                    x: rect.x as f32 / texture_size,
+                    y: rect.y as f32 / texture_size,
+                    w: rect.w as f32 / texture_size,
+                    h: rect.h as f32 / texture_size,
+                },
+                dest: graphics::Point2::new(image.x as f32 * 3.0, image.y as f32 * 3.0),
+                scale: graphics::Point2::new(3.0, 3.0),
+                ..Default::default()
+            };
+            graphics::draw_ex(ctx, ggez_image, draw_params)?;
         }
 
         graphics::present(ctx);
