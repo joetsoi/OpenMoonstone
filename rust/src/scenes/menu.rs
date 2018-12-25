@@ -1,4 +1,5 @@
 use std::collections::hash_map::Entry::{Occupied, Vacant};
+use std::iter::repeat;
 use std::time::Duration;
 
 use failure::Error;
@@ -28,7 +29,16 @@ impl Menu {
         let background = graphics::Image::from_rgba8(ctx, 320, 200, &*piv.borrow().to_rgba8())?;
         let screen_res = store.get::<_, Screen>(&warmy::LogicalKey::new("/menu.yaml"), ctx)?;
         let screen = screen_res.borrow().clone();
-        let palette = piv.borrow().palette.to_vec();
+        let mut palette = piv.borrow().palette.to_vec();
+        palette.extend(
+            repeat(Colour {
+                r: 0,
+                g: 0,
+                b: 0,
+                a: 0,
+            })
+            .take(16),
+        );
         Ok(Self {
             done: false,
             background,

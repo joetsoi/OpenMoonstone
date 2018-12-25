@@ -192,10 +192,7 @@ impl Image {
         for pel in self.pixels.iter() {
             match palette.get(*pel) {
                 Some(colour) => pixels.extend([colour.r, colour.g, colour.b, colour.a].iter()),
-                None => {
-                    println!("couldn't find pixel colour {}, defaulting to black", pel);
-                    pixels.extend([0, 0, 0, 0].iter());
-                }
+                None => panic!("Palette doesn't contain enough colours {}", pel),
             }
         }
         pixels
