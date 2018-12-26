@@ -5,6 +5,7 @@ use std::time::Duration;
 use failure::Error;
 use ggez::{graphics, timer, Context, GameResult};
 use ggez_goodies::scene::{Scene, SceneSwitch};
+use lazy_static::lazy_static;
 use warmy::{LogicalKey, Store};
 
 use crate::game::Game;
@@ -13,7 +14,42 @@ use crate::objects::TextureAtlas;
 use crate::piv::Colour;
 use crate::piv::PivImage;
 use crate::scenes::FSceneSwitch;
-use crate::text::Screen;
+use crate::text::{Screen, Text};
+
+struct MenuImage {
+    sheet: &'static str,
+    image: usize,
+    x: u32,
+    y: u32,
+}
+
+const ARROW: MenuImage = MenuImage {
+    sheet: "sel.cel",
+    image: 0,
+    x: 50,
+    y: 85,
+};
+
+const ARROW_POSITIONS: [u32; 4] = [85, 110, 152, 172];
+
+lazy_static! {
+    static ref ON: Text = Text {
+        string: "On".to_string(),
+        font: "bold.f".to_string(),
+        bordered: true,
+        centered: false,
+        x: 214,
+        y: 108,
+    };
+    static ref OFF: Text = Text {
+        string: "Off".to_string(),
+        font: "bold.f".to_string(),
+        bordered: true,
+        centered: false,
+        x: 214,
+        y: 108,
+    };
+}
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 enum MenuOption {
@@ -30,7 +66,7 @@ impl MenuOption {
             1 => MenuOption::Gore,
             2 => MenuOption::Practice,
             3 => MenuOption::SelectKnight,
-            _ => MenuOption::Players,
+            _ => panic!("Something went really wrong selecting menu options"),
         }
     }
 }
@@ -72,18 +108,8 @@ impl Menu {
     }
 }
 
-impl Scene<Game, InputEvent> for Menu {
-    fn update(&mut self, game: &mut Game) -> FSceneSwitch {
-        if self.done {
-            SceneSwitch::Pop
-        } else {
-            SceneSwitch::None
-        }
-    }
-
-    fn draw(&mut self, game: &mut Game, ctx: &mut Context) -> GameResult<()> {
-        graphics::set_background_color(ctx, graphics::Color::from((0, 0, 0, 255)));
-        graphics::clear(ctx);
+impl Menu {
+    fn draw_screen(&mut self, game: &mut Game, ctx: &mut Context) -> GameResult<()> {
         graphics::draw_ex(
             ctx,
             &self.background,
@@ -119,15 +145,12 @@ impl Scene<Game, InputEvent> for Menu {
             let atlas_dimension = atlas.borrow().image.width as u32;
             let ggez_image = match game.images.entry(image.sheet.clone()) {
                 Occupied(i) => i.into_mut(),
-                Vacant(i) => i.insert(
-                    graphics::Image::from_rgba8(
-                        ctx,
-                        atlas_dimension as u16,
-                        atlas_dimension as u16,
-                        &atlas.borrow().image.to_rgba8(&self.palette),
-                    )
-                    .unwrap(),
-                ),
+                Vacant(i) => i.insert(graphics::Image::from_rgba8(
+                    ctx,
+                    atlas_dimension as u16,
+                    atlas_dimension as u16,
+                    &atlas.borrow().image.to_rgba8(&self.palette),
+                )?),
             };
 
             let rect = atlas.borrow().rects[image.image];
@@ -145,7 +168,79 @@ impl Scene<Game, InputEvent> for Menu {
             };
             graphics::draw_ex(ctx, ggez_image, draw_params)?;
         }
+        Ok(())
+    }
 
+    fn draw_arrow(&mut self, game: &mut Game, ctx: &mut Context) -> GameResult<()> {
+        let atlas = game
+            .store
+            .get::<_, TextureAtlas>(&LogicalKey::new(ARROW.sheet), ctx)
+            // TODO: raise error
+            .expect("Couldn't find sel.cel yaml metadata");
+
+        let atlas_dimension = atlas.borrow().image.width as u32;
+        let arrow_image = graphics::Image::from_rgba8(
+            ctx,
+            atlas_dimension as u16,
+            atlas_dimension as u16,
+            &atlas.borrow().image.to_rgba8(&self.palette),
+        )?;
+        let rect = atlas.borrow().rects[ARROW.image];
+        let texture_size = atlas.borrow().image.width as f32;
+        let y = ARROW_POSITIONS[self.selected_option as usize];
+        let draw_params = graphics::DrawParam {
+            src: graphics::Rect {
+                x: rect.x as f32 / texture_size,
+                y: rect.y as f32 / texture_size,
+                w: rect.w as f32 / texture_size,
+                h: rect.h as f32 / texture_size,
+            },
+            dest: graphics::Point2::new(ARROW.x as f32 * 3.0, y as f32 * 3.0),
+            scale: graphics::Point2::new(3.0, 3.0),
+            ..Default::default()
+        };
+        graphics::draw_ex(ctx, &arrow_image, draw_params)?;
+        Ok(())
+    }
+
+    fn draw_gore_option(&mut self, game: &mut Game, ctx: &mut Context) -> GameResult<()> {
+        let mut batch = match game.gore_on {
+            true => ON
+                .as_sprite_batch(ctx, game, &self.palette)
+                .expect("error drawing ON"),
+            false => OFF
+                .as_sprite_batch(ctx, game, &self.palette)
+                .expect("error drawing ON"),
+        };
+        graphics::draw_ex(
+            ctx,
+            &batch,
+            graphics::DrawParam {
+                dest: graphics::Point2::new(0.0, 0.0),
+                scale: graphics::Point2::new(3.0, 3.0),
+                ..Default::default()
+            },
+        )?;
+        batch.clear();
+        Ok(())
+    }
+}
+
+impl Scene<Game, InputEvent> for Menu {
+    fn update(&mut self, game: &mut Game) -> FSceneSwitch {
+        if self.done {
+            SceneSwitch::Pop
+        } else {
+            SceneSwitch::None
+        }
+    }
+
+    fn draw(&mut self, game: &mut Game, ctx: &mut Context) -> GameResult<()> {
+        graphics::set_background_color(ctx, graphics::Color::from((0, 0, 0, 255)));
+        graphics::clear(ctx);
+        self.draw_screen(game, ctx)?;
+        self.draw_arrow(game, ctx)?;
+        self.draw_gore_option(game, ctx)?;
         graphics::present(ctx);
         timer::sleep(Duration::from_millis(50));
         Ok(())

@@ -51,12 +51,12 @@ pub struct Screen {
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct Text {
-    string: String,
-    font: String,
-    bordered: bool,
-    centered: bool,
-    x: u32,
-    y: u32,
+    pub string: String,
+    pub font: String,
+    pub bordered: bool,
+    pub centered: bool,
+    pub x: u32,
+    pub y: u32,
 }
 
 impl Text {
