@@ -7,20 +7,42 @@ use ggez::{graphics, timer, Context, GameResult};
 use ggez_goodies::scene::{Scene, SceneSwitch};
 use warmy::{LogicalKey, Store};
 
-use crate::error::{err_from, CompatError};
 use crate::game::Game;
-use crate::input::{Button, InputEvent};
+use crate::input::{Axis, Button, InputEvent};
 use crate::objects::TextureAtlas;
 use crate::piv::Colour;
 use crate::piv::PivImage;
 use crate::scenes::FSceneSwitch;
 use crate::text::Screen;
 
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+enum MenuOption {
+    Players = 0,
+    Gore = 1,
+    Practice = 2,
+    SelectKnight = 3,
+}
+
+impl MenuOption {
+    fn from_i32(n: i32) -> MenuOption {
+        match n {
+            0 => MenuOption::Players,
+            1 => MenuOption::Gore,
+            2 => MenuOption::Practice,
+            3 => MenuOption::SelectKnight,
+            _ => MenuOption::Players,
+        }
+    }
+}
+
+#[derive(Debug)]
 pub struct Menu {
     background: graphics::Image,
     palette: Vec<Colour>,
     done: bool,
+    num_players: i32,
     screen: Screen,
+    selected_option: MenuOption,
 }
 
 impl Menu {
@@ -40,10 +62,12 @@ impl Menu {
             .take(16),
         );
         Ok(Self {
-            done: false,
             background,
+            done: false,
             palette,
+            num_players: 1,
             screen,
+            selected_option: MenuOption::Players,
         })
     }
 }
@@ -131,9 +155,37 @@ impl Scene<Game, InputEvent> for Menu {
         "Main menu"
     }
 
-    fn input(&mut self, gameworld: &mut Game, _event: InputEvent, _started: bool) {
-        if gameworld.input.get_button_pressed(Button::Fire1) {
-            self.done = true;
+    fn input(&mut self, gameworld: &mut Game, _event: InputEvent, started: bool) {
+        let x = gameworld.input.get_axis_raw(Axis::Horz1) as i32;
+        if gameworld.input.get_button_down(Button::Fire1) {
+            match self.selected_option {
+                MenuOption::Practice => self.done = true,
+                MenuOption::Gore => gameworld.gore_on = !gameworld.gore_on,
+                MenuOption::Players => self.num_players = (self.num_players % 4) + 1,
+                _ => (),
+            }
+        } else if x != 0 {
+            match self.selected_option {
+                MenuOption::Gore => gameworld.gore_on = !gameworld.gore_on,
+                MenuOption::Players => {
+                    if x > 0 {
+                        self.num_players = (self.num_players % 4) + x;
+                    } else {
+                        self.num_players = (self.num_players + 3 + x) % 4 + 1;
+                    }
+                }
+                _ => (),
+            }
+        }
+
+        if !started {
+            let y = gameworld.input.get_axis_raw(Axis::Vert1) as i32;
+            if y > 0 {
+                self.selected_option = MenuOption::from_i32((self.selected_option as i32 + y) % 4);
+            } else if y < 0 {
+                self.selected_option =
+                    MenuOption::from_i32((self.selected_option as i32 + 4 + y) % 4);
+            }
         }
     }
 }
