@@ -4,6 +4,5 @@ text:
   - {string: "Gore", font: bold.f, bordered: true, centered: false, x: 86, y: 108}
   - {string: "Practice", font: bold.f, bordered: true, centered: true, x: 0, y: 150}
   - {string: "Select Knight", font: bold.f, bordered: true, centered: true, x: 0, y: 170}
-  - {string: "1", font: bold.f, bordered: true, centered: false, x: 214, y: 83}
 images:
   - {sheet: bold.f, image: 73, x: 5, y: 10}

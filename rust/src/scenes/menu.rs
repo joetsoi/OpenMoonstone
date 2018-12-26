@@ -49,6 +49,14 @@ lazy_static! {
         x: 214,
         y: 108,
     };
+    static ref PLAYER_COUNT: Text = Text {
+        string: "1".to_string(),
+        font: "bold.f".to_string(),
+        bordered: true,
+        centered: false,
+        x: 214,
+        y: 83,
+    };
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
@@ -224,6 +232,25 @@ impl Menu {
         batch.clear();
         Ok(())
     }
+
+    fn draw_player_count_option(&mut self, game: &mut Game, ctx: &mut Context) -> GameResult<()> {
+        let mut text = PLAYER_COUNT.clone();
+        text.string = self.num_players.to_string();
+        let mut batch = text
+            .as_sprite_batch(ctx, game, &self.palette)
+            .expect("error drawing PLAYER_COUNT");
+        graphics::draw_ex(
+            ctx,
+            &batch,
+            graphics::DrawParam {
+                dest: graphics::Point2::new(0.0, 0.0),
+                scale: graphics::Point2::new(3.0, 3.0),
+                ..Default::default()
+            },
+        )?;
+        batch.clear();
+        Ok(())
+    }
 }
 
 impl Scene<Game, InputEvent> for Menu {
@@ -241,6 +268,7 @@ impl Scene<Game, InputEvent> for Menu {
         self.draw_screen(game, ctx)?;
         self.draw_arrow(game, ctx)?;
         self.draw_gore_option(game, ctx)?;
+        self.draw_player_count_option(game, ctx)?;
         graphics::present(ctx);
         timer::sleep(Duration::from_millis(50));
         Ok(())
