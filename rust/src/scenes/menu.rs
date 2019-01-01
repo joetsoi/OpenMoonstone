@@ -180,6 +180,9 @@ impl Menu {
     }
 
     fn draw_arrow(&mut self, game: &mut Game, ctx: &mut Context) -> GameResult<()> {
+        // we don't want to save this image to the game cache as we only
+        // want to apply the pallete to the the arrow. We've extended the palette
+        // by 16 empty colours so to_rgba8 won't break.
         let atlas = game
             .store
             .get::<_, TextureAtlas>(&LogicalKey::new(ARROW.sheet), ctx)
@@ -218,7 +221,7 @@ impl Menu {
                 .expect("error drawing ON"),
             false => OFF
                 .as_sprite_batch(ctx, game, &self.palette)
-                .expect("error drawing ON"),
+                .expect("error drawing OFF"),
         };
         graphics::draw_ex(
             ctx,

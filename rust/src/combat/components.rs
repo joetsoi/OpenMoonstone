@@ -1,5 +1,6 @@
 pub mod animation;
 pub mod collision;
+pub mod daggers;
 pub mod direction;
 pub mod draw;
 pub mod health;
@@ -9,6 +10,7 @@ pub mod state;
 
 pub use self::animation::AnimationState;
 pub use self::collision::{Body, Collided, Weapon};
+pub use self::daggers::DaggersInventory;
 pub use self::direction::Facing;
 pub use self::draw::Draw;
 pub use self::health::Health;

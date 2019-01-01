@@ -14,8 +14,8 @@ use warmy::{LogicalKey, Store};
 
 use crate::animation::{ImageType, Sprite, SpriteData};
 use crate::combat::components::{
-    AnimationState, Body, Collided, Controller, Draw, Facing, Health, Intent, Position, State,
-    Velocity, WalkingState, Weapon,
+    AnimationState, Body, Collided, Controller, DaggersInventory, Draw, Facing, Health, Intent,
+    Position, State, Velocity, WalkingState, Weapon,
 };
 use crate::combat::systems::{
     ActionSystem, Animation, CheckCollisions, Commander, ConfirmVelocity, EntityDeath,
@@ -53,6 +53,7 @@ impl<'a> EncounterScene<'a> {
         world.register::<Body>();
         world.register::<Collided>();
         world.register::<Controller>();
+        world.register::<DaggersInventory>();
         world.register::<Draw>();
         world.register::<Health>();
         world.register::<Intent>();
@@ -229,6 +230,9 @@ impl<'a> EncounterScene<'a> {
             .with(Weapon {
                 ..Default::default()
             })
+            .with(DaggersInventory {
+                ..Default::default()
+            })
             .build();
 
         let player_2 = world
@@ -267,6 +271,9 @@ impl<'a> EncounterScene<'a> {
                 ..Default::default()
             })
             .with(Weapon {
+                ..Default::default()
+            })
+            .with(DaggersInventory {
                 ..Default::default()
             })
             .build();
