@@ -19,8 +19,8 @@ use crate::combat::components::{
 };
 use crate::combat::systems::{
     ActionSystem, Animation, CheckCollisions, Commander, ConfirmVelocity, EntityDeath,
-    EntityEntityCollision, Movement, ResolveCollisions, RestrictMovementToBoundary, StateUpdater,
-    UpdateBoundingBoxes, UpdateImage, VelocitySystem,
+    EntityEntityCollision, Movement, OutOfBounds, ResolveCollisions, RestrictMovementToBoundary,
+    StateUpdater, UpdateBoundingBoxes, UpdateImage, VelocitySystem,
 };
 use crate::files::collide::CollisionBoxes;
 use crate::game::Game;
@@ -102,6 +102,7 @@ impl<'a> EncounterScene<'a> {
                 &["check_collisions"],
             )
             .with(StateUpdater, "state_updater", &["resolve_collisions"])
+            .with(OutOfBounds, "out_of_bounds", &[])
             // .with_thread_local(Renderer {
             //     store: Store::new(StoreOpt::default()).expect("store creation"),
             // })

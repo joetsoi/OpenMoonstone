@@ -6,6 +6,7 @@ pub mod commander;
 pub mod draw;
 pub mod health;
 pub mod movement;
+pub mod out_of_bounds;
 pub mod state;
 pub mod velocity;
 
@@ -19,5 +20,6 @@ pub use self::commander::Commander;
 pub use self::draw::UpdateImage;
 pub use self::health::EntityDeath;
 pub use self::movement::Movement;
+pub use self::out_of_bounds::OutOfBounds;
 pub use self::state::StateUpdater;
 pub use self::velocity::{ConfirmVelocity, VelocitySystem};

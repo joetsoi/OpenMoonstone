@@ -4,7 +4,6 @@ use lazy_static::lazy_static;
 use maplit::hashmap;
 use specs::{Entities, ReadExpect, ReadStorage, System, WriteStorage};
 
-use crate::animation::ImageType;
 use crate::combat::components::collision::{CollisionBox, Points};
 use crate::combat::components::intent::{AttackType, DefendType};
 use crate::combat::components::state::HitType;
@@ -211,7 +210,6 @@ pub struct CheckCollisions;
 impl<'a> System<'a> for CheckCollisions {
     type SystemData = (
         ReadExpect<'a, EncounterTextures>,
-        ReadStorage<'a, State>,
         ReadStorage<'a, Position>,
         ReadStorage<'a, Body>,
         ReadStorage<'a, Weapon>,
@@ -221,7 +219,7 @@ impl<'a> System<'a> for CheckCollisions {
 
     fn run(
         &mut self,
-        (encounter_textures, state, position, bodies, weapons, mut collided, entities): Self::SystemData,
+        (encounter_textures, position, bodies, weapons, mut collided, entities): Self::SystemData,
     ) {
         use specs::Join;
         let textures = &encounter_textures.data;
