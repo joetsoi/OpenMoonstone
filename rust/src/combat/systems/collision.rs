@@ -225,9 +225,9 @@ impl<'a> System<'a> for CheckCollisions {
     ) {
         use specs::Join;
         let textures = &encounter_textures.data;
-        for (_state, att_pos, weapon, attacker) in (&state, &position, &weapons, &*entities)
-            .join()
-            .filter(|(state, ..)| state.action.is_attack())
+        // for (_state, att_pos, weapon, attacker) in (&state, &position, &weapons, &*entities)
+        for (att_pos, weapon, attacker) in (&position, &weapons, &*entities).join()
+        // .filter(|(state, ..)| state.action.is_attack())
         {
             for (defender, body, _defender_position) in (&*entities, &bodies, &position)
                 .join()
@@ -359,6 +359,12 @@ impl<'a> System<'a> for ResolveCollisions {
                             }
                         }
                     }
+                } else {
+                    // entiites without state are deleted after a collision
+                    // this is currently for thrown daggers, it would be better
+                    // to make this explicit, perhaps add a DeleteOnCollision component.
+                    println!("deleting entity {:?}", entity);
+                    entities.delete(entity);
                 }
             }
         }
