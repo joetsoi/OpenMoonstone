@@ -111,9 +111,66 @@ impl<'a> System<'a> for UpdateBoundingBoxes {
         use specs::Join;
         let collision_data = &collision_boxes.data;
         let textures = &encounter_textures.data;
-        for (draw, position, body, weapon) in (&draw, &position, &mut body, &mut weapon).join() {
-            let mut weapon_boxes: Vec<Points> = vec![];
+
+        for (draw, position, body) in (&draw, &position, &mut body).join() {
             let mut body_boxes: Vec<CollisionBox> = vec![];
+            for image in draw.frame.images.iter() {
+                match image.image_type {
+                    ImageType::Collidee => {
+                        if let Some(texture) = textures.get(&image.sheet) {
+                            let rect = &texture.rects[image.image];
+                            let mut image_global_x: i32 =
+                                position.x as i32 + image.x * draw.direction as i32;
+                            image_global_x = match draw.direction {
+                                Facing::Left => image_global_x - rect.w as i32,
+                                Facing::Right => image_global_x,
+                            };
+                            body_boxes.push(CollisionBox {
+                                rect: Rect {
+                                    x: image_global_x,
+                                    y: position.y as i32 + image.y,
+                                    w: rect.w,
+                                    h: rect.h,
+                                },
+                                sheet: image.sheet.clone(),
+                                image_num: image.image as u32,
+                            })
+                        }
+                    }
+                    _ => (),
+                }
+            }
+
+            if body_boxes.is_empty() {
+                body.collision_boxes = None;
+            } else {
+                let mut contains_all: Option<Rect> = None;
+                for body_box in &body_boxes {
+                    match contains_all {
+                        Some(ref mut rect) => {
+                            if body_box.rect.w > rect.w {
+                                rect.w = body_box.rect.w
+                            }
+                            if body_box.rect.h > rect.h {
+                                rect.h = body_box.rect.h
+                            }
+                            if body_box.rect.x < rect.x {
+                                rect.x = body_box.rect.x
+                            }
+                            if body_box.rect.y < rect.x {
+                                rect.y = body_box.rect.y
+                            }
+                        }
+                        None => contains_all = Some(body_box.rect.clone()),
+                    }
+                }
+                body.collision_boxes = Some(body_boxes);
+                body.rect = contains_all;
+            }
+        }
+
+        for (draw, position, weapon) in (&draw, &position, &mut weapon).join() {
+            let mut weapon_boxes: Vec<Points> = vec![];
             for image in draw.frame.images.iter() {
                 match image.image_type {
                     ImageType::Collider => {
@@ -146,27 +203,6 @@ impl<'a> System<'a> for UpdateBoundingBoxes {
                             })
                         }
                     }
-                    ImageType::Collidee => {
-                        if let Some(texture) = textures.get(&image.sheet) {
-                            let rect = &texture.rects[image.image];
-                            let mut image_global_x: i32 =
-                                position.x as i32 + image.x * draw.direction as i32;
-                            image_global_x = match draw.direction {
-                                Facing::Left => image_global_x - rect.w as i32,
-                                Facing::Right => image_global_x,
-                            };
-                            body_boxes.push(CollisionBox {
-                                rect: Rect {
-                                    x: image_global_x,
-                                    y: position.y as i32 + image.y,
-                                    w: rect.w,
-                                    h: rect.h,
-                                },
-                                sheet: image.sheet.clone(),
-                                image_num: image.image as u32,
-                            })
-                        }
-                    }
                     _ => (),
                 }
             }
@@ -175,33 +211,6 @@ impl<'a> System<'a> for UpdateBoundingBoxes {
                 weapon.collision_points = None;
             } else {
                 weapon.collision_points = Some(weapon_boxes);
-            }
-
-            if body_boxes.is_empty() {
-                body.collision_boxes = None;
-            } else {
-                let mut contains_all: Option<Rect> = None;
-                for body_box in &body_boxes {
-                    match contains_all {
-                        Some(ref mut rect) => {
-                            if body_box.rect.w > rect.w {
-                                rect.w = body_box.rect.w
-                            }
-                            if body_box.rect.h > rect.h {
-                                rect.h = body_box.rect.h
-                            }
-                            if body_box.rect.x < rect.x {
-                                rect.x = body_box.rect.x
-                            }
-                            if body_box.rect.y < rect.x {
-                                rect.y = body_box.rect.y
-                            }
-                        }
-                        None => contains_all = Some(body_box.rect.clone()),
-                    }
-                }
-                body.collision_boxes = Some(body_boxes);
-                body.rect = contains_all;
             }
         }
     }
