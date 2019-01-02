@@ -27,6 +27,11 @@ def change_player_colour(colour: str, palette: list):
         'green': [0x8c6, 0x593, 0x251],
         'red': [0xf22, 0xb22, 0x700],
         'black': [0x206, 0x103, 1],
+        # 'blue': [0xc, 0x9, 0x6],
+        # 'orange': [0xfa0, 0xe70, 0xc50],
+        # 'red': [0xd00, 0x900, 0x500],
+        # 'green': [0xae8, 0x6b5, 0x473],
+        # 'black': [0x408, 0x405, 3],
     }
     palette = copy.deepcopy(palette)
     old_palette = extract_palette(palette, base=256)

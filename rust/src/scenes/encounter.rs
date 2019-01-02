@@ -492,11 +492,11 @@ impl<'a> scene::Scene<Game, input::InputEvent> for EncounterScene<'a> {
         //    },
         //)?;
         //self.batch.clear();
-        graphics::present(ctx);
+        // graphics::present(ctx);
 
         // println!("Delta frame time: {:?} ", timer::get_delta(ctx));
         // println!("Average FPS: {}", timer::get_fps(ctx));
-        timer::sleep(Duration::from_millis(50));
+        // timer::sleep(Duration::from_millis(50));
         //timer::sleep(Duration::from_millis(100));
         //timer::sleep(Duration::from_millis(109));
         Ok(())

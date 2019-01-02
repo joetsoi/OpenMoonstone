@@ -272,8 +272,6 @@ impl Scene<Game, InputEvent> for Menu {
         self.draw_arrow(game, ctx)?;
         self.draw_gore_option(game, ctx)?;
         self.draw_player_count_option(game, ctx)?;
-        graphics::present(ctx);
-        timer::sleep(Duration::from_millis(50));
         Ok(())
     }
 
