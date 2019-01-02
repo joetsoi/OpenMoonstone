@@ -12,9 +12,9 @@ use crate::combat::components::{
     Action, Body, Collided, Draw, Facing, Health, Position, State, Velocity, Weapon,
 };
 use crate::files::collide::CollisionBoxes;
-use crate::scenes::encounter::EncounterTextures;
 use crate::objects::TextureAtlas;
 use crate::rect::{Interval, Point, Rect};
+use crate::scenes::encounter::EncounterTextures;
 
 pub struct EntityEntityCollision;
 
@@ -71,7 +71,6 @@ impl<'a> System<'a> for EntityEntityCollision {
                             {
                                 velocity.y = 0;
                             }
-
                         }
                     }
 
@@ -94,7 +93,6 @@ impl<'a> System<'a> for UpdateBoundingBoxes {
         ReadExpect<'a, EncounterTextures>,
         ReadStorage<'a, Draw>,
         ReadStorage<'a, Position>,
-        ReadStorage<'a, State>,
         WriteStorage<'a, Body>,
         WriteStorage<'a, Weapon>,
     );
@@ -106,7 +104,6 @@ impl<'a> System<'a> for UpdateBoundingBoxes {
             encounter_textures,
             draw,
             position,
-            state,
             mut body,
             mut weapon,
         ): Self::SystemData,
@@ -114,9 +111,7 @@ impl<'a> System<'a> for UpdateBoundingBoxes {
         use specs::Join;
         let collision_data = &collision_boxes.data;
         let textures = &encounter_textures.data;
-        for (draw, position, state, body, weapon) in
-            (&draw, &position, &state, &mut body, &mut weapon).join()
-        {
+        for (draw, position, body, weapon) in (&draw, &position, &mut body, &mut weapon).join() {
             let mut weapon_boxes: Vec<Points> = vec![];
             let mut body_boxes: Vec<CollisionBox> = vec![];
             for image in draw.frame.images.iter() {
@@ -126,10 +121,10 @@ impl<'a> System<'a> for UpdateBoundingBoxes {
                             .get(&image.sheet)
                             .and_then(|v| v.points.get(image.image))
                         {
-                            let direction = state.direction as i32;
+                            let direction = draw.direction as i32;
                             let image_global_x: i32 = position.x as i32 + image.x * direction;
                             let image_global_y: i32 = position.y as i32 + image.y;
-                            let rect_x = match state.direction {
+                            let rect_x = match draw.direction {
                                 Facing::Left => image_global_x - points.max_x as i32,
                                 Facing::Right => image_global_x,
                             };
@@ -155,8 +150,8 @@ impl<'a> System<'a> for UpdateBoundingBoxes {
                         if let Some(texture) = textures.get(&image.sheet) {
                             let rect = &texture.rects[image.image];
                             let mut image_global_x: i32 =
-                                position.x as i32 + image.x * state.direction as i32;
-                            image_global_x = match state.direction {
+                                position.x as i32 + image.x * draw.direction as i32;
+                            image_global_x = match draw.direction {
                                 Facing::Left => image_global_x - rect.w as i32,
                                 Facing::Right => image_global_x,
                             };

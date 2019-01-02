@@ -30,6 +30,14 @@ impl Action {
             false
         }
     }
+
+    pub fn is_throw_dagger(&self) -> bool {
+        if let Action::Attack(AttackType::ThrowDagger) = self {
+            true
+        } else {
+            false
+        }
+    }
 }
 
 impl Default for Action {

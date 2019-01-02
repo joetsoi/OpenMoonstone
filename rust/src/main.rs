@@ -76,9 +76,13 @@ fn main() {
     let game = Game::new().expect("failed to initialize game");
     let mut scene_stack = scenes::FSceneStack::new(ctx, game);
 
-    let encounter_scene =
-        EncounterScene::new(ctx, &mut scene_stack.world.store, &["knight"], filename)
-            .expect("failed to init game");
+    let encounter_scene = EncounterScene::new(
+        ctx,
+        &mut scene_stack.world.store,
+        &["knight", "dagger"],
+        filename,
+    )
+    .expect("failed to init game");
     scene_stack.push(Box::new(encounter_scene));
 
     let menu = Menu::new(ctx, &mut scene_stack.world.store).unwrap();

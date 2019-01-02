@@ -1,0 +1,4 @@
+fly:
+  frames:
+    - images:
+      - {sheet: kn4.ob, image: 10, y: 8, x: 61, image_type: Collider}

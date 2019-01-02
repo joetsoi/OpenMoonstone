@@ -21,6 +21,7 @@ impl<'a> System<'a> for ActionSystem {
                 Command::Attack(AttackType::ThrowDagger) => match state.action {
                     Action::Idle | Action::Move { .. } => {
                         let daggers: Option<&mut DaggersInventory> = dagger_storage.get_mut(entity);
+
                         if let Some(daggers) = daggers {
                             if daggers.count > 0 {
                                 state.action = Action::Attack(AttackType::ThrowDagger);
@@ -53,3 +54,36 @@ impl<'a> System<'a> for ActionSystem {
         }
     }
 }
+
+// impl<'a> ActionSystem {
+//     fn create_dagger_components(&self, entity: &Entity, entities: &Entities, updater: &Read<'a, LazyUpdate>) {
+//         if let Some(position) = position {
+//             let dagger = entities.create();
+//             // position_storage.insert(
+//             //     dagger,
+//             //     Position {
+//             //         x: position.x + 5,
+//             //         y: position.y,
+//             //     },
+//             // );
+//             // // // velocity_storage.insert(dagger, Velocity {});
+//             // draw_storage.insert(dagger, Draw {});
+//             // animation_storage.insert(dagger, AnimationState { frame_number: 0 });
+//             // weapon_storage.insert(
+//             //     dagger,
+//             //     Weapon {
+//             //         ..Default::default()
+//             //     },
+//             // );
+//             // state_storage.insert(
+//             //     dagger,
+//             //     State {
+//             //         action: Action::Idle,
+//             //         direction: state.direction,
+//             //         length: 0,
+//             //         ticks: 0,
+//             //     },
+//             // );
+//         }
+//     }
+// }

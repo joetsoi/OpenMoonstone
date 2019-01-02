@@ -252,6 +252,7 @@ throw_dagger:
       - {sheet: kn1.ob, image: 29, y: -5, x: 3, image_type: Collidee}
       - {sheet: kn4.ob, image: 10, y: 7, x: 63, image_type: Collider}
   order: [0, 0, 0, 1, 2]
+  #create_entity: {frame: 5, resource: dagger, animation: fly}
 dodge:
   frames:
     - images:
