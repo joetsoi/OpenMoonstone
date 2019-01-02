@@ -12,7 +12,7 @@ pub struct SpriteData {
     pub sprites: HashMap<String, Sprite>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub enum ImageType {
     NonSolid,
     Collidee,
@@ -28,6 +28,24 @@ pub struct Image {
     pub x: i32,
     pub y: i32,
     pub image_type: ImageType,
+}
+
+impl Image {
+    pub fn is_collidee(&self) -> bool {
+        if self.image_type == ImageType::Collidee {
+            true
+        } else {
+            false
+        }
+    }
+
+    pub fn is_collider(&self) -> bool {
+        if self.image_type == ImageType::Collider {
+            true
+        } else {
+            false
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
