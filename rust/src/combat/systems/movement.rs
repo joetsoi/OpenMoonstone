@@ -11,8 +11,8 @@ impl<'a> System<'a> for Movement {
         use specs::Join;
 
         for (velocity, position) in (&velocity, &mut position).join() {
-            position.x = (position.x as i32 + velocity.x) as u32;
-            position.y = (position.y as i32 + velocity.y) as u32;
+            position.x = position.x + velocity.x;
+            position.y = position.y + velocity.y;
         }
     }
 }

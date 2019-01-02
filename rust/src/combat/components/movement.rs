@@ -6,8 +6,8 @@ use super::Facing;
 #[derive(Component, Debug)]
 #[storage(VecStorage)]
 pub struct Position {
-    pub x: u32,
-    pub y: u32,
+    pub x: i32,
+    pub y: i32,
 }
 
 #[derive(Component, Debug, Default)]
