@@ -740,7 +740,7 @@ dependencies = [
 [[package]]
 name = "ggez-goodies"
 version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
+source = "git+https://github.com/joetsoi/ggez-goodies.git?branch=push-multiple#927d54ce76bc71f53418f9801d82cb526107e3db"
 dependencies = [
  "ggez 0.4.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1244,7 +1244,7 @@ dependencies = [
  "failure 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "failure_derive 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "ggez 0.4.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "ggez-goodies 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ggez-goodies 0.1.0 (git+https://github.com/joetsoi/ggez-goodies.git?branch=push-multiple)",
  "lazy_static 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "maplit 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "pest 2.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -2486,7 +2486,7 @@ dependencies = [
 "checksum gfx_glyph 0.10.2 (registry+https://github.com/rust-lang/crates.io-index)" = "e5df0f26def7ce25e120c4c7e03b610fb479d44b984fcc19207ff8dff213c6a9"
 "checksum gfx_window_sdl 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)" = "f0d36e50e6620804c7613d1fd95f816b4f1c6e0ece0ccb8b155016a9404344f1"
 "checksum ggez 0.4.4 (registry+https://github.com/rust-lang/crates.io-index)" = "51c1ba59ec402c1fab55e59d9b715032a6c5e9385be3edf9628a128fad0af68a"
-"checksum ggez-goodies 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "8b560eee10ab2f6732e8483546664a29fcdb5d7938e6e47cc87e8037e2a9b7e7"
+"checksum ggez-goodies 0.1.0 (git+https://github.com/joetsoi/ggez-goodies.git?branch=push-multiple)" = "<none>"
 "checksum gif 0.10.1 (registry+https://github.com/rust-lang/crates.io-index)" = "dd4bca55ac1f213920ce3527ccd62386f1f15fa3f1714aeee1cf93f2c416903f"
 "checksum gl_generator 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)" = "7a795170cbd85b5a7baa58d6d7525cae6a03e486859860c220f7ebbbdd379d0a"
 "checksum glob 0.2.11 (registry+https://github.com/rust-lang/crates.io-index)" = "8be18de09a56b60ed0edf84bc9df007e30040691af7acd1c41874faac5895bfb"

@@ -8,6 +8,8 @@ use ggez_goodies::scene::{Scene, SceneSwitch};
 use lazy_static::lazy_static;
 use warmy::{LogicalKey, Store};
 
+use super::{Fade, EncounterScene};
+use super::transition::FadeStyle;
 use crate::game::Game;
 use crate::input::{Axis, Button, InputEvent};
 use crate::objects::TextureAtlas;
@@ -84,7 +86,7 @@ pub struct Menu {
     background: graphics::Image,
     palette: Vec<Colour>,
     done: bool,
-    num_players: i32,
+    fade_out_done: bool,
     screen: Screen,
     selected_option: MenuOption,
 }
@@ -108,8 +110,8 @@ impl Menu {
         Ok(Self {
             background,
             done: false,
+            fade_out_done: false,
             palette,
-            num_players: 1,
             screen,
             selected_option: MenuOption::Players,
         })
@@ -238,7 +240,7 @@ impl Menu {
 
     fn draw_player_count_option(&mut self, game: &mut Game, ctx: &mut Context) -> GameResult<()> {
         let mut text = PLAYER_COUNT.clone();
-        text.string = self.num_players.to_string();
+        text.string = game.num_players.to_string();
         let mut batch = text
             .as_sprite_batch(ctx, game, &self.palette)
             .expect("error drawing PLAYER_COUNT");
@@ -257,9 +259,12 @@ impl Menu {
 }
 
 impl Scene<Game, InputEvent> for Menu {
-    fn update(&mut self, game: &mut Game) -> FSceneSwitch {
+    fn update(&mut self, game: &mut Game, ctx: &mut Context) -> FSceneSwitch {
         if self.done {
-            SceneSwitch::Pop
+            match self.fade_out_done {
+                false => SceneSwitch::push(Fade::new(274, 1, FadeStyle::Out)),
+                true => SceneSwitch::Pop, //shouldn't happen
+            }
         } else {
             SceneSwitch::None
         }
@@ -285,7 +290,7 @@ impl Scene<Game, InputEvent> for Menu {
             match self.selected_option {
                 MenuOption::Practice => self.done = true,
                 MenuOption::Gore => gameworld.gore_on = !gameworld.gore_on,
-                MenuOption::Players => self.num_players = (self.num_players % 4) + 1,
+                MenuOption::Players => gameworld.num_players = (gameworld.num_players % 4) + 1,
                 _ => (),
             }
         } else if x != 0 {
@@ -293,9 +298,9 @@ impl Scene<Game, InputEvent> for Menu {
                 MenuOption::Gore => gameworld.gore_on = !gameworld.gore_on,
                 MenuOption::Players => {
                     if x > 0 {
-                        self.num_players = (self.num_players % 4) + x;
+                        gameworld.num_players = (gameworld.num_players % 4) + x;
                     } else {
-                        self.num_players = (self.num_players + 3 + x) % 4 + 1;
+                        gameworld.num_players = (gameworld.num_players + 3 + x) % 4 + 1;
                     }
                 }
                 _ => (),

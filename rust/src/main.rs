@@ -8,12 +8,13 @@ use ggez::event;
 use ggez::graphics;
 use ggez::timer;
 use ggez::{Context, GameResult};
+use ggez_goodies::scene::Scene;
 
 use openmoonstone::game::Game;
 use openmoonstone::input;
 use openmoonstone::scenes;
 use openmoonstone::scenes::transition::FadeStyle;
-use openmoonstone::scenes::{EncounterScene, FSceneStack, Fade, Menu};
+use openmoonstone::scenes::{EncounterScene, FSceneStack, Fade, MainScene, Menu};
 
 struct MainState {
     input_binding: input::InputBinding,
@@ -40,7 +41,7 @@ impl event::EventHandler for MainState {
         while timer::check_update_time(ctx, DESIRED_FPS) {
             if ticks < MAX_UPDATES_PER_FRAME {
                 self.scene_stack.world.input.update(1.0);
-                self.scene_stack.update();
+                self.scene_stack.update(ctx);
             }
             ticks += 1;
         }
@@ -92,25 +93,38 @@ fn main() {
     let game = Game::new().expect("failed to initialize game");
     let mut scene_stack = scenes::FSceneStack::new(ctx, game);
 
-    let encounter_scene = EncounterScene::new(
-        ctx,
-        &mut scene_stack.world.store,
-        &["knight", "dagger"],
-        filename,
-    )
-    .expect("failed to init game");
-    scene_stack.push(Box::new(encounter_scene));
+    // let encounter_scene = EncounterScene::new(
+    //     ctx,
+    //     &mut scene_stack.world.store,
+    //     &["knight", "dagger"],
+    //     filename,
+    // )
+    // .expect("failed to init game");
+    // scene_stack.push(Box::new(encounter_scene));
 
     // let fade_in = Fade::new(274, 1, FadeStyle::In);
     // scene_stack.push(Box::new(fade_in));
     // let fade_out = Fade::new(274, 1, FadeStyle::Out);
     // scene_stack.push(Box::new(fade_out));
+    let main_scene = MainScene::new();
+    scene_stack.push(Box::new(main_scene));
 
     let menu = Menu::new(ctx, &mut scene_stack.world.store).unwrap();
     scene_stack.push(Box::new(menu));
 
     let fade_in = Fade::new(274, 1, FadeStyle::In);
     scene_stack.push(Box::new(fade_in));
+
+    //     let fade_in = Fade::new(274, 1, FadeStyle::In);
+    //     scene_stack.push(Box::new(fade_in));
+
+    // let c: usize = 3;
+    // // let s: Option<Scene<Context, Game>> = (0..c).map(|i| scene_stack.pop()).collect().nth(c);
+    // let mut s = None;
+    // for i in (0..c) {
+    //     s = Some(scene_stack.pop());
+    //     println!("{}", s.unwrap().name());
+    // }
 
     let mut state = MainState {
         scene_stack,

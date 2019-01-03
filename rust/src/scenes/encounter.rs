@@ -307,7 +307,7 @@ impl<'a> EncounterScene<'a> {
 }
 
 impl<'a> scene::Scene<Game, input::InputEvent> for EncounterScene<'a> {
-    fn update(&mut self, game: &mut Game) -> FSceneSwitch {
+    fn update(&mut self, game: &mut Game, ctx: &mut Context) -> FSceneSwitch {
         self.update_controllers(&game.input);
         self.dispatcher.dispatch_par(&self.specs_world.res);
         self.specs_world.maintain();

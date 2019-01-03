@@ -25,13 +25,15 @@ pub struct Fade {
 }
 
 impl scene::Scene<Game, InputEvent> for Fade {
-    fn update(&mut self, game: &mut Game) -> FSceneSwitch {
+    fn update(&mut self, game: &mut Game, ctx: &mut Context) -> FSceneSwitch {
         if !self.update_run {
             self.update_run = true;
         }
         if self.done {
-            // println!("transition done");
-            scene::SceneSwitch::Pop
+            match self.style {
+                FadeStyle::In => scene::SceneSwitch::Pop,
+                FadeStyle::Out => scene::SceneSwitch::PopMultiple(2),
+            }
         } else {
             scene::SceneSwitch::None
         }
