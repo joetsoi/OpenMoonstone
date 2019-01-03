@@ -30,7 +30,7 @@ impl scene::Scene<Game, InputEvent> for Fade {
             self.update_run = true;
         }
         if self.done {
-                println!("transition done");
+            // println!("transition done");
             scene::SceneSwitch::Pop
         } else {
             scene::SceneSwitch::None
@@ -38,7 +38,8 @@ impl scene::Scene<Game, InputEvent> for Fade {
     }
 
     fn draw(&mut self, game: &mut Game, ctx: &mut Context) -> GameResult<()> {
-        println!("draw transition");
+        // println!("draw transition");
+        // TODO fix this when context is passed to update.
         let time_since_start = timer::get_time_since_start(ctx);
         if self.update_run && self.ticks < self.fade_start {
             self.ticks += 1;

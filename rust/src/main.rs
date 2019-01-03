@@ -12,8 +12,8 @@ use ggez::{Context, GameResult};
 use openmoonstone::game::Game;
 use openmoonstone::input;
 use openmoonstone::scenes;
-use openmoonstone::scenes::{EncounterScene, FSceneStack, Fade, Menu};
 use openmoonstone::scenes::transition::FadeStyle;
+use openmoonstone::scenes::{EncounterScene, FSceneStack, Fade, Menu};
 
 struct MainState {
     input_binding: input::InputBinding,
@@ -22,17 +22,27 @@ struct MainState {
 
 impl event::EventHandler for MainState {
     fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
+        const MAX_UPDATES_PER_FRAME: u32 = 1;
+        // see https://docs.rs/ggez/0.4.4/ggez/timer/fn.check_update_time.html
+        // we don't want our while loop to allow unbounded number of ticks
+        // in between draw calls, ideally we'd like it to be 1-1.
+        //
+        // Limiting the number of updates means that when the scene is first
+        // loaded we don't suddenly call update loads of times at once.
+        // causing knights to zip across the screen if the move button is held.
+        // TODO look into passing delta time to scene_stack.update()
+        // this might mean we can go back to the recommended loop
+        // TODO allow this to be configurable so if people need frame skip as they
+        // are running this on a potato then they can.
+        let mut ticks = 0;
+
         const DESIRED_FPS: u32 = 1000 / (1193182 / 21845 * 2);
-        // const DESIRED_FPS: u32 = 1;
         while timer::check_update_time(ctx, DESIRED_FPS) {
-            let delta = timer::get_delta(ctx);
-            // println!("delta main {:?}", delta);
-            self.scene_stack
-                .world
-                .input
-                .update(delta.as_secs() as f32 + delta.subsec_millis() as f32 / 1000.0);
-            self.scene_stack.update();
-            timer::sleep(Duration::from_millis(50));
+            if ticks < MAX_UPDATES_PER_FRAME {
+                self.scene_stack.world.input.update(1.0);
+                self.scene_stack.update();
+            }
+            ticks += 1;
         }
         Ok(())
     }
@@ -40,6 +50,7 @@ impl event::EventHandler for MainState {
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         self.scene_stack.draw(ctx);
         graphics::present(ctx);
+        timer::sleep(Duration::from_millis(50));
         Ok(())
     }
 
@@ -90,21 +101,20 @@ fn main() {
     .expect("failed to init game");
     scene_stack.push(Box::new(encounter_scene));
 
-    let fade_in = Fade::new(274, 1, FadeStyle::In);
-    scene_stack.push(Box::new(fade_in));
-    let fade_out = Fade::new(274, 1, FadeStyle::Out);
-    scene_stack.push(Box::new(fade_out));
+    // let fade_in = Fade::new(274, 1, FadeStyle::In);
+    // scene_stack.push(Box::new(fade_in));
+    // let fade_out = Fade::new(274, 1, FadeStyle::Out);
+    // scene_stack.push(Box::new(fade_out));
 
     let menu = Menu::new(ctx, &mut scene_stack.world.store).unwrap();
     scene_stack.push(Box::new(menu));
 
-    let fade_in = Fade::new(274, 5, FadeStyle::In);
+    let fade_in = Fade::new(274, 1, FadeStyle::In);
     scene_stack.push(Box::new(fade_in));
 
     let mut state = MainState {
         scene_stack,
         input_binding: input::create_input_binding(),
     };
-
     event::run(ctx, &mut state).unwrap();;
 }
