@@ -29,7 +29,7 @@ impl PivImage {
         let palette: Vec<Colour> =
             read_palette(header.bit_depth, &data[6..6 + (header.bit_depth * 2)]);
 
-        let extracted = lz77::decompress(header.file_length, &data[6 + (header.bit_depth * 2)..])?;
+        let extracted = lz77::decompress(header.file_length as u32, &data[6 + (header.bit_depth * 2)..])?;
         let pixels = PivImage::combine_bit_planes(&extracted);
         Ok(PivImage { palette, pixels })
     }

@@ -21,6 +21,10 @@ class TerrainFile:
         num_images_to_extract = test = unpack('>H', self.extracted[:2])[0] * 8
         si = 2 + test
         extracted = self.extracted[si:si+2400]
+        #extracted = self.extracted[si:si+2400]
+        # iter= iter_unpack('>BBHH', self.extracted[si+10:])
+        #test = [CmpSubImage._make(i) for i in iter]
+        print(self.extracted[si+2400:])
 
         #print_hex_view(extracted)
         di = 2
@@ -84,14 +88,3 @@ def sub_7e8c(ax, bx, dx):
     bx = 20 * bx
     ax = (ax // 16 + bx) * 2
     return ax, bx, dx
-
-if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: t.py <filename>")
-        print(sys.argv)
-        sys.exit()
-    file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                             sys.argv[1])
-    with open(file_path, 'rb') as f:
-        t = TerrainFile(f.read())
-    #print_hex_view(t.extracted)

@@ -10,6 +10,9 @@ use ggez::timer;
 use ggez::{Context, GameResult};
 use ggez_goodies::scene::Scene;
 
+use warmy::{LogicalKey, Store};
+
+use openmoonstone::files::TerrainFile;
 use openmoonstone::game::Game;
 use openmoonstone::input;
 use openmoonstone::scenes;
@@ -92,6 +95,13 @@ fn main() {
 
     let game = Game::new().expect("failed to initialize game");
     let mut scene_stack = scenes::FSceneStack::new(ctx, game);
+
+    let terrain = scene_stack
+        .world
+        .store
+        .get::<_, TerrainFile>(&LogicalKey::new("wa1"), ctx)
+        .expect("terrain err");
+    println!("{:?}", terrain);
 
     // let encounter_scene = EncounterScene::new(
     //     ctx,

@@ -67,7 +67,7 @@ impl ObjectsFile {
         let image_headers =
             ObjectsFile::read_image_headers(&header, &data[10..image_header_len + 10])?;
 
-        let extracted = lz77::decompress(header.file_length, &data[image_header_len + 10..])?;
+        let extracted = lz77::decompress(header.file_length as u32, &data[image_header_len + 10..])?;
         let mut images: Vec<Image> = Vec::new();
         for image_header in image_headers {
             images.push(Image::from_data(image_header, &extracted));

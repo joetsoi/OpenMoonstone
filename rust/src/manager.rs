@@ -8,6 +8,7 @@ use warmy;
 
 use crate::error::{err_from, CompatError};
 use crate::files::collide::{parse_collide_hit, CollisionBoxes};
+use crate::files::TerrainFile;
 use crate::objects::{ObjectsFile, TextureAtlas};
 use crate::piv::PivImage;
 
@@ -58,8 +59,13 @@ impl warmy::Load<Context> for PivImage {
             .filesystem
             .open(
                 // todo: remove expect
-                Path::new("/moonstone/").join(&scenes[key.as_str()].as_str().expect(&format!("yaml error for {}", key.as_str()))),
-            ).map_err(err_from)?;
+                Path::new("/moonstone/").join(
+                    &scenes[key.as_str()]
+                        .as_str()
+                        .expect(&format!("yaml error for {}", key.as_str())),
+                ),
+            )
+            .map_err(err_from)?;
 
         Ok(warmy::Loaded::from(
             PivImage::from_reader(&mut file).map_err(err_from)?,
@@ -94,7 +100,8 @@ impl warmy::Load<Context> for TextureAtlas {
             .map_err(|e| {
                 failure::Error::from(GameDataError {
                     message: format!("Failed loading {}. {} in files.yaml", key.as_str(), e),
-                }).compat()
+                })
+                .compat()
             })
     }
 }
@@ -121,7 +128,42 @@ impl warmy::Load<Context> for CollisionBoxes {
             .map_err(|e| {
                 failure::Error::from(GameDataError {
                     message: format!("Failed loading {}. {} in files.yaml", key.as_str(), e),
-                }).compat()
+                })
+                .compat()
             })
+    }
+}
+
+impl warmy::Load<Context> for TerrainFile {
+    type Key = warmy::LogicalKey;
+    type Error = CompatError;
+    fn load(
+        key: Self::Key,
+        store: &mut warmy::Storage<ggez::Context>,
+        ctx: &mut ggez::Context,
+    ) -> Result<warmy::Loaded<Self>, Self::Error> {
+        println!("key: {:?}, path: {:?}", key, store.root());
+        let yaml = store
+            .get::<_, GameYaml>(&warmy::LogicalKey::new("/files.yaml"), ctx)
+            .map_err(err_from)?;
+        let terrain = &yaml.borrow().yaml["terrain"][key.as_str()];
+        let mut file = ctx
+            .filesystem
+            .open(Path::new("/moonstone/").join(&terrain.as_str().expect("invalid yaml error")))
+            .map_err(err_from)?;
+
+        TerrainFile::from_reader(&mut file).map(warmy::Loaded::from).map_err(err_from)
+        // let objects = ObjectsFile::from_reader(&mut file).map_err(err_from)?;
+        // let texture_size = object["texture_size"].as_u64().unwrap() as u32;
+
+        // objects
+        //     .to_texture_atlas(texture_size as i32)
+        //     .map(warmy::Loaded::from)
+        //     .map_err(|e| {
+        //         failure::Error::from(GameDataError {
+        //             message: format!("Failed loading {}. {} in files.yaml", key.as_str(), e),
+        //         })
+        //         .compat()
+        //     })
     }
 }

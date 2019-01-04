@@ -4,7 +4,7 @@ use std::io::Cursor;
 use bv::BitSlice;
 use byteorder::{BigEndian, ReadBytesExt};
 
-pub fn decompress(file_length: u16, data: &[u8]) -> Result<Vec<u8>, io::Error> {
+pub fn decompress(file_length: u32, data: &[u8]) -> Result<Vec<u8>, io::Error> {
     let mut rdr = Cursor::new(data);
     let mut extracted: Vec<u8> = Vec::with_capacity(file_length as usize);
     while rdr.position() != file_length as u64 {
