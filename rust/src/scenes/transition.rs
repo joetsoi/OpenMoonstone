@@ -20,6 +20,8 @@ pub struct Fade {
     pub style: FadeStyle,
     done: bool,
     fade_start: u32,
+    /// we can have draw run before update (if we have a stack and we're drawing
+    /// the scene below
     update_run: bool,
     ticks: u32,
 }
@@ -40,13 +42,13 @@ impl scene::Scene<Game, InputEvent> for Fade {
     }
 
     fn draw(&mut self, game: &mut Game, ctx: &mut Context) -> GameResult<()> {
-        // println!("draw transition");
         // TODO fix this when context is passed to update.
         let time_since_start = timer::get_time_since_start(ctx);
         if self.update_run && self.ticks < self.fade_start {
             self.ticks += 1;
             self.start_time = time_since_start;
         }
+
         let time_passed = time_since_start - self.start_time;
         let time_passed = timer::duration_to_f64(time_passed);
         let alpha = match self.style {
@@ -65,7 +67,19 @@ impl scene::Scene<Game, InputEvent> for Fade {
                 alpha
             }
         };
-        graphics::set_color(ctx, graphics::Color::new(0.0, 0.0, 0.0, alpha as f32))?;
+        if self.update_run {
+            graphics::set_color(ctx, graphics::Color::new(0.0, 0.0, 0.0, alpha as f32))?;
+        } else {
+            match self.style {
+                FadeStyle::In => {
+                    graphics::set_color(ctx, graphics::Color::new(0.0, 0.0, 0.0, 1.0))?
+                }
+                FadeStyle::Out => {
+                    graphics::set_color(ctx, graphics::Color::new(0.0, 0.0, 0.0, 0.0))?
+                }
+            }
+        }
+
         graphics::rectangle(
             ctx,
             DrawMode::Fill,

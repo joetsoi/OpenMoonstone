@@ -83,8 +83,8 @@ impl event::EventHandler for MainState {
 }
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
-    let filename = &args[1];
+    // let args: Vec<String> = env::args().collect();
+    // let filename = &args[1];
 
     let c = conf::Conf::new();
     let ctx = &mut Context::load_from_conf("openmoonstone", "joetsoi", c).unwrap();
