@@ -26,12 +26,18 @@ impl MainScene {
 }
 
 impl Scene<Game, InputEvent> for MainScene {
-    fn update(&mut self, game: &mut Game, ctx: &mut Context) -> FSceneSwitch {
+    fn update(&mut self, mut game: &mut Game, ctx: &mut Context) -> FSceneSwitch {
         match game.scene {
             SceneState::Menu => {
                 let encounter_scene = Box::new(
-                    EncounterScene::new(ctx, &mut game.store, &["knight", "dagger"], "wab1")
-                        .expect("failed to init practice encounter"),
+                    EncounterScene::new(
+                        ctx,
+                        &mut game,
+                        &["knight", "dagger"],
+                        "wab1",
+                        "wa1.t",
+                    )
+                    .expect("failed to init practice encounter"),
                 );
 
                 match game.next_scene {

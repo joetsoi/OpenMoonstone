@@ -29,7 +29,10 @@ impl PivImage {
         let palette: Vec<Colour> =
             read_palette(header.bit_depth, &data[6..6 + (header.bit_depth * 2)]);
 
-        let extracted = lz77::decompress(header.file_length as u32, &data[6 + (header.bit_depth * 2)..])?;
+        let extracted = lz77::decompress(
+            header.file_length as u32,
+            &data[6 + (header.bit_depth * 2)..],
+        )?;
         let pixels = PivImage::combine_bit_planes(&extracted);
         Ok(PivImage { palette, pixels })
     }
@@ -42,6 +45,25 @@ impl PivImage {
         for pel in self.pixels.iter() {
             let colour = &self.palette[*pel];
             pixels.extend([colour.r, colour.g, colour.b, colour.a].iter())
+        }
+        pixels
+    }
+
+    pub fn to_rgba8_512(&self) -> Vec<u8> {
+        let width = 320;
+        let height = 200;
+
+        let mut pixels: Vec<u8> = Vec::with_capacity(512 * 512 * 4);
+        for y in 0..512 {
+            for x in 0..512 {
+                if x < width && y < height {
+                    let pel = self.pixels[y * width + x];
+                    let colour = &self.palette[pel];
+                    pixels.extend([colour.r, colour.g, colour.b, colour.a].iter())
+                } else {
+                    pixels.extend([0, 0, 0, 0].iter())
+                }
+            }
         }
         pixels
     }
@@ -93,7 +115,8 @@ pub fn read_palette(bit_depth: usize, data: &[u8]) -> Vec<Colour> {
                 b: ((pel_bytes[1]) & 0x0f) << 4,
                 a: 255,
             }
-        }).collect();
+        })
+        .collect();
     if let Some(first) = palette.get_mut(0) {
         first.a = 0;
     }

@@ -9,12 +9,14 @@ use ggez::graphics;
 use ggez::timer;
 use ggez::{Context, GameResult};
 use ggez_goodies::scene::Scene;
+// use image::RgbaImage;
 
 use warmy::{LogicalKey, Store};
 
 use openmoonstone::files::TerrainFile;
 use openmoonstone::game::Game;
 use openmoonstone::input;
+use openmoonstone::piv::PivImage;
 use openmoonstone::scenes;
 use openmoonstone::scenes::transition::FadeStyle;
 use openmoonstone::scenes::{EncounterScene, FSceneStack, Fade, MainScene, Menu};
@@ -95,13 +97,20 @@ fn main() {
 
     let game = Game::new().expect("failed to initialize game");
     let mut scene_stack = scenes::FSceneStack::new(ctx, game);
-
-    let terrain = scene_stack
+    let cmp = scene_stack
         .world
         .store
-        .get::<_, TerrainFile>(&LogicalKey::new("wa1"), ctx)
-        .expect("terrain err");
-    println!("{:?}", terrain);
+        .get::<_, PivImage>(&LogicalKey::new("wa1".to_string()), ctx)
+        .unwrap();
+    // let image = RgbaImage::from_raw(512, 512, cmp.borrow().to_rgba8_512()).unwrap();
+    // image.save("cmp.png");
+
+    // let terrain = scene_stack
+    //     .world
+    //     .store
+    //     .get::<_, TerrainFile>(&LogicalKey::new("wa1"), ctx)
+    //     .expect("terrain err");
+    // println!("{:?}", terrain);
 
     // let encounter_scene = EncounterScene::new(
     //     ctx,

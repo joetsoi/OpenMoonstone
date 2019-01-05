@@ -1,11 +1,40 @@
+use std::collections::HashMap;
 use std::io;
 use std::io::prelude::*;
 use std::io::Cursor;
 
 use byteorder::{BigEndian, ByteOrder, ReadBytesExt};
+use ggez::graphics::Image;
+use lazy_static::lazy_static;
+use maplit::hashmap;
 
 use crate::lz77;
+use crate::objects::TextureAtlas;
 use crate::rect::Rect;
+
+lazy_static! {
+    static ref scenery_lookup: HashMap<u32, &'static str> = hashmap! {
+        0 => "fo1",
+        1 => "fo1",
+        2 => "sw1",
+        3 => "wa1",
+        4 => "fo2",
+    };
+    pub static ref scenery_rects: Vec<Rect> = {
+        let mut rects: Vec<Rect> = Vec::new();
+        for y in 0..10 {
+            for x in 0..10 {
+                rects.push(Rect {
+                    x: 32 * x,
+                    y: 25 * y,
+                    w: 32,
+                    h: 25,
+                })
+            }
+        }
+        rects
+    };
+}
 
 #[derive(Debug)]
 struct Header {
@@ -20,8 +49,8 @@ pub struct TerrainFile {
 
 #[derive(Debug)]
 pub struct Position {
-    pub atlas: u32,
-    pub image_number: u32,
+    pub atlas: String,
+    pub image_number: usize,
     pub x: u32,
     pub y: u32,
 }
@@ -51,13 +80,16 @@ impl TerrainFile {
         let mut positions: Vec<Position> = Vec::with_capacity(count);
 
         loop {
+            let atlas = rdr.read_u8()? as u32;
+            let image_number = rdr.read_u8()? as usize;
+
             let position = Position {
-                atlas: rdr.read_u8()? as u32,
-                image_number: rdr.read_u8()? as u32,
+                atlas: scenery_lookup.get(&atlas).unwrap_or(&"fo2").to_string(),
+                image_number,
                 x: rdr.read_u16::<BigEndian>()? as u32,
                 y: rdr.read_u16::<BigEndian>()? as u32,
             };
-            if position.atlas == 0xff {
+            if atlas == 0xff {
                 break;
             }
             positions.push(position);
@@ -76,10 +108,6 @@ impl TerrainFile {
         let image_count = BigEndian::read_u16(&extracted[..2]) as usize * 8;
         let boundary = TerrainFile::read_boundary(&extracted[2..])?;
         let positions = TerrainFile::read_terrain_positions(image_count, &extracted[10..])?;
-        // println!(
-        //     "{:?} {:?} {:?} {:#?}",
-        //     header, image_count, boundary, positions
-        // );
         Ok(TerrainFile {
             boundary,
             positions,

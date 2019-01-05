@@ -23,6 +23,8 @@ use crate::combat::systems::{
     StateUpdater, UpdateBoundingBoxes, UpdateImage, VelocitySystem,
 };
 use crate::files::collide::CollisionBoxes;
+use crate::files::terrain::scenery_rects;
+use crate::files::TerrainFile;
 use crate::game::Game;
 use crate::input;
 use crate::manager::GameYaml;
@@ -157,14 +159,16 @@ impl<'a> EncounterScene<'a> {
 
     pub fn new(
         ctx: &mut Context,
-        store: &mut Store<Context>,
+        game: &mut Game,
         entity_names: &[&str],
         background_name: &str,
+        terrain_name: &str,
     ) -> Result<Self, Error> {
         let mut world = EncounterScene::build_world();
-        EncounterScene::load_sprite_data(ctx, store, &mut world, entity_names)?;
+        EncounterScene::load_sprite_data(ctx, &mut game.store, &mut world, entity_names)?;
 
-        let piv = store
+        let piv = game
+            .store
             .get::<_, PivImage>(&LogicalKey::new(background_name), ctx)
             .unwrap();
         let background_image =
@@ -181,14 +185,51 @@ impl<'a> EncounterScene<'a> {
                 ..Default::default()
             },
         )?;
+
+        let terrain = game
+            .store
+            .get::<_, TerrainFile>(&LogicalKey::new(terrain_name.to_string()), ctx)
+            .unwrap();
+        for p in &terrain.borrow().positions {
+            let cmp = game
+                .store
+                .get::<_, PivImage>(&LogicalKey::new(&p.atlas), ctx)?;
+            let ggez_image = match game.images.entry(p.atlas.clone()) {
+                Occupied(i) => i.into_mut(),
+                Vacant(i) => i.insert(graphics::Image::from_rgba8(
+                    ctx,
+                    512u16,
+                    512u16,
+                    &cmp.borrow().to_rgba8_512(),
+                )?),
+            };
+
+            let rect = scenery_rects[p.image_number];
+            // println!("{:#?}",rect);
+
+            let draw_params = graphics::DrawParam {
+                src: graphics::Rect {
+                    x: rect.x as f32 / 512.0,
+                    y: rect.y as f32 / 512.0,
+                    w: rect.w as f32 / 512.0,
+                    h: rect.h as f32 / 512.0,
+                },
+                dest: graphics::Point2::new(p.x as f32 * 3.0, p.y as f32 * 3.0),
+                scale: graphics::Point2::new(3.0, 3.0),
+                ..Default::default()
+            };
+            graphics::draw_ex(ctx, ggez_image, draw_params)?;
+        }
         graphics::set_canvas(ctx, None);
 
         let palette = piv.borrow().palette.to_vec();
 
-        let sprite = store
+        let sprite = game
+            .store
             .get::<_, Sprite>(&LogicalKey::new("/knight.yaml"), ctx)
             .unwrap();
-        let collide_hit = store
+        let collide_hit = game
+            .store
             .get::<_, CollisionBoxes>(&LogicalKey::new("collide"), ctx)
             .unwrap();
         world.add_resource(collide_hit.borrow().clone());
