@@ -17,6 +17,7 @@ use crate::combat::components::{
     AnimationState, Body, Collided, Controller, DaggersInventory, Draw, Facing, Health, Intent,
     Position, State, Velocity, WalkingState, Weapon,
 };
+use crate::combat::systems::boundary::TopBoundary;
 use crate::combat::systems::{
     ActionSystem, Animation, CheckCollisions, Commander, ConfirmVelocity, EntityDeath,
     EntityEntityCollision, Movement, OutOfBounds, ResolveCollisions, RestrictMovementToBoundary,
@@ -221,6 +222,9 @@ impl<'a> EncounterScene<'a> {
             graphics::draw_ex(ctx, ggez_image, draw_params)?;
         }
         graphics::set_canvas(ctx, None);
+        world.add_resource(TopBoundary {
+            y: terrain.borrow().boundary.h as i32,
+        });
 
         let palette = piv.borrow().palette.to_vec();
 

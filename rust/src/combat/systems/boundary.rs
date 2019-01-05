@@ -1,4 +1,4 @@
-use specs::{ReadStorage, System, WriteStorage};
+use specs::{ReadExpect, ReadStorage, System, WriteStorage};
 
 use crate::combat::components::{Intent, Position, Velocity};
 
@@ -17,20 +17,33 @@ const LAIR_BOUNDARY: Rect = Rect {
     h: 155, // - 30,
 };
 
+#[derive(Debug)]
+pub struct TopBoundary {
+    pub y: i32,
+}
+
+impl Default for TopBoundary {
+    fn default() -> TopBoundary {
+        TopBoundary { y: 30 }
+    }
+}
+
 pub struct RestrictMovementToBoundary;
 // takes a velocity and restricts velocity if the resulting movement would
 // collide with a boundary
 
 impl<'a> System<'a> for RestrictMovementToBoundary {
     type SystemData = (
+        ReadExpect<'a, TopBoundary>,
         ReadStorage<'a, Position>,
         // anything which can take commands is bounded to the screen.
         // TODO: what happens with off screen (trogg war beasts) enemies?
         ReadStorage<'a, Intent>,
         WriteStorage<'a, Velocity>,
     );
-    fn run(&mut self, (position, intent, mut velocity): Self::SystemData) {
+    fn run(&mut self, (top_boundary, position, intent, mut velocity): Self::SystemData) {
         use specs::Join;
+        println!("{:?}", top_boundary.y);
         for (position, _, velocity) in (&position, &intent, &mut velocity).join() {
             let new_x = position.x as i32 + velocity.x;
             if new_x < LAIR_BOUNDARY.x && velocity.x < 0
@@ -40,8 +53,7 @@ impl<'a> System<'a> for RestrictMovementToBoundary {
             }
 
             let new_y = position.y as i32 - velocity.y;
-            if new_y < LAIR_BOUNDARY.y && velocity.y < 0
-                || new_y > LAIR_BOUNDARY.h && velocity.y > 0
+            if new_y < top_boundary.y && velocity.y < 0 || new_y > LAIR_BOUNDARY.h && velocity.y > 0
             {
                 velocity.y = 0;
             }
