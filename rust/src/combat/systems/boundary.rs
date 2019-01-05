@@ -43,7 +43,6 @@ impl<'a> System<'a> for RestrictMovementToBoundary {
     );
     fn run(&mut self, (top_boundary, position, intent, mut velocity): Self::SystemData) {
         use specs::Join;
-        println!("{:?}", top_boundary.y);
         for (position, _, velocity) in (&position, &intent, &mut velocity).join() {
             let new_x = position.x as i32 + velocity.x;
             if new_x < LAIR_BOUNDARY.x && velocity.x < 0

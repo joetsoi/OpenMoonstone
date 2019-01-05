@@ -187,45 +187,7 @@ impl<'a> EncounterScene<'a> {
             },
         )?;
 
-        let terrain = game
-            .store
-            .get::<_, TerrainFile>(&LogicalKey::new(terrain_name.to_string()), ctx)
-            .unwrap();
-        for p in &terrain.borrow().positions {
-            let cmp = game
-                .store
-                .get::<_, PivImage>(&LogicalKey::new(&p.atlas), ctx)?;
-            let ggez_image = match game.images.entry(p.atlas.clone()) {
-                Occupied(i) => i.into_mut(),
-                Vacant(i) => i.insert(graphics::Image::from_rgba8(
-                    ctx,
-                    512u16,
-                    512u16,
-                    &cmp.borrow().to_rgba8_512(),
-                )?),
-            };
-
-            let rect = scenery_rects[p.image_number];
-            // println!("{:#?}",rect);
-
-            let draw_params = graphics::DrawParam {
-                src: graphics::Rect {
-                    x: rect.x as f32 / 512.0,
-                    y: rect.y as f32 / 512.0,
-                    w: rect.w as f32 / 512.0,
-                    h: rect.h as f32 / 512.0,
-                },
-                dest: graphics::Point2::new(p.x as f32 * 3.0, p.y as f32 * 3.0),
-                scale: graphics::Point2::new(3.0, 3.0),
-                ..Default::default()
-            };
-            graphics::draw_ex(ctx, ggez_image, draw_params)?;
-        }
-        graphics::set_canvas(ctx, None);
-        world.add_resource(TopBoundary {
-            y: terrain.borrow().boundary.h as i32,
-        });
-
+        EncounterScene::draw_terrain(ctx, game, &mut world, terrain_name, &background);
         let palette = piv.borrow().palette.to_vec();
 
         let sprite = game
@@ -332,6 +294,54 @@ impl<'a> EncounterScene<'a> {
             knight_id: knight.id(),
             player_2: player_2.id(),
         })
+    }
+
+    fn draw_terrain(
+        ctx: &mut Context,
+        game: &mut Game,
+        world: &mut World,
+        terrain_name: &str,
+        background_image: &graphics::Canvas,
+    ) -> Result<(), Error> {
+        let terrain = game
+            .store
+            .get::<_, TerrainFile>(&LogicalKey::new(terrain_name.to_string()), ctx)
+            .unwrap();
+        for p in &terrain.borrow().positions {
+            let cmp = game
+                .store
+                .get::<_, PivImage>(&LogicalKey::new(&p.atlas), ctx)?;
+            let ggez_image = match game.images.entry(p.atlas.clone()) {
+                Occupied(i) => i.into_mut(),
+                Vacant(i) => i.insert(graphics::Image::from_rgba8(
+                    ctx,
+                    512u16,
+                    512u16,
+                    &cmp.borrow().to_rgba8_512(),
+                )?),
+            };
+
+            let rect = scenery_rects[p.image_number];
+            // println!("{:#?}",rect);
+
+            let draw_params = graphics::DrawParam {
+                src: graphics::Rect {
+                    x: rect.x as f32 / 512.0,
+                    y: rect.y as f32 / 512.0,
+                    w: rect.w as f32 / 512.0,
+                    h: rect.h as f32 / 512.0,
+                },
+                dest: graphics::Point2::new(p.x as f32 * 3.0, p.y as f32 * 3.0),
+                scale: graphics::Point2::new(3.0, 3.0),
+                ..Default::default()
+            };
+            graphics::draw_ex(ctx, ggez_image, draw_params)?;
+        }
+        graphics::set_canvas(ctx, None);
+        world.add_resource(TopBoundary {
+            y: terrain.borrow().boundary.h as i32,
+        });
+        Ok(())
     }
 
     fn update_controllers(&mut self, input: &input::InputState) {
