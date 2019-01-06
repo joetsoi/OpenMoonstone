@@ -1,0 +1,9 @@
+knight:
+    swing: 4
+    back_swing: 2
+    thrust: 3
+    chop: 4
+    up_thrust: 3
+
+dagger:
+    fly: 3

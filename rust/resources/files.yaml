@@ -1,12 +1,12 @@
 scenes:
+    # full screen:
     ch: DISKB/CH.PIV
     mindscape: DISKA/MINDSCAP
     wab1: DISKB/WAB1.CMP
     fob1: DISKB/FOB1.CMP
     glb1: DISKB/GLB1.CMP
     swb1: DISKB/SWB1.CMP
-
-# scenery:
+    # scenery
     fo1: DISKB/FO1.CMP
     fo2: DISKB/FO2.CMP
     sw1: DISKB/SW1.CMP

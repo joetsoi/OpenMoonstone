@@ -9,7 +9,7 @@ use crate::combat::components::state::HitType;
 use crate::combat::components::{Action, AnimationState, Draw, State, WalkingState};
 
 lazy_static! {
-    static ref action_to_animation: HashMap<Action, String> = hashmap!{
+    pub static ref action_to_animation: HashMap<Action, String> = hashmap!{
         Action::Idle => "idle".to_string(),
         Action::Hit(HitType::Sliced) => "hit".to_string(),
         //Action::Move { x: XAxis::Centre, y: YAxis::Centre } => "idle".to_string(),

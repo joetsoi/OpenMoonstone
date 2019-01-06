@@ -15,8 +15,9 @@ use warmy::{LogicalKey, Store};
 use crate::animation::{ImageType, Sprite, SpriteData};
 use crate::combat::components::{
     AnimationState, Body, Collided, Controller, DaggersInventory, Draw, Facing, Health, Intent,
-    Position, State, Velocity, WalkingState, Weapon,
+    Position, State, UnitType, Velocity, WalkingState, Weapon,
 };
+use crate::combat::damage::DamageTables;
 use crate::combat::systems::boundary::TopBoundary;
 use crate::combat::systems::{
     ActionSystem, Animation, CheckCollisions, Commander, ConfirmVelocity, EntityDeath,
@@ -62,6 +63,7 @@ impl<'a> EncounterScene<'a> {
         world.register::<Intent>();
         world.register::<Position>();
         world.register::<State>();
+        world.register::<UnitType>();
         world.register::<Velocity>();
         world.register::<WalkingState>();
         world.register::<Weapon>();
@@ -110,6 +112,18 @@ impl<'a> EncounterScene<'a> {
             //     store: Store::new(StoreOpt::default()).expect("store creation"),
             // })
             .build()
+    }
+
+    fn load_resources(
+        ctx: &mut Context,
+        store: &mut Store<Context>,
+        world: &mut World,
+    ) -> Result<(), Error> {
+        let damage_tables = store
+            .get::<_, DamageTables>(&LogicalKey::new("/damage.yaml"), ctx)
+            .expect("error loading damage.yaml");
+        world.add_resource(damage_tables.borrow().clone());
+        Ok(())
     }
 
     fn load_sprite_data(
@@ -167,6 +181,7 @@ impl<'a> EncounterScene<'a> {
     ) -> Result<Self, Error> {
         let mut world = EncounterScene::build_world();
         EncounterScene::load_sprite_data(ctx, &mut game.store, &mut world, entity_names)?;
+        EncounterScene::load_resources(ctx, &mut game.store, &mut world)?;
 
         let piv = game
             .store
@@ -202,6 +217,9 @@ impl<'a> EncounterScene<'a> {
 
         let knight = world
             .create_entity()
+            .with(UnitType {
+                name: "knight".to_string(),
+            })
             .with(Controller {
                 x: 0,
                 y: 0,
@@ -245,6 +263,9 @@ impl<'a> EncounterScene<'a> {
 
         let player_2 = world
             .create_entity()
+            .with(UnitType {
+                name: "knight".to_string(),
+            })
             .with(Controller {
                 x: 0,
                 y: 0,

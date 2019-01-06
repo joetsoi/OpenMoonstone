@@ -8,8 +8,10 @@ use crate::combat::components::collision::{CollisionBox, Points};
 use crate::combat::components::intent::{AttackType, DefendType};
 use crate::combat::components::state::HitType;
 use crate::combat::components::{
-    Action, Body, Collided, Draw, Facing, Health, Position, State, Velocity, Weapon,
+    Action, Body, Collided, Draw, Facing, Health, Position, State, UnitType, Velocity, Weapon,
 };
+use crate::combat::damage::DamageTables;
+use crate::combat::systems::animation::action_to_animation;
 use crate::files::collide::CollisionBoxes;
 use crate::objects::TextureAtlas;
 use crate::rect::{Interval, Point, Rect};
@@ -296,6 +298,8 @@ pub struct ResolveCollisions;
 
 impl<'a> System<'a> for ResolveCollisions {
     type SystemData = (
+        ReadExpect<'a, DamageTables>,
+        ReadStorage<'a, UnitType>,
         WriteStorage<'a, Collided>,
         WriteStorage<'a, Health>,
         WriteStorage<'a, State>,
@@ -304,10 +308,20 @@ impl<'a> System<'a> for ResolveCollisions {
 
     fn run(
         &mut self,
-        (mut collided_storage, mut health_storage, mut state_storage, entities): Self::SystemData,
+        (
+            damage_tables,
+            unit_type_storage,
+            mut collided_storage,
+            mut health_storage,
+            mut state_storage,
+            entities,
+        ): Self::SystemData,
     ) {
         use specs::Join;
-        for (collided, entity) in (collided_storage.drain(), &*entities).join() {
+
+        for (unit_type, collided, entity) in
+            (&unit_type_storage, collided_storage.drain(), &*entities).join()
+        {
             let mut has_defended = false;
             let mut target_used_block = false;
 
@@ -334,11 +348,18 @@ impl<'a> System<'a> for ResolveCollisions {
                 if !has_defended {
                     // set defender animation
                     let target = &collided.target;
+                    let state_action = state_storage
+                        .get(entity)
+                        .and_then(|s| Some(s.action.clone()));
                     let target_health: Option<&mut Health> = health_storage.get_mut(*target);
                     let target_state: Option<&mut State> = state_storage.get_mut(*target);
                     if let (Some(target_health), Some(target_state)) = (target_health, target_state)
                     {
-                        target_health.points -= 3; // TODO: change hard coded weapon damage
+                        let damage = match state_action {
+                            Some(action) => calculate_damage(&damage_tables, unit_type, action),
+                            None => 3, //TODO since daggers have no state
+                        };
+                        target_health.points -= damage as i32;
                         target_state.action = Action::Hit(HitType::Sliced);
                         target_state.ticks = 0;
                     }
@@ -367,4 +388,25 @@ impl<'a> System<'a> for ResolveCollisions {
             }
         }
     }
+}
+
+fn calculate_damage(
+    damage_tables: &DamageTables,
+    unit_type: &UnitType,
+    attacker_action: Action,
+) -> u32 {
+    let mut raw_damage = *damage_tables
+        .0
+        .get(&unit_type.name)
+        .and_then(|t| {
+            action_to_animation
+                .get(&attacker_action)
+                .and_then(|name| t.get(name))
+        })
+        .expect("missing value from damage tables");
+
+    if attacker_action == Action::Attack(AttackType::Chop) {
+        raw_damage *= 2;
+    }
+    raw_damage
 }

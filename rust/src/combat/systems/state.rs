@@ -1,7 +1,7 @@
 use specs::{Entities, LazyUpdate, Read, ReadExpect, ReadStorage, System, WriteStorage};
 
 use crate::animation::SpriteData;
-use crate::combat::components::{Action, Draw, Position, State, Velocity, Weapon};
+use crate::combat::components::{Action, Draw, Position, State, UnitType, Velocity, Weapon};
 
 pub struct StateUpdater;
 
@@ -43,6 +43,12 @@ impl<'a> System<'a> for StateUpdater {
                         .and_then(|s| s.animations.get("fly"))
                         .and_then(|a| a.frames.get(0))
                         .expect("dagger entity yaml not loaded");
+                    updater.insert(
+                        dagger,
+                        UnitType {
+                            name: "dagger".to_string(),
+                        },
+                    );
                     updater.insert(
                         dagger,
                         Draw {
