@@ -3,6 +3,8 @@ knight:
     back_swing: 2
     thrust: 3
     chop: 4
+    dagger: 3
+    throw_dagger: 3
     up_thrust: 3
 
 dagger:
