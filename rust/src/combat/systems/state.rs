@@ -34,7 +34,7 @@ impl<'a> System<'a> for StateUpdater {
                     updater.insert(
                         dagger,
                         Velocity {
-                            x: 10 * state.direction as i32, //TODO: check velocity.
+                            x: 20 * state.direction as i32, //TODO: change hardcoded dagger vel.
                             y: 0,
                         },
                     );
