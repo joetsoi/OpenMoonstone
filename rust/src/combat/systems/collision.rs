@@ -382,7 +382,6 @@ impl<'a> System<'a> for ResolveCollisions {
                     // entiites without state are deleted after a collision
                     // this is currently for thrown daggers, it would be better
                     // to make this explicit, perhaps add a DeleteOnCollision component.
-                    // TODO: deleted a frame too early.
                     println!("deleting entity {:?}", entity);
                     entities.delete(entity);
                 }
