@@ -225,13 +225,13 @@ impl<'a> EncounterScene<'a> {
                 y: 0,
                 fire: false,
             })
-            .with(Position { x: 100, y: 100 })
+            .with(Position { x: 30, y: 100 })
             .with(Health {
                 ..Default::default()
             })
             .with(Draw {
-                frame: sprite.borrow().animations["walk"].frames[0].clone(),
-                animation: "walk".to_string(),
+                frame: sprite.borrow().animations["entrance"].frames[0].clone(),
+                animation: "entrance".to_string(),
                 resource_name: "knight".to_string(),
                 direction: Facing::default(),
             })
@@ -271,15 +271,15 @@ impl<'a> EncounterScene<'a> {
                 y: 0,
                 fire: false,
             })
-            .with(Position { x: 200, y: 100 })
+            .with(Position { x: 250, y: 100 })
             .with(Health {
                 ..Default::default()
             })
             .with(Draw {
-                frame: sprite.borrow().animations["walk"].frames[0].clone(),
-                animation: "walk".to_string(),
+                frame: sprite.borrow().animations["entrance"].frames[0].clone(),
+                animation: "entrance".to_string(),
                 resource_name: "knight".to_string(),
-                direction: Facing::default(),
+                direction: Facing::Left,
             })
             .with(Intent {
                 ..Default::default()
@@ -294,6 +294,7 @@ impl<'a> EncounterScene<'a> {
                 ..Default::default()
             })
             .with(State {
+                direction: Facing::Left,
                 ..Default::default()
             })
             .with(Body {

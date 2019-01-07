@@ -32,6 +32,7 @@ lazy_static! {
         Action::Defend(DefendType::Dodge) => "dodge".to_string(),
         Action::Death => "death".to_string(),
         Action::Dead => "dead".to_string(),
+        Action::Entrance => "entrance".to_string(),
     };
 }
 
@@ -61,7 +62,10 @@ impl<'a> System<'a> for Animation {
                 Action::Idle | Action::Defend(..) => {
                     animation_state.frame_number = 0;
                 }
-                Action::Attack(..) | Action::Hit(..) | Action::AttackRecovery => {
+                Action::Attack(..)
+                | Action::Hit(..)
+                | Action::AttackRecovery
+                | Action::Entrance => {
                     animation_state.frame_number = state.ticks;
                 }
                 Action::Move { .. } => animation_state.frame_number = walking_state.step,

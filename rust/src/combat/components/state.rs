@@ -20,6 +20,7 @@ pub enum Action {
     Hit(HitType),
     Death,
     Dead,
+    Entrance,
 }
 
 impl Action {
@@ -42,7 +43,7 @@ impl Action {
 
 impl Default for Action {
     fn default() -> Action {
-        Action::Idle
+        Action::Entrance
     }
 }
 

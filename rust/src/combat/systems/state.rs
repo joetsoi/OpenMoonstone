@@ -68,7 +68,10 @@ impl<'a> System<'a> for StateUpdater {
             }
 
             match state.action {
-                Action::Attack(..) | Action::Hit(..) | Action::AttackRecovery => {
+                Action::Attack(..)
+                | Action::Hit(..)
+                | Action::AttackRecovery
+                | Action::Entrance => {
                     state.ticks += 1;
                     if state.ticks == state.length && state.length != 0 {
                         // assuming: that all states that match this arm have a
