@@ -28,12 +28,12 @@ spritesheets = {
 }
 
 collide_type = {
-    0: 'FrameType.NON_SOLID',
-    1: 'FrameType.COLLIDEE',
-    2: 'FrameType.COLLIDER',
-    16: 'FrameType.VM',
-    128: 'FrameType.BLOOD',
-    144: 'FrameType.BLOOD_STAIN',
+    0: 'NonSolid',
+    1: 'Collidee',
+    2: 'Collider',
+    16: 'Vm',
+    128: 'Blood',
+    144: 'BloodStain',
 }
 
 
@@ -48,13 +48,15 @@ while next_line:
         sprite = spritesheets[sprite]
         collide = collide_type[collide]
 
-        test = "ImagePosition('{}', {}, {}, {}, {}),".format(sprite, img_num, y, x, collide)
+        #test = "ImagePosition('{}', {}, {}, {}, {}),".format(sprite, img_num, y, x, collide)
+        test = "  - {{sheet: {}, image: {}, y: {}, x: {}, image_type:{}}}".format(sprite, img_num, y, x, collide)
         print test
         line = line.next
     elif line.disasm.startswith('EndOfAnimFrame <0FFh, 0>'):
         line = line.next
-        print '),'
-        print '('
+
+        # print '),'
+        print '- images:'
     elif line.disasm.startswith('EndOfAnimFrame <0FFh, 0FFh>'):
         next_line = False
     else:
