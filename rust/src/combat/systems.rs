@@ -18,7 +18,7 @@ pub use self::collision::{
 };
 pub use self::commander::Commander;
 pub use self::draw::UpdateImage;
-pub use self::health::EntityDeath;
+pub use self::health::{CheckEndOfCombat, EntityDeath};
 pub use self::movement::Movement;
 pub use self::out_of_bounds::OutOfBounds;
 pub use self::state::StateUpdater;

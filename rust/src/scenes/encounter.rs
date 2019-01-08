@@ -12,22 +12,25 @@ use specs::world::{Builder, Index};
 use specs::{Dispatcher, DispatcherBuilder, Entity, Join, World};
 use warmy::{LogicalKey, Store};
 
+use super::transition::FadeStyle;
+use super::Fade;
 use crate::animation::{ImageType, Sprite, SpriteData};
 use crate::combat::components::{
     AnimationState, Body, Collided, Controller, DaggersInventory, Draw, Facing, Health, Intent,
-    Palette, Position, State, UnitType, Velocity, WalkingState, Weapon,
+    MustLive, Palette, Position, State, UnitType, Velocity, WalkingState, Weapon,
 };
 use crate::combat::damage::DamageTables;
 use crate::combat::systems::boundary::TopBoundary;
+use crate::combat::systems::health::CombatDone;
 use crate::combat::systems::{
-    ActionSystem, Animation, CheckCollisions, Commander, ConfirmVelocity, EntityDeath,
-    EntityEntityCollision, Movement, OutOfBounds, ResolveCollisions, RestrictMovementToBoundary,
-    StateUpdater, UpdateBoundingBoxes, UpdateImage, VelocitySystem,
+    ActionSystem, Animation, CheckCollisions, CheckEndOfCombat, Commander, ConfirmVelocity,
+    EntityDeath, EntityEntityCollision, Movement, OutOfBounds, ResolveCollisions,
+    RestrictMovementToBoundary, StateUpdater, UpdateBoundingBoxes, UpdateImage, VelocitySystem,
 };
 use crate::files::collide::CollisionBoxes;
 use crate::files::terrain::scenery_rects;
 use crate::files::TerrainFile;
-use crate::game::Game;
+use crate::game::{Game, SceneState};
 use crate::input;
 use crate::manager::GameYaml;
 use crate::objects::TextureAtlas;
@@ -41,6 +44,8 @@ pub struct EncounterTextures {
     pub data: HashMap<String, TextureAtlas>,
 }
 
+const TICKS_TO_WAIT: u32 = 35;
+
 pub struct EncounterScene<'a> {
     pub specs_world: World,
     pub dispatcher: Dispatcher<'a, 'a>,
@@ -49,6 +54,11 @@ pub struct EncounterScene<'a> {
 
     knight_id: Index,
     player_2: Index,
+
+    // the number of ticks since the encounter is done
+    ticks_after: u32,
+    // we do the fade out first, pop back to this scene then pop the encounter.
+    fade_out_done: bool,
 }
 
 impl<'a> EncounterScene<'a> {
@@ -62,6 +72,7 @@ impl<'a> EncounterScene<'a> {
         world.register::<Draw>();
         world.register::<Health>();
         world.register::<Intent>();
+        world.register::<MustLive>();
         world.register::<Palette>();
         world.register::<Position>();
         world.register::<State>();
@@ -77,6 +88,7 @@ impl<'a> EncounterScene<'a> {
             .with(Commander, "commander", &[])
             .with(ActionSystem, "action", &["commander"])
             .with(EntityDeath, "entity_death", &["action"])
+            .with(CheckEndOfCombat, "check_end_of_combat", &["entity_death"])
             .with(VelocitySystem, "velocity", &["commander"])
             .with(EntityEntityCollision, "entity_collision", &["velocity"])
             .with(
@@ -125,6 +137,7 @@ impl<'a> EncounterScene<'a> {
             .get::<_, DamageTables>(&LogicalKey::new("/damage.yaml"), ctx)
             .expect("error loading damage.yaml");
         world.add_resource(damage_tables.borrow().clone());
+        world.add_resource(CombatDone(false));
         Ok(())
     }
 
@@ -206,6 +219,7 @@ impl<'a> EncounterScene<'a> {
                     &swaps.0.get(&palette_name.to_string()).expect("no palette"),
                 ),
             })
+            .with(MustLive {})
             .with(Controller {
                 x: 0,
                 y: 0,
@@ -317,6 +331,8 @@ impl<'a> EncounterScene<'a> {
             background,
             knight_id: knight.id(),
             player_2: player_2.id(),
+            ticks_after: 0,
+            fade_out_done: false,
         })
     }
 
@@ -390,6 +406,18 @@ impl<'a> scene::Scene<Game, input::InputEvent> for EncounterScene<'a> {
         self.specs_world.maintain();
         self.update_controllers(&game.input);
         self.dispatcher.dispatch_par(&self.specs_world.res);
+        if self.specs_world.read_resource::<CombatDone>().0 {
+            self.ticks_after += 1;
+            if self.ticks_after > TICKS_TO_WAIT {
+                match self.fade_out_done {
+                    false => {
+                        game.next_scene = SceneState::Menu;
+                        return scene::SceneSwitch::push(Fade::new(274, 1, FadeStyle::Out));
+                    }
+                    true => return scene::SceneSwitch::Pop, //shouldn't happen
+                }
+            }
+        }
         scene::SceneSwitch::None
     }
 

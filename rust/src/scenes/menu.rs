@@ -8,9 +8,9 @@ use ggez_goodies::scene::{Scene, SceneSwitch};
 use lazy_static::lazy_static;
 use warmy::{LogicalKey, Store};
 
-use super::{Fade, EncounterScene};
 use super::transition::FadeStyle;
-use crate::game::Game;
+use super::{EncounterScene, Fade};
+use crate::game::{Game, SceneState};
 use crate::input::{Axis, Button, InputEvent};
 use crate::objects::TextureAtlas;
 use crate::piv::Colour;
@@ -288,7 +288,10 @@ impl Scene<Game, InputEvent> for Menu {
         let x = gameworld.input.get_axis_raw(Axis::Horz1) as i32;
         if gameworld.input.get_button_down(Button::Fire1) {
             match self.selected_option {
-                MenuOption::Practice => self.done = true,
+                MenuOption::Practice => {
+                    self.done = true;
+                    gameworld.next_scene = SceneState::Practice;
+                }
                 MenuOption::Gore => gameworld.gore_on = !gameworld.gore_on,
                 MenuOption::Players => gameworld.num_players = (gameworld.num_players % 4) + 1,
                 _ => (),

@@ -14,7 +14,7 @@ pub use self::collision::{Body, Collided, Weapon};
 pub use self::daggers::DaggersInventory;
 pub use self::direction::Facing;
 pub use self::draw::{Draw, Palette};
-pub use self::health::Health;
+pub use self::health::{Health, MustLive};
 pub use self::identity::UnitType;
 pub use self::intent::{Command, Intent};
 pub use self::movement::{Controller, Position, Velocity, WalkingState};
