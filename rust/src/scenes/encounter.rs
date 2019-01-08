@@ -301,21 +301,7 @@ impl<'a> EncounterScene<'a> {
         world.add_resource(collide_hit.borrow().clone());
 
         let y = EncounterScene::next_starting_position(game, 100);
-        println!("{:?} {:?}", y_max, y);
-
         let player_1 = EncounterScene::create_entity(
-            ctx,
-            &mut game.store,
-            &mut world,
-            "knight",
-            &piv.borrow().raw_palette,
-            "green_knight",
-            30,
-            100,
-            Facing::default(),
-        );
-
-        let player_2 = EncounterScene::create_entity(
             ctx,
             &mut game.store,
             &mut world,
@@ -326,6 +312,20 @@ impl<'a> EncounterScene<'a> {
             y,
             Facing::Left,
         );
+
+        let y = EncounterScene::next_starting_position(game, 100);
+        let player_2 = EncounterScene::create_entity(
+            ctx,
+            &mut game.store,
+            &mut world,
+            "knight",
+            &piv.borrow().raw_palette,
+            "green_knight",
+            30,
+            y,
+            Facing::default(),
+        );
+
         let palette: Vec<Colour> = piv.borrow().palette.to_vec();
         Ok(Self {
             palette,
@@ -350,17 +350,6 @@ impl<'a> EncounterScene<'a> {
             .store
             .get::<_, TerrainFile>(&LogicalKey::new(terrain_name.to_string()), ctx)
             .unwrap();
-        // let ys: Option<u32> = terrain.borrow().positions.iter().map(|p| p.y).max();
-        // println!("{:?}", ys);
-
-        //let mut y_max = 30;
-        let y_max: u32 = terrain
-            .borrow()
-            .headers
-            .iter()
-            .map(|h| h.y)
-            .max()
-            .expect("error getting ymax");
         for p in &terrain.borrow().positions {
             let cmp = game
                 .store
@@ -392,6 +381,14 @@ impl<'a> EncounterScene<'a> {
             graphics::draw_ex(ctx, ggez_image, draw_params)?;
         }
         graphics::set_canvas(ctx, None);
+
+        let y_max: u32 = terrain
+            .borrow()
+            .headers
+            .iter()
+            .map(|h| h.y)
+            .max()
+            .expect("error getting ymax");
         world.add_resource(TopBoundary {
             y: y_max as i32 - 30,
         });
