@@ -7,7 +7,7 @@ use crate::input::{Axis, Button, InputEvent};
 use crate::scenes::FSceneSwitch;
 
 use super::transition::FadeStyle;
-use super::{EncounterScene, Fade};
+use super::{EncounterScene, Fade, Menu};
 /// Scene that controls switching between various game states.
 ///
 /// Base state that switches between the menu, practice encounter and
@@ -27,26 +27,21 @@ impl MainScene {
 
 impl Scene<Game, InputEvent> for MainScene {
     fn update(&mut self, mut game: &mut Game, ctx: &mut Context) -> FSceneSwitch {
-        match game.scene {
-            SceneState::Menu => {
+        match game.next_scene {
+            SceneState::Menu => SceneSwitch::PushMultiple(vec![
+                Box::new(Menu::new(ctx, &mut game.store).expect("failed to init menu scene")),
+                Box::new(Fade::new(274, 1, FadeStyle::In)),
+            ]),
+            SceneState::Practice => {
                 let encounter_scene = Box::new(
-                    EncounterScene::new(
-                        ctx,
-                        &mut game,
-                        &["knight", "dagger"],
-                        "wab1",
-                        "wa1.t",
-                    )
-                    .expect("failed to init practice encounter"),
+                    EncounterScene::new(ctx, &mut game, &["knight", "dagger"], "wab1", "wa1.t")
+                        .expect("failed to init practice encounter"),
                 );
-
-                match game.next_scene {
-                    SceneState::Practice => SceneSwitch::PushMultiple(vec![
-                        encounter_scene,
-                        Box::new(Fade::new(274, 1, FadeStyle::In)),
-                    ]),
-                    _ => SceneSwitch::None,
-                }
+                game.scene = SceneState::Practice;
+                SceneSwitch::PushMultiple(vec![
+                    encounter_scene,
+                    Box::new(Fade::new(274, 1, FadeStyle::In)),
+                ])
             }
             _ => SceneSwitch::None,
         }
