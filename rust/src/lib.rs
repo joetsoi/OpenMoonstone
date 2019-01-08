@@ -7,6 +7,7 @@ pub mod input;
 pub mod lz77;
 pub mod manager;
 pub mod objects;
+pub mod palette;
 pub mod piv;
 pub mod rect;
 pub mod scenes;

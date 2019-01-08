@@ -17,6 +17,7 @@ pub struct Colour {
 #[derive(Debug)]
 pub struct PivImage {
     pub palette: Vec<Colour>,
+    pub raw_palette: Vec<u16>,
     pixels: Vec<usize>,
 }
 
@@ -26,15 +27,19 @@ impl PivImage {
         reader.read_to_end(&mut data)?;
         let header = PivImage::read_header(&data[..6]);
 
-        let palette: Vec<Colour> =
-            read_palette(header.bit_depth, &data[6..6 + (header.bit_depth * 2)]);
+        let raw_palette = read_palette(header.bit_depth, &data[6..6 + (header.bit_depth * 2)]);
+        let palette: Vec<Colour> = extract_palette(&raw_palette);
 
         let extracted = lz77::decompress(
             header.file_length as u32,
             &data[6 + (header.bit_depth * 2)..],
         )?;
         let pixels = PivImage::combine_bit_planes(&extracted);
-        Ok(PivImage { palette, pixels })
+        Ok(PivImage {
+            palette,
+            raw_palette,
+            pixels,
+        })
     }
 
     pub fn to_rgba8(&self) -> Vec<u8> {
@@ -99,12 +104,15 @@ struct Header {
     bit_depth: usize,
 }
 
-pub fn read_palette(bit_depth: usize, data: &[u8]) -> Vec<Colour> {
+fn read_palette(bit_depth: usize, data: &[u8]) -> Vec<u16> {
     let mut palette = vec![0; bit_depth];
     BigEndian::read_u16_into(&data, &mut palette);
     let palette: Vec<u16> = palette.iter().map(|pel| pel & 0x7fff).collect();
+    palette
+}
 
-    let mut palette: Vec<Colour> = palette
+pub fn extract_palette(data: &[u16]) -> Vec<Colour> {
+    let mut palette: Vec<Colour> = data
         .iter()
         .map(|pel| {
             let mut pel_bytes = [0u8; 2];
@@ -121,4 +129,10 @@ pub fn read_palette(bit_depth: usize, data: &[u8]) -> Vec<Colour> {
         first.a = 0;
     }
     palette
+}
+
+pub fn palette_swap(base_palette: &[u16], swap: &[u16]) -> Vec<Colour> {
+    let mut base_palette = base_palette.to_vec();
+    let _: Vec<u16> = base_palette.splice(6..9, swap.to_vec()).collect();
+    extract_palette(&base_palette)
 }

@@ -36,12 +36,13 @@ def change_player_colour(colour: str, palette: list):
     palette = copy.deepcopy(palette)
     old_palette = extract_palette(palette, base=256)
     # palette[0xc // 2:0xc // 2 + 2] = colours[colour]
-    palette[6:8] = colours[colour]
+    palette[6:9] = colours[colour]
     new_palette = extract_palette(palette, base=256)
+    print(palette, new_palette)
 
     # This is the blood colour, which is an incorrect orange in new_pallete
     # investigate in ida if this gets overrriden later
-    new_palette[15] = old_palette[15]
+    #new_palette[15] = old_palette[15]
     return PivFile.make_palette(new_palette)
 
 

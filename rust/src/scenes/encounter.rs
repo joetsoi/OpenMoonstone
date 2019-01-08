@@ -15,7 +15,7 @@ use warmy::{LogicalKey, Store};
 use crate::animation::{ImageType, Sprite, SpriteData};
 use crate::combat::components::{
     AnimationState, Body, Collided, Controller, DaggersInventory, Draw, Facing, Health, Intent,
-    Position, State, UnitType, Velocity, WalkingState, Weapon,
+    Palette, Position, State, UnitType, Velocity, WalkingState, Weapon,
 };
 use crate::combat::damage::DamageTables;
 use crate::combat::systems::boundary::TopBoundary;
@@ -31,7 +31,8 @@ use crate::game::Game;
 use crate::input;
 use crate::manager::GameYaml;
 use crate::objects::TextureAtlas;
-use crate::piv::{Colour, PivImage};
+use crate::palette::PaletteSwaps;
+use crate::piv::{palette_swap, Colour, PivImage};
 use crate::rect::Rect;
 use crate::scenes::FSceneSwitch;
 
@@ -45,6 +46,8 @@ pub struct EncounterScene<'a> {
     pub dispatcher: Dispatcher<'a, 'a>,
     pub background: graphics::Canvas,
     pub palette: Vec<Colour>,
+
+    raw_palette: Vec<u16>,
 
     knight_id: Index,
     player_2: Index,
@@ -61,6 +64,7 @@ impl<'a> EncounterScene<'a> {
         world.register::<Draw>();
         world.register::<Health>();
         world.register::<Intent>();
+        world.register::<Palette>();
         world.register::<Position>();
         world.register::<State>();
         world.register::<UnitType>();
@@ -204,6 +208,7 @@ impl<'a> EncounterScene<'a> {
 
         EncounterScene::draw_terrain(ctx, game, &mut world, terrain_name, &background);
         let palette = piv.borrow().palette.to_vec();
+        let palette = palette_swap(&piv.borrow().raw_palette, &[0xa, 0x7, 0x4]);
 
         let sprite = game
             .store
@@ -220,6 +225,9 @@ impl<'a> EncounterScene<'a> {
             .with(UnitType {
                 name: "knight".to_string(),
             })
+            // .with(Palette {
+            //     name: "green_knight".to_string(),
+            // })
             .with(Controller {
                 x: 0,
                 y: 0,
@@ -308,8 +316,11 @@ impl<'a> EncounterScene<'a> {
             })
             .build();
 
+        let raw_palette = piv.borrow().raw_palette.clone();
+
         Ok(Self {
             palette,
+            raw_palette,
             specs_world: world,
             dispatcher: EncounterScene::build_dispatcher(),
             background,
@@ -412,13 +423,16 @@ impl<'a> scene::Scene<Game, input::InputEvent> for EncounterScene<'a> {
         )?;
         let position_storage = self.specs_world.read_storage::<Position>();
         let draw_storage = self.specs_world.read_storage::<Draw>();
+        let entities = self.specs_world.entities();
 
-        let mut storage = (&position_storage, &draw_storage)
+        let palette_storage = self.specs_world.read_storage::<Palette>();
+
+        let mut storage = (&position_storage, &draw_storage, &entities)
             .join()
             .collect::<Vec<_>>();
         storage.sort_by(|&a, &b| a.0.y.cmp(&b.0.y));
 
-        for (position, draw) in storage {
+        for (position, draw, entity) in storage {
             for image in &draw.frame.images {
                 let atlas = game
                     .store
@@ -426,19 +440,54 @@ impl<'a> scene::Scene<Game, input::InputEvent> for EncounterScene<'a> {
                     .unwrap();
 
                 let atlas_dimension = atlas.borrow().image.width as u32;
-                let ggez_image = match game.images.entry(image.sheet.clone()) {
-                    Occupied(i) => i.into_mut(),
-                    Vacant(i) => i.insert(
-                        graphics::Image::from_rgba8(
-                            ctx,
-                            atlas_dimension as u16,
-                            atlas_dimension as u16,
-                            &atlas.borrow().image.to_rgba8(&self.palette),
-                        )
-                        .unwrap(),
-                    ),
+                // TODO: change with palettes
+                let palette: Option<&Palette> = palette_storage.get(entity);
+                let ggez_image = match palette {
+                    None => {
+                        let ggez_image = match game.images.entry(image.sheet.clone()) {
+                            Occupied(i) => i.into_mut(),
+                            Vacant(i) => i.insert(
+                                graphics::Image::from_rgba8(
+                                    ctx,
+                                    atlas_dimension as u16,
+                                    atlas_dimension as u16,
+                                    &atlas.borrow().image.to_rgba8(&self.palette),
+                                )
+                                .unwrap(),
+                            ),
+                        };
+                        ggez_image
+                    }
+                    Some(palette) => {
+                        let image_name = [image.sheet.clone(), palette.name.clone()].join("-");
+                        let ggez_image = match game.images.entry(image_name) {
+                            Occupied(i) => i.into_mut(),
+                            Vacant(i) => {
+                                let palette = self.palette.clone();
+                                // let swaps = game
+                                //     .store
+                                //     .get::<_, PaletteSwaps>(
+                                //         &LogicalKey::new("/palette.yaml"),
+                                //         ctx,
+                                //     )?;
+                                // let swap = swaps.get(&palette.name);
+
+                                i.insert(
+                                    graphics::Image::from_rgba8(
+                                        ctx,
+                                        atlas_dimension as u16,
+                                        atlas_dimension as u16,
+                                        &atlas.borrow().image.to_rgba8(&palette),
+                                    )
+                                    .unwrap(),
+                                )
+                            }
+                        };
+                        ggez_image
+                    }
                 };
 
+                // Debug collision rects
                 let rect = atlas.borrow().rects[image.image];
                 let texture_size = atlas.borrow().image.width as f32;
                 let draw_params = graphics::DrawParam {
