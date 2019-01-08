@@ -37,13 +37,13 @@ lazy_static! {
 }
 
 #[derive(Debug)]
-struct Header {
-    file_length: u32,
+pub struct Header {
+    pub y: u32,
 }
 
 #[derive(Debug)]
 pub struct TerrainFile {
-    pub boundary: Rect,
+    pub headers: Vec<Header>,
     pub positions: Vec<Position>,
 }
 
@@ -56,28 +56,27 @@ pub struct Position {
 }
 
 impl TerrainFile {
-    fn read_header(data: &[u8]) -> Header {
-        Header {
-            file_length: BigEndian::read_u32(&data[..4]),
+    fn read_headers(header_count: usize, data: &[u8]) -> Result<Vec<Header>, io::Error> {
+        let mut headers: Vec<Header> = Vec::new();
+        for _ in 0..header_count {
+            let _a = BigEndian::read_u16(&data[0..2]) as i32;
+            let _b = BigEndian::read_u16(&data[2..4]) as i32;
+            let y = BigEndian::read_u16(&data[4..6]) as u32;
+            let _c = BigEndian::read_u16(&data[6..8]) as u32;
+            headers.push(Header { y });
         }
+        Ok(headers)
+        //Ok(Header {
+        //    //x: left,
+        //    y,
+        //    // w: (right - left) as u32,
+        //    // h: bottom - 30,
+        //})
     }
 
-    fn read_boundary(data: &[u8]) -> Result<Rect, io::Error> {
-        let left = BigEndian::read_u16(&data[0..2]) as i32;
-        let right = BigEndian::read_u16(&data[2..4]) as i32;
-        let bottom = BigEndian::read_u16(&data[4..6]) as u32;
-        let _top = BigEndian::read_u16(&data[6..8]) as u32;
-        Ok(Rect {
-            x: left,
-            y: 30,
-            w: (right - left) as u32,
-            h: bottom - 30,
-        })
-    }
-
-    fn read_terrain_positions(count: usize, data: &[u8]) -> Result<Vec<Position>, io::Error> {
+    fn read_terrain_positions(data: &[u8]) -> Result<Vec<Position>, io::Error> {
         let mut rdr = Cursor::new(data);
-        let mut positions: Vec<Position> = Vec::with_capacity(count);
+        let mut positions: Vec<Position> = Vec::new();
 
         loop {
             let atlas = rdr.read_u8()? as u32;
@@ -103,14 +102,13 @@ impl TerrainFile {
         let mut data: Vec<u8> = Vec::new();
         reader.read_to_end(&mut data)?;
 
-        let header = TerrainFile::read_header(&data[..4]);
-        let extracted = lz77::decompress(header.file_length, &data[4..])?;
-        let image_count = BigEndian::read_u16(&extracted[..2]) as usize * 8;
-        let boundary = TerrainFile::read_boundary(&extracted[2..])?;
-        let positions = TerrainFile::read_terrain_positions(image_count, &extracted[10..])?;
-        Ok(TerrainFile {
-            boundary,
-            positions,
-        })
+        let file_length = BigEndian::read_u32(&data[..4]);
+        let extracted = lz77::decompress(file_length, &data[4..])?;
+        let header_count = BigEndian::read_u16(&extracted[..2]) as usize;
+        let positions_start = (8 * header_count) + 2;
+
+        let headers = TerrainFile::read_headers(header_count, &extracted[2..positions_start])?;
+        let positions = TerrainFile::read_terrain_positions(&extracted[positions_start..])?;
+        Ok(TerrainFile { headers, positions })
     }
 }

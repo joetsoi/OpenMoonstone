@@ -39,7 +39,7 @@ impl Game {
 
             gore_on: true,
             num_players: 1,
-            encounter_starting_position: 1,
+            encounter_starting_position: 0,
         })
     }
 }

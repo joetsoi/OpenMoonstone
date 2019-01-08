@@ -52,7 +52,7 @@ pub struct EncounterScene<'a> {
     pub background: graphics::Canvas,
     pub palette: Vec<Colour>,
 
-    knight_id: Index,
+    player_1: Index,
     player_2: Index,
 
     // the number of ticks since the encounter is done
@@ -293,14 +293,17 @@ impl<'a> EncounterScene<'a> {
             },
         )?;
 
-        EncounterScene::draw_terrain(ctx, game, &mut world, terrain_name, &background);
+        let y_max = EncounterScene::draw_terrain(ctx, game, &mut world, terrain_name, &background)?;
         let collide_hit = game
             .store
             .get::<_, CollisionBoxes>(&LogicalKey::new("collide"), ctx)
             .unwrap();
         world.add_resource(collide_hit.borrow().clone());
 
-        let knight = EncounterScene::create_entity(
+        let y = EncounterScene::next_starting_position(game, 100);
+        println!("{:?} {:?}", y_max, y);
+
+        let player_1 = EncounterScene::create_entity(
             ctx,
             &mut game.store,
             &mut world,
@@ -320,7 +323,7 @@ impl<'a> EncounterScene<'a> {
             &piv.borrow().raw_palette,
             "blue_knight",
             250,
-            100,
+            y,
             Facing::Left,
         );
         let palette: Vec<Colour> = piv.borrow().palette.to_vec();
@@ -329,7 +332,7 @@ impl<'a> EncounterScene<'a> {
             specs_world: world,
             dispatcher: EncounterScene::build_dispatcher(),
             background,
-            knight_id: knight.id(),
+            player_1: player_1.id(),
             player_2: player_2.id(),
             ticks_after: 0,
             fade_out_done: false,
@@ -342,11 +345,22 @@ impl<'a> EncounterScene<'a> {
         world: &mut World,
         terrain_name: &str,
         background_image: &graphics::Canvas,
-    ) -> Result<(), Error> {
+    ) -> Result<u32, Error> {
         let terrain = game
             .store
             .get::<_, TerrainFile>(&LogicalKey::new(terrain_name.to_string()), ctx)
             .unwrap();
+        // let ys: Option<u32> = terrain.borrow().positions.iter().map(|p| p.y).max();
+        // println!("{:?}", ys);
+
+        //let mut y_max = 30;
+        let y_max: u32 = terrain
+            .borrow()
+            .headers
+            .iter()
+            .map(|h| h.y)
+            .max()
+            .expect("error getting ymax");
         for p in &terrain.borrow().positions {
             let cmp = game
                 .store
@@ -379,16 +393,16 @@ impl<'a> EncounterScene<'a> {
         }
         graphics::set_canvas(ctx, None);
         world.add_resource(TopBoundary {
-            y: terrain.borrow().boundary.h as i32,
+            y: y_max as i32 - 30,
         });
-        Ok(())
+        Ok(y_max)
     }
 
     fn update_controllers(&mut self, input: &input::InputState) {
         let entities = self.specs_world.entities();
         let mut controllers = self.specs_world.write_storage::<Controller>();
         for (e, controller) in (&*entities, &mut controllers).join() {
-            if e.id() == self.knight_id {
+            if e.id() == self.player_1 {
                 controller.x = input.get_axis_raw(input::Axis::Horz1) as i32;
                 controller.y = input.get_axis_raw(input::Axis::Vert1) as i32;
                 controller.fire = input.get_button_down(input::Button::Fire1);
@@ -397,6 +411,17 @@ impl<'a> EncounterScene<'a> {
                 controller.y = input.get_axis_raw(input::Axis::Vert2) as i32;
                 controller.fire = input.get_button_down(input::Button::Fire2);
             }
+        }
+    }
+
+    fn next_starting_position(game: &mut Game, t: i32) -> i32 {
+        game.encounter_starting_position = game.encounter_starting_position % 3 + 1;
+        let s = 200 - t; // screen height - smallest t
+        match game.encounter_starting_position {
+            3 => s / 2 + t - 47,
+            2 => s / 4 + t - 47,
+            1 => s / 2 + s / 4 + t - 47,
+            _ => panic!("set starting position failed"),
         }
     }
 }
