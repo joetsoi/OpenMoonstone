@@ -360,8 +360,13 @@ impl<'a> System<'a> for ResolveCollisions {
                             None => 3, //TODO since daggers have no state
                         };
                         target_health.points -= damage as i32;
-                        target_state.action = Action::Hit(HitType::Sliced);
-                        target_state.ticks = 0;
+                        match target_state.action {
+                            Action::Death | Action::Dead => (),
+                            _ => {
+                                target_state.action = Action::Hit(HitType::Sliced);
+                                target_state.ticks = 0;
+                            }
+                        }
                     }
                 }
             }
