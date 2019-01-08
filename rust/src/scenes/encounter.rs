@@ -208,7 +208,10 @@ impl<'a> EncounterScene<'a> {
 
         EncounterScene::draw_terrain(ctx, game, &mut world, terrain_name, &background);
         let palette = piv.borrow().palette.to_vec();
-        let palette = palette_swap(&piv.borrow().raw_palette, &[0xa, 0x7, 0x4]);
+        let swaps = game
+            .store
+            .get::<_, PaletteSwaps>(&LogicalKey::new("/palettes.yaml"), ctx)
+            .expect("error loading palette.yaml");
 
         let sprite = game
             .store
@@ -225,9 +228,17 @@ impl<'a> EncounterScene<'a> {
             .with(UnitType {
                 name: "knight".to_string(),
             })
-            // .with(Palette {
-            //     name: "green_knight".to_string(),
-            // })
+            .with(Palette {
+                name: "green_knight".to_string(),
+                palette: palette_swap(
+                    &piv.borrow().raw_palette,
+                    swaps
+                        .borrow()
+                        .0
+                        .get(&"green_knight".to_string())
+                        .expect("no palette"),
+                ),
+            })
             .with(Controller {
                 x: 0,
                 y: 0,
@@ -273,6 +284,17 @@ impl<'a> EncounterScene<'a> {
             .create_entity()
             .with(UnitType {
                 name: "knight".to_string(),
+            })
+            .with(Palette {
+                name: "blue_knight".to_string(),
+                palette: palette_swap(
+                    &piv.borrow().raw_palette,
+                    swaps
+                        .borrow()
+                        .0
+                        .get(&"blue_knight".to_string())
+                        .expect("no palette"),
+                ),
             })
             .with(Controller {
                 x: 0,
@@ -463,21 +485,13 @@ impl<'a> scene::Scene<Game, input::InputEvent> for EncounterScene<'a> {
                         let ggez_image = match game.images.entry(image_name) {
                             Occupied(i) => i.into_mut(),
                             Vacant(i) => {
-                                let palette = self.palette.clone();
-                                // let swaps = game
-                                //     .store
-                                //     .get::<_, PaletteSwaps>(
-                                //         &LogicalKey::new("/palette.yaml"),
-                                //         ctx,
-                                //     )?;
-                                // let swap = swaps.get(&palette.name);
 
                                 i.insert(
                                     graphics::Image::from_rgba8(
                                         ctx,
                                         atlas_dimension as u16,
                                         atlas_dimension as u16,
-                                        &atlas.borrow().image.to_rgba8(&palette),
+                                        &atlas.borrow().image.to_rgba8(&palette.palette),
                                     )
                                     .unwrap(),
                                 )
