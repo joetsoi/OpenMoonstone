@@ -9,7 +9,7 @@ use ggez::timer;
 use ggez::{Context, GameResult};
 use ggez_goodies::scene;
 use specs::world::{Builder, Index};
-use specs::{Dispatcher, DispatcherBuilder, Join, World};
+use specs::{Dispatcher, DispatcherBuilder, Entity, Join, World};
 use warmy::{LogicalKey, Store};
 
 use crate::animation::{ImageType, Sprite, SpriteData};
@@ -46,8 +46,6 @@ pub struct EncounterScene<'a> {
     pub dispatcher: Dispatcher<'a, 'a>,
     pub background: graphics::Canvas,
     pub palette: Vec<Colour>,
-
-    raw_palette: Vec<u16>,
 
     knight_id: Index,
     player_2: Index,
@@ -176,6 +174,81 @@ impl<'a> EncounterScene<'a> {
         Ok(())
     }
 
+    fn create_entity(
+        ctx: &mut Context,
+        store: &mut Store<Context>,
+        world: &mut World,
+        resource: &str,
+        raw_palette: &Vec<u16>,
+        palette_name: &str,
+        x: i32,
+        y: i32,
+        direction: Facing,
+    ) -> Entity {
+        let sprite_res = store
+            .get::<_, Sprite>(&LogicalKey::new(format!("/{}.yaml", resource)), ctx)
+            .unwrap();
+        let sprite = sprite_res.borrow();
+
+        let swaps_res = store
+            .get::<_, PaletteSwaps>(&LogicalKey::new("/palettes.yaml"), ctx)
+            .expect("error loading palette.yaml");
+        let swaps = swaps_res.borrow();
+        world
+            .create_entity()
+            .with(UnitType {
+                name: resource.to_string(),
+            })
+            .with(Palette {
+                name: palette_name.to_string(),
+                palette: palette_swap(
+                    &raw_palette,
+                    &swaps.0.get(&palette_name.to_string()).expect("no palette"),
+                ),
+            })
+            .with(Controller {
+                x: 0,
+                y: 0,
+                fire: false,
+            })
+            .with(Position { x: x, y: y })
+            .with(Health {
+                ..Default::default()
+            })
+            .with(Draw {
+                frame: sprite.animations["entrance"].frames[0].clone(),
+                animation: "entrance".to_string(),
+                resource_name: resource.to_string(),
+                direction: direction,
+            })
+            .with(Intent {
+                ..Default::default()
+            })
+            .with(WalkingState {
+                ..Default::default()
+            })
+            .with(Velocity {
+                ..Default::default()
+            })
+            .with(AnimationState {
+                ..Default::default()
+            })
+            .with(State {
+                direction: direction,
+                ..Default::default()
+            })
+            .with(Body {
+                ..Default::default()
+            })
+            .with(Weapon {
+                ..Default::default()
+            })
+            .with(DaggersInventory {
+                ..Default::default()
+            })
+            .build()
+    }
+
     pub fn new(
         ctx: &mut Context,
         game: &mut Game,
@@ -207,142 +280,38 @@ impl<'a> EncounterScene<'a> {
         )?;
 
         EncounterScene::draw_terrain(ctx, game, &mut world, terrain_name, &background);
-        let palette = piv.borrow().palette.to_vec();
-        let swaps = game
-            .store
-            .get::<_, PaletteSwaps>(&LogicalKey::new("/palettes.yaml"), ctx)
-            .expect("error loading palette.yaml");
-
-        let sprite = game
-            .store
-            .get::<_, Sprite>(&LogicalKey::new("/knight.yaml"), ctx)
-            .unwrap();
         let collide_hit = game
             .store
             .get::<_, CollisionBoxes>(&LogicalKey::new("collide"), ctx)
             .unwrap();
         world.add_resource(collide_hit.borrow().clone());
 
-        let knight = world
-            .create_entity()
-            .with(UnitType {
-                name: "knight".to_string(),
-            })
-            .with(Palette {
-                name: "green_knight".to_string(),
-                palette: palette_swap(
-                    &piv.borrow().raw_palette,
-                    swaps
-                        .borrow()
-                        .0
-                        .get(&"green_knight".to_string())
-                        .expect("no palette"),
-                ),
-            })
-            .with(Controller {
-                x: 0,
-                y: 0,
-                fire: false,
-            })
-            .with(Position { x: 30, y: 100 })
-            .with(Health {
-                ..Default::default()
-            })
-            .with(Draw {
-                frame: sprite.borrow().animations["entrance"].frames[0].clone(),
-                animation: "entrance".to_string(),
-                resource_name: "knight".to_string(),
-                direction: Facing::default(),
-            })
-            .with(Intent {
-                ..Default::default()
-            })
-            .with(WalkingState {
-                ..Default::default()
-            })
-            .with(Velocity {
-                ..Default::default()
-            })
-            .with(AnimationState {
-                ..Default::default()
-            })
-            .with(State {
-                ..Default::default()
-            })
-            .with(Body {
-                ..Default::default()
-            })
-            .with(Weapon {
-                ..Default::default()
-            })
-            .with(DaggersInventory {
-                ..Default::default()
-            })
-            .build();
+        let knight = EncounterScene::create_entity(
+            ctx,
+            &mut game.store,
+            &mut world,
+            "knight",
+            &piv.borrow().raw_palette,
+            "green_knight",
+            30,
+            100,
+            Facing::default(),
+        );
 
-        let player_2 = world
-            .create_entity()
-            .with(UnitType {
-                name: "knight".to_string(),
-            })
-            .with(Palette {
-                name: "blue_knight".to_string(),
-                palette: palette_swap(
-                    &piv.borrow().raw_palette,
-                    swaps
-                        .borrow()
-                        .0
-                        .get(&"blue_knight".to_string())
-                        .expect("no palette"),
-                ),
-            })
-            .with(Controller {
-                x: 0,
-                y: 0,
-                fire: false,
-            })
-            .with(Position { x: 250, y: 100 })
-            .with(Health {
-                ..Default::default()
-            })
-            .with(Draw {
-                frame: sprite.borrow().animations["entrance"].frames[0].clone(),
-                animation: "entrance".to_string(),
-                resource_name: "knight".to_string(),
-                direction: Facing::Left,
-            })
-            .with(Intent {
-                ..Default::default()
-            })
-            .with(WalkingState {
-                ..Default::default()
-            })
-            .with(Velocity {
-                ..Default::default()
-            })
-            .with(AnimationState {
-                ..Default::default()
-            })
-            .with(State {
-                direction: Facing::Left,
-                ..Default::default()
-            })
-            .with(Body {
-                ..Default::default()
-            })
-            .with(Weapon {
-                ..Default::default()
-            })
-            .with(DaggersInventory {
-                ..Default::default()
-            })
-            .build();
-
-        let raw_palette = piv.borrow().raw_palette.clone();
-
+        let player_2 = EncounterScene::create_entity(
+            ctx,
+            &mut game.store,
+            &mut world,
+            "knight",
+            &piv.borrow().raw_palette,
+            "blue_knight",
+            250,
+            100,
+            Facing::Left,
+        );
+        let palette: Vec<Colour> = piv.borrow().palette.to_vec();
         Ok(Self {
             palette,
-            raw_palette,
             specs_world: world,
             dispatcher: EncounterScene::build_dispatcher(),
             background,
@@ -484,18 +453,15 @@ impl<'a> scene::Scene<Game, input::InputEvent> for EncounterScene<'a> {
                         let image_name = [image.sheet.clone(), palette.name.clone()].join("-");
                         let ggez_image = match game.images.entry(image_name) {
                             Occupied(i) => i.into_mut(),
-                            Vacant(i) => {
-
-                                i.insert(
-                                    graphics::Image::from_rgba8(
-                                        ctx,
-                                        atlas_dimension as u16,
-                                        atlas_dimension as u16,
-                                        &atlas.borrow().image.to_rgba8(&palette.palette),
-                                    )
-                                    .unwrap(),
+                            Vacant(i) => i.insert(
+                                graphics::Image::from_rgba8(
+                                    ctx,
+                                    atlas_dimension as u16,
+                                    atlas_dimension as u16,
+                                    &atlas.borrow().image.to_rgba8(&palette.palette),
                                 )
-                            }
+                                .unwrap(),
+                            ),
                         };
                         ggez_image
                     }
