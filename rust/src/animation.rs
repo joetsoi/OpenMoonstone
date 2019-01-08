@@ -46,6 +46,13 @@ impl Image {
             false
         }
     }
+
+    pub fn is_blood(&self) -> bool {
+        match self.image_type {
+            ImageType::Blood | ImageType::BloodStain => true,
+            _ => false,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

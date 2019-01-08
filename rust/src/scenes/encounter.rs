@@ -14,7 +14,7 @@ use warmy::{LogicalKey, Store};
 
 use super::transition::FadeStyle;
 use super::Fade;
-use crate::animation::{ImageType, Sprite, SpriteData};
+use crate::animation::{Image, ImageType, Sprite, SpriteData};
 use crate::combat::components::{
     AnimationState, Body, Collided, Controller, DaggersInventory, Draw, Facing, Health, Intent,
     MustLive, Palette, Position, State, UnitType, Velocity, WalkingState, Weapon,
@@ -452,7 +452,11 @@ impl<'a> scene::Scene<Game, input::InputEvent> for EncounterScene<'a> {
         storage.sort_by(|&a, &b| a.0.y.cmp(&b.0.y));
 
         for (position, draw, entity) in storage {
-            for image in &draw.frame.images {
+            let images: Vec<&Image> = match game.gore_on {
+                true => draw.frame.images.iter().collect(),
+                false => draw.frame.images.iter().filter(|i| !i.is_blood()).collect(),
+            };
+            for image in images {
                 let atlas = game
                     .store
                     .get::<_, TextureAtlas>(&LogicalKey::new(image.sheet.as_str()), ctx)
