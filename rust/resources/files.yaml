@@ -16,6 +16,11 @@ terrain:
     wa1.t: DISKB/WA1.T
     wa2.t: DISKB/WA2.T
     wa3.t: DISKB/WA3.T
+    wa4.t: DISKB/WA4.T
+    wa5.t: DISKB/WA5.T
+    wa6.t: DISKB/WA6.T
+    wa7.t: DISKB/WA7.T
+    wa8.t: DISKB/WA8.T
 
 objects:
     sel.cel: {file: DISKB/SEL.CEL, texture_size: 256}

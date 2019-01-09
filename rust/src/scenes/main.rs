@@ -32,10 +32,18 @@ impl Scene<Game, InputEvent> for MainScene {
                 Box::new(Menu::new(ctx, &mut game.store).expect("failed to init menu scene")),
                 Box::new(Fade::new(274, 1, FadeStyle::In)),
             ]),
+
             SceneState::Practice => {
+                let terrain_file = format!("wa{}.t", game.practice_encounter);
                 let encounter_scene = Box::new(
-                    EncounterScene::new(ctx, &mut game, &["knight", "dagger"], "wab1", "wa1.t")
-                        .expect("failed to init practice encounter"),
+                    EncounterScene::new(
+                        ctx,
+                        &mut game,
+                        &["knight", "dagger"],
+                        "wab1",
+                        &terrain_file,
+                    )
+                    .expect("failed to init practice encounter"),
                 );
                 game.scene = SceneState::Practice;
                 SceneSwitch::PushMultiple(vec![

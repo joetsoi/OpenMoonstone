@@ -434,6 +434,7 @@ impl<'a> scene::Scene<Game, input::InputEvent> for EncounterScene<'a> {
                 match self.fade_out_done {
                     false => {
                         game.next_scene = SceneState::Menu;
+                        game.practice_encounter = game.practice_encounter % 8 + 1;
                         return scene::SceneSwitch::push(Fade::new(274, 1, FadeStyle::Out));
                     }
                     true => return scene::SceneSwitch::Pop, //shouldn't happen

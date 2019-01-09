@@ -25,6 +25,7 @@ pub struct Game {
     pub num_players: i32,
 
     pub encounter_starting_position: u32,
+    pub practice_encounter: u32,
 }
 
 impl Game {
@@ -40,6 +41,7 @@ impl Game {
             gore_on: true,
             num_players: 1,
             encounter_starting_position: 0,
+            practice_encounter: 1,
         })
     }
 }
