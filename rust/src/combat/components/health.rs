@@ -11,8 +11,8 @@ pub struct Health {
 impl Default for Health {
     fn default() -> Health {
         Health {
-            points: 10,
-            max: 10,
+            points: 20,
+            max: 20,
         }
     }
 }
