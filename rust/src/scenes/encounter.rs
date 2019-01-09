@@ -300,7 +300,7 @@ impl<'a> EncounterScene<'a> {
             .unwrap();
         world.add_resource(collide_hit.borrow().clone());
 
-        let y = EncounterScene::next_starting_position(game, 100);
+        let y = EncounterScene::next_starting_position(game, y_max as i32);
         let player_1 = EncounterScene::create_entity(
             ctx,
             &mut game.store,
@@ -313,7 +313,7 @@ impl<'a> EncounterScene<'a> {
             Facing::Left,
         );
 
-        let y = EncounterScene::next_starting_position(game, 100);
+        let y = EncounterScene::next_starting_position(game, y_max as i32);
         let player_2 = EncounterScene::create_entity(
             ctx,
             &mut game.store,
