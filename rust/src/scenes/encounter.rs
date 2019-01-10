@@ -53,7 +53,9 @@ pub struct EncounterScene<'a> {
     pub palette: Vec<Colour>,
 
     player_1: Index,
-    player_2: Index,
+    player_2: Option<Index>,
+    player_3: Option<Index>,
+    player_4: Option<Index>,
 
     // the number of ticks since the encounter is done
     ticks_after: u32,
@@ -304,43 +306,53 @@ impl<'a> EncounterScene<'a> {
             .unwrap();
         world.add_resource(collide_hit.borrow().clone());
 
-        let y = EncounterScene::next_starting_position(game, y_max as i32);
-        let player_1 = EncounterScene::build_entity(
+        let (player_1, player_2, player_3, player_4) = EncounterScene::create_entities(
             ctx,
-            &mut game.store,
+            game,
             &mut world,
-            "knight",
             &piv.borrow().raw_palette,
-            "blue_knight",
-            250,
-            y,
-            Facing::Left,
-        )
-        .with(Controller {
-            ..Default::default()
-        })
-        .build();
+            y_max,
+        );
+        // let y = EncounterScene::next_starting_position(game, y_max as i32);
+        // let player_1 = EncounterScene::build_entity(
+        //     ctx,
+        //     &mut game.store,
+        //     &mut world,
+        //     "knight",
+        //     &piv.borrow().raw_palette,
+        //     "blue_knight",
+        //     250,
+        //     y,
+        //     Facing::Left,
+        // )
+        // .with(Controller {
+        //     ..Default::default()
+        // })
+        // .build();
 
-        let y = EncounterScene::next_starting_position(game, y_max as i32);
-        let player_2 = EncounterScene::build_entity(
-            ctx,
-            &mut game.store,
-            &mut world,
-            "knight",
-            &piv.borrow().raw_palette,
-            "green_knight",
-            30,
-            y,
-            Facing::default(),
-        )
-        .with(AiState {
-            class: "black_knight".to_string(),
-            target: Some(player_1),
-            y_range: 4,
-            close_range: 80,
-            long_range: 100,
-        })
-        .build();
+        // let y = EncounterScene::next_starting_position(game, y_max as i32);
+        // let player_2 = EncounterScene::build_entity(
+        //     ctx,
+        //     &mut game.store,
+        //     &mut world,
+        //     "knight",
+        //     &piv.borrow().raw_palette,
+        //     "green_knight",
+        //     30,
+        //     y,
+        //     Facing::default(),
+        // )
+        // // .with(Controller {
+        // //     ..Default::default()
+        // // })
+        // .with(AiState {
+        //     class: "black_knight".to_string(),
+        //     target: Some(player_1),
+        //     y_range: 4,
+        //     close_range: 80,
+        //     long_range: 100,
+        // })
+        // .build();
 
         let palette: Vec<Colour> = piv.borrow().palette.to_vec();
         Ok(Self {
@@ -348,11 +360,103 @@ impl<'a> EncounterScene<'a> {
             specs_world: world,
             dispatcher: EncounterScene::build_dispatcher(),
             background,
-            player_1: player_1.id(),
-            player_2: player_2.id(),
+            player_1: player_1,
+            player_2: player_2,
+            player_3: player_3,
+            player_4: player_4,
             ticks_after: 0,
             fade_out_done: false,
         })
+    }
+
+    fn create_entities(
+        ctx: &mut Context,
+        game: &mut Game,
+        world: &mut World,
+        raw_palette: &Vec<u16>,
+        y_max: u32,
+    ) -> (Index, Option<Index>, Option<Index>, Option<Index>) {
+        let starting_x = [250, 30, 240, 40];
+        let colours = ["blue_knight", "green_knight", "red_knight", "orange_knight"];
+
+        let x = starting_x[0];
+        let y = EncounterScene::next_starting_position(game, y_max as i32);
+        let facing = match x {
+            x if x < 160 => Facing::Right,
+            _ => Facing::Left,
+        };
+        let player_1 = EncounterScene::build_entity(
+            ctx,
+            &mut game.store,
+            world,
+            "knight",
+            raw_palette,
+            colours[0],
+            x,
+            y,
+            facing,
+        )
+        .with(Controller {
+            ..Default::default()
+        })
+        .build();
+
+        let mut players: Vec<Entity> = Vec::new();
+
+        for n in 1..game.num_players {
+            let x = starting_x[n as usize];
+            let y = EncounterScene::next_starting_position(game, y_max as i32);
+            let facing = match x {
+                x if x < 160 => Facing::Right,
+                _ => Facing::Left,
+            };
+            let player = EncounterScene::build_entity(
+                ctx,
+                &mut game.store,
+                world,
+                "knight",
+                raw_palette,
+                colours[n as usize],
+                x,
+                y,
+                facing,
+            )
+            .with(Controller {
+                ..Default::default()
+            })
+            .build();
+            players.push(player);
+        }
+
+        if game.num_players == 1 {
+            let y = EncounterScene::next_starting_position(game, y_max as i32);
+            let player_2 = EncounterScene::build_entity(
+                ctx,
+                &mut game.store,
+                world,
+                "knight",
+                raw_palette,
+                "black_knight",
+                30,
+                y,
+                Facing::default(),
+            )
+            .with(AiState {
+                class: "black_knight".to_string(),
+                target: Some(player_1),
+                y_range: 4,
+                close_range: 80,
+                long_range: 100,
+            })
+            .build();
+        }
+
+        (
+            player_1.id(),
+            players.get(0).and_then(|p| Some(p.id())),
+            players.get(1).and_then(|p| Some(p.id())),
+            players.get(2).and_then(|p| Some(p.id())),
+        )
     }
 
     fn draw_terrain(
@@ -419,7 +523,7 @@ impl<'a> EncounterScene<'a> {
                 controller.x = input.get_axis_raw(input::Axis::Horz1) as i32;
                 controller.y = input.get_axis_raw(input::Axis::Vert1) as i32;
                 controller.fire = input.get_button_down(input::Button::Fire1);
-            } else if e.id() == self.player_2 {
+            } else if self.player_2.is_some() && e.id() == self.player_2.unwrap() {
                 controller.x = input.get_axis_raw(input::Axis::Horz2) as i32;
                 controller.y = input.get_axis_raw(input::Axis::Vert2) as i32;
                 controller.fire = input.get_button_down(input::Button::Fire2);
