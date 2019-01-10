@@ -1,3 +1,4 @@
+pub mod ai;
 pub mod action;
 pub mod animation;
 pub mod boundary;
@@ -11,6 +12,7 @@ pub mod state;
 pub mod velocity;
 
 pub use self::action::ActionSystem;
+pub use self::ai::BlackKnightAi;
 pub use self::animation::Animation;
 pub use self::boundary::RestrictMovementToBoundary;
 pub use self::collision::{

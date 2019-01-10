@@ -9,22 +9,22 @@ use ggez::timer;
 use ggez::{Context, GameResult};
 use ggez_goodies::scene;
 use specs::world::{Builder, Index};
-use specs::{Dispatcher, DispatcherBuilder, Entity, Join, World};
+use specs::{Component, Dispatcher, DispatcherBuilder, Entity, EntityBuilder, Join, World};
 use warmy::{LogicalKey, Store};
 
 use super::transition::FadeStyle;
 use super::Fade;
 use crate::animation::{Image, ImageType, Sprite, SpriteData};
 use crate::combat::components::{
-    AnimationState, Body, Collided, Controller, DaggersInventory, Draw, Facing, Health, Intent,
-    MustLive, Palette, Position, State, UnitType, Velocity, WalkingState, Weapon,
+    AiState, AnimationState, Body, Collided, Controller, DaggersInventory, Draw, Facing, Health,
+    Intent, MustLive, Palette, Position, State, UnitType, Velocity, WalkingState, Weapon,
 };
 use crate::combat::damage::DamageTables;
 use crate::combat::systems::boundary::TopBoundary;
 use crate::combat::systems::health::CombatDone;
 use crate::combat::systems::{
-    ActionSystem, Animation, CheckCollisions, CheckEndOfCombat, Commander, ConfirmVelocity,
-    EntityDeath, EntityEntityCollision, Movement, OutOfBounds, ResolveCollisions,
+    ActionSystem, Animation, BlackKnightAi, CheckCollisions, CheckEndOfCombat, Commander,
+    ConfirmVelocity, EntityDeath, EntityEntityCollision, Movement, OutOfBounds, ResolveCollisions,
     RestrictMovementToBoundary, StateUpdater, UpdateBoundingBoxes, UpdateImage, VelocitySystem,
 };
 use crate::files::collide::CollisionBoxes;
@@ -64,6 +64,7 @@ pub struct EncounterScene<'a> {
 impl<'a> EncounterScene<'a> {
     fn build_world() -> World {
         let mut world = World::new();
+        world.register::<AiState>();
         world.register::<AnimationState>();
         world.register::<Body>();
         world.register::<Collided>();
@@ -86,7 +87,8 @@ impl<'a> EncounterScene<'a> {
     fn build_dispatcher() -> Dispatcher<'a, 'a> {
         DispatcherBuilder::new()
             .with(Commander, "commander", &[])
-            .with(ActionSystem, "action", &["commander"])
+            .with(BlackKnightAi, "black_knight_ai", &[])
+            .with(ActionSystem, "action", &["commander", "black_knight_ai"])
             .with(EntityDeath, "entity_death", &["action"])
             .with(CheckEndOfCombat, "check_end_of_combat", &["entity_death"])
             .with(VelocitySystem, "velocity", &["commander"])
@@ -187,17 +189,25 @@ impl<'a> EncounterScene<'a> {
         Ok(())
     }
 
-    fn create_entity(
+    // fn create_player_entity(entity_builder: EntityBuilder) -> Entity {
+    //     entity_builder
+    //         .with(Controller {
+    //             ..Default::default()
+    //         })
+    //         .build()
+    // }
+
+    fn build_entity(
         ctx: &mut Context,
         store: &mut Store<Context>,
-        world: &mut World,
+        world: &'a mut World,
         resource: &str,
         raw_palette: &Vec<u16>,
         palette_name: &str,
         x: i32,
         y: i32,
         direction: Facing,
-    ) -> Entity {
+    ) -> EntityBuilder<'a> {
         let sprite_res = store
             .get::<_, Sprite>(&LogicalKey::new(format!("/{}.yaml", resource)), ctx)
             .unwrap();
@@ -220,11 +230,6 @@ impl<'a> EncounterScene<'a> {
                 ),
             })
             .with(MustLive {})
-            .with(Controller {
-                x: 0,
-                y: 0,
-                fire: false,
-            })
             .with(Position { x: x, y: y })
             .with(Health {
                 ..Default::default()
@@ -260,7 +265,6 @@ impl<'a> EncounterScene<'a> {
             .with(DaggersInventory {
                 ..Default::default()
             })
-            .build()
     }
 
     pub fn new(
@@ -301,7 +305,7 @@ impl<'a> EncounterScene<'a> {
         world.add_resource(collide_hit.borrow().clone());
 
         let y = EncounterScene::next_starting_position(game, y_max as i32);
-        let player_1 = EncounterScene::create_entity(
+        let player_1 = EncounterScene::build_entity(
             ctx,
             &mut game.store,
             &mut world,
@@ -311,10 +315,14 @@ impl<'a> EncounterScene<'a> {
             250,
             y,
             Facing::Left,
-        );
+        )
+        .with(Controller {
+            ..Default::default()
+        })
+        .build();
 
         let y = EncounterScene::next_starting_position(game, y_max as i32);
-        let player_2 = EncounterScene::create_entity(
+        let player_2 = EncounterScene::build_entity(
             ctx,
             &mut game.store,
             &mut world,
@@ -324,7 +332,15 @@ impl<'a> EncounterScene<'a> {
             30,
             y,
             Facing::default(),
-        );
+        )
+        .with(AiState {
+            class: "black_knight".to_string(),
+            target: Some(player_1),
+            y_range: 4,
+            close_range: 80,
+            long_range: 100,
+        })
+        .build();
 
         let palette: Vec<Colour> = piv.borrow().palette.to_vec();
         Ok(Self {

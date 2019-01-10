@@ -1,3 +1,4 @@
+pub mod ai;
 pub mod animation;
 pub mod collision;
 pub mod daggers;
@@ -9,6 +10,7 @@ pub mod intent;
 pub mod movement;
 pub mod state;
 
+pub use self::ai::AiState;
 pub use self::animation::AnimationState;
 pub use self::collision::{Body, Collided, Weapon};
 pub use self::daggers::DaggersInventory;
