@@ -25,19 +25,27 @@ impl<'a> System<'a> for VelocitySystem {
             match state.action {
                 Action::Idle | Action::Move { .. } => match intent.command {
                     Command::Move { x, y } => {
-                        // match x {
-                        //     XAxis::Right => state.direction = Facing::Right,
-                        //     XAxis::Left => state.direction = Facing::Left,
-                        //     _ => (),
-                        // }
                         if x == XAxis::Centre && y == YAxis::Centre {
                             state.action = Action::Idle;
                             velocity.x = 0;
                             velocity.y = 0;
                         } else {
+                            let walking_direction = match x {
+                                XAxis::Right => Facing::Right,
+                                XAxis::Left => Facing::Left,
+                                _ => state.direction,
+                            };
                             state.action = Action::Move { x, y };
 
-                            let step = (walking_state.step + 1) % 4;
+                            let mut step = (walking_state.step + 1) % 4;
+                            if walking_direction != state.direction {
+                                // if we have an ai player, then they are always
+                                // facing the player, so the step sizes don't
+                                // match the animation, shifting this fixes that
+                                // this wasn't fixed in the original and the
+                                // forward facing animations were off by 1
+                                step = (step + 1) % 4;
+                            }
                             velocity.x = X_STEP_SIZES[(x as i32 + 1) as usize][step as usize];
                             velocity.y = Y_STEP_SIZES[(y as i32 + 1) as usize][step as usize];
                         }
