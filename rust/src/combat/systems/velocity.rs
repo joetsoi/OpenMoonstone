@@ -25,11 +25,11 @@ impl<'a> System<'a> for VelocitySystem {
             match state.action {
                 Action::Idle | Action::Move { .. } => match intent.command {
                     Command::Move { x, y } => {
-                        match x {
-                            XAxis::Right => state.direction = Facing::Right,
-                            XAxis::Left => state.direction = Facing::Left,
-                            _ => (),
-                        }
+                        // match x {
+                        //     XAxis::Right => state.direction = Facing::Right,
+                        //     XAxis::Left => state.direction = Facing::Left,
+                        //     _ => (),
+                        // }
                         if x == XAxis::Centre && y == YAxis::Centre {
                             state.action = Action::Idle;
                             velocity.x = 0;

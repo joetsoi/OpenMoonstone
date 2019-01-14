@@ -23,9 +23,10 @@ use crate::combat::damage::DamageTables;
 use crate::combat::systems::boundary::TopBoundary;
 use crate::combat::systems::health::CombatDone;
 use crate::combat::systems::{
-    ActionSystem, Animation, BlackKnightAi, CheckCollisions, CheckEndOfCombat, Commander,
-    ConfirmVelocity, EntityDeath, EntityEntityCollision, Movement, OutOfBounds, ResolveCollisions,
-    RestrictMovementToBoundary, StateUpdater, UpdateBoundingBoxes, UpdateImage, VelocitySystem,
+    ActionSystem, AiDirection, Animation, BlackKnightAi, CheckCollisions, CheckEndOfCombat,
+    Commander, ConfirmVelocity, EntityDeath, EntityEntityCollision, Movement, OutOfBounds,
+    PlayerDirection, ResolveCollisions, RestrictMovementToBoundary, StateUpdater,
+    UpdateBoundingBoxes, UpdateImage, VelocitySystem,
 };
 use crate::files::collide::CollisionBoxes;
 use crate::files::terrain::scenery_rects;
@@ -89,11 +90,21 @@ impl<'a> EncounterScene<'a> {
     fn build_dispatcher() -> Dispatcher<'a, 'a> {
         DispatcherBuilder::new()
             .with(Commander, "commander", &[])
+            .with(PlayerDirection, "player_direction", &["commander"])
             .with(BlackKnightAi, "black_knight_ai", &[])
-            .with(ActionSystem, "action", &["commander", "black_knight_ai"])
+            .with(AiDirection, "ai_direction", &["black_knight_ai"])
+            .with(
+                ActionSystem,
+                "action",
+                &["player_direction", "ai_direction"],
+            )
             .with(EntityDeath, "entity_death", &["action"])
             .with(CheckEndOfCombat, "check_end_of_combat", &["entity_death"])
-            .with(VelocitySystem, "velocity", &["commander"])
+            .with(
+                VelocitySystem,
+                "velocity",
+                &["player_direction", "ai_direction"],
+            )
             .with(EntityEntityCollision, "entity_collision", &["velocity"])
             .with(
                 RestrictMovementToBoundary,

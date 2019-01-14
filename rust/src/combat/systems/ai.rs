@@ -2,6 +2,7 @@ use rand::prelude::*;
 use specs::{ReadStorage, System, WriteStorage};
 
 use crate::combat::components::direction::Facing;
+use crate::combat::components::movement::get_distance;
 use crate::combat::components::intent::{AttackType, DefendType, XAxis, YAxis};
 use crate::combat::components::state::Action;
 use crate::combat::components::{AiState, Command, Controller, Intent, Position, State};
@@ -55,13 +56,6 @@ impl<'a> System<'a> for BlackKnightAi {
                 intent.command = Command::Idle;
             }
         }
-    }
-}
-
-fn get_distance(me: &Position, them: &Position) -> Point {
-    Point {
-        x: me.x - them.x,
-        y: me.y - them.y,
     }
 }
 
