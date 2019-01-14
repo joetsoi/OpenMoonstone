@@ -129,14 +129,16 @@ fn do_attack(chance_index: usize, delta: &Point, dagger_count: u32) -> Option<Co
         return None;
     }
 
-    let attack = match delta.x.abs() {
-        x if x <= 90 => Command::Attack(AttackType::Swing),
-        x if x <= 95 && x > 90 => Command::Attack(AttackType::Chop),
-        x if x <= 100 && x > 95 => Command::Attack(AttackType::Thrust),
-        _ => match dagger_count {
-            d if d > 0 => Command::Attack(AttackType::ThrowDagger),
-            _ => Command::Attack(AttackType::Thrust),
+    match delta.x.abs() {
+        x if x <= 90 => Some(Command::Attack(AttackType::Swing)),
+        x if x <= 95 && x > 90 => Some(Command::Attack(AttackType::Chop)),
+        x if x <= 100 && x > 95 => match dagger_count {
+            d if d > 0 => Some(Command::Attack(AttackType::ThrowDagger)),
+            _ => Some(Command::Attack(AttackType::Thrust)),
         },
-    };
-    Some(attack)
+        _ => match dagger_count {
+            d if d > 0 => Some(Command::Attack(AttackType::ThrowDagger)),
+            _ => None,
+        },
+    }
 }
