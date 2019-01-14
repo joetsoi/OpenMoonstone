@@ -538,6 +538,14 @@ impl<'a> EncounterScene<'a> {
                 controller.x = input.get_axis_raw(input::Axis::Horz2) as i32;
                 controller.y = input.get_axis_raw(input::Axis::Vert2) as i32;
                 controller.fire = input.get_button_down(input::Button::Fire2);
+            } else if self.player_3.is_some() && e.id() == self.player_3.unwrap() {
+                controller.x = input.get_axis_raw(input::Axis::Horz3) as i32;
+                controller.y = input.get_axis_raw(input::Axis::Vert3) as i32;
+                controller.fire = input.get_button_down(input::Button::Fire3);
+            } else if self.player_4.is_some() && e.id() == self.player_4.unwrap() {
+                controller.x = input.get_axis_raw(input::Axis::Horz4) as i32;
+                controller.y = input.get_axis_raw(input::Axis::Vert4) as i32;
+                controller.fire = input.get_button_down(input::Button::Fire4);
             }
         }
     }
