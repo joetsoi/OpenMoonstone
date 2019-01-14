@@ -44,6 +44,9 @@ impl<'a> System<'a> for VelocitySystem {
                                 // match the animation, shifting this fixes that
                                 // this wasn't fixed in the original and the
                                 // forward facing animations were off by 1
+                                //
+                                // TODO: come back to this when we add other enemy
+                                // types.
                                 step = (step + 1) % 4;
                             }
                             velocity.x = X_STEP_SIZES[(x as i32 + 1) as usize][step as usize];

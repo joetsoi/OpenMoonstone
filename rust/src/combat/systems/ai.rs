@@ -5,7 +5,9 @@ use crate::combat::components::direction::Facing;
 use crate::combat::components::intent::{AttackType, DefendType, XAxis, YAxis};
 use crate::combat::components::movement::get_distance;
 use crate::combat::components::state::Action;
-use crate::combat::components::{AiState, Command, Controller, Intent, Position, State};
+use crate::combat::components::{
+    AiState, Command, Controller, DaggersInventory, Intent, Position, State,
+};
 use crate::rect::Point;
 
 const ACTION_CHANCE: [u32; 19] = [20, 10, 8, 7, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5];
@@ -17,19 +19,21 @@ impl<'a> System<'a> for BlackKnightAi {
         ReadStorage<'a, AiState>,
         ReadStorage<'a, Position>,
         ReadStorage<'a, State>,
+        ReadStorage<'a, DaggersInventory>,
         WriteStorage<'a, Intent>,
     );
 
     fn run(
         &mut self,
-        (ai_storage, position_storage, state_storage, mut intent_storage): Self::SystemData,
+        (ai_storage, position_storage, state_storage, dagger_storage, mut intent_storage): Self::SystemData,
     ) {
         use specs::Join;
 
-        for (ai, position, state, intent) in (
+        for (ai, position, state, daggers, intent) in (
             &ai_storage,
             &position_storage,
             &state_storage,
+            &dagger_storage,
             &mut intent_storage,
         )
             .join()
@@ -48,7 +52,7 @@ impl<'a> System<'a> for BlackKnightAi {
                     } => {
                         let mut command = do_block(0, &delta, state, target_state);
                         if command.is_none() {
-                            command = do_attack(0, &delta);
+                            command = do_attack(0, &delta, daggers.count);
                         }
                         command
                     }
@@ -117,7 +121,7 @@ fn do_block(
     }
 }
 
-fn do_attack(chance_index: usize, delta: &Point) -> Option<Command> {
+fn do_attack(chance_index: usize, delta: &Point, dagger_count: u32) -> Option<Command> {
     let mut rng = rand::thread_rng();
     let chance = rng.gen_range(0, 100);
 
@@ -129,7 +133,10 @@ fn do_attack(chance_index: usize, delta: &Point) -> Option<Command> {
         x if x <= 90 => Command::Attack(AttackType::Swing),
         x if x <= 95 && x > 90 => Command::Attack(AttackType::Chop),
         x if x <= 100 && x > 95 => Command::Attack(AttackType::Thrust),
-        _ => Command::Attack(AttackType::ThrowDagger),
+        _ => match dagger_count {
+            d if d > 0 => Command::Attack(AttackType::ThrowDagger),
+            _ => Command::Attack(AttackType::Thrust),
+        },
     };
     Some(attack)
 }
