@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use lazy_static::lazy_static;
 use maplit::hashmap;
+use specs::world::Index;
 use specs::{Entities, ReadExpect, ReadStorage, System, WriteStorage};
 
 use crate::combat::components::collision::{CollisionBox, Points};
@@ -319,6 +320,10 @@ impl<'a> System<'a> for ResolveCollisions {
     ) {
         use specs::Join;
 
+        let mut set_recovery: Vec<Index> = Vec::new();
+        let mut set_sliced: Vec<Index> = Vec::new();
+        let mut set_chopped: Vec<Index> = Vec::new();
+
         for (unit_type, collided, entity) in
             (&unit_type_storage, collided_storage.drain(), &*entities).join()
         {
@@ -363,8 +368,9 @@ impl<'a> System<'a> for ResolveCollisions {
                         match target_state.action {
                             Action::Death | Action::Dead => (),
                             _ => {
-                                target_state.action = Action::Hit(HitType::Sliced);
-                                target_state.ticks = 0;
+                                set_sliced.push(target.id());
+                                // target_state.action = Action::Hit(HitType::Sliced);
+                                // target_state.ticks = 0;
                             }
                         }
                     }
@@ -378,8 +384,7 @@ impl<'a> System<'a> for ResolveCollisions {
                         match state.action {
                             Action::Attack(AttackType::UpThrust) => (),
                             _ => {
-                                state.action = Action::AttackRecovery;
-                                state.ticks = 0;
+                                set_recovery.push(target.id());
                             }
                         }
                     }
@@ -390,6 +395,33 @@ impl<'a> System<'a> for ResolveCollisions {
                     println!("deleting entity {:?}", entity);
                     entities.delete(entity);
                 }
+            }
+        }
+
+        for i in set_recovery {
+            let entity = entities.entity(i);
+            let state: Option<&mut State> = state_storage.get_mut(entity);
+            if let Some(state) = state {
+                state.action = Action::AttackRecovery;
+                state.ticks = 0;
+            }
+        }
+
+        for i in set_sliced {
+            let entity = entities.entity(i);
+            let state: Option<&mut State> = state_storage.get_mut(entity);
+            if let Some(state) = state {
+                state.action = Action::Hit(HitType::Sliced);
+                state.ticks = 0;
+            }
+        }
+
+        for i in set_chopped {
+            let entity = entities.entity(i);
+            let state: Option<&mut State> = state_storage.get_mut(entity);
+            if let Some(state) = state {
+                state.action = Action::Hit(HitType::Chopped);
+                state.ticks = 0;
             }
         }
     }
@@ -408,7 +440,10 @@ fn calculate_damage(
                 .get(&attacker_action)
                 .and_then(|name| t.get(name))
         })
-        .expect("missing value from damage tables");
+        .expect(&format!(
+            "missing value from damage tables {}",
+            &unit_type.name
+        ));
 
     if attacker_action == Action::Attack(AttackType::Chop) {
         raw_damage *= 2;
