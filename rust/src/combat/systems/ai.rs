@@ -2,8 +2,8 @@ use rand::prelude::*;
 use specs::{ReadStorage, System, WriteStorage};
 
 use crate::combat::components::direction::Facing;
-use crate::combat::components::movement::get_distance;
 use crate::combat::components::intent::{AttackType, DefendType, XAxis, YAxis};
+use crate::combat::components::movement::get_distance;
 use crate::combat::components::state::Action;
 use crate::combat::components::{AiState, Command, Controller, Intent, Position, State};
 use crate::rect::Point;
@@ -45,7 +45,13 @@ impl<'a> System<'a> for BlackKnightAi {
                     Command::Move {
                         x: _,
                         y: YAxis::Centre,
-                    } => do_block(0, &delta, state, target_state),
+                    } => {
+                        let mut command = do_block(0, &delta, state, target_state);
+                        if command.is_none() {
+                            command = do_attack(0, &delta);
+                        }
+                        command
+                    }
                     _ => None,
                 };
                 match command {
@@ -109,4 +115,21 @@ fn do_block(
         },
         _ => None,
     }
+}
+
+fn do_attack(chance_index: usize, delta: &Point) -> Option<Command> {
+    let mut rng = rand::thread_rng();
+    let chance = rng.gen_range(0, 100);
+
+    if chance < ACTION_CHANCE[chance_index] {
+        return None;
+    }
+
+    let attack = match delta.x.abs() {
+        x if x <= 90 => Command::Attack(AttackType::Swing),
+        x if x <= 95 && x > 90 => Command::Attack(AttackType::Chop),
+        x if x <= 100 && x > 95 => Command::Attack(AttackType::Thrust),
+        _ => Command::Attack(AttackType::ThrowDagger),
+    };
+    Some(attack)
 }
