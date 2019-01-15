@@ -30,7 +30,8 @@ lazy_static! {
         Action::AttackRecovery => "recovery".to_string(),
         Action::Defend(DefendType::Block) => "block".to_string(),
         Action::Defend(DefendType::Dodge) => "dodge".to_string(),
-        Action::Death => "death".to_string(),
+        Action::Death("death".to_string()) => "death".to_string(),
+        Action::Death("decapitate".to_string()) => "decapitate".to_string(),
         Action::Dead => "dead".to_string(),
         Action::Entrance => "entrance".to_string(),
     };
@@ -58,7 +59,7 @@ impl<'a> System<'a> for Animation {
         )
             .join()
         {
-            match state.action {
+            match &state.action {
                 Action::Idle | Action::Defend(..) => {
                     animation_state.frame_number = 0;
                 }
@@ -69,7 +70,7 @@ impl<'a> System<'a> for Animation {
                     animation_state.frame_number = state.ticks;
                 }
                 Action::Move { .. } => animation_state.frame_number = walking_state.step,
-                Action::Death => {
+                Action::Death(s) => {
                     animation_state.frame_number = state.ticks;
                 }
                 Action::Dead => {

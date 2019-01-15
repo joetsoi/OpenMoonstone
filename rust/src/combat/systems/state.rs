@@ -88,7 +88,7 @@ impl<'a> System<'a> for StateUpdater {
                     // immediately
                     state.action = Action::Idle;
                 }
-                Action::Death => {
+                Action::Death(_) => {
                     state.ticks += 1;
                     if state.ticks == state.length && state.length != 0 {
                         if state.ticks > 1 {

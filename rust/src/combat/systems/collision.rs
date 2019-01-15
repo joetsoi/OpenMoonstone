@@ -323,6 +323,7 @@ impl<'a> System<'a> for ResolveCollisions {
         let mut set_recovery: Vec<Index> = Vec::new();
         let mut set_sliced: Vec<Index> = Vec::new();
         let mut set_chopped: Vec<Index> = Vec::new();
+        let mut set_decapitated: Vec<Index> = Vec::new();
 
         for (unit_type, collided, entity) in
             (&unit_type_storage, collided_storage.drain(), &*entities).join()
@@ -365,8 +366,12 @@ impl<'a> System<'a> for ResolveCollisions {
                             None => 3, //TODO since daggers have no state
                         };
                         target_health.points -= damage as i32;
-                        match target_state.action {
-                            Action::Death | Action::Dead => (),
+                        match &target_state.action {
+                            Action::Dead => (),
+                            Action::Death(a) => match a.as_ref() {
+                                "death" => set_decapitated.push(target.id()),
+                                _ => (),
+                            },
                             _ => {
                                 set_sliced.push(target.id());
                                 // target_state.action = Action::Hit(HitType::Sliced);
@@ -383,9 +388,7 @@ impl<'a> System<'a> for ResolveCollisions {
                     if !has_defended || target_used_block {
                         match state.action {
                             Action::Attack(AttackType::UpThrust) => (),
-                            _ => {
-                                set_recovery.push(target.id());
-                            }
+                            _ => set_recovery.push(entity.id()),
                         }
                     }
                 } else {
@@ -421,6 +424,15 @@ impl<'a> System<'a> for ResolveCollisions {
             let state: Option<&mut State> = state_storage.get_mut(entity);
             if let Some(state) = state {
                 state.action = Action::Hit(HitType::Chopped);
+                state.ticks = 0;
+            }
+        }
+
+        for i in set_decapitated {
+            let entity = entities.entity(i);
+            let state: Option<&mut State> = state_storage.get_mut(entity);
+            if let Some(state) = state {
+                state.action = Action::Death("decapitate".to_string());
                 state.ticks = 0;
             }
         }

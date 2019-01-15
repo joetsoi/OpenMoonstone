@@ -12,10 +12,10 @@ impl<'a> System<'a> for EntityDeath {
 
         for (health, state) in (&health, &mut state).join() {
             match state.action {
-                Action::Death | Action::Dead => (),
+                Action::Death(_) | Action::Dead => (),
                 _ => {
                     if health.points <= 0 {
-                        state.action = Action::Death;
+                        state.action = Action::Death("death".to_string());
                         state.ticks = 0;
                         // the death animations have the wrong direction
                         state.direction = state.direction.flip();

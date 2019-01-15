@@ -18,7 +18,7 @@ pub enum Action {
     AttackRecovery,
     Defend(DefendType),
     Hit(HitType),
-    Death,
+    Death(String),
     Dead,
     Entrance,
 }
