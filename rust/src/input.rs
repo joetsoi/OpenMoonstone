@@ -50,9 +50,9 @@ pub fn create_input_binding() -> input::InputBinding<Axis, Button> {
         .bind_key_to_axis(Keycode::L, Axis::Horz3, true)
         .bind_key_to_button(Keycode::G, Button::Fire3)
         //player 4
-        .bind_key_to_axis(Keycode::Num8, Axis::Vert4, false)
-        .bind_key_to_axis(Keycode::Num5, Axis::Vert4, true)
-        .bind_key_to_axis(Keycode::Num4, Axis::Horz4, false)
-        .bind_key_to_axis(Keycode::Num6, Axis::Horz4, true)
+        .bind_key_to_axis(Keycode::Kp8, Axis::Vert4, false)
+        .bind_key_to_axis(Keycode::Kp5, Axis::Vert4, true)
+        .bind_key_to_axis(Keycode::Kp4, Axis::Horz4, false)
+        .bind_key_to_axis(Keycode::Kp6, Axis::Horz4, true)
         .bind_key_to_button(Keycode::KpEnter, Button::Fire4)
 }
