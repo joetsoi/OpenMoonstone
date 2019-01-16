@@ -22,7 +22,7 @@ Currently only Ubuntu and Windows have been tested.
 
 ### Configuration
 #### Fullscreen
-You run in full screen mode by changing `fullscreen_type` from `"Off"` to `"Desktop"`
+You run in full screen mode by changing `fullscreen_type` from `"Off"` to `"Desktop"` in `resources/conf.toml`
 
 ##  Developement
 Requires [rust nightly](https://www.rust-lang.org/tools/install)
