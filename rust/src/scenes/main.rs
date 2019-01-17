@@ -17,6 +17,7 @@ use super::{EncounterScene, Fade, Menu};
 /// We need this as the current ggez scene stack requires a scene. The other
 /// option would be to change the scene stack to not have `expects()` and raise
 /// and option instead and use None to handle scene transitions.
+#[derive(Default)]
 pub struct MainScene {}
 
 impl MainScene {
@@ -66,7 +67,7 @@ impl Scene<Game, InputEvent> for MainScene {
                 w: 320.0 * 3.0,
                 h: 200.0 * 3.0,
             },
-        );
+        )?;
         graphics::set_color(ctx, graphics::Color::new(1.0, 1.0, 1.0, 1.0))?;
         Ok(())
     }

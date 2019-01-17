@@ -39,7 +39,7 @@ impl event::EventHandler for MainState {
         // are running this on a potato then they can.
         let mut ticks = 0;
 
-        const DESIRED_FPS: u32 = 1000 / (1193182 / 21845 * 2);
+        const DESIRED_FPS: u32 = 1000 / (1_193_182 / 21845 * 2);
         while timer::check_update_time(ctx, DESIRED_FPS) {
             if ticks < MAX_UPDATES_PER_FRAME {
                 self.scene_stack.world.input.update(1.0);

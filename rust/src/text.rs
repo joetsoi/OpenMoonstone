@@ -91,11 +91,16 @@ impl Text {
         }
 
         let mut params: Vec<graphics::DrawParam> = Vec::new();
-        let mut x = self.x as f32;
-        if self.centered {
-            // TODO: change to pass width in
-            x = (320 - string_width) as f32 / 2.0;
-        }
+        let mut x = if self.centered {
+            (320 - string_width) as f32 / 2.0
+        } else {
+            self.x as f32
+        };
+        // let mut x = self.x as f32;
+        // if self.centered {
+        //     // TODO: change to pass width in
+        //     x = (320 - string_width) as f32 / 2.0;
+        // }
         for (i, w) in lookup_width.iter() {
             // let num: usize = c as usize - 0x20;
             // let image_num = lookup
@@ -123,7 +128,7 @@ impl Text {
         &self,
         ctx: &mut Context,
         game: &mut Game,
-        palette: &Vec<Colour>,
+        palette: &[Colour],
     ) -> Result<SpriteBatch, failure::Error> {
         let atlas = game
             .store

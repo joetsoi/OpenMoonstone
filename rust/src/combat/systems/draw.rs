@@ -24,7 +24,7 @@ impl<'a> System<'a> for UpdateImage {
                 let animation = sprite
                     .animations
                     .get(animation)
-                    .expect(format!("{} not found in yaml", animation).as_str());
+                    .unwrap_or_else(|| panic!("{} not found in yaml", animation));
                 match &animation.order {
                     None => {
                         draw.frame =

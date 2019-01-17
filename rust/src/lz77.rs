@@ -7,7 +7,7 @@ use byteorder::{BigEndian, ReadBytesExt};
 pub fn decompress(file_length: u32, data: &[u8]) -> Result<Vec<u8>, io::Error> {
     let mut rdr = Cursor::new(data);
     let mut extracted: Vec<u8> = Vec::with_capacity(file_length as usize);
-    while rdr.position() != file_length as u64 {
+    while rdr.position() != u64::from(file_length) {
         let header = [rdr.read_u8()?];
         let slice = BitSlice::from_slice(&header);
 
@@ -27,7 +27,7 @@ pub fn decompress(file_length: u32, data: &[u8]) -> Result<Vec<u8>, io::Error> {
                 let encoded = rdr.read_u8()?;
                 extracted.push(encoded);
             }
-            if rdr.position() >= file_length as u64 {
+            if rdr.position() >= u64::from(file_length) {
                 break;
             }
         }

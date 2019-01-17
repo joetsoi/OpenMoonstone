@@ -31,7 +31,7 @@ impl PivImage {
         let palette: Vec<Colour> = extract_palette(&raw_palette);
 
         let extracted = lz77::decompress(
-            header.file_length as u32,
+            u32::from(header.file_length),
             &data[6 + (header.bit_depth * 2)..],
         )?;
         let pixels = PivImage::combine_bit_planes(&extracted);
@@ -77,7 +77,7 @@ impl PivImage {
         let file_type = BigEndian::read_u16(&data[..2]);
         Header {
             file_length: BigEndian::read_u16(&data[4..6]),
-            bit_depth: 1usize.wrapping_shl(file_type as u32),
+            bit_depth: 1usize.wrapping_shl(u32::from(file_type)),
         }
     }
 

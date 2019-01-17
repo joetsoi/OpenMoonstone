@@ -11,8 +11,8 @@ impl Default for Facing {
 }
 
 impl Facing {
-    pub fn flip(&self) -> Facing {
-        let value = *self as i32 * -1;
+    pub fn flip(self) -> Facing {
+        let value = -(self as i32);
         match value {
             -1 => Facing::Left,
             1 => Facing::Right,

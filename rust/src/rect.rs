@@ -22,7 +22,7 @@ impl Rect {
             && self.h as i32 + self.y > other.y
     }
 
-    pub fn contains_point(&self, point: &Point) -> bool {
+    pub fn contains_point(self, point: Point) -> bool {
         point.x > self.x
             && point.x < self.x + self.w as i32
             && point.y > self.y
@@ -63,7 +63,7 @@ pub struct Interval {
 }
 
 impl Interval {
-    pub fn contains_point(&self, other: i32) -> bool {
+    pub fn contains_point(self, other: i32) -> bool {
         self.a <= other && self.b >= other
     }
 }

@@ -32,19 +32,11 @@ pub struct Image {
 
 impl Image {
     pub fn is_collidee(&self) -> bool {
-        if self.image_type == ImageType::Collidee {
-            true
-        } else {
-            false
-        }
+        self.image_type == ImageType::Collidee
     }
 
     pub fn is_collider(&self) -> bool {
-        if self.image_type == ImageType::Collider {
-            true
-        } else {
-            false
-        }
+        self.image_type == ImageType::Collider
     }
 
     pub fn is_blood(&self) -> bool {

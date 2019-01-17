@@ -84,21 +84,18 @@ impl<'a> System<'a> for ConfirmVelocity {
     fn run(&mut self, (velocity, mut state, mut walking_state): Self::SystemData) {
         use specs::Join;
         for (velocity, state, walking_state) in (&velocity, &mut state, &mut walking_state).join() {
-            match state.action {
-                Action::Move { mut x, mut y } => {
-                    if velocity.x == 0 {
-                        x = XAxis::Centre;
-                    }
-                    if velocity.y == 0 {
-                        y = YAxis::Centre;
-                    }
-                    if x == XAxis::Centre && y == YAxis::Centre {
-                        state.action = Action::Idle;
-                    } else {
-                        walking_state.step = (walking_state.step + 1) % 4;
-                    }
+            if let Action::Move { mut x, mut y } = state.action {
+                if velocity.x == 0 {
+                    x = XAxis::Centre;
                 }
-                _ => (),
+                if velocity.y == 0 {
+                    y = YAxis::Centre;
+                }
+                if x == XAxis::Centre && y == YAxis::Centre {
+                    state.action = Action::Idle;
+                } else {
+                    walking_state.step = (walking_state.step + 1) % 4;
+                }
             }
         }
     }

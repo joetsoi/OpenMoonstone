@@ -43,15 +43,15 @@ impl<'a> System<'a> for BlackKnightAi {
 
             if let (Some(target_state), Some(target_position)) = (target_state, target_position) {
                 let delta = get_distance(position, target_position);
-                let movement = get_movement(ai, &delta);
+                let movement = get_movement(ai, delta);
                 let command = match movement {
                     Command::Move {
-                        x: _,
                         y: YAxis::Centre,
+                        ..
                     } => {
-                        let mut command = do_block(0, &delta, state, target_state);
+                        let mut command = do_block(0, delta, state, target_state);
                         if command.is_none() {
-                            command = do_attack(0, &delta, daggers.count);
+                            command = do_attack(0, delta, daggers.count);
                         }
                         command
                     }
@@ -69,7 +69,7 @@ impl<'a> System<'a> for BlackKnightAi {
 }
 
 /// Calculates whether an ai controlled entity should move
-fn get_movement(ai: &AiState, delta: &Point) -> Command {
+fn get_movement(ai: &AiState, delta: Point) -> Command {
     let y_axis = match delta.y.abs() {
         y if y > ai.y_range as i32 => match delta.y {
             d if d <= 0 => YAxis::Down,
@@ -96,7 +96,7 @@ fn get_movement(ai: &AiState, delta: &Point) -> Command {
 
 fn do_block(
     chance_index: usize,
-    delta: &Point,
+    delta: Point,
     state: &State,
     target_state: &State,
 ) -> Option<Command> {
@@ -120,7 +120,7 @@ fn do_block(
     }
 }
 
-fn do_attack(chance_index: usize, delta: &Point, dagger_count: u32) -> Option<Command> {
+fn do_attack(chance_index: usize, delta: Point, dagger_count: u32) -> Option<Command> {
     let mut rng = rand::thread_rng();
     let chance = rng.gen_range(0, 100);
 

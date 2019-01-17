@@ -57,19 +57,13 @@ impl TerrainFile {
     fn read_headers(header_count: usize, data: &[u8]) -> Result<Vec<Header>, io::Error> {
         let mut headers: Vec<Header> = Vec::new();
         for _ in 0..header_count {
-            let _a = BigEndian::read_u16(&data[0..2]) as i32;
-            let _b = BigEndian::read_u16(&data[2..4]) as i32;
-            let y = BigEndian::read_u16(&data[4..6]) as u32;
-            let _c = BigEndian::read_u16(&data[6..8]) as u32;
+            let _a = i32::from(BigEndian::read_u16(&data[0..2]));
+            let _b = i32::from(BigEndian::read_u16(&data[2..4]));
+            let y = u32::from(BigEndian::read_u16(&data[4..6]));
+            let _c = u32::from(BigEndian::read_u16(&data[6..8]));
             headers.push(Header { y });
         }
         Ok(headers)
-        //Ok(Header {
-        //    //x: left,
-        //    y,
-        //    // w: (right - left) as u32,
-        //    // h: bottom - 30,
-        //})
     }
 
     fn read_terrain_positions(data: &[u8]) -> Result<Vec<Position>, io::Error> {
@@ -77,14 +71,14 @@ impl TerrainFile {
         let mut positions: Vec<Position> = Vec::new();
 
         loop {
-            let atlas = rdr.read_u8()? as u32;
+            let atlas = u32::from(rdr.read_u8()?);
             let image_number = rdr.read_u8()? as usize;
 
             let position = Position {
                 atlas: scenery_lookup.get(&atlas).unwrap_or(&"fo2").to_string(),
                 image_number,
-                x: rdr.read_u16::<BigEndian>()? as u32,
-                y: rdr.read_u16::<BigEndian>()? as u32,
+                x: u32::from(rdr.read_u16::<BigEndian>()?),
+                y: u32::from(rdr.read_u16::<BigEndian>()?),
             };
             if atlas == 0xff {
                 break;

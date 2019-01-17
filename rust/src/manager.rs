@@ -62,7 +62,7 @@ impl warmy::Load<Context> for PivImage {
                 Path::new("/moonstone/").join(
                     &scenes[key.as_str()]
                         .as_str()
-                        .expect(&format!("yaml error for {}", key.as_str())),
+                        .unwrap_or_else(|| panic!("yaml error for {}", key.as_str())),
                 ),
             )
             .map_err(err_from)?;
@@ -152,7 +152,9 @@ impl warmy::Load<Context> for TerrainFile {
             .open(Path::new("/moonstone/").join(&terrain.as_str().expect("invalid yaml error")))
             .map_err(err_from)?;
 
-        TerrainFile::from_reader(&mut file).map(warmy::Loaded::from).map_err(err_from)
+        TerrainFile::from_reader(&mut file)
+            .map(warmy::Loaded::from)
+            .map_err(err_from)
         // let objects = ObjectsFile::from_reader(&mut file).map_err(err_from)?;
         // let texture_size = object["texture_size"].as_u64().unwrap() as u32;
 

@@ -90,10 +90,8 @@ impl<'a> System<'a> for StateUpdater {
                 }
                 Action::Death(_) => {
                     state.ticks += 1;
-                    if state.ticks == state.length && state.length != 0 {
-                        if state.ticks > 1 {
-                            state.action = Action::Dead;
-                        }
+                    if state.ticks == state.length && state.length != 0 && state.ticks > 1 {
+                        state.action = Action::Dead;
                     }
                 }
                 _ => (),

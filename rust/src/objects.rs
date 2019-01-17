@@ -67,7 +67,10 @@ impl ObjectsFile {
         let image_headers =
             ObjectsFile::read_image_headers(&header, &data[10..image_header_len + 10])?;
 
-        let extracted = lz77::decompress(header.file_length as u32, &data[image_header_len + 10..])?;
+        let extracted = lz77::decompress(
+            u32::from(header.file_length),
+            &data[image_header_len + 10..],
+        )?;
         let mut images: Vec<Image> = Vec::new();
         for image_header in image_headers {
             images.push(Image::from_data(image_header, &extracted));
@@ -156,10 +159,11 @@ pub struct Image {
 impl Image {
     fn from_data(header: ImageHeader, extracted: &[u8]) -> Image {
         let packed_image_width = (header.width + 15) / 16 * 2;
-        let mut num_bit_planes = (8 - header.blit_type.leading_zeros()) as usize;
-        if header.blit_type == 32 {
-            num_bit_planes = 2;
-        }
+        let num_bit_planes = if header.blit_type == 32 {
+            2
+        } else {
+            (8 - header.blit_type.leading_zeros()) as usize
+        };
         let bit_plane_size = packed_image_width * header.height;
         let unpacked_image_width = packed_image_width * 8;
 

@@ -11,8 +11,8 @@ impl<'a> System<'a> for Movement {
         use specs::Join;
 
         for (velocity, position) in (&velocity, &mut position).join() {
-            position.x = position.x + velocity.x;
-            position.y = position.y + velocity.y;
+            position.x += velocity.x;
+            position.y += velocity.y;
         }
     }
 }

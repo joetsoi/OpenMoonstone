@@ -48,31 +48,27 @@ impl<'a> System<'a> for EntityEntityCollision {
                 if let (Some(body_rect), Some(other_rect)) = (body.rect, other.rect) {
                     let y_delta: i32 = position_1.y as i32 - position_2.y as i32;
                     let new_rect = body_rect + (velocity.x, velocity.y);
-                    if y_delta.abs() <= 20 {
-                        if new_rect.intersects(&other_rect) {
-                            let other_x = Interval {
-                                a: other_rect.x,
-                                b: other_rect.x + other_rect.w as i32,
-                            };
-                            if velocity.x < 0 && other_x.contains_point(new_rect.x) {
-                                velocity.x = 0;
-                            } else if velocity.x > 0
-                                && other_x.contains_point(new_rect.x + new_rect.w as i32)
-                            {
-                                velocity.x = 0;
-                            }
+                    if y_delta.abs() <= 20 && new_rect.intersects(&other_rect) {
+                        let other_x = Interval {
+                            a: other_rect.x,
+                            b: other_rect.x + other_rect.w as i32,
+                        };
+                        if (velocity.x < 0 && other_x.contains_point(new_rect.x))
+                            || (velocity.x > 0
+                                && other_x.contains_point(new_rect.x + new_rect.w as i32))
+                        {
+                            velocity.x = 0;
+                        }
 
-                            let other_y = Interval {
-                                a: other_rect.y,
-                                b: other_rect.y + new_rect.h as i32,
-                            };
-                            if velocity.y < 0 && other_y.contains_point(new_rect.y) {
-                                velocity.y = 0;
-                            } else if velocity.y > 0
-                                && other_y.contains_point(new_rect.y + new_rect.h as i32)
-                            {
-                                velocity.y = 0;
-                            }
+                        let other_y = Interval {
+                            a: other_rect.y,
+                            b: other_rect.y + new_rect.h as i32,
+                        };
+                        if (velocity.y < 0 && other_y.contains_point(new_rect.y))
+                            || (velocity.y > 0
+                                && other_y.contains_point(new_rect.y + new_rect.h as i32))
+                        {
+                            velocity.y = 0;
                         }
                     }
 
@@ -158,7 +154,7 @@ impl<'a> System<'a> for UpdateBoundingBoxes {
                                 rect.y = body_box.rect.y
                             }
                         }
-                        None => contains_all = Some(body_box.rect.clone()),
+                        None => contains_all = Some(body_box.rect),
                     }
                 }
                 body.collision_boxes = Some(body_boxes);
@@ -264,7 +260,7 @@ impl CheckCollisions {
                 for point in weapon_part
                     .points
                     .iter()
-                    .filter(|p| body_part.rect.contains_point(p))
+                    .filter(|p| body_part.rect.contains_point(**p))
                 {
                     // check the points collide and the pixel in the image is a part of the target
                     let hit_x = point.x - body_part.rect.x;
@@ -339,10 +335,9 @@ impl<'a> System<'a> for ResolveCollisions {
                     has_defended = blocks_attack
                         .get(&state.action)
                         .and_then(|a| Some(a == &target_state.action))
-                        .expect(&format!(
-                            "attack {:?} not in blocks_attack lookup",
-                            &state.action
-                        ));
+                        .unwrap_or_else(|| {
+                            panic!("attack {:?} not in blocks_attack lookup", &state.action)
+                        });
                     target_used_block = target_state.action == Action::Defend(DefendType::Block);
                     if target_used_block && target_state.direction == state.direction {
                         has_defended = false;
@@ -368,10 +363,11 @@ impl<'a> System<'a> for ResolveCollisions {
                         target_health.points -= damage as i32;
                         match &target_state.action {
                             Action::Dead => (),
-                            Action::Death(a) => match a.as_ref() {
-                                "death" => set_decapitated.push(target.id()),
-                                _ => (),
-                            },
+                            Action::Death(a) => {
+                                if let "death" = a.as_ref() {
+                                    set_decapitated.push(target.id())
+                                }
+                            }
                             _ => {
                                 set_sliced.push(target.id());
                                 // target_state.action = Action::Hit(HitType::Sliced);
@@ -452,10 +448,7 @@ fn calculate_damage(
                 .get(&attacker_action)
                 .and_then(|name| t.get(name))
         })
-        .expect(&format!(
-            "missing value from damage tables {}",
-            &unit_type.name
-        ));
+        .unwrap_or_else(|| panic!("missing value from damage tables {}", &unit_type.name));
 
     if attacker_action == Action::Attack(AttackType::Chop) {
         raw_damage *= 2;

@@ -85,7 +85,7 @@ impl scene::Scene<Game, InputEvent> for Fade {
                 w: 320.0 * 3.0,
                 h: 200.0 * 3.0,
             },
-        );
+        )?;
         graphics::set_color(ctx, graphics::Color::new(1.0, 1.0, 1.0, 1.0))?;
         if self.update_run && self.start_time + self.duration < timer::get_time_since_start(ctx) {
             self.done = true;
@@ -112,7 +112,7 @@ impl Fade {
             time_used: Duration::new(0, 0),
             style,
             done: false,
-            fade_start: fade_start,
+            fade_start,
             update_run: false,
             ticks: 0,
         }

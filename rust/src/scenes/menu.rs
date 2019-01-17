@@ -216,14 +216,14 @@ impl Menu {
     }
 
     fn draw_gore_option(&mut self, game: &mut Game, ctx: &mut Context) -> GameResult<()> {
-        let mut batch = match game.gore_on {
-            true => ON
-                .as_sprite_batch(ctx, game, &self.palette)
-                .expect("error drawing ON"),
-            false => OFF
-                .as_sprite_batch(ctx, game, &self.palette)
-                .expect("error drawing OFF"),
+        let mut batch = if game.gore_on {
+            ON.as_sprite_batch(ctx, game, &self.palette)
+                .expect("error drawing ON")
+        } else {
+            OFF.as_sprite_batch(ctx, game, &self.palette)
+                .expect("error drawing OFF")
         };
+
         graphics::draw_ex(
             ctx,
             &batch,
@@ -260,9 +260,10 @@ impl Menu {
 impl Scene<Game, InputEvent> for Menu {
     fn update(&mut self, _game: &mut Game, _ctx: &mut Context) -> FSceneSwitch {
         if self.done {
-            match self.fade_out_done {
-                false => SceneSwitch::push(Fade::new(274, 1, FadeStyle::Out)),
-                true => SceneSwitch::Pop, //shouldn't happen
+            if !self.fade_out_done {
+                SceneSwitch::push(Fade::new(274, 1, FadeStyle::Out))
+            } else {
+                SceneSwitch::Pop // shouldn't happen
             }
         } else {
             SceneSwitch::None

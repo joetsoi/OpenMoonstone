@@ -18,7 +18,7 @@ impl<'a> System<'a> for Commander {
         for (controller, state, intent) in (&controller, &state, &mut intent).join() {
             if controller.x == 0 && controller.y == 0 {
                 intent.command = Command::Idle;
-            } else if controller.fire == false {
+            } else if !controller.fire {
                 let x = match controller.x {
                     -1 => XAxis::Left,
                     1 => XAxis::Right,

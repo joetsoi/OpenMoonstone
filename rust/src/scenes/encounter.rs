@@ -213,7 +213,7 @@ impl<'a> EncounterScene<'a> {
         store: &mut Store<Context>,
         world: &'a mut World,
         resource: &str,
-        raw_palette: &Vec<u16>,
+        raw_palette: &[u16],
         palette_name: &str,
         x: i32,
         y: i32,
@@ -241,7 +241,7 @@ impl<'a> EncounterScene<'a> {
                 ),
             })
             .with(MustLive {})
-            .with(Position { x: x, y: y })
+            .with(Position { x, y })
             .with(Health {
                 ..Default::default()
             })
@@ -249,7 +249,7 @@ impl<'a> EncounterScene<'a> {
                 frame: sprite.animations["entrance"].frames[0].clone(),
                 animation: "entrance".to_string(),
                 resource_name: resource.to_string(),
-                direction: direction,
+                direction,
             })
             .with(Intent {
                 ..Default::default()
@@ -264,7 +264,7 @@ impl<'a> EncounterScene<'a> {
                 ..Default::default()
             })
             .with(State {
-                direction: direction,
+                direction,
                 ..Default::default()
             })
             .with(Body {
@@ -369,10 +369,10 @@ impl<'a> EncounterScene<'a> {
             specs_world: world,
             dispatcher: EncounterScene::build_dispatcher(),
             background,
-            player_1: player_1,
-            player_2: player_2,
-            player_3: player_3,
-            player_4: player_4,
+            player_1,
+            player_2,
+            player_3,
+            player_4,
             ticks_after: 0,
             fade_out_done: false,
         })
@@ -382,7 +382,7 @@ impl<'a> EncounterScene<'a> {
         ctx: &mut Context,
         game: &mut Game,
         world: &mut World,
-        raw_palette: &Vec<u16>,
+        raw_palette: &[u16],
         y_max: u32,
     ) -> (Index, Option<Index>, Option<Index>, Option<Index>) {
         let starting_x = [250, 30, 240, 40];
@@ -567,13 +567,12 @@ impl<'a> scene::Scene<Game, input::InputEvent> for EncounterScene<'a> {
         if self.specs_world.read_resource::<CombatDone>().0 {
             self.ticks_after += 1;
             if self.ticks_after > TICKS_TO_WAIT {
-                match self.fade_out_done {
-                    false => {
-                        game.next_scene = SceneState::Menu;
-                        game.practice_encounter = game.practice_encounter % 8 + 1;
-                        return scene::SceneSwitch::push(Fade::new(274, 1, FadeStyle::Out));
-                    }
-                    true => return scene::SceneSwitch::Pop, //shouldn't happen
+                if self.fade_out_done {
+                    return scene::SceneSwitch::Pop; //shouldn't happen
+                } else {
+                    game.next_scene = SceneState::Menu;
+                    game.practice_encounter = game.practice_encounter % 8 + 1;
+                    return scene::SceneSwitch::push(Fade::new(274, 1, FadeStyle::Out));
                 }
             }
         }
@@ -611,9 +610,10 @@ impl<'a> scene::Scene<Game, input::InputEvent> for EncounterScene<'a> {
         storage.sort_by(|&a, &b| a.0.y.cmp(&b.0.y));
 
         for (position, draw, entity) in storage {
-            let images: Vec<&Image> = match game.gore_on {
-                true => draw.frame.images.iter().collect(),
-                false => draw.frame.images.iter().filter(|i| !i.is_blood()).collect(),
+            let images: Vec<&Image> = if game.gore_on {
+                draw.frame.images.iter().collect()
+            } else {
+                draw.frame.images.iter().filter(|i| !i.is_blood()).collect()
             };
             for image in images {
                 let atlas = game
@@ -625,24 +625,21 @@ impl<'a> scene::Scene<Game, input::InputEvent> for EncounterScene<'a> {
                 // TODO: change with palettes
                 let palette: Option<&Palette> = palette_storage.get(entity);
                 let ggez_image = match palette {
-                    None => {
-                        let ggez_image = match game.images.entry(image.sheet.clone()) {
-                            Occupied(i) => i.into_mut(),
-                            Vacant(i) => i.insert(
-                                graphics::Image::from_rgba8(
-                                    ctx,
-                                    atlas_dimension as u16,
-                                    atlas_dimension as u16,
-                                    &atlas.borrow().image.to_rgba8(&self.palette),
-                                )
-                                .unwrap(),
-                            ),
-                        };
-                        ggez_image
-                    }
+                    None => match game.images.entry(image.sheet.clone()) {
+                        Occupied(i) => i.into_mut(),
+                        Vacant(i) => i.insert(
+                            graphics::Image::from_rgba8(
+                                ctx,
+                                atlas_dimension as u16,
+                                atlas_dimension as u16,
+                                &atlas.borrow().image.to_rgba8(&self.palette),
+                            )
+                            .unwrap(),
+                        ),
+                    },
                     Some(palette) => {
                         let image_name = [image.sheet.clone(), palette.name.clone()].join("-");
-                        let ggez_image = match game.images.entry(image_name) {
+                        match game.images.entry(image_name) {
                             Occupied(i) => i.into_mut(),
                             Vacant(i) => i.insert(
                                 graphics::Image::from_rgba8(
@@ -653,8 +650,7 @@ impl<'a> scene::Scene<Game, input::InputEvent> for EncounterScene<'a> {
                                 )
                                 .unwrap(),
                             ),
-                        };
-                        ggez_image
+                        }
                     }
                 };
 
@@ -677,13 +673,10 @@ impl<'a> scene::Scene<Game, input::InputEvent> for EncounterScene<'a> {
                 };
 
                 graphics::draw_ex(ctx, ggez_image, draw_params)?;
-                match image.image_type {
-                    ImageType::BloodStain => {
-                        graphics::set_canvas(ctx, Some(&self.background));
-                        graphics::draw_ex(ctx, ggez_image, draw_params)?;
-                        graphics::set_canvas(ctx, None);
-                    }
-                    _ => (),
+                if let ImageType::BloodStain = image.image_type {
+                    graphics::set_canvas(ctx, Some(&self.background));
+                    graphics::draw_ex(ctx, ggez_image, draw_params)?;
+                    graphics::set_canvas(ctx, None);
                 }
             }
         }
