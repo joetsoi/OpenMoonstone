@@ -1,12 +1,10 @@
-use rand::prelude::*;
+use rand::{Rng};
 use specs::{ReadStorage, System, WriteStorage};
 
 use crate::combat::components::intent::{AttackType, DefendType, XAxis, YAxis};
 use crate::combat::components::movement::get_distance;
 use crate::combat::components::state::Action;
-use crate::combat::components::{
-    AiState, Command, DaggersInventory, Intent, Position, State,
-};
+use crate::combat::components::{AiState, Command, DaggersInventory, Intent, Position, State};
 use crate::rect::Point;
 
 const ACTION_CHANCE: [u32; 19] = [20, 10, 8, 7, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5];
@@ -46,8 +44,7 @@ impl<'a> System<'a> for BlackKnightAi {
                 let movement = get_movement(ai, delta);
                 let command = match movement {
                     Command::Move {
-                        y: YAxis::Centre,
-                        ..
+                        y: YAxis::Centre, ..
                     } => {
                         let mut command = do_block(0, delta, state, target_state);
                         if command.is_none() {
