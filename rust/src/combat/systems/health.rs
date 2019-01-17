@@ -41,7 +41,7 @@ impl<'a> System<'a> for CheckEndOfCombat {
         let live_entity_count = (&health, &must_live)
             .join()
             .filter(|(h, _)| h.points > 0)
-            .fold(0, |acc, x| acc + 1);
+            .fold(0, |acc, _| acc + 1);
         if live_entity_count <= 1 {
             combat_done.0 = true;
         }

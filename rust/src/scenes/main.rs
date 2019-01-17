@@ -3,7 +3,7 @@ use ggez::{graphics, Context, GameResult};
 use ggez_goodies::scene::{Scene, SceneSwitch};
 
 use crate::game::{Game, SceneState};
-use crate::input::{Axis, Button, InputEvent};
+use crate::input::InputEvent;
 use crate::scenes::FSceneSwitch;
 
 use super::transition::FadeStyle;
@@ -51,11 +51,10 @@ impl Scene<Game, InputEvent> for MainScene {
                     Box::new(Fade::new(274, 1, FadeStyle::In)),
                 ])
             }
-            _ => SceneSwitch::None,
         }
     }
 
-    fn draw(&mut self, game: &mut Game, ctx: &mut Context) -> GameResult<()> {
+    fn draw(&mut self, _game: &mut Game, ctx: &mut Context) -> GameResult<()> {
         graphics::set_color(ctx, graphics::Color::new(0.0, 0.0, 0.0, 1.0))?;
         graphics::rectangle(
             ctx,

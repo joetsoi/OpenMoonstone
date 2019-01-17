@@ -1,4 +1,4 @@
-use ggez::graphics::{DrawMode, Drawable, MeshBuilder, Point2};
+use ggez::graphics::DrawMode;
 use ggez::{graphics, timer, Context, GameResult};
 use ggez_goodies::scene;
 use std::time::Duration;
@@ -27,7 +27,7 @@ pub struct Fade {
 }
 
 impl scene::Scene<Game, InputEvent> for Fade {
-    fn update(&mut self, game: &mut Game, ctx: &mut Context) -> FSceneSwitch {
+    fn update(&mut self, _game: &mut Game, _ctx: &mut Context) -> FSceneSwitch {
         if !self.update_run {
             self.update_run = true;
         }
@@ -41,7 +41,7 @@ impl scene::Scene<Game, InputEvent> for Fade {
         }
     }
 
-    fn draw(&mut self, game: &mut Game, ctx: &mut Context) -> GameResult<()> {
+    fn draw(&mut self, _game: &mut Game, ctx: &mut Context) -> GameResult<()> {
         // TODO fix this when context is passed to update.
         let time_since_start = timer::get_time_since_start(ctx);
         if self.update_run && self.ticks < self.fade_start {
@@ -60,11 +60,7 @@ impl scene::Scene<Game, InputEvent> for Fade {
                 alpha
             }
             FadeStyle::Out => {
-                let mut alpha = time_passed / timer::duration_to_f64(self.duration);
-                // if alpha < 1.0 {
-                //     alpha = 1.0;
-                // }
-                alpha
+                time_passed / timer::duration_to_f64(self.duration)
             }
         };
         if self.update_run {

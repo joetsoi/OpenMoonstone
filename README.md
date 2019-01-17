@@ -25,7 +25,7 @@ Currently only Ubuntu and Windows have been tested.
 You run in full screen mode by changing `fullscreen_type` from `"Off"` to `"Desktop"` in `resources/conf.toml`
 
 ##  Developement
-Requires [rust nightly](https://www.rust-lang.org/tools/install)
+Requires [rust stable 1.32](https://www.rust-lang.org/tools/install)
 ```
 cd rust
 cargo run

@@ -70,7 +70,7 @@ impl<'a> System<'a> for Animation {
                     animation_state.frame_number = state.ticks;
                 }
                 Action::Move { .. } => animation_state.frame_number = walking_state.step,
-                Action::Death(s) => {
+                Action::Death(_s) => {
                     animation_state.frame_number = state.ticks;
                 }
                 Action::Dead => {

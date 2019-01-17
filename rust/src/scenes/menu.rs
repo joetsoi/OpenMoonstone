@@ -1,15 +1,14 @@
 use std::collections::hash_map::Entry::{Occupied, Vacant};
 use std::iter::repeat;
-use std::time::Duration;
 
 use failure::Error;
-use ggez::{graphics, timer, Context, GameResult};
+use ggez::{graphics, Context, GameResult};
 use ggez_goodies::scene::{Scene, SceneSwitch};
 use lazy_static::lazy_static;
 use warmy::{LogicalKey, Store};
 
 use super::transition::FadeStyle;
-use super::{EncounterScene, Fade};
+use super::Fade;
 use crate::game::{Game, SceneState};
 use crate::input::{Axis, Button, InputEvent};
 use crate::objects::TextureAtlas;
@@ -259,7 +258,7 @@ impl Menu {
 }
 
 impl Scene<Game, InputEvent> for Menu {
-    fn update(&mut self, game: &mut Game, ctx: &mut Context) -> FSceneSwitch {
+    fn update(&mut self, _game: &mut Game, _ctx: &mut Context) -> FSceneSwitch {
         if self.done {
             match self.fade_out_done {
                 false => SceneSwitch::push(Fade::new(274, 1, FadeStyle::Out)),

@@ -4,12 +4,10 @@ use std::io::prelude::*;
 use std::io::Cursor;
 
 use byteorder::{BigEndian, ByteOrder, ReadBytesExt};
-use ggez::graphics::Image;
 use lazy_static::lazy_static;
 use maplit::hashmap;
 
 use crate::lz77;
-use crate::objects::TextureAtlas;
 use crate::rect::Rect;
 
 lazy_static! {

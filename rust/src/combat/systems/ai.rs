@@ -1,12 +1,11 @@
 use rand::prelude::*;
 use specs::{ReadStorage, System, WriteStorage};
 
-use crate::combat::components::direction::Facing;
 use crate::combat::components::intent::{AttackType, DefendType, XAxis, YAxis};
 use crate::combat::components::movement::get_distance;
 use crate::combat::components::state::Action;
 use crate::combat::components::{
-    AiState, Command, Controller, DaggersInventory, Intent, Position, State,
+    AiState, Command, DaggersInventory, Intent, Position, State,
 };
 use crate::rect::Point;
 

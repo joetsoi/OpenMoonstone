@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 use ggez::Context;
-use serde_derive::{Deserialize, Serialize};
 use serde_yaml::Value;
 use warmy;
 

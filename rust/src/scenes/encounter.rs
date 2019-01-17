@@ -1,15 +1,13 @@
 use std::collections::hash_map::Entry::{Occupied, Vacant};
 use std::collections::{HashMap, HashSet};
-use std::time::Duration;
 
 use failure::Error;
 use ggez::conf::NumSamples;
 use ggez::graphics;
-use ggez::timer;
 use ggez::{Context, GameResult};
 use ggez_goodies::scene;
 use specs::world::{Builder, Index};
-use specs::{Component, Dispatcher, DispatcherBuilder, Entity, EntityBuilder, Join, World};
+use specs::{Dispatcher, DispatcherBuilder, Entity, EntityBuilder, Join, World};
 use warmy::{LogicalKey, Store};
 
 use super::transition::FadeStyle;
@@ -310,7 +308,7 @@ impl<'a> EncounterScene<'a> {
             },
         )?;
 
-        let y_max = EncounterScene::draw_terrain(ctx, game, &mut world, terrain_name, &background)?;
+        let y_max = EncounterScene::draw_terrain(ctx, game, &mut world, terrain_name)?;
         let collide_hit = game
             .store
             .get::<_, CollisionBoxes>(&LogicalKey::new("collide"), ctx)
@@ -441,7 +439,7 @@ impl<'a> EncounterScene<'a> {
 
         if game.num_players == 1 {
             let y = EncounterScene::next_starting_position(game, y_max as i32);
-            let player_2 = EncounterScene::build_entity(
+            EncounterScene::build_entity(
                 ctx,
                 &mut game.store,
                 world,
@@ -475,7 +473,6 @@ impl<'a> EncounterScene<'a> {
         game: &mut Game,
         world: &mut World,
         terrain_name: &str,
-        background_image: &graphics::Canvas,
     ) -> Result<u32, Error> {
         let terrain = game
             .store
@@ -563,7 +560,7 @@ impl<'a> EncounterScene<'a> {
 }
 
 impl<'a> scene::Scene<Game, input::InputEvent> for EncounterScene<'a> {
-    fn update(&mut self, game: &mut Game, ctx: &mut Context) -> FSceneSwitch {
+    fn update(&mut self, game: &mut Game, _ctx: &mut Context) -> FSceneSwitch {
         self.specs_world.maintain();
         self.update_controllers(&game.input);
         self.dispatcher.dispatch_par(&self.specs_world.res);
