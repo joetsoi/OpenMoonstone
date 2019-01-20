@@ -1,22 +1,18 @@
-use std::collections::hash_map::Entry::{Occupied, Vacant};
-use std::iter::repeat;
-
 use failure::Error;
 use ggez::{graphics, Context, GameResult};
 use ggez_goodies::scene::{Scene, SceneSwitch};
 use lazy_static::lazy_static;
 use warmy::{LogicalKey, Store};
 
-use super::transition::FadeStyle;
-use super::Fade;
 use crate::game::{Game, SceneState};
 use crate::input::{Axis, Button, InputEvent};
 use crate::objects::TextureAtlas;
-use crate::palette::PaletteSwaps;
-use crate::piv::Colour;
-use crate::piv::{extract_palette, PivImage};
 use crate::scenes::FSceneSwitch;
-use crate::text::{Screen, Text};
+use crate::text::Text;
+
+use super::menu::Menu;
+use super::transition::FadeStyle;
+use super::Fade;
 
 struct MenuImage {
     sheet: &'static str,
@@ -83,125 +79,26 @@ impl MenuOption {
 
 #[derive(Debug)]
 pub struct MainMenuScene {
-    background: graphics::Image,
-    palette: Vec<Colour>,
+    menu: Menu,
     done: bool,
     fade_out_done: bool,
-    screen: Screen,
     selected_option: MenuOption,
 }
 
 impl MainMenuScene {
     pub fn new(ctx: &mut Context, store: &mut Store<Context>) -> Result<Self, Error> {
-        let screen = store
-            .get::<_, Screen>(&warmy::LogicalKey::new("/menu.yaml"), ctx)?
-            .borrow()
-            .clone();
-
-        let (background, palette) = match &screen.background {
-            Some(background) => {
-                let piv = store.get::<_, PivImage>(&LogicalKey::new(background), ctx)?;
-                let mut palette = piv.borrow().palette.to_vec();
-                palette.extend(
-                    repeat(Colour {
-                        r: 0,
-                        g: 0,
-                        b: 0,
-                        a: 0,
-                    })
-                    .take(16),
-                );
-                let image = graphics::Image::from_rgba8(ctx, 320, 200, &*piv.borrow().to_rgba8())?;
-                (Some(image), palette)
-            }
-            None => {
-                let swaps_res = store
-                    .get::<_, PaletteSwaps>(&LogicalKey::new("/palettes.yaml"), ctx)
-                    .expect("error loading palette.yaml");
-                let swaps = swaps_res.borrow();
-                let raw_palette = swaps
-                    .0
-                    .get("default")
-                    .expect("failed to fetch default palette");
-                let palette = extract_palette(raw_palette);
-                (None, palette)
-            }
-        };
+        let menu = Menu::new(ctx, store, "/menu.yaml")?;
+        // .unwrap_or_else(|| panic!("error in menu.yaml, must have 'background")),
         Ok(Self {
-            background: background
-                .unwrap_or_else(|| panic!("error in menu.yaml, must have 'background")),
+            menu,
             done: false,
             fade_out_done: false,
-            palette,
-            screen,
             selected_option: MenuOption::Players,
         })
     }
 }
 
 impl MainMenuScene {
-    fn draw_screen(&mut self, game: &mut Game, ctx: &mut Context) -> GameResult<()> {
-        graphics::draw_ex(
-            ctx,
-            &self.background,
-            graphics::DrawParam {
-                dest: graphics::Point2::new(0.0, 0.0),
-                scale: graphics::Point2::new(3.0, 3.0),
-                ..Default::default()
-            },
-        )?;
-
-        for text in &self.screen.text {
-            let mut batch: graphics::spritebatch::SpriteBatch = text
-                .as_sprite_batch(ctx, game, &self.palette)
-                .expect("error drawing text to screen");
-            graphics::draw_ex(
-                ctx,
-                &batch,
-                graphics::DrawParam {
-                    dest: graphics::Point2::new(0.0, 0.0),
-                    scale: graphics::Point2::new(3.0, 3.0),
-                    ..Default::default()
-                },
-            )?;
-            batch.clear();
-        }
-
-        for image in &self.screen.images {
-            let atlas = game
-                .store
-                .get::<_, TextureAtlas>(&LogicalKey::new(image.sheet.as_str()), ctx)
-                .unwrap();
-
-            let atlas_dimension = atlas.borrow().image.width as u32;
-            let ggez_image = match game.images.entry(image.sheet.clone()) {
-                Occupied(i) => i.into_mut(),
-                Vacant(i) => i.insert(graphics::Image::from_rgba8(
-                    ctx,
-                    atlas_dimension as u16,
-                    atlas_dimension as u16,
-                    &atlas.borrow().image.to_rgba8(&self.palette),
-                )?),
-            };
-
-            let rect = atlas.borrow().rects[image.image];
-            let texture_size = atlas.borrow().image.width as f32;
-            let draw_params = graphics::DrawParam {
-                src: graphics::Rect {
-                    x: rect.x as f32 / texture_size,
-                    y: rect.y as f32 / texture_size,
-                    w: rect.w as f32 / texture_size,
-                    h: rect.h as f32 / texture_size,
-                },
-                dest: graphics::Point2::new(image.x as f32 * 3.0, image.y as f32 * 3.0),
-                scale: graphics::Point2::new(3.0, 3.0),
-                ..Default::default()
-            };
-            graphics::draw_ex(ctx, ggez_image, draw_params)?;
-        }
-        Ok(())
-    }
-
     fn draw_arrow(&mut self, game: &mut Game, ctx: &mut Context) -> GameResult<()> {
         // we don't want to save this image to the game cache as we only
         // want to apply the pallete to the the arrow. We've extended the palette
@@ -217,7 +114,7 @@ impl MainMenuScene {
             ctx,
             atlas_dimension as u16,
             atlas_dimension as u16,
-            &atlas.borrow().image.to_rgba8(&self.palette),
+            &atlas.borrow().image.to_rgba8(&self.menu.palette),
         )?;
         let rect = atlas.borrow().rects[ARROW.image];
         let texture_size = atlas.borrow().image.width as f32;
@@ -239,10 +136,10 @@ impl MainMenuScene {
 
     fn draw_gore_option(&mut self, game: &mut Game, ctx: &mut Context) -> GameResult<()> {
         let mut batch = if game.gore_on {
-            ON.as_sprite_batch(ctx, game, &self.palette)
+            ON.as_sprite_batch(ctx, game, &self.menu.palette)
                 .expect("error drawing ON")
         } else {
-            OFF.as_sprite_batch(ctx, game, &self.palette)
+            OFF.as_sprite_batch(ctx, game, &self.menu.palette)
                 .expect("error drawing OFF")
         };
 
@@ -263,7 +160,7 @@ impl MainMenuScene {
         let mut text = PLAYER_COUNT.clone();
         text.string = game.num_players.to_string();
         let mut batch = text
-            .as_sprite_batch(ctx, game, &self.palette)
+            .as_sprite_batch(ctx, game, &self.menu.palette)
             .expect("error drawing PLAYER_COUNT");
         graphics::draw_ex(
             ctx,
@@ -295,7 +192,7 @@ impl Scene<Game, InputEvent> for MainMenuScene {
     fn draw(&mut self, game: &mut Game, ctx: &mut Context) -> GameResult<()> {
         graphics::set_background_color(ctx, graphics::Color::from((0, 0, 0, 255)));
         graphics::clear(ctx);
-        self.draw_screen(game, ctx)?;
+        self.menu.draw(game, ctx)?;
         self.draw_arrow(game, ctx)?;
         self.draw_gore_option(game, ctx)?;
         self.draw_player_count_option(game, ctx)?;

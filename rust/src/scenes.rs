@@ -6,6 +6,7 @@ use crate::input;
 pub mod encounter;
 pub mod main;
 pub mod main_menu;
+pub mod menu;
 pub mod transition;
 
 pub use self::encounter::EncounterScene;
