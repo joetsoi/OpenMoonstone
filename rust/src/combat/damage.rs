@@ -20,7 +20,6 @@ impl warmy::Load<Context> for DamageTables {
         store: &mut warmy::Storage<ggez::Context>,
         ctx: &mut ggez::Context,
     ) -> Result<warmy::Loaded<Self>, Self::Error> {
-        println!("key: {:?}, path: {:?}", key, store.root());
         let file = ctx.filesystem.open(key.as_str()).map_err(err_from)?;
         let yaml: Value = serde_yaml::from_reader(file).map_err(err_from)?;
 

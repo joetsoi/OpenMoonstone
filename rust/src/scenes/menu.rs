@@ -12,8 +12,9 @@ use super::Fade;
 use crate::game::{Game, SceneState};
 use crate::input::{Axis, Button, InputEvent};
 use crate::objects::TextureAtlas;
+use crate::palette::PaletteSwaps;
 use crate::piv::Colour;
-use crate::piv::PivImage;
+use crate::piv::{extract_palette, PivImage};
 use crate::scenes::FSceneSwitch;
 use crate::text::{Screen, Text};
 
@@ -92,22 +93,43 @@ pub struct Menu {
 
 impl Menu {
     pub fn new(ctx: &mut Context, store: &mut Store<Context>) -> Result<Self, Error> {
-        let piv = store.get::<_, PivImage>(&LogicalKey::new("ch"), ctx)?;
-        let background = graphics::Image::from_rgba8(ctx, 320, 200, &*piv.borrow().to_rgba8())?;
-        let screen_res = store.get::<_, Screen>(&warmy::LogicalKey::new("/menu.yaml"), ctx)?;
-        let screen = screen_res.borrow().clone();
-        let mut palette = piv.borrow().palette.to_vec();
-        palette.extend(
-            repeat(Colour {
-                r: 0,
-                g: 0,
-                b: 0,
-                a: 0,
-            })
-            .take(16),
-        );
+        let screen = store
+            .get::<_, Screen>(&warmy::LogicalKey::new("/menu.yaml"), ctx)?
+            .borrow()
+            .clone();
+
+        let (background, palette) = match &screen.background {
+            Some(background) => {
+                let piv = store.get::<_, PivImage>(&LogicalKey::new(background), ctx)?;
+                let mut palette = piv.borrow().palette.to_vec();
+                palette.extend(
+                    repeat(Colour {
+                        r: 0,
+                        g: 0,
+                        b: 0,
+                        a: 0,
+                    })
+                    .take(16),
+                );
+                let image = graphics::Image::from_rgba8(ctx, 320, 200, &*piv.borrow().to_rgba8())?;
+                (Some(image), palette)
+            }
+            None => {
+                let swaps_res = store
+                    .get::<_, PaletteSwaps>(&LogicalKey::new("/palettes.yaml"), ctx)
+                    .expect("error loading palette.yaml");
+                let swaps = swaps_res.borrow();
+                let raw_palette = swaps
+                    .0
+                    .get("default")
+                    .expect("failed to fetch default palette");
+                let palette = extract_palette(raw_palette);
+                (None, palette)
+            }
+        };
         Ok(Self {
-            background,
+            background: background
+                .unwrap_or_else(|| panic!("error in menu.yaml, must have 'background")),
             done: false,
             fade_out_done: false,
             palette,

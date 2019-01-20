@@ -33,7 +33,6 @@ impl warmy::Load<Context> for GameYaml {
         store: &mut warmy::Storage<ggez::Context>,
         ctx: &mut ggez::Context,
     ) -> Result<warmy::Loaded<Self>, Self::Error> {
-        println!("key: {:?}, path: {:?}", key, store.root());
         let file = ctx.filesystem.open(key.as_str()).map_err(err_from)?;
         Ok(warmy::Loaded::from(GameYaml {
             yaml: serde_yaml::from_reader(file).map_err(err_from)?,
@@ -50,7 +49,6 @@ impl warmy::Load<Context> for PivImage {
         store: &mut warmy::Storage<ggez::Context>,
         ctx: &mut ggez::Context,
     ) -> Result<warmy::Loaded<Self>, Self::Error> {
-        println!("key: {:?}, path: {:?}", key, store.root());
         let yaml = store
             .get::<_, GameYaml>(&warmy::LogicalKey::new("/files.yaml"), ctx)
             .map_err(err_from)?;
@@ -81,7 +79,6 @@ impl warmy::Load<Context> for TextureAtlas {
         store: &mut warmy::Storage<ggez::Context>,
         ctx: &mut ggez::Context,
     ) -> Result<warmy::Loaded<Self>, Self::Error> {
-        println!("key: {:?}, path: {:?}", key, store.root());
         let yaml = store
             .get::<_, GameYaml>(&warmy::LogicalKey::new("/files.yaml"), ctx)
             .map_err(err_from)?;
@@ -114,7 +111,6 @@ impl warmy::Load<Context> for CollisionBoxes {
         store: &mut warmy::Storage<ggez::Context>,
         ctx: &mut ggez::Context,
     ) -> Result<warmy::Loaded<Self>, Self::Error> {
-        println!("key: {:?}, path: {:?}", key, store.root());
         let yaml = store
             .get::<_, GameYaml>(&warmy::LogicalKey::new("/files.yaml"), ctx)
             .map_err(err_from)?;
@@ -142,7 +138,6 @@ impl warmy::Load<Context> for TerrainFile {
         store: &mut warmy::Storage<ggez::Context>,
         ctx: &mut ggez::Context,
     ) -> Result<warmy::Loaded<Self>, Self::Error> {
-        println!("key: {:?}, path: {:?}", key, store.root());
         let yaml = store
             .get::<_, GameYaml>(&warmy::LogicalKey::new("/files.yaml"), ctx)
             .map_err(err_from)?;

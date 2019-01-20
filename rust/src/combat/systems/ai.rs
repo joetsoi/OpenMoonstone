@@ -1,4 +1,4 @@
-use rand::{Rng};
+use rand::Rng;
 use specs::{ReadStorage, System, WriteStorage};
 
 use crate::combat::components::intent::{AttackType, DefendType, XAxis, YAxis};

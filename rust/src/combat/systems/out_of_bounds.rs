@@ -14,7 +14,6 @@ impl<'a> System<'a> for OutOfBounds {
             // TODO: change these hardcoded values?
             if position.x < -100 || position.x > 420 {
                 entities.delete(entity);
-                println!("deleted");
             }
         }
     }
