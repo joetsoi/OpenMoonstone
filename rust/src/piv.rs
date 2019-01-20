@@ -6,7 +6,7 @@ use byteorder::{BigEndian, ByteOrder};
 
 use crate::lz77;
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct Colour {
     pub r: u8,
     pub g: u8,
@@ -119,7 +119,7 @@ pub fn extract_palette(data: &[u16]) -> Vec<Colour> {
             BigEndian::write_u16(&mut pel_bytes, *pel);
             Colour {
                 r: (pel_bytes[0]) << 4,
-                g: (((pel_bytes[1]) & 0xf0) >> 2) << 2,
+                g: (((pel_bytes[1]) & 0xf0)),// >> 2) << 2,
                 b: ((pel_bytes[1]) & 0x0f) << 4,
                 a: 255,
             }

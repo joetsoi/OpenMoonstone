@@ -9,7 +9,7 @@ use crate::game::Game;
 use crate::objects::TextureAtlas;
 use crate::palette::PaletteSwaps;
 use crate::piv::{extract_palette, Colour, PivImage};
-use crate::text::{Screen, Text};
+use crate::text::Screen;
 
 #[derive(Debug)]
 pub struct Menu {
