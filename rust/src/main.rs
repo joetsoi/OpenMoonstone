@@ -16,7 +16,7 @@ use openmoonstone::input;
 use openmoonstone::piv::PivImage;
 use openmoonstone::scenes;
 use openmoonstone::scenes::transition::FadeStyle;
-use openmoonstone::scenes::{FSceneStack, Fade, MainScene, Menu};
+use openmoonstone::scenes::{FSceneStack, Fade, MainScene, MainMenuScene};
 
 struct MainState {
     input_binding: input::InputBinding,
@@ -102,7 +102,7 @@ fn main() {
     let main_scene = MainScene::new();
     scene_stack.push(Box::new(main_scene));
 
-    let menu = Menu::new(ctx, &mut scene_stack.world.store).unwrap();
+    let menu = MainMenuScene::new(ctx, &mut scene_stack.world.store).unwrap();
     scene_stack.push(Box::new(menu));
 
     let fade_in = Fade::new(274, 1, FadeStyle::In);

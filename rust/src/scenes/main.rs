@@ -7,7 +7,7 @@ use crate::input::InputEvent;
 use crate::scenes::FSceneSwitch;
 
 use super::transition::FadeStyle;
-use super::{EncounterScene, Fade, Menu};
+use super::{EncounterScene, Fade, MainMenuScene};
 /// Scene that controls switching between various game states.
 ///
 /// Base state that switches between the menu, practice encounter and
@@ -30,7 +30,7 @@ impl Scene<Game, InputEvent> for MainScene {
     fn update(&mut self, mut game: &mut Game, ctx: &mut Context) -> FSceneSwitch {
         match game.next_scene {
             SceneState::Menu => SceneSwitch::PushMultiple(vec![
-                Box::new(Menu::new(ctx, &mut game.store).expect("failed to init menu scene")),
+                Box::new(MainMenuScene::new(ctx, &mut game.store).expect("failed to init menu scene")),
                 Box::new(Fade::new(274, 1, FadeStyle::In)),
             ]),
 

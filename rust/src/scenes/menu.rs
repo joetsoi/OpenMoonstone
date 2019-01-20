@@ -82,7 +82,7 @@ impl MenuOption {
 }
 
 #[derive(Debug)]
-pub struct Menu {
+pub struct MainMenuScene {
     background: graphics::Image,
     palette: Vec<Colour>,
     done: bool,
@@ -91,7 +91,7 @@ pub struct Menu {
     selected_option: MenuOption,
 }
 
-impl Menu {
+impl MainMenuScene {
     pub fn new(ctx: &mut Context, store: &mut Store<Context>) -> Result<Self, Error> {
         let screen = store
             .get::<_, Screen>(&warmy::LogicalKey::new("/menu.yaml"), ctx)?
@@ -139,7 +139,7 @@ impl Menu {
     }
 }
 
-impl Menu {
+impl MainMenuScene {
     fn draw_screen(&mut self, game: &mut Game, ctx: &mut Context) -> GameResult<()> {
         graphics::draw_ex(
             ctx,
@@ -279,7 +279,7 @@ impl Menu {
     }
 }
 
-impl Scene<Game, InputEvent> for Menu {
+impl Scene<Game, InputEvent> for MainMenuScene {
     fn update(&mut self, _game: &mut Game, _ctx: &mut Context) -> FSceneSwitch {
         if self.done {
             if !self.fade_out_done {
