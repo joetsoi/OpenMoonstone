@@ -1,0 +1,8 @@
+text:
+  - {string: "Select a Knight", font: bold.f, bordered: true, centered: true, x: 0, y: 5}
+images:
+  - {sheet: sel.cel, image: 2, x: 12, y: 80}
+  - {sheet: sel.cel, image: 3, x: 88, y: 80}
+  - {sheet: sel.cel, image: 4, x: 164, y: 80}
+  - {sheet: sel.cel, image: 5, x: 240, y: 80}
+cursor: {sheet: sel.cel, image: 1, x: 12, y: 80}

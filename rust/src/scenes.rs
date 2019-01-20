@@ -7,11 +7,13 @@ pub mod encounter;
 pub mod main;
 pub mod main_menu;
 pub mod menu;
+pub mod select_knight;
 pub mod transition;
 
 pub use self::encounter::EncounterScene;
 pub use self::main::MainScene;
 pub use self::main_menu::MainMenuScene;
+pub use self::select_knight::SelectKnight;
 pub use self::transition::Fade;
 
 pub type FSceneSwitch = scene::SceneSwitch<game::Game, input::InputEvent>;
