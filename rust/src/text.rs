@@ -59,6 +59,7 @@ pub struct Screen {
     pub background: Option<String>,
     pub text: Vec<Text>,
     pub images: Vec<Image>,
+    pub cursor: Image,
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]

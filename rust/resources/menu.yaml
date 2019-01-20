@@ -6,3 +6,4 @@ text:
   - {string: "Select Knight", font: bold.f, bordered: true, centered: true, x: 0, y: 170}
 images:
   - {sheet: bold.f, image: 73, x: 5, y: 10}
+cursor: {sheet: "sel.cel", image: 0, x: 50, y: 85}

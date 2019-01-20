@@ -13,7 +13,7 @@ use crate::text::{Screen, Text};
 
 #[derive(Debug)]
 pub struct Menu {
-    screen: Screen,
+    pub screen: Screen,
     background: Option<graphics::Image>,
     pub palette: Vec<Colour>,
 }

@@ -21,13 +21,6 @@ struct MenuImage {
     y: u32,
 }
 
-const ARROW: MenuImage = MenuImage {
-    sheet: "sel.cel",
-    image: 0,
-    x: 50,
-    y: 85,
-};
-
 const ARROW_POSITIONS: [u32; 4] = [85, 110, 152, 172];
 
 lazy_static! {
@@ -105,7 +98,7 @@ impl MainMenuScene {
         // by 16 empty colours so to_rgba8 won't break.
         let atlas = game
             .store
-            .get::<_, TextureAtlas>(&LogicalKey::new(ARROW.sheet), ctx)
+            .get::<_, TextureAtlas>(&LogicalKey::new(&self.menu.screen.cursor.sheet), ctx)
             // TODO: raise error
             .expect("Couldn't find sel.cel yaml metadata");
 
@@ -116,7 +109,7 @@ impl MainMenuScene {
             atlas_dimension as u16,
             &atlas.borrow().image.to_rgba8(&self.menu.palette),
         )?;
-        let rect = atlas.borrow().rects[ARROW.image];
+        let rect = atlas.borrow().rects[self.menu.screen.cursor.image];
         let texture_size = atlas.borrow().image.width as f32;
         let y = ARROW_POSITIONS[self.selected_option as usize];
         let draw_params = graphics::DrawParam {
@@ -126,7 +119,7 @@ impl MainMenuScene {
                 w: rect.w as f32 / texture_size,
                 h: rect.h as f32 / texture_size,
             },
-            dest: graphics::Point2::new(ARROW.x as f32 * 3.0, y as f32 * 3.0),
+            dest: graphics::Point2::new(self.menu.screen.cursor.x as f32 * 3.0, y as f32 * 3.0),
             scale: graphics::Point2::new(3.0, 3.0),
             ..Default::default()
         };
