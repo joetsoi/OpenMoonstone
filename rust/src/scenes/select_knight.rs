@@ -14,10 +14,21 @@ use crate::scenes::FSceneSwitch;
 
 use super::menu::Menu;
 
+enum State {
+    Selecting,
+    Naming,
+}
+
 pub struct SelectKnight {
     menu: Menu,
     oscillate: ColourOscillate,
     swap_colour: Colour,
+
+    state: State,
+
+    current: usize,
+    selected: Vec<u32>,
+    available: Vec<u32>,
 }
 
 struct ColourOscillate {
@@ -95,6 +106,10 @@ impl SelectKnight {
             menu,
             oscillate,
             swap_colour: original_colour.clone(),
+            state: State::Selecting,
+            current: 0,
+            available: vec![0, 1, 2, 3],
+            selected: Vec::new(),
         })
     }
 
@@ -154,6 +169,14 @@ impl Scene<Game, InputEvent> for SelectKnight {
         if let Some(colour) = self.oscillate.next() {
             self.swap_colour = colour;
         }
+        self.menu.screen.cursor.x = self
+            .menu
+            .screen
+            .images
+            .iter()
+            .map(|i| i.x)
+            .nth(self.current)
+            .unwrap_or_else(|| self.menu.screen.cursor.x);
         SceneSwitch::None
     }
 
@@ -169,5 +192,18 @@ impl Scene<Game, InputEvent> for SelectKnight {
         "Select a Knight"
     }
 
-    fn input(&mut self, gameworld: &mut Game, _event: InputEvent, started: bool) {}
+    fn input(&mut self, gameworld: &mut Game, _event: InputEvent, started: bool) {
+        match self.state {
+            State::Selecting => {
+                let x = gameworld.input.get_axis_raw(Axis::Horz1) as i32;
+                let len = self.available.len() as i32;
+                if x > 0 {
+                    self.current = ((self.current as i32 + x) % len) as usize;
+                } else {
+                    self.current = ((self.current as i32 + x + len) % len) as usize;
+                }
+            }
+            State::Naming => (),
+        }
+    }
 }
