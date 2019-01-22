@@ -138,23 +138,18 @@ impl Text {
         Ok(params)
     }
 
-    pub fn as_sprite_batch<T: AsRef<str> + fmt::Display>(
+    pub fn as_sprite_batch(
         &self,
         ctx: &mut Context,
         game: &mut Game,
         palette: &[Colour],
-        background_name: Option<T>,
+        palette_hash: u64,
     ) -> Result<SpriteBatch, failure::Error> {
         let atlas = game
             .store
             .get::<_, TextureAtlas>(&LogicalKey::new(self.font.as_str()), ctx)?;
 
-        let image_name = if let Some(background_name) = background_name {
-            format!("{}{}", self.font, background_name)
-        } else {
-            self.font.clone()
-        };
-
+        let image_name = format!("{}{}", self.font, palette_hash);
         let atlas_dimension = atlas.borrow().image.width as u32;
         let ggez_image = match game.images.entry(image_name) {
             Occupied(i) => i.into_mut(),

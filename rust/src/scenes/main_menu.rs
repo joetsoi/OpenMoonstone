@@ -129,29 +129,11 @@ impl MainMenuScene {
 
     fn draw_gore_option(&mut self, game: &mut Game, ctx: &mut Context) -> GameResult<()> {
         let mut batch = if game.gore_on {
-            ON.as_sprite_batch(
-                ctx,
-                game,
-                &self.menu.palette,
-                self
-                    .menu
-                    .screen
-                    .background
-                    .as_ref(),
-            )
-            .expect("error drawing ON")
+            ON.as_sprite_batch(ctx, game, &self.menu.palette, self.menu.palette_hash)
+                .expect("error drawing ON")
         } else {
-            OFF.as_sprite_batch(
-                ctx,
-                game,
-                &self.menu.palette,
-                self
-                    .menu
-                    .screen
-                    .background
-                    .as_ref(),
-            )
-            .expect("error drawing OFF")
+            OFF.as_sprite_batch(ctx, game, &self.menu.palette, self.menu.palette_hash)
+                .expect("error drawing OFF")
         };
 
         graphics::draw_ex(
@@ -171,16 +153,7 @@ impl MainMenuScene {
         let mut text = PLAYER_COUNT.clone();
         text.string = game.num_players.to_string();
         let mut batch = text
-            .as_sprite_batch(
-                ctx,
-                game,
-                &self.menu.palette,
-                self
-                    .menu
-                    .screen
-                    .background
-                    .as_ref(),
-            )
+            .as_sprite_batch(ctx, game, &self.menu.palette, self.menu.palette_hash)
             .expect("error drawing PLAYER_COUNT");
         graphics::draw_ex(
             ctx,

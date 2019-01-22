@@ -1,3 +1,4 @@
+use std::hash::Hash;
 use std::io;
 use std::io::prelude::*;
 
@@ -6,7 +7,7 @@ use byteorder::{BigEndian, ByteOrder};
 
 use crate::lz77;
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub struct Colour {
     pub r: u8,
     pub g: u8,

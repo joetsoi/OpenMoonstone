@@ -1,4 +1,6 @@
+use std::collections::hash_map::DefaultHasher;
 use std::collections::hash_map::Entry::{Occupied, Vacant};
+use std::hash::{Hash, Hasher};
 use std::iter::repeat;
 
 use failure::Error;
@@ -16,6 +18,13 @@ pub struct Menu {
     pub screen: Screen,
     background: Option<graphics::Image>,
     pub palette: Vec<Colour>,
+    pub palette_hash: u64,
+}
+
+fn calculate_hash<T: Hash>(t: &T) -> u64 {
+    let mut s = DefaultHasher::new();
+    t.hash(&mut s);
+    s.finish()
 }
 
 impl Menu {
@@ -56,10 +65,13 @@ impl Menu {
                 (None, palette)
             }
         };
+
+        let palette_hash = calculate_hash(&palette);
         Ok(Self {
             background,
             palette,
             screen,
+            palette_hash,
         })
     }
 
@@ -79,7 +91,7 @@ impl Menu {
         for text in &self.screen.text {
             let palette_name = self.screen.background.as_ref();
             let mut batch: graphics::spritebatch::SpriteBatch = text
-                .as_sprite_batch(ctx, game, &self.palette, palette_name)
+                .as_sprite_batch(ctx, game, &self.palette, self.palette_hash)
                 .expect("error drawing text to screen");
             graphics::draw_ex(
                 ctx,
@@ -100,11 +112,7 @@ impl Menu {
                 .unwrap();
 
             let atlas_dimension = atlas.borrow().image.width as u32;
-            let image_name = if let Some(background) = &self.screen.background {
-                format!("{}{}", image.sheet, background)
-            } else {
-                image.sheet.clone()
-            };
+            let image_name = format!("{}{}", image.sheet, self.palette_hash);
             let ggez_image = match game.images.entry(image_name) {
                 Occupied(i) => i.into_mut(),
                 Vacant(i) => i.insert(graphics::Image::from_rgba8(
