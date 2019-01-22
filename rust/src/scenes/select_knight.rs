@@ -162,10 +162,17 @@ impl SelectKnight {
 
         Ok(())
     }
+
+    fn select_current_knight(&mut self) {
+        self.selected.push(self.available.remove(self.current));
+        self.menu.screen.images.remove(self.current);
+
+        self.current = 0;
+    }
 }
 
 impl Scene<Game, InputEvent> for SelectKnight {
-    fn update(&mut self, _game: &mut Game, _ctx: &mut Context) -> FSceneSwitch {
+    fn update(&mut self, game: &mut Game, _ctx: &mut Context) -> FSceneSwitch {
         if let Some(colour) = self.oscillate.next() {
             self.swap_colour = colour;
         }
@@ -177,7 +184,12 @@ impl Scene<Game, InputEvent> for SelectKnight {
             .map(|i| i.x)
             .nth(self.current)
             .unwrap_or_else(|| self.menu.screen.cursor.x);
-        SceneSwitch::None
+
+        if self.selected.len() == game.num_players as usize {
+            SceneSwitch::Pop
+        } else {
+            SceneSwitch::None
+        }
     }
 
     fn draw(&mut self, game: &mut Game, ctx: &mut Context) -> GameResult<()> {
@@ -201,6 +213,10 @@ impl Scene<Game, InputEvent> for SelectKnight {
                     self.current = ((self.current as i32 + x) % len) as usize;
                 } else {
                     self.current = ((self.current as i32 + x + len) % len) as usize;
+                }
+
+                if gameworld.input.get_button_down(Button::Fire1) {
+                    self.select_current_knight();
                 }
             }
             State::Naming => (),
