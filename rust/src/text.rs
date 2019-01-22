@@ -1,5 +1,6 @@
 use std::collections::hash_map::Entry::{Occupied, Vacant};
 use std::collections::HashMap;
+use std::fmt;
 
 use failure;
 use failure_derive::Fail;
@@ -137,18 +138,25 @@ impl Text {
         Ok(params)
     }
 
-    pub fn as_sprite_batch(
+    pub fn as_sprite_batch<T: AsRef<str> + fmt::Display>(
         &self,
         ctx: &mut Context,
         game: &mut Game,
         palette: &[Colour],
+        background_name: Option<T>,
     ) -> Result<SpriteBatch, failure::Error> {
         let atlas = game
             .store
             .get::<_, TextureAtlas>(&LogicalKey::new(self.font.as_str()), ctx)?;
 
+        let image_name = if let Some(background_name) = background_name {
+            format!("{}{}", self.font, background_name)
+        } else {
+            self.font.clone()
+        };
+
         let atlas_dimension = atlas.borrow().image.width as u32;
-        let ggez_image = match game.images.entry(self.font.clone()) {
+        let ggez_image = match game.images.entry(image_name) {
             Occupied(i) => i.into_mut(),
             Vacant(i) => i.insert(graphics::Image::from_rgba8(
                 ctx,

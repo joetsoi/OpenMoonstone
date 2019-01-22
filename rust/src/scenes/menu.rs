@@ -77,8 +77,9 @@ impl Menu {
         }
 
         for text in &self.screen.text {
+            let palette_name = self.screen.background.as_ref();
             let mut batch: graphics::spritebatch::SpriteBatch = text
-                .as_sprite_batch(ctx, game, &self.palette)
+                .as_sprite_batch(ctx, game, &self.palette, palette_name)
                 .expect("error drawing text to screen");
             graphics::draw_ex(
                 ctx,
@@ -99,7 +100,12 @@ impl Menu {
                 .unwrap();
 
             let atlas_dimension = atlas.borrow().image.width as u32;
-            let ggez_image = match game.images.entry(image.sheet.clone()) {
+            let image_name = if let Some(background) = &self.screen.background {
+                format!("{}{}", image.sheet, background)
+            } else {
+                image.sheet.clone()
+            };
+            let ggez_image = match game.images.entry(image_name) {
                 Occupied(i) => i.into_mut(),
                 Vacant(i) => i.insert(graphics::Image::from_rgba8(
                     ctx,
