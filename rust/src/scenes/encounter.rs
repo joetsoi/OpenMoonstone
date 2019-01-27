@@ -3,8 +3,8 @@ use std::collections::{HashMap, HashSet};
 
 use failure::Error;
 use ggez::conf::NumSamples;
-use ggez::graphics;
-use ggez::{Context, GameResult};
+use ggez::nalgebra::{Point2, Vector2};
+use ggez::{graphics, Context, GameResult};
 use ggez_goodies::scene;
 use specs::world::{Builder, Index};
 use specs::{Dispatcher, DispatcherBuilder, Entity, EntityBuilder, Join, World};
@@ -297,15 +297,13 @@ impl<'a> EncounterScene<'a> {
             graphics::Image::from_rgba8(ctx, 320, 200, &*piv.borrow().to_rgba8()).unwrap();
         let background = graphics::Canvas::new(ctx, 320, 200, NumSamples::One)?;
         graphics::set_canvas(ctx, Some(&background));
-        let screen_origin = graphics::Point2::new(0.0, 0.0);
-        graphics::draw_ex(
+        let screen_origin = Point2::new(0.0, 0.0);
+        graphics::draw(
             ctx,
             &background_image,
-            graphics::DrawParam {
-                dest: screen_origin,
-                scale: graphics::Point2::new(3.0, 3.0),
-                ..Default::default()
-            },
+            graphics::DrawParam::default()
+                .dest(screen_origin)
+                .scale(Vector2::new(3.0, 3.0)),
         )?;
 
         let y_max = EncounterScene::draw_terrain(ctx, game, &mut world, terrain_name)?;
@@ -495,18 +493,16 @@ impl<'a> EncounterScene<'a> {
             let rect = scenery_rects[p.image_number];
             // println!("{:#?}",rect);
 
-            let draw_params = graphics::DrawParam {
-                src: graphics::Rect {
+            let draw_params = graphics::DrawParam::default()
+                .src(graphics::Rect {
                     x: rect.x as f32 / 512.0,
                     y: rect.y as f32 / 512.0,
                     w: rect.w as f32 / 512.0,
                     h: rect.h as f32 / 512.0,
-                },
-                dest: graphics::Point2::new(p.x as f32 * 3.0, p.y as f32 * 3.0),
-                scale: graphics::Point2::new(3.0, 3.0),
-                ..Default::default()
-            };
-            graphics::draw_ex(ctx, ggez_image, draw_params)?;
+                })
+                .dest(Point2::new(p.x as f32 * 3.0, p.y as f32 * 3.0))
+                .scale(Vector2::new(3.0, 3.0));
+            graphics::draw(ctx, ggez_image, draw_params)?;
         }
         graphics::set_canvas(ctx, None);
 
@@ -585,18 +581,16 @@ impl<'a> scene::Scene<Game, input::InputEvent> for EncounterScene<'a> {
         // graphics::set_background_color(ctx, graphics::Color::from((0, 0, 0, 255)));
         // graphics::clear(ctx);
 
-        let screen_origin = graphics::Point2::new(0.0, 0.0);
+        let screen_origin = Point2::new(0.0, 0.0);
         // draw background
         let lair = &self.background;
-        graphics::draw_ex(
+        graphics::draw(
             ctx,
             lair,
-            graphics::DrawParam {
-                dest: screen_origin,
+            graphics::DrawParam::default()
+                .dest(screen_origin)
                 // TODO: this shouldn't be need investigate why it is.
-                scale: graphics::Point2::new(3.0, 3.0),
-                ..Default::default()
-            },
+                .scale(Vector2::new(3.0, 3.0)),
         )?;
         let position_storage = self.specs_world.read_storage::<Position>();
         let draw_storage = self.specs_world.read_storage::<Draw>();
@@ -657,25 +651,23 @@ impl<'a> scene::Scene<Game, input::InputEvent> for EncounterScene<'a> {
                 // Debug collision rects
                 let rect = atlas.borrow().rects[image.image];
                 let texture_size = atlas.borrow().image.width as f32;
-                let draw_params = graphics::DrawParam {
-                    src: graphics::Rect {
+                let draw_params = graphics::DrawParam::default()
+                    .src(graphics::Rect {
                         x: rect.x as f32 / texture_size,
                         y: rect.y as f32 / texture_size,
                         w: rect.w as f32 / texture_size,
                         h: rect.h as f32 / texture_size,
-                    },
-                    dest: graphics::Point2::new(
+                    })
+                    .dest(Point2::new(
                         (position.x as i32 + (draw.direction as i32 * image.x)) as f32 * 3.0,
                         (position.y as i32 + image.y) as f32 * 3.0,
-                    ),
-                    scale: graphics::Point2::new((draw.direction as i32 * 3) as f32, 3.0),
-                    ..Default::default()
-                };
+                    ))
+                    .scale(Vector2::new((draw.direction as i32 * 3) as f32, 3.0));
 
-                graphics::draw_ex(ctx, ggez_image, draw_params)?;
+                graphics::draw(ctx, ggez_image, draw_params)?;
                 if let ImageType::BloodStain = image.image_type {
                     graphics::set_canvas(ctx, Some(&self.background));
-                    graphics::draw_ex(ctx, ggez_image, draw_params)?;
+                    graphics::draw(ctx, ggez_image, draw_params)?;
                     graphics::set_canvas(ctx, None);
                 }
             }
@@ -683,56 +675,63 @@ impl<'a> scene::Scene<Game, input::InputEvent> for EncounterScene<'a> {
 
         let body_storage = self.specs_world.read_storage::<Body>();
 
-        graphics::set_color(ctx, graphics::Color::new(0.4, 1.0, 0.0, 1.0))?;
+        // graphics::set_color(ctx, graphics::Color::new(0.4, 1.0, 0.0, 1.0))?;
         for body in (&body_storage).join() {
             if let Some(boxes) = &body.collision_boxes {
                 for collision_box in boxes {
-                    graphics::rectangle(
-                        ctx,
-                        graphics::DrawMode::Line(1.0),
-                        graphics::Rect {
-                            x: (collision_box.rect.x) as f32 * 3.0,
-                            y: (collision_box.rect.y) as f32 * 3.0,
-                            w: collision_box.rect.w as f32 * 3.0,
-                            h: collision_box.rect.h as f32 * 3.0,
-                        },
-                    )?;
+                    let mesh = graphics::MeshBuilder::new()
+                        .rectangle(
+                            graphics::DrawMode::stroke(1.0),
+                            graphics::Rect {
+                                x: (collision_box.rect.x) as f32 * 3.0,
+                                y: (collision_box.rect.y) as f32 * 3.0,
+                                w: collision_box.rect.w as f32 * 3.0,
+                                h: collision_box.rect.h as f32 * 3.0,
+                            },
+                            graphics::Color::new(0.4, 1.0, 0.0, 1.0),
+                        )
+                        .build(ctx)?;
+                    graphics::draw(ctx, &mesh, graphics::DrawParam::default())?;
                 }
             }
         }
 
         let weapon_storage = self.specs_world.read_storage::<Weapon>();
 
-        graphics::set_color(ctx, graphics::Color::new(1.0, 0.0, 1.0, 1.0))?;
         for weapon in (&weapon_storage).join() {
             if let Some(collision_rects) = &weapon.collision_points {
                 for rect in collision_rects {
-                    graphics::rectangle(
-                        ctx,
-                        graphics::DrawMode::Line(1.0),
-                        graphics::Rect {
-                            x: (rect.bounding.x * 3) as f32,
-                            y: (rect.bounding.y * 3) as f32,
-                            w: rect.bounding.w as f32 * 3.0,
-                            h: rect.bounding.h as f32 * 3.0,
-                        },
-                    )?;
-                    for point in &rect.points {
-                        graphics::rectangle(
-                            ctx,
-                            graphics::DrawMode::Line(1.0),
+                    let mesh = graphics::MeshBuilder::new()
+                        .rectangle(
+                            graphics::DrawMode::stroke(1.0),
                             graphics::Rect {
-                                x: (point.x as i32 * 3) as f32,
-                                y: (point.y as i32 * 3) as f32,
-                                w: 3.0,
-                                h: 3.0,
+                                x: (rect.bounding.x * 3) as f32,
+                                y: (rect.bounding.y * 3) as f32,
+                                w: rect.bounding.w as f32 * 3.0,
+                                h: rect.bounding.h as f32 * 3.0,
                             },
-                        )?;
+                            graphics::Color::new(1.0, 0.0, 1.0, 1.0),
+                        )
+                        .build(ctx)?;
+                    graphics::draw(ctx, &mesh, graphics::DrawParam::default())?;
+                    for point in &rect.points {
+                        let mesh = graphics::MeshBuilder::new()
+                            .rectangle(
+                                graphics::DrawMode::stroke(1.0),
+                                graphics::Rect {
+                                    x: (point.x as i32 * 3) as f32,
+                                    y: (point.y as i32 * 3) as f32,
+                                    w: 3.0,
+                                    h: 3.0,
+                                },
+                                graphics::Color::new(1.0, 0.0, 1.0, 1.0),
+                            )
+                            .build(ctx)?;
+                        graphics::draw(ctx, &mesh, graphics::DrawParam::default())?;
                     }
                 }
             }
         }
-        graphics::set_color(ctx, graphics::Color::new(1.0, 1.0, 1.0, 1.0))?;
 
         //let banner = &self.rects[73];
         //self.batch.add(graphics::DrawParam {
