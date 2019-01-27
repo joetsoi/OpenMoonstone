@@ -4,6 +4,7 @@ use std::fmt;
 
 use failure;
 use failure_derive::Fail;
+use ggez::nalgebra::Point2;
 use ggez::graphics;
 use ggez::graphics::spritebatch::SpriteBatch;
 use ggez::Context;
@@ -123,16 +124,14 @@ impl Text {
 
             let rect = atlas.borrow().rects[*i];
             let texture_size = atlas.borrow().image.width as f32;
-            params.push(graphics::DrawParam {
-                src: graphics::Rect {
+            params.push(graphics::DrawParam::default()
+                .src(graphics::Rect {
                     x: rect.x as f32 / texture_size,
                     y: rect.y as f32 / texture_size,
                     w: rect.w as f32 / texture_size,
-                    h: rect.h as f32 / texture_size,
-                },
-                dest: graphics::Point2::new(x as f32, self.y as f32),
-                ..Default::default()
-            });
+                    h: rect.h as f32 / texture_size})
+                .dest(Point2::new(x as f32, self.y as f32))
+            );
             x += *w as f32;
         }
         Ok(params)
