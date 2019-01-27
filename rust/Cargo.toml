@@ -7,8 +7,7 @@ authors = ["Joe Tsoi <joetsoi@users.noreply.github.com>"]
 [dependencies]
 byteorder = "*"
 bv = "*"
-#ggez-goodies = { git = "https://github.com/joetsoi/ggez-goodies.git"}
-ggez-goodies = { git = "https://github.com/joetsoi/ggez-goodies.git", branch = "push-multiple"}
+ggez-goodies = { git = "https://github.com/joetsoi/ggez-goodies.git", branch = "only-input-scene"}
 failure = "*"
 failure_derive = "*"
 #image = "*"
@@ -35,3 +34,5 @@ ggez = { git = "https://github.com/ggez/ggez" }
 
 #[dev-dependencies]
 #rustfmt-nightly = "*"
+[replace]
+"glutin:0.19.0" = { git = 'https://github.com/joetsoi/glutin.git', branch = "patch-1" }
