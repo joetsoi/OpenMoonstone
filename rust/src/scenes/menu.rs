@@ -4,6 +4,7 @@ use std::hash::{Hash, Hasher};
 use std::iter::repeat;
 
 use failure::Error;
+use ggez::nalgebra::{Point2, Vector2};
 use ggez::{graphics, Context, GameResult};
 use warmy::{LogicalKey, Store};
 
@@ -76,16 +77,9 @@ impl Menu {
     }
 
     pub fn draw(&mut self, game: &mut Game, ctx: &mut Context) -> GameResult<()> {
+        let draw_params = graphics::DrawParam::default().scale(Vector2::new(3.0, 3.0));
         if let Some(background) = &self.background {
-            graphics::draw_ex(
-                ctx,
-                background,
-                graphics::DrawParam {
-                    dest: graphics::Point2::new(0.0, 0.0),
-                    scale: graphics::Point2::new(3.0, 3.0),
-                    ..Default::default()
-                },
-            )?;
+            graphics::draw(ctx, background, draw_params)?;
         }
 
         for text in &self.screen.text {
@@ -93,15 +87,7 @@ impl Menu {
             let mut batch: graphics::spritebatch::SpriteBatch = text
                 .as_sprite_batch(ctx, game, &self.palette, self.palette_hash)
                 .expect("error drawing text to screen");
-            graphics::draw_ex(
-                ctx,
-                &batch,
-                graphics::DrawParam {
-                    dest: graphics::Point2::new(0.0, 0.0),
-                    scale: graphics::Point2::new(3.0, 3.0),
-                    ..Default::default()
-                },
-            )?;
+            graphics::draw(ctx, &batch, draw_params)?;
             batch.clear();
         }
 
@@ -125,18 +111,16 @@ impl Menu {
 
             let rect = atlas.borrow().rects[image.image];
             let texture_size = atlas.borrow().image.width as f32;
-            let draw_params = graphics::DrawParam {
-                src: graphics::Rect {
+            let draw_params = graphics::DrawParam::default()
+                .src(graphics::Rect {
                     x: rect.x as f32 / texture_size,
                     y: rect.y as f32 / texture_size,
                     w: rect.w as f32 / texture_size,
                     h: rect.h as f32 / texture_size,
-                },
-                dest: graphics::Point2::new(image.x as f32 * 3.0, image.y as f32 * 3.0),
-                scale: graphics::Point2::new(3.0, 3.0),
-                ..Default::default()
-            };
-            graphics::draw_ex(ctx, ggez_image, draw_params)?;
+                })
+                .dest(Point2::new(image.x as f32 * 3.0, image.y as f32 * 3.0))
+                .scale(Vector2::new(3.0, 3.0));
+            graphics::draw(ctx, ggez_image, draw_params)?;
         }
         Ok(())
     }
