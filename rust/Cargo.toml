@@ -24,10 +24,10 @@ serde_yaml = "*"
 warmy = "0.8.0"
 maplit = "*"
 lazy_static = "1.2.0"
+ggez = { git = "https://github.com/ggez/ggez" }
 
-[dependencies.ggez]
-version = "*"
-features = ["cargo-resource-root"]
+# [dependencies.ggez]
+# features = ["cargo-resource-root"]
 
 #[dependencies.shred]
 #version = "*"
