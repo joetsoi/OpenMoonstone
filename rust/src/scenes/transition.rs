@@ -43,7 +43,7 @@ impl scene::Scene<Game, InputEvent> for Fade {
 
     fn draw(&mut self, _game: &mut Game, ctx: &mut Context) -> GameResult<()> {
         // TODO fix this when context is passed to update.
-        let time_since_start = timer::get_time_since_start(ctx);
+        let time_since_start = timer::time_since_start(ctx);
         if self.update_run && self.ticks < self.fade_start {
             self.ticks += 1;
             self.start_time = time_since_start;
@@ -59,35 +59,32 @@ impl scene::Scene<Game, InputEvent> for Fade {
                 }
                 alpha
             }
-            FadeStyle::Out => {
-                time_passed / timer::duration_to_f64(self.duration)
-            }
+            FadeStyle::Out => time_passed / timer::duration_to_f64(self.duration),
         };
-        if self.update_run {
-            graphics::set_color(ctx, graphics::Color::new(0.0, 0.0, 0.0, alpha as f32))?;
+        let color = if self.update_run {
+            graphics::Color::new(0.0, 0.0, 0.0, alpha as f32)
         } else {
             match self.style {
-                FadeStyle::In => {
-                    graphics::set_color(ctx, graphics::Color::new(0.0, 0.0, 0.0, 1.0))?
-                }
-                FadeStyle::Out => {
-                    graphics::set_color(ctx, graphics::Color::new(0.0, 0.0, 0.0, 0.0))?
-                }
+                FadeStyle::In => graphics::Color::new(0.0, 0.0, 0.0, 1.0),
+                FadeStyle::Out => graphics::Color::new(0.0, 0.0, 0.0, 0.0),
             }
-        }
+        };
 
-        graphics::rectangle(
-            ctx,
-            DrawMode::Fill,
-            graphics::Rect {
-                x: 0.0,
-                y: 0.0,
-                w: 320.0 * 3.0,
-                h: 200.0 * 3.0,
-            },
-        )?;
-        graphics::set_color(ctx, graphics::Color::new(1.0, 1.0, 1.0, 1.0))?;
-        if self.update_run && self.start_time + self.duration < timer::get_time_since_start(ctx) {
+        let mesh = graphics::MeshBuilder::new()
+            .rectangle(
+                DrawMode::fill(),
+                graphics::Rect {
+                    x: 0.0,
+                    y: 0.0,
+                    w: 320.0 * 3.0,
+                    h: 200.0 * 3.0,
+                },
+                color,
+            )
+            .build(ctx)?;
+        graphics::draw(ctx, &mesh, graphics::DrawParam::default())?;
+
+        if self.update_run && self.start_time + self.duration < timer::time_since_start(ctx) {
             self.done = true;
         }
         Ok(())
