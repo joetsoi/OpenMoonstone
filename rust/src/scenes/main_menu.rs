@@ -1,4 +1,5 @@
 use failure::Error;
+use ggez::nalgebra::{Point2, Vector2};
 use ggez::{graphics, Context, GameResult};
 use ggez_goodies::scene::{Scene, SceneSwitch};
 use lazy_static::lazy_static;
@@ -112,18 +113,15 @@ impl MainMenuScene {
         let rect = atlas.borrow().rects[self.menu.screen.cursor.image];
         let texture_size = atlas.borrow().image.width as f32;
         let y = ARROW_POSITIONS[self.selected_option as usize];
-        let draw_params = graphics::DrawParam {
-            src: graphics::Rect {
+        let draw_params = graphics::DrawParam::default()
+            .src(graphics::Rect {
                 x: rect.x as f32 / texture_size,
                 y: rect.y as f32 / texture_size,
                 w: rect.w as f32 / texture_size,
-                h: rect.h as f32 / texture_size,
-            },
-            dest: graphics::Point2::new(self.menu.screen.cursor.x as f32 * 3.0, y as f32 * 3.0),
-            scale: graphics::Point2::new(3.0, 3.0),
-            ..Default::default()
-        };
-        graphics::draw_ex(ctx, &arrow_image, draw_params)?;
+                h: rect.h as f32 / texture_size})
+            .dest(Point2::new(self.menu.screen.cursor.x as f32 * 3.0, y as f32 * 3.0))
+            .scale(Vector2::new(3.0, 3.0));
+        graphics::draw(ctx, &arrow_image, draw_params)?;
         Ok(())
     }
 
@@ -136,14 +134,10 @@ impl MainMenuScene {
                 .expect("error drawing OFF")
         };
 
-        graphics::draw_ex(
+        graphics::draw(
             ctx,
             &batch,
-            graphics::DrawParam {
-                dest: graphics::Point2::new(0.0, 0.0),
-                scale: graphics::Point2::new(3.0, 3.0),
-                ..Default::default()
-            },
+            graphics::DrawParam::default().scale(Vector2::new(3.0, 3.0)),
         )?;
         batch.clear();
         Ok(())
@@ -155,14 +149,10 @@ impl MainMenuScene {
         let mut batch = text
             .as_sprite_batch(ctx, game, &self.menu.palette, self.menu.palette_hash)
             .expect("error drawing PLAYER_COUNT");
-        graphics::draw_ex(
+        graphics::draw(
             ctx,
             &batch,
-            graphics::DrawParam {
-                dest: graphics::Point2::new(0.0, 0.0),
-                scale: graphics::Point2::new(3.0, 3.0),
-                ..Default::default()
-            },
+            graphics::DrawParam::default().scale(Vector2::new(3.0, 3.0)),
         )?;
         batch.clear();
         Ok(())
@@ -183,8 +173,7 @@ impl Scene<Game, InputEvent> for MainMenuScene {
     }
 
     fn draw(&mut self, game: &mut Game, ctx: &mut Context) -> GameResult<()> {
-        graphics::set_background_color(ctx, graphics::Color::from((0, 0, 0, 255)));
-        graphics::clear(ctx);
+        graphics::clear(ctx, graphics::Color::from((0, 0, 0, 255)));
         self.menu.draw(game, ctx)?;
         self.draw_arrow(game, ctx)?;
         self.draw_gore_option(game, ctx)?;
