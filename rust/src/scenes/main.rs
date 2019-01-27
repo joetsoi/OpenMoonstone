@@ -56,19 +56,19 @@ impl Scene<Game, InputEvent> for MainScene {
     }
 
     fn draw(&mut self, _game: &mut Game, ctx: &mut Context) -> GameResult<()> {
-        let mesh = graphics::MeshBuilder::new()
-            .rectangle(
-                DrawMode::fill(),
-                graphics::Rect {
-                    x: 0.0,
-                    y: 0.0,
-                    //TODO: handle scale factor
-                    w: 320.0 * 3.0,
-                    h: 200.0 * 3.0,
-                },
-                graphics::Color::new(0.0, 1.0, 0.0, 1.0))
-            .build(ctx)?;
-        graphics::draw(ctx, &mesh, graphics::DrawParam::default())?;
+        //let mesh = graphics::MeshBuilder::new()
+        //    .rectangle(
+        //        DrawMode::fill(),
+        //        graphics::Rect {
+        //            x: 0.0,
+        //            y: 0.0,
+        //            //TODO: handle scale factor
+        //            w: 320.0 * 3.0,
+        //            h: 200.0 * 3.0,
+        //        },
+        //        graphics::Color::new(0.0, 1.0, 0.0, 1.0))
+        //    .build(ctx)?;
+        //graphics::draw(ctx, &mesh, graphics::DrawParam::default())?;
         Ok(())
     }
 

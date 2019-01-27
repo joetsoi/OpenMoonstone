@@ -1,12 +1,14 @@
 #![warn(rust_2018_idioms)]
 
 use std::time::Duration;
+use std::{env, path};
 
 use ggez::conf;
 use ggez::event;
+use ggez::filesystem;
 use ggez::graphics;
 use ggez::timer;
-use ggez::{Context, GameResult};
+use ggez::{Context, ContextBuilder, GameResult};
 // use image::RgbaImage;
 
 use warmy::LogicalKey;
@@ -16,7 +18,7 @@ use openmoonstone::input;
 use openmoonstone::piv::PivImage;
 use openmoonstone::scenes;
 use openmoonstone::scenes::transition::FadeStyle;
-use openmoonstone::scenes::{FSceneStack, Fade, MainScene, MainMenuScene};
+use openmoonstone::scenes::{FSceneStack, Fade, MainMenuScene, MainScene};
 
 struct MainState {
     input_binding: input::InputBinding,
@@ -60,8 +62,8 @@ impl event::EventHandler for MainState {
     fn key_down_event(
         &mut self,
         _ctx: &mut Context,
-        keycode: event::Keycode,
-        _keymod: event::Mod,
+        keycode: event::KeyCode,
+        _keymods: event::KeyMods,
         _repeat: bool,
     ) {
         if let Some(ev) = self.input_binding.resolve(keycode) {
@@ -73,9 +75,8 @@ impl event::EventHandler for MainState {
     fn key_up_event(
         &mut self,
         _ctx: &mut Context,
-        keycode: event::Keycode,
-        _keymod: event::Mod,
-        _repeat: bool,
+        keycode: event::KeyCode,
+        _keymods: event::KeyMods,
     ) {
         if let Some(ev) = self.input_binding.resolve(keycode) {
             self.scene_stack.input(ev, false);
@@ -85,8 +86,13 @@ impl event::EventHandler for MainState {
 }
 
 fn main() {
-    let c = conf::Conf::new();
-    let ctx = &mut Context::load_from_conf("openmoonstone", "joetsoi", c).unwrap();
+    let mut builder = ContextBuilder::new("openmoonstone", "joetsoi");
+    if let Ok(manifest_dir) = env::var("CARGO_MANIFEST_DIR") {
+        let path = path::PathBuf::from(manifest_dir).join("resources");
+        println!("Adding 'resources' path {:?}", path);
+        builder = builder.add_resource_path(path);
+    }
+    let (ctx, event_loop) = &mut builder.build().unwrap();
     graphics::set_default_filter(ctx, graphics::FilterMode::Nearest);
 
     let game = Game::new().expect("failed to initialize game");
@@ -112,5 +118,5 @@ fn main() {
         scene_stack,
         input_binding: input::create_input_binding(),
     };
-    event::run(ctx, &mut state).unwrap();;
+    event::run(ctx, event_loop, &mut state).unwrap();;
 }
