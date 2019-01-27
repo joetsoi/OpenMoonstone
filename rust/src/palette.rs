@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use ggez::Context;
+use ggez::{filesystem, Context};
 use serde_yaml::Value;
 use warmy;
 
@@ -19,11 +19,11 @@ impl warmy::Load<Context> for PaletteSwaps {
         store: &mut warmy::Storage<ggez::Context>,
         ctx: &mut ggez::Context,
     ) -> Result<warmy::Loaded<Self>, Self::Error> {
-        let file = ctx.filesystem.open(key.as_str()).map_err(err_from)?;
+        let file = filesystem::open(ctx, key.as_str()).map_err(err_from)?;
         let yaml: Value = serde_yaml::from_reader(file).map_err(err_from)?;
 
         Ok(warmy::Loaded::from(PaletteSwaps(
-            serde_yaml::from_value(yaml).map_err(err_from)?
+            serde_yaml::from_value(yaml).map_err(err_from)?,
         )))
     }
 }
