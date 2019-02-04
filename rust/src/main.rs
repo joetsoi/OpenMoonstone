@@ -61,25 +61,29 @@ impl event::EventHandler for MainState {
 
     fn key_down_event(
         &mut self,
-        _ctx: &mut Context,
+        ctx: &mut Context,
         keycode: event::KeyCode,
-        _keymods: event::KeyMods,
-        _repeat: bool,
+        keymods: event::KeyMods,
+        repeat: bool,
     ) {
+        self.scene_stack.input(
+            input::InputEvent::Raw(input::RawInput { keycode, keymods }),
+            true,
+        );
         if let Some(ev) = self.input_binding.resolve(keycode) {
-            self.scene_stack.input(ev, true);
+            self.scene_stack.input(input::InputEvent::Binded(ev), true);
             self.scene_stack.world.input.update_effect(ev, true);
         }
     }
 
     fn key_up_event(
         &mut self,
-        _ctx: &mut Context,
+        ctx: &mut Context,
         keycode: event::KeyCode,
-        _keymods: event::KeyMods,
+        keymods: event::KeyMods,
     ) {
         if let Some(ev) = self.input_binding.resolve(keycode) {
-            self.scene_stack.input(ev, false);
+            self.scene_stack.input(input::InputEvent::Binded(ev), false);
             self.scene_stack.world.input.update_effect(ev, false);
         }
     }
