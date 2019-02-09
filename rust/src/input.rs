@@ -1,6 +1,6 @@
 //! Typedefs for input shortcuts.
 use ggez::event::*;
-use ggez::input::keyboard::{KeyCode, KeyMods};
+use ggez::input::keyboard::KeyCode;
 use ggez_goodies::input;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
@@ -26,23 +26,15 @@ pub enum Axis {
     Horz4,
 }
 
-#[derive(Debug)]
-pub struct RawInput {
-    pub keycode: KeyCode,
-    pub keymods: KeyMods,
-}
-
 pub type InputBinding = input::InputBinding<Axis, Button>;
 pub type InputEffect = input::InputEffect<Axis, Button>;
 pub type InputState = input::InputState<Axis, Button>;
 
-
 pub enum InputEvent {
     Binded(InputEffect),
-    Raw(RawInput),
+    Text(char),
+    Key(KeyCode),
 }
-
-
 
 /// Create the default keybindings for our input state.
 pub fn create_input_binding() -> input::InputBinding<Axis, Button> {

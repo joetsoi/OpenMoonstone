@@ -23,16 +23,11 @@ serde_yaml = "*"
 warmy = "0.8.0"
 maplit = "*"
 lazy_static = "1.2.0"
-ggez = { git = "https://github.com/ggez/ggez" }
+#ggez = { git = "https://github.com/ggez/ggez" }
 
-# [dependencies.ggez]
-# features = ["cargo-resource-root"]
+[dependencies.ggez]
+git = "https://github.com/ggez/ggez"
+default-features = false
 
-#[dependencies.shred]
-#version = "*"
-#features = ["nightly"]
-
-#[dev-dependencies]
-#rustfmt-nightly = "*"
 [replace]
 "glutin:0.19.0" = { git = 'https://github.com/joetsoi/glutin.git', branch = "patch-1" }

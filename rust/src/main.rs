@@ -18,7 +18,7 @@ use openmoonstone::input;
 use openmoonstone::piv::PivImage;
 use openmoonstone::scenes;
 use openmoonstone::scenes::transition::FadeStyle;
-use openmoonstone::scenes::{FSceneStack, Fade, MainMenuScene, MainScene};
+use openmoonstone::scenes::{FSceneStack, Fade, MainMenuScene, MainScene, SelectKnight};
 
 struct MainState {
     input_binding: input::InputBinding,
@@ -66,10 +66,8 @@ impl event::EventHandler for MainState {
         keymods: event::KeyMods,
         repeat: bool,
     ) {
-        self.scene_stack.input(
-            input::InputEvent::Raw(input::RawInput { keycode, keymods }),
-            true,
-        );
+        self.scene_stack
+            .input(input::InputEvent::Key(keycode), true);
         if let Some(ev) = self.input_binding.resolve(keycode) {
             self.scene_stack.input(input::InputEvent::Binded(ev), true);
             self.scene_stack.world.input.update_effect(ev, true);
@@ -86,6 +84,10 @@ impl event::EventHandler for MainState {
             self.scene_stack.input(input::InputEvent::Binded(ev), false);
             self.scene_stack.world.input.update_effect(ev, false);
         }
+    }
+    fn text_input_event(&mut self, _ctx: &mut Context, c: char) {
+        self.scene_stack
+            .input(input::InputEvent::Text(c), true);
     }
 }
 
@@ -117,6 +119,9 @@ fn main() {
 
     let fade_in = Fade::new(274, 1, FadeStyle::In);
     scene_stack.push(Box::new(fade_in));
+
+    let sk = SelectKnight::new(ctx, &mut scene_stack.world.store).unwrap();
+    scene_stack.push(Box::new(sk));
 
     let mut state = MainState {
         scene_stack,

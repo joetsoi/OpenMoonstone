@@ -1,6 +1,8 @@
 use std::collections::hash_map::Entry::{Occupied, Vacant};
 
 use failure::{err_msg, Error};
+use ggez::event;
+use ggez::input::keyboard::KeyCode;
 use ggez::nalgebra::{Point2, Vector2};
 use ggez::{graphics, Context, GameResult};
 use ggez_goodies::scene::{Scene, SceneSwitch};
@@ -12,6 +14,7 @@ use crate::objects::TextureAtlas;
 use crate::palette::PaletteSwaps;
 use crate::piv::{extract_palette, Colour};
 use crate::scenes::FSceneSwitch;
+use crate::text::Text;
 
 use super::menu::Menu;
 
@@ -30,6 +33,8 @@ pub struct SelectKnight {
     current: usize,
     selected: Vec<u32>,
     available: Vec<u32>,
+
+    current_name: String,
 }
 
 struct ColourOscillate {
@@ -111,6 +116,7 @@ impl SelectKnight {
             current: 0,
             available: vec![0, 1, 2, 3],
             selected: Vec::new(),
+            current_name: String::from("SIR GODBER"),
         })
     }
 
@@ -165,6 +171,7 @@ impl SelectKnight {
     fn select_current_knight(&mut self) {
         self.selected.push(self.available.remove(self.current));
         self.menu.screen.images.remove(self.current);
+        self.state = State::Naming;
 
         self.current = 0;
     }
@@ -194,7 +201,26 @@ impl Scene<Game, InputEvent> for SelectKnight {
     fn draw(&mut self, game: &mut Game, ctx: &mut Context) -> GameResult<()> {
         graphics::clear(ctx, graphics::Color::from((0, 0, 0, 255)));
         self.menu.draw(game, ctx);
-        self.draw_cursor(game, ctx);
+        match self.state {
+            State::Selecting => self.draw_cursor(game, ctx)?,
+            State::Naming => {
+                let mut name_input = self.current_name.clone();
+                name_input.push('/');
+                let text = Text {
+                    string: name_input,
+                    font: "bold.f".to_string(),
+                    bordered: true,
+                    centered: false,
+                    x: 50,
+                    y: 50,
+                };
+                let spritebatch = text
+                    .as_sprite_batch(ctx, game, &self.menu.palette, self.menu.palette_hash)
+                    .expect("fix this sprite batch");
+                let draw_params = graphics::DrawParam::default().scale(Vector2::new(3.0, 3.0));
+                graphics::draw(ctx, &spritebatch, draw_params)?;
+            }
+        };
         Ok(())
     }
 
@@ -202,7 +228,7 @@ impl Scene<Game, InputEvent> for SelectKnight {
         "Select a Knight"
     }
 
-    fn input(&mut self, gameworld: &mut Game, _event: InputEvent, started: bool) {
+    fn input(&mut self, gameworld: &mut Game, event: InputEvent, started: bool) {
         match self.state {
             State::Selecting => {
                 let x = gameworld.input.get_axis_raw(Axis::Horz1) as i32;
@@ -217,7 +243,19 @@ impl Scene<Game, InputEvent> for SelectKnight {
                     self.select_current_knight();
                 }
             }
-            State::Naming => (),
+            State::Naming => match event {
+                InputEvent::Text(c) => {
+                    if c.is_alphanumeric() || c.is_ascii_whitespace() {
+                        self.current_name.push(c.to_ascii_uppercase());
+                    }
+                }
+                InputEvent::Key(keycode) => {
+                    if keycode == KeyCode::Back {
+                        self.current_name.pop();
+                    }
+                }
+                _ => (),
+            },
         }
     }
 }

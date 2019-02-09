@@ -39,7 +39,7 @@ impl Game {
             next_scene: SceneState::Practice,
 
             gore_on: true,
-            num_players: 1,
+            num_players: 2,
             encounter_starting_position: 0,
             practice_encounter: 1,
         })
