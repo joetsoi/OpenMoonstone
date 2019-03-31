@@ -117,11 +117,11 @@ fn main() {
     let menu = MainMenuScene::new(ctx, &mut scene_stack.world.store).unwrap();
     scene_stack.push(Box::new(menu));
 
-    let fade_in = Fade::new(274, 1, FadeStyle::In);
-    scene_stack.push(Box::new(fade_in));
+    // let fade_in = Fade::new(274, 1, FadeStyle::In);
+    // scene_stack.push(Box::new(fade_in));
 
-    let sk = SelectKnight::new(ctx, &mut scene_stack.world.store).unwrap();
-    scene_stack.push(Box::new(sk));
+    // let sk = SelectKnight::new(ctx, &mut scene_stack.world.store).unwrap();
+    // scene_stack.push(Box::new(sk));
 
     let mut state = MainState {
         scene_stack,

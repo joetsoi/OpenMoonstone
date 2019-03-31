@@ -24,6 +24,8 @@ warmy = "0.8.0"
 maplit = "*"
 lazy_static = "1.2.0"
 #ggez = { git = "https://github.com/ggez/ggez" }
+loadable_yaml_macro_derive = {path = "../loadable_yaml_macro_derive"}
+compat_error = {path = "../compat_error"}
 
 [dependencies.ggez]
 git = "https://github.com/ggez/ggez"
