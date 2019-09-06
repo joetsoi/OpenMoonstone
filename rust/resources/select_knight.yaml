@@ -1,8 +1,50 @@
+background: map
 text:
-  - {string: "Select a Knight", font: bold.f, bordered: true, centered: true, x: 0, y: 5}
+   - {string: "a", font: bold.f, bordered: true, centered: true, x: 0, y: 5}
+   # - {string: "Select a Knight", font: bold.f, bordered: true, centered: true, x: 0, y: 5}
 images:
-  - {sheet: sel.cel, image: 2, x: 12, y: 80}
-  - {sheet: sel.cel, image: 3, x: 88, y: 80}
-  - {sheet: sel.cel, image: 4, x: 164, y: 80}
-  - {sheet: sel.cel, image: 5, x: 240, y: 80}
+  # forest lairs
+  - {sheet: mi.c, image: 20, x: 24, y: 112}
+  - {sheet: mi.c, image: 20, x: 104, y: 120}
+  - {sheet: mi.c, image: 20, x: 120, y: 144}
+  - {sheet: mi.c, image: 20, x: 80, y: 184}
+  - {sheet: mi.c, image: 20, x: 24, y: 160}
+  - {sheet: mi.c, image: 20, x: 48, y: 136}
+  # wasteland lairs
+  - {sheet: mi.c, image: 20, x: 296, y: 32}
+  - {sheet: mi.c, image: 20, x: 232, y: 16}
+  - {sheet: mi.c, image: 20, x: 176, y: 48}
+  - {sheet: mi.c, image: 20, x: 240, y: 48}
+  - {sheet: mi.c, image: 20, x: 216, y: 72}
+  - {sheet: mi.c, image: 20, x: 272, y: 80}
+  # wetlands lairs
+  - {sheet: mi.c, image: 20, x: 208, y: 104}
+  - {sheet: mi.c, image: 20, x: 248, y: 120}
+  - {sheet: mi.c, image: 20, x: 168, y: 136}
+  - {sheet: mi.c, image: 20, x: 152, y: 176}
+  - {sheet: mi.c, image: 20, x: 232, y: 176}
+  - {sheet: mi.c, image: 20, x: 288, y: 176}
+  # grasslands lairs
+  - {sheet: mi.c, image: 20, x: 24, y: 24}
+  - {sheet: mi.c, image: 20, x: 96, y: 16}
+  - {sheet: mi.c, image: 20, x: 136, y: 49}
+  - {sheet: mi.c, image: 20, x: 32, y: 64}
+  - {sheet: mi.c, image: 20, x: 80, y: 64}
+  - {sheet: mi.c, image: 20, x: 96, y: 88}
+  # knights
+  - {sheet: mi.c, image: 0, x: 10, y: 10}
+  - {sheet: mi.c, image: 1, x: 300, y: 5}
+  - {sheet: mi.c, image: 2, x: 26, y: 180}
+  - {sheet: mi.c, image: 4, x: 300, y: 185}
+  - {sheet: mi.c, image: 41, x: 10, y: 40}
+  - {sheet: mi.c, image: 42, x: 10, y: 70}
+  - {sheet: mi.c, image: 43, x: 10, y: 100}
+  - {sheet: mi.c, image: 44, x: 10, y: 130}
+  - {sheet: mi.c, image: 45, x: 10, y: 160}
+  # blue frog
+  - {sheet: mi.c, image: 43, x: 10, y: 180}
+  # - {sheet: sel.cel, image: 2, x: 12, y: 80}
+  # - {sheet: sel.cel, image: 3, x: 88, y: 80}
+  # - {sheet: sel.cel, image: 4, x: 164, y: 80}
+  # - {sheet: sel.cel, image: 5, x: 240, y: 80}
 cursor: {sheet: sel.cel, image: 1, x: 12, y: 80}

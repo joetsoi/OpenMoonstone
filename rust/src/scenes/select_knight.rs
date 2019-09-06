@@ -6,7 +6,7 @@ use ggez::input::keyboard::KeyCode;
 use ggez::nalgebra::{Point2, Vector2};
 use ggez::{graphics, Context, GameResult};
 use ggez_goodies::scene::{Scene, SceneSwitch};
-use warmy::{LogicalKey, Store};
+use warmy::{SimpleKey, Store};
 
 use crate::game::{Game, SceneState};
 use crate::input::{Axis, Button, InputEvent};
@@ -89,10 +89,12 @@ impl Iterator for ColourOscillate {
 }
 
 impl SelectKnight {
-    pub fn new(ctx: &mut Context, store: &mut Store<Context>) -> Result<Self, Error> {
+    pub fn new(ctx: &mut Context, store: &mut Store<Context, SimpleKey>) -> Result<Self, Error> {
         let menu = Menu::new(ctx, store, "/select_knight.yaml")?;
 
-        let swaps_res = store.get::<_, PaletteSwaps>(&LogicalKey::new("/palettes.yaml"), ctx)?;
+        let swaps_res = store.get::<PaletteSwaps>(&SimpleKey::from("/palettes.yaml"), ctx)
+            //TODO: fix with ? syntax
+            .expect("error loading pallete swaps in select knight");
         let swaps = swaps_res.borrow();
         let raw_palette = swaps
             .0
@@ -123,8 +125,8 @@ impl SelectKnight {
     fn draw_cursor(&mut self, game: &mut Game, ctx: &mut Context) -> GameResult<()> {
         let atlas = game
             .store
-            .get::<_, TextureAtlas>(&LogicalKey::new(&self.menu.screen.cursor.sheet), ctx)
-            // TODO: raise error
+            .get::<TextureAtlas>(&SimpleKey::from(self.menu.screen.cursor.sheet.clone()), ctx)
+            // TODO: raise error with ?
             .expect("Couldn't find sel.cel yaml metadata");
 
         let ggez_image = match game.images.entry(format!(

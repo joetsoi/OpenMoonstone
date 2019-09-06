@@ -6,6 +6,7 @@ scenes:
     fob1: DISKB/FOB1.CMP
     glb1: DISKB/GLB1.CMP
     swb1: DISKB/SWB1.CMP
+    map: DISKB/MAP.CMP
     # scenery
     fo1: DISKB/FO1.CMP
     fo2: DISKB/FO2.CMP
@@ -37,5 +38,7 @@ objects:
     # fonts
     bold.f: {file: DISKA/BOLD.F, texture_size: 512}
     small.f: {file: DISKB/SMALL.FON, texture_size: 128}
+    # map
+    mi.c: {file: DISKB/MI.C, texture_size: 256}
 
 collide: DISKB/COLLIDE.HIT

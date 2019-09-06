@@ -2,8 +2,9 @@ use std::collections::HashMap;
 
 use failure::Error;
 use ggez::graphics;
+use ggez::nalgebra::Vector2;
 use ggez::Context;
-use warmy::{Store, StoreOpt};
+use warmy::{SimpleKey, Store, StoreOpt};
 
 use crate::input;
 
@@ -15,7 +16,7 @@ pub enum SceneState {
 
 pub struct Game {
     pub input: input::InputState,
-    pub store: Store<Context>,
+    pub store: Store<Context, SimpleKey>,
     pub images: HashMap<String, graphics::Image>,
 
     pub scene: SceneState,
@@ -26,14 +27,17 @@ pub struct Game {
 
     pub encounter_starting_position: u32,
     pub practice_encounter: u32,
+
+    pub screen_scale: Vector2<f32>,
 }
 
 impl Game {
     pub fn new() -> Result<Game, Error> {
+        let store = Store::new(StoreOpt::default()).expect("error creating store");
         Ok(Game {
             input: input::InputState::new(),
             images: HashMap::new(),
-            store: Store::new(StoreOpt::default())?,
+            store: store,
 
             scene: SceneState::Menu,
             next_scene: SceneState::Practice,
@@ -42,6 +46,8 @@ impl Game {
             num_players: 2,
             encounter_starting_position: 0,
             practice_encounter: 1,
+
+            screen_scale: Vector2::new(3.0, 3.0),
         })
     }
 }

@@ -8,7 +8,7 @@ use ggez::{graphics, Context, GameResult};
 use ggez_goodies::scene;
 use specs::world::{Builder, Index};
 use specs::{Dispatcher, DispatcherBuilder, Entity, EntityBuilder, Join, World};
-use warmy::{LogicalKey, Store};
+use warmy::{SimpleKey, Store};
 
 use super::transition::FadeStyle;
 use super::Fade;
@@ -143,11 +143,11 @@ impl<'a> EncounterScene<'a> {
 
     fn load_resources(
         ctx: &mut Context,
-        store: &mut Store<Context>,
+        store: &mut Store<Context, SimpleKey>,
         world: &mut World,
     ) -> Result<(), Error> {
         let damage_tables = store
-            .get::<_, DamageTables>(&LogicalKey::new("/damage.yaml"), ctx)
+            .get::<DamageTables>(&SimpleKey::from("/damage.yaml"), ctx)
             .expect("error loading damage.yaml");
         world.add_resource(damage_tables.borrow().clone());
         world.add_resource(CombatDone(false));
@@ -156,19 +156,21 @@ impl<'a> EncounterScene<'a> {
 
     fn load_sprite_data(
         ctx: &mut Context,
-        store: &mut Store<Context>,
+        store: &mut Store<Context, SimpleKey>,
         world: &mut World,
         entity_names: &[&str],
     ) -> Result<(), Error> {
         let entities_yaml =
-            store.get::<_, GameYaml>(&warmy::LogicalKey::new("/entities.yaml"), ctx)?;
+            // TODO: fix to allow ? syntax
+            store.get::<GameYaml>(&warmy::SimpleKey::from("/entities.yaml"), ctx).expect("Error loading entities.yaml");
 
         let mut sprites: HashMap<String, Sprite> = HashMap::new();
         let mut atlas_names: HashSet<String> = HashSet::new();
         for name in entity_names {
             let yaml_borrow = &entities_yaml.borrow();
             let yaml_file = yaml_borrow.yaml[name].as_str().unwrap();
-            let entity_yaml = store.get::<_, Sprite>(&warmy::LogicalKey::new(yaml_file), ctx)?;
+            // TODO: Fix to allow ? syntax
+            let entity_yaml = store.get::<Sprite>(&warmy::SimpleKey::from(yaml_file), ctx).expect("error loading entity yaml_file");
             sprites.insert(name.to_string(), (*entity_yaml.borrow()).clone());
 
             for i in entity_yaml
@@ -189,8 +191,9 @@ impl<'a> EncounterScene<'a> {
         let mut texture_atlases: HashMap<String, TextureAtlas> = HashMap::new();
         for atlas_name in atlas_names {
             let atlas = store
-                .get::<_, TextureAtlas>(&LogicalKey::new(atlas_name.clone()), ctx)
-                .unwrap();
+                .get::<TextureAtlas>(&SimpleKey::from(atlas_name.clone()), ctx)
+                // TODO: Fix to allow ? syntax
+                .expect("Error loading texture atlas");
             image_sizes.insert(atlas_name.clone(), atlas.borrow().rects.clone());
             texture_atlases.insert(atlas_name.clone(), atlas.borrow().clone());
         }
@@ -210,7 +213,7 @@ impl<'a> EncounterScene<'a> {
 
     fn build_entity(
         ctx: &mut Context,
-        store: &mut Store<Context>,
+        store: &mut Store<Context, SimpleKey>,
         world: &'a mut World,
         resource: &str,
         raw_palette: &[u16],
@@ -220,12 +223,14 @@ impl<'a> EncounterScene<'a> {
         direction: Facing,
     ) -> EntityBuilder<'a> {
         let sprite_res = store
-            .get::<_, Sprite>(&LogicalKey::new(format!("/{}.yaml", resource)), ctx)
-            .unwrap();
+            .get::<Sprite>(&SimpleKey::from(format!("/{}.yaml", resource)), ctx)
+            // TODO fix error handling, make this ?
+            .expect("error getting sprite in build entity");
         let sprite = sprite_res.borrow();
 
         let swaps_res = store
-            .get::<_, PaletteSwaps>(&LogicalKey::new("/palettes.yaml"), ctx)
+            .get::<PaletteSwaps>(&SimpleKey::from("/palettes.yaml"), ctx)
+            // TODO fix error handling, make this ?
             .expect("error loading palette.yaml");
         let swaps = swaps_res.borrow();
         world
@@ -291,8 +296,9 @@ impl<'a> EncounterScene<'a> {
 
         let piv = game
             .store
-            .get::<_, PivImage>(&LogicalKey::new(background_name), ctx)
-            .unwrap();
+            .get::<PivImage>(&SimpleKey::from(background_name), ctx)
+            // TODO fix error handling, make this ?
+            .expect("Error loading piv background");
         let background_image =
             graphics::Image::from_rgba8(ctx, 320, 200, &*piv.borrow().to_rgba8()).unwrap();
         let background = graphics::Canvas::new(ctx, 320, 200, NumSamples::One)?;
@@ -309,8 +315,9 @@ impl<'a> EncounterScene<'a> {
         let y_max = EncounterScene::draw_terrain(ctx, game, &mut world, terrain_name)?;
         let collide_hit = game
             .store
-            .get::<_, CollisionBoxes>(&LogicalKey::new("collide"), ctx)
-            .unwrap();
+            .get::<CollisionBoxes>(&SimpleKey::from("collide"), ctx)
+            // TODO fix error handling, make this ?
+            .expect("Error loading collision boxes");
         world.add_resource(collide_hit.borrow().clone());
 
         let (player_1, player_2, player_3, player_4) = EncounterScene::create_entities(
@@ -474,12 +481,15 @@ impl<'a> EncounterScene<'a> {
     ) -> Result<u32, Error> {
         let terrain = game
             .store
-            .get::<_, TerrainFile>(&LogicalKey::new(terrain_name.to_string()), ctx)
-            .unwrap();
+            .get::<TerrainFile>(&SimpleKey::from(terrain_name.to_string()), ctx)
+            // TODO fix error handling, make this ?
+            .expect("Error loading terrain file whlie drawing");
         for p in &terrain.borrow().positions {
             let cmp = game
                 .store
-                .get::<_, PivImage>(&LogicalKey::new(&p.atlas), ctx)?;
+                .get::<PivImage>(&SimpleKey::from(p.atlas.clone()), ctx)
+                // TODO fix error handling, make this ?
+                .expect("error loading piv image in draw_terrain");
             let ggez_image = match game.images.entry(p.atlas.clone()) {
                 Occupied(i) => i.into_mut(),
                 Vacant(i) => i.insert(graphics::Image::from_rgba8(
@@ -612,8 +622,9 @@ impl<'a> scene::Scene<Game, input::InputEvent> for EncounterScene<'a> {
             for image in images {
                 let atlas = game
                     .store
-                    .get::<_, TextureAtlas>(&LogicalKey::new(image.sheet.as_str()), ctx)
-                    .unwrap();
+                    .get::<TextureAtlas>(&SimpleKey::from(image.sheet.as_str()), ctx)
+                    // TODO fix error handling, make this ?
+                    .expect("error loading texture atlas when drawing");
 
                 let atlas_dimension = atlas.borrow().image.width as u32;
                 // TODO: change with palettes

@@ -11,7 +11,7 @@ use ggez::timer;
 use ggez::{Context, ContextBuilder, GameResult};
 // use image::RgbaImage;
 
-use warmy::LogicalKey;
+use warmy::SimpleKey;
 
 use openmoonstone::game::Game;
 use openmoonstone::input;
@@ -106,8 +106,9 @@ fn main() {
     let cmp = scene_stack
         .world
         .store
-        .get::<_, PivImage>(&LogicalKey::new("wa1".to_string()), ctx)
-        .unwrap();
+        .get::<PivImage>(&SimpleKey::from("wa1".to_string()), ctx)
+        // TODO: fix with ? error syntax
+        .expect("error loading wa1");
     // let image = RgbaImage::from_raw(512, 512, cmp.borrow().to_rgba8_512()).unwrap();
     // image.save("cmp.png");
 
@@ -122,6 +123,9 @@ fn main() {
 
     // let sk = SelectKnight::new(ctx, &mut scene_stack.world.store).unwrap();
     // scene_stack.push(Box::new(sk));
+
+    // let map = scenes::MapScene::new(ctx, &mut scene_stack.world.store, "map").unwrap();
+    // scene_stack.push(Box::new(map));
 
     let mut state = MainState {
         scene_stack,

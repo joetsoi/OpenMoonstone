@@ -6,7 +6,7 @@ use std::iter::repeat;
 use failure::Error;
 use ggez::nalgebra::{Point2, Vector2};
 use ggez::{graphics, Context, GameResult};
-use warmy::{LogicalKey, Store};
+use warmy::{SimpleKey, Store};
 
 use crate::game::Game;
 use crate::objects::TextureAtlas;
@@ -29,15 +29,23 @@ fn calculate_hash<T: Hash>(t: &T) -> u64 {
 }
 
 impl Menu {
-    pub fn new(ctx: &mut Context, store: &mut Store<Context>, key: &str) -> Result<Self, Error> {
+    pub fn new(
+        ctx: &mut Context,
+        store: &mut Store<Context, SimpleKey>,
+        key: &str,
+    ) -> Result<Self, Error> {
         let screen = store
-            .get::<_, Screen>(&warmy::LogicalKey::new(key), ctx)?
+            .get::<Screen>(&warmy::SimpleKey::from(key), ctx)
+            //TODO: fix with ? syntax
+            .expect("err loading screen in menu")
             .borrow()
             .clone();
 
         let (background, palette) = match &screen.background {
             Some(background) => {
-                let piv = store.get::<_, PivImage>(&LogicalKey::new(background), ctx)?;
+                let piv = store.get::<PivImage>(&SimpleKey::from(background.clone()), ctx)
+                    // TODO: fix with ?
+                    .expect("error loading menu pivimage");
                 let mut palette = piv.borrow().palette.to_vec();
                 if palette.len() == 16 {
                     palette.extend(
@@ -55,7 +63,8 @@ impl Menu {
             }
             None => {
                 let swaps_res = store
-                    .get::<_, PaletteSwaps>(&LogicalKey::new("/palettes.yaml"), ctx)
+                    .get::<PaletteSwaps>(&SimpleKey::from("/palettes.yaml"), ctx)
+                    // TODO: fix with ?
                     .expect("error loading palette.yaml");
                 let swaps = swaps_res.borrow();
                 let raw_palette = swaps
@@ -94,8 +103,9 @@ impl Menu {
         for image in &self.screen.images {
             let atlas = game
                 .store
-                .get::<_, TextureAtlas>(&LogicalKey::new(image.sheet.as_str()), ctx)
-                .unwrap();
+                .get::<TextureAtlas>(&SimpleKey::from(image.sheet.as_str()), ctx)
+                // TODO: fix with ? syntax
+                .expect("error loading texture atlas");
 
             let atlas_dimension = atlas.borrow().image.width as u32;
             let image_name = format!("{}{}", image.sheet, self.palette_hash);

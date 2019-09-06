@@ -1,10 +1,11 @@
 use std::path::Path;
 
 use failure;
+use failure::err_msg;
 use failure_derive::Fail;
 use ggez::{filesystem, Context};
 use serde_yaml::Value;
-use warmy;
+use warmy::{Load, Loaded, SimpleKey, Storage};
 
 use crate::error::{err_from, CompatError};
 use crate::files::collide::{parse_collide_hit, CollisionBoxes};
@@ -24,140 +25,167 @@ pub struct GameYaml {
     pub yaml: Value,
 }
 
-impl warmy::Load<Context> for GameYaml {
-    type Key = warmy::LogicalKey;
+impl Load<Context, SimpleKey> for GameYaml {
+    //type Key = warmy::LogicalKey;
     type Error = CompatError;
 
     fn load(
-        key: Self::Key,
-        store: &mut warmy::Storage<ggez::Context>,
+        key: SimpleKey,
+        store: &mut Storage<ggez::Context, SimpleKey>,
         ctx: &mut ggez::Context,
-    ) -> Result<warmy::Loaded<Self>, Self::Error> {
-        let file = filesystem::open(ctx, key.as_str()).map_err(err_from)?;
-        Ok(warmy::Loaded::from(GameYaml {
-            yaml: serde_yaml::from_reader(file).map_err(err_from)?,
-        }))
+    ) -> Result<Loaded<Self, SimpleKey>, Self::Error> {
+        match key {
+            warmy::SimpleKey::Logical(key) => {
+                let file = filesystem::open(ctx, key).map_err(err_from)?;
+                Ok(Loaded::from(GameYaml {
+                    yaml: serde_yaml::from_reader(file).map_err(err_from)?,
+                }))
+            }
+            warmy::SimpleKey::Path(_) => return Err(err_msg("error").compat()),
+        }
     }
 }
 
-impl warmy::Load<Context> for PivImage {
-    type Key = warmy::LogicalKey;
+impl Load<Context, SimpleKey> for PivImage {
+    // type Key = LogicalKey;
     type Error = CompatError;
 
     fn load(
-        key: Self::Key,
-        store: &mut warmy::Storage<ggez::Context>,
+        key: SimpleKey,
+        store: &mut Storage<ggez::Context, SimpleKey>,
         ctx: &mut ggez::Context,
-    ) -> Result<warmy::Loaded<Self>, Self::Error> {
+    ) -> Result<Loaded<Self, SimpleKey>, Self::Error> {
         let yaml = store
-            .get::<_, GameYaml>(&warmy::LogicalKey::new("/files.yaml"), ctx)
-            .map_err(err_from)?;
+            .get::<GameYaml>(&SimpleKey::from("/files.yaml"), ctx)
+            // TODO: warmy::StoreErrorOr does not implement Error
+            .expect("store error that I can't handle yet");
         let scenes = &yaml.borrow().yaml["scenes"];
-        let mut file = filesystem::open(
-            ctx,
-            // todo: remove expect
-            Path::new("/moonstone/").join(
-                &scenes[key.as_str()]
-                    .as_str()
-                    .unwrap_or_else(|| panic!("yaml error for {}", key.as_str())),
-            ),
-        )
-        .map_err(err_from)?;
+        match &key {
+            warmy::SimpleKey::Logical(key) => {
+                let mut file = filesystem::open(
+                    ctx,
+                    // todo: remove expect
+                    Path::new("/moonstone/").join(
+                        &scenes[key]
+                            .as_str()
+                            .unwrap_or_else(|| panic!("yaml error for {}", key)),
+                    ),
+                )
+                .map_err(err_from)?;
 
-        Ok(warmy::Loaded::from(
-            PivImage::from_reader(&mut file).map_err(err_from)?,
-        ))
+                Ok(Loaded::from(
+                    PivImage::from_reader(&mut file).map_err(err_from)?,
+                ))
+            }
+            warmy::SimpleKey::Path(_) => return Err(err_msg("error").compat()),
+        }
     }
 }
 
-impl warmy::Load<Context> for TextureAtlas {
-    type Key = warmy::LogicalKey;
+impl Load<Context, SimpleKey> for TextureAtlas {
+    // type Key = LogicalKey;
     type Error = CompatError;
     fn load(
-        key: Self::Key,
-        store: &mut warmy::Storage<ggez::Context>,
+        key: SimpleKey,
+        store: &mut Storage<ggez::Context, SimpleKey>,
         ctx: &mut ggez::Context,
-    ) -> Result<warmy::Loaded<Self>, Self::Error> {
+    ) -> Result<Loaded<Self, SimpleKey>, Self::Error> {
         let yaml = store
-            .get::<_, GameYaml>(&warmy::LogicalKey::new("/files.yaml"), ctx)
-            .map_err(err_from)?;
-        let object = &yaml.borrow().yaml["objects"][key.as_str()];
-        let mut file = filesystem::open(
-            ctx,
-            Path::new("/moonstone/").join(&object["file"].as_str().expect("yaml error")),
-        )
-        .map_err(err_from)?;
+            .get::<GameYaml>(&SimpleKey::from("/files.yaml"), ctx)
+            // TODO: warmy::StoreErrorOr does not implement Error
+            .expect("store error loading TextureAtlas");
+        match &key {
+            warmy::SimpleKey::Logical(key) => {
+                let object = &yaml.borrow().yaml["objects"][key];
+                let mut file = filesystem::open(
+                    ctx,
+                    Path::new("/moonstone/").join(&object["file"].as_str().expect("yaml error")),
+                )
+                .map_err(err_from)?;
 
-        let objects = ObjectsFile::from_reader(&mut file).map_err(err_from)?;
-        let texture_size = object["texture_size"].as_u64().unwrap() as u32;
+                let objects = ObjectsFile::from_reader(&mut file).map_err(err_from)?;
+                let texture_size = object["texture_size"].as_u64().unwrap() as u32;
 
-        objects
-            .to_texture_atlas(texture_size as i32)
-            .map(warmy::Loaded::from)
-            .map_err(|e| {
-                failure::Error::from(GameDataError {
-                    message: format!("Failed loading {}. {} in files.yaml", key.as_str(), e),
+                objects
+                    .to_texture_atlas(texture_size as i32)
+                    .map(Loaded::from)
+                    .map_err(|e| {
+                        failure::Error::from(GameDataError {
+                            message: format!("Failed loading {}. {} in files.yaml", key, e),
+                        })
+                        .compat()
+                    })
+            }
+            warmy::SimpleKey::Path(_) => return Err(err_msg("error").compat()),
+        }
+    }
+}
+
+impl Load<Context, SimpleKey> for CollisionBoxes {
+    // type Key = LogicalKey;
+    type Error = CompatError;
+    fn load(
+        key: SimpleKey,
+        store: &mut Storage<ggez::Context, SimpleKey>,
+        ctx: &mut ggez::Context,
+    ) -> Result<Loaded<Self, SimpleKey>, Self::Error> {
+        let yaml = store
+            .get::<GameYaml>(&SimpleKey::from("/files.yaml"), ctx)
+            // TODO: warmy::StoreErrorOr does not implement Error
+            .expect("store error loading CollisionBoxes");
+        match &key {
+            warmy::SimpleKey::Logical(key) => {
+                let object = &yaml.borrow().yaml[key];
+                let mut file = filesystem::open(
+                    ctx,
+                    Path::new("/moonstone/").join(object.as_str().expect("yaml error")),
+                )
+                .map_err(err_from)?;
+                parse_collide_hit(&mut file).map(Loaded::from).map_err(|e| {
+                    failure::Error::from(GameDataError {
+                        message: format!("Failed loading {}. {} in files.yaml", key.as_str(), e),
+                    })
+                    .compat()
                 })
-                .compat()
-            })
+            }
+            warmy::SimpleKey::Path(_) => return Err(err_msg("error").compat()),
+        }
     }
 }
 
-impl warmy::Load<Context> for CollisionBoxes {
-    type Key = warmy::LogicalKey;
+impl Load<Context, SimpleKey> for TerrainFile {
+    // type Key = LogicalKey;
     type Error = CompatError;
     fn load(
-        key: Self::Key,
-        store: &mut warmy::Storage<ggez::Context>,
+        key: SimpleKey,
+        store: &mut Storage<ggez::Context, SimpleKey>,
         ctx: &mut ggez::Context,
-    ) -> Result<warmy::Loaded<Self>, Self::Error> {
+    ) -> Result<Loaded<Self, SimpleKey>, Self::Error> {
         let yaml = store
-            .get::<_, GameYaml>(&warmy::LogicalKey::new("/files.yaml"), ctx)
-            .map_err(err_from)?;
-        let object = &yaml.borrow().yaml[key.as_str()];
-        let mut file = filesystem::open(
-            ctx,
-            Path::new("/moonstone/").join(object.as_str().expect("yaml error")),
-        )
-        .map_err(err_from)?;
-        parse_collide_hit(&mut file)
-            .map(warmy::Loaded::from)
-            .map_err(|e| {
-                failure::Error::from(GameDataError {
-                    message: format!("Failed loading {}. {} in files.yaml", key.as_str(), e),
-                })
-                .compat()
-            })
-    }
-}
+            .get::<GameYaml>(&SimpleKey::from("/files.yaml"), ctx)
+            // TODO: warmy::StoreErrorOr does not implement Error
+            .expect("store error loading TerrainFile");
+        match key {
+            warmy::SimpleKey::Logical(key) => {
+                let terrain = &yaml.borrow().yaml["terrain"][key.as_str()];
+                let mut file = filesystem::open(
+                    ctx,
+                    Path::new("/moonstone/").join(&terrain.as_str().expect("invalid yaml error")),
+                )
+                .map_err(err_from)?;
 
-impl warmy::Load<Context> for TerrainFile {
-    type Key = warmy::LogicalKey;
-    type Error = CompatError;
-    fn load(
-        key: Self::Key,
-        store: &mut warmy::Storage<ggez::Context>,
-        ctx: &mut ggez::Context,
-    ) -> Result<warmy::Loaded<Self>, Self::Error> {
-        let yaml = store
-            .get::<_, GameYaml>(&warmy::LogicalKey::new("/files.yaml"), ctx)
-            .map_err(err_from)?;
-        let terrain = &yaml.borrow().yaml["terrain"][key.as_str()];
-        let mut file = filesystem::open(
-            ctx,
-            Path::new("/moonstone/").join(&terrain.as_str().expect("invalid yaml error")),
-        )
-        .map_err(err_from)?;
-
-        TerrainFile::from_reader(&mut file)
-            .map(warmy::Loaded::from)
-            .map_err(err_from)
+                TerrainFile::from_reader(&mut file)
+                    .map(Loaded::from)
+                    .map_err(err_from)
+            }
+            warmy::SimpleKey::Path(_) => return Err(err_msg("error").compat()),
+        }
         // let objects = ObjectsFile::from_reader(&mut file).map_err(err_from)?;
         // let texture_size = object["texture_size"].as_u64().unwrap() as u32;
 
         // objects
         //     .to_texture_atlas(texture_size as i32)
-        //     .map(warmy::Loaded::from)
+        //     .map(Loaded::from)
         //     .map_err(|e| {
         //         failure::Error::from(GameDataError {
         //             message: format!("Failed loading {}. {} in files.yaml", key.as_str(), e),

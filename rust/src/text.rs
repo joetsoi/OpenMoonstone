@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use std::fmt;
 
 use failure;
+use failure::err_msg;
 use failure_derive::Fail;
 use ggez::graphics::spritebatch::SpriteBatch;
 use ggez::nalgebra::Point2;
@@ -10,7 +11,7 @@ use ggez::{filesystem, graphics, Context};
 use lazy_static::lazy_static;
 use maplit::hashmap;
 use serde_derive::{Deserialize, Serialize};
-use warmy::{LogicalKey, Store};
+use warmy::{SimpleKey, Store};
 
 use compat_error::err_from;
 use loadable_yaml_macro_derive::LoadableYaml;
@@ -78,7 +79,7 @@ impl Text {
     pub fn as_draw_params(
         &self,
         ctx: &mut Context,
-        store: &mut Store<Context>,
+        store: &mut Store<Context, SimpleKey>,
     ) -> Result<Vec<graphics::DrawParam>, failure::Error> {
         let lookup: &Vec<usize> =
             font_lookup
@@ -87,8 +88,9 @@ impl Text {
                     font: self.font.clone(),
                 })?;
         let atlas = store
-            .get::<_, TextureAtlas>(&LogicalKey::new(self.font.as_str()), ctx)
-            .map_err(err_from)?;
+            .get::<TextureAtlas>(&SimpleKey::from(self.font.as_str()), ctx)
+            //TODO: use error hadling ? syntax
+            .expect("erro loading texture atlas in Text.as_draw_params");
 
         let mut lookup_width: Vec<(usize, u32)> = Vec::new();
         let mut string_width: u32 = 0;
@@ -148,7 +150,9 @@ impl Text {
     ) -> Result<SpriteBatch, failure::Error> {
         let atlas = game
             .store
-            .get::<_, TextureAtlas>(&LogicalKey::new(self.font.as_str()), ctx)?;
+            .get::<TextureAtlas>(&SimpleKey::from(self.font.as_str()), ctx)
+            //TODO: fix with ? syntax
+            .expect("error with textureatlas in as_sprite_batch");
 
         let image_name = format!("{}{}", self.font, palette_hash);
         let atlas_dimension = atlas.borrow().image.width as u32;
@@ -170,6 +174,7 @@ impl Text {
     }
 }
 
+// TODO: move this to its own module
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct Image {
     pub sheet: String,

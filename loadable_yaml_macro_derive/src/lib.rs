@@ -18,18 +18,23 @@ pub fn loadable_yaml_macro_derive(input: TokenStream) -> TokenStream {
 fn impl_loadable_yaml_macro(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
     let gen = quote! {
-        impl warmy::Load<Context> for #name {
-            type Key = warmy::LogicalKey;
+        impl warmy::Load<Context, warmy::SimpleKey> for #name {
+            // type Key = warmy::LogicalKey;
             type Error = compat_error::CompatError;
             fn load(
-                key: Self::Key,
-                _store: &mut warmy::Storage<Context>,
+                key: warmy::SimpleKey,
+                _store: &mut warmy::Storage<Context, warmy::SimpleKey>,
                 ctx: &mut ggez::Context,
-            ) -> Result<warmy::Loaded<Self>, Self::Error> {
-                let file = ggez::filesystem::open(ctx, key.as_str()).map_err(compat_error::err_from)?;
-                let yaml: serde_yaml::Value = serde_yaml::from_reader(file).map_err(compat_error::err_from)?;
-                let name: #name = serde_yaml::from_value(yaml).map_err(compat_error::err_from)?;
-                Ok(warmy::Loaded::from(name))
+            ) -> Result<warmy::Loaded<Self, warmy::SimpleKey>, Self::Error> {
+                match key {
+                    warmy::SimpleKey::Logical(key) => {
+                        let file = ggez::filesystem::open(ctx, key.as_str()).map_err(compat_error::err_from)?;
+                        let yaml: serde_yaml::Value = serde_yaml::from_reader(file).map_err(compat_error::err_from)?;
+                        let name: #name = serde_yaml::from_value(yaml).map_err(compat_error::err_from)?;
+                        Ok(warmy::Loaded::from(name))
+                    }
+                    warmy::SimpleKey::Path(_) => Err(err_msg("error").compat())
+                }
             }
         }
     };

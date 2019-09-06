@@ -3,7 +3,7 @@ use ggez::nalgebra::{Point2, Vector2};
 use ggez::{graphics, Context, GameResult};
 use ggez_goodies::scene::{Scene, SceneSwitch};
 use lazy_static::lazy_static;
-use warmy::{LogicalKey, Store};
+use warmy::{SimpleKey, Store};
 
 use crate::game::{Game, SceneState};
 use crate::input::{Axis, Button, InputEvent};
@@ -80,7 +80,7 @@ pub struct MainMenuScene {
 }
 
 impl MainMenuScene {
-    pub fn new(ctx: &mut Context, store: &mut Store<Context>) -> Result<Self, Error> {
+    pub fn new(ctx: &mut Context, store: &mut Store<Context, SimpleKey>) -> Result<Self, Error> {
         let menu = Menu::new(ctx, store, "/menu.yaml")?;
         // .unwrap_or_else(|| panic!("error in menu.yaml, must have 'background")),
         Ok(Self {
@@ -99,7 +99,7 @@ impl MainMenuScene {
         // by 16 empty colours so to_rgba8 won't break.
         let atlas = game
             .store
-            .get::<_, TextureAtlas>(&LogicalKey::new(&self.menu.screen.cursor.sheet), ctx)
+            .get::<TextureAtlas>(&SimpleKey::from(self.menu.screen.cursor.sheet.clone()), ctx)
             // TODO: raise error
             .expect("Couldn't find sel.cel yaml metadata");
 
