@@ -7,7 +7,7 @@ use ggez::nalgebra::{Point2, Vector2};
 use ggez::{graphics, Context, GameResult};
 use ggez_goodies::scene;
 use specs::world::{Builder, Index};
-use specs::{Dispatcher, DispatcherBuilder, Entity, EntityBuilder, Join, World};
+use specs::{Dispatcher, DispatcherBuilder, Entity, EntityBuilder, Join, World, WorldExt};
 use warmy::{SimpleKey, Store};
 
 use super::transition::FadeStyle;
@@ -569,7 +569,7 @@ impl<'a> scene::Scene<Game, input::InputEvent> for EncounterScene<'a> {
     fn update(&mut self, game: &mut Game, _ctx: &mut Context) -> FSceneSwitch {
         self.specs_world.maintain();
         self.update_controllers(&game.input);
-        self.dispatcher.dispatch_par(&self.specs_world.res);
+        self.dispatcher.dispatch_par(&self.specs_world);
         if self.specs_world.read_resource::<CombatDone>().0 {
             self.ticks_after += 1;
             if self.ticks_after > TICKS_TO_WAIT {

@@ -1,7 +1,7 @@
 use super::Facing;
 use crate::animation::Frame;
 use crate::piv::Colour;
-use specs::VecStorage;
+use specs::{Component, VecStorage};
 use specs_derive::*;
 
 #[derive(Component, Debug)]

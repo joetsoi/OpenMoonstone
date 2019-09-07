@@ -1,4 +1,4 @@
-use specs::{Entity, VecStorage};
+use specs::{Component, Entity, VecStorage};
 use specs_derive::*;
 
 use crate::rect::{Point, Rect};

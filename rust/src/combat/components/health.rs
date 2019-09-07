@@ -1,4 +1,4 @@
-use specs::{NullStorage, VecStorage};
+use specs::{Component, NullStorage, VecStorage};
 use specs_derive::*;
 
 #[derive(Component, Debug)]

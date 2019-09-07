@@ -1,4 +1,4 @@
-use specs::VecStorage;
+use specs::{Component, VecStorage};
 use specs_derive::*;
 
 #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]

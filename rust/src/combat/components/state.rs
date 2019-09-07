@@ -1,4 +1,4 @@
-use specs::VecStorage;
+use specs::{Component, VecStorage};
 use specs_derive::*;
 
 use super::intent::{AttackType, DefendType, XAxis, YAxis};
