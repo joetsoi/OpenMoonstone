@@ -92,26 +92,26 @@ swing:
 hit:
   frames:
     - images:
-      - {sheet:kn3.ob, image: 10, y: -2, x: -26, image_type: NonSolid}
-      - {sheet:kn3.ob, image: 9, y: -12, x: -16, image_type: NonSolid}
-      - {sheet:kn3.ob, image: 11, y: 13, x: -26, image_type: Blood}
-      - {sheet:kn4.ob, image: 0, y: -25, x: 5, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 10, y: -2, x: -26, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 9, y: -12, x: -16, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 11, y: 13, x: -26, image_type: Blood}
+      - {sheet: kn4.ob, image: 0, y: -25, x: 5, image_type: NonSolid}
     - images:
-      - {sheet:kn3.ob, image: 12, y: 0, x: -38, image_type: NonSolid}
-      - {sheet:kn3.ob, image: 13, y: 21, x: -27, image_type: Blood}
-      - {sheet:kn3.ob, image: 14, y: 24, x: -3, image_type: Blood}
-      - {sheet:kn4.ob, image: 0, y: -15, x: -1, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 12, y: 0, x: -38, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 13, y: 21, x: -27, image_type: Blood}
+      - {sheet: kn3.ob, image: 14, y: 24, x: -3, image_type: Blood}
+      - {sheet: kn4.ob, image: 0, y: -15, x: -1, image_type: NonSolid}
     - images:
-      - {sheet:kn3.ob, image: 12, y: 0, x: -38, image_type: NonSolid}
-      - {sheet:kn3.ob, image: 15, y: 22, x: -24, image_type: Blood}
-      - {sheet:kn3.ob, image: 16, y: 39, x: 19, image_type: Blood}
-      - {sheet:kn3.ob, image: 17, y: 49, x: 17, image_type: BloodStain}
-      - {sheet:kn4.ob, image: 0, y: -15, x: -1, image_type: Collidee}
+      - {sheet: kn3.ob, image: 12, y: 0, x: -38, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 15, y: 22, x: -24, image_type: Blood}
+      - {sheet: kn3.ob, image: 16, y: 39, x: 19, image_type: Blood}
+      - {sheet: kn3.ob, image: 17, y: 49, x: 17, image_type: BloodStain}
+      - {sheet: kn4.ob, image: 0, y: -15, x: -1, image_type: Collidee}
     - images:
-      - {sheet:kn3.ob, image: 18, y: 8, x: -37, image_type: NonSolid}
-      - {sheet:kn3.ob, image: 19, y: 22, x: -18, image_type: Blood}
-      - {sheet:kn3.ob, image: 17, y: 49, x: 17, image_type: BloodStain}
-      - {sheet:kn4.ob, image: 6, y: -5, x: -15, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 18, y: 8, x: -37, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 19, y: 22, x: -18, image_type: Blood}
+      - {sheet: kn3.ob, image: 17, y: 49, x: 17, image_type: BloodStain}
+      - {sheet: kn4.ob, image: 6, y: -5, x: -15, image_type: NonSolid}
   order: [0, 1, 1, 2, 2, 3]
 thrust:
   frames:
@@ -270,13 +270,13 @@ block:
 recovery:
   frames:
     - images:
-        - {sheet:kn1.ob, image: 19, y: 44, x: -21, image_type: Collidee}
-        - {sheet:kn1.ob, image: 18, y: -7, x: -14, image_type: Collidee}
-        - {sheet:kn4.ob, image: 1, y: -15, x: 12, image_type: NonSolid}
+        - {sheet: kn1.ob, image: 19, y: 44, x: -21, image_type: Collidee}
+        - {sheet: kn1.ob, image: 18, y: -7, x: -14, image_type: Collidee}
+        - {sheet: kn4.ob, image: 1, y: -15, x: 12, image_type: NonSolid}
     - images:
-        - {sheet:kn1.ob, image: 1, y: 45, x: -13, image_type: NonSolid}
-        - {sheet:kn1.ob, image: 0, y: -9, x: -9, image_type: Collidee}
-        - {sheet:kn4.ob, image: 1, y: -6, x: 4, image_type: NonSolid}
+        - {sheet: kn1.ob, image: 1, y: 45, x: -13, image_type: NonSolid}
+        - {sheet: kn1.ob, image: 0, y: -9, x: -9, image_type: Collidee}
+        - {sheet: kn4.ob, image: 1, y: -6, x: 4, image_type: NonSolid}
   order: [0, 1, 1]
 death:
   frames:
@@ -316,147 +316,146 @@ dead:
 entrance:
   frames:
     - images:
-      - {sheet: kn1.ob, image: 3, y: 46, x: -147, image_type:NonSolid}
-      - {sheet: kn1.ob, image: 2, y: -9, x: -143, image_type:NonSolid}
-      - {sheet: kn4.ob, image: 1, y: -7, x: -132, image_type:NonSolid}
+      - {sheet: kn1.ob, image: 3, y: 46, x: -147, image_type: NonSolid}
+      - {sheet: kn1.ob, image: 2, y: -9, x: -143, image_type: NonSolid}
+      - {sheet: kn4.ob, image: 1, y: -7, x: -132, image_type: NonSolid}
     - images:
-      - {sheet: kn1.ob, image: 5, y: 34, x: -144, image_type:NonSolid}
-      - {sheet: kn1.ob, image: 4, y: -10, x: -134, image_type:NonSolid}
-      - {sheet: kn4.ob, image: 1, y: -7, x: -124, image_type:NonSolid}
+      - {sheet: kn1.ob, image: 5, y: 34, x: -144, image_type: NonSolid}
+      - {sheet: kn1.ob, image: 4, y: -10, x: -134, image_type: NonSolid}
+      - {sheet: kn4.ob, image: 1, y: -7, x: -124, image_type: NonSolid}
     - images:
-      - {sheet: kn1.ob, image: 7, y: 24, x: -122, image_type:NonSolid}
-      - {sheet: kn1.ob, image: 6, y: -8, x: -118, image_type:NonSolid}
-      - {sheet: kn4.ob, image: 1, y: -6, x: -109, image_type:NonSolid}
+      - {sheet: kn1.ob, image: 7, y: 24, x: -122, image_type: NonSolid}
+      - {sheet: kn1.ob, image: 6, y: -8, x: -118, image_type: NonSolid}
+      - {sheet: kn4.ob, image: 1, y: -6, x: -109, image_type: NonSolid}
     - images:
-      - {sheet: kn1.ob, image: 9, y: 27, x: -121, image_type:NonSolid}
-      - {sheet: kn1.ob, image: 8, y: -9, x: -112, image_type:NonSolid}
-      - {sheet: kn4.ob, image: 1, y: -9, x: -96, image_type:NonSolid}
+      - {sheet: kn1.ob, image: 9, y: 27, x: -121, image_type: NonSolid}
+      - {sheet: kn1.ob, image: 8, y: -9, x: -112, image_type: NonSolid}
+      - {sheet: kn4.ob, image: 1, y: -9, x: -96, image_type: NonSolid}
     - images:
-      - {sheet: kn1.ob, image: 3, y: 46, x: -100, image_type:NonSolid}
-      - {sheet: kn1.ob, image: 2, y: -9, x: -95, image_type:NonSolid}
-      - {sheet: kn4.ob, image: 1, y: -8, x: -83, image_type:NonSolid}
+      - {sheet: kn1.ob, image: 3, y: 46, x: -100, image_type: NonSolid}
+      - {sheet: kn1.ob, image: 2, y: -9, x: -95, image_type: NonSolid}
+      - {sheet: kn4.ob, image: 1, y: -8, x: -83, image_type: NonSolid}
     - images:
-      - {sheet: kn1.ob, image: 5, y: 34, x: -97, image_type:NonSolid}
-      - {sheet: kn1.ob, image: 4, y: -10, x: -87, image_type:NonSolid}
-      - {sheet: kn4.ob, image: 1, y: -7, x: -77, image_type:NonSolid}
+      - {sheet: kn1.ob, image: 5, y: 34, x: -97, image_type: NonSolid}
+      - {sheet: kn1.ob, image: 4, y: -10, x: -87, image_type: NonSolid}
+      - {sheet: kn4.ob, image: 1, y: -7, x: -77, image_type: NonSolid}
     - images:
-      - {sheet: kn1.ob, image: 7, y: 24, x: -75, image_type:NonSolid}
-      - {sheet: kn1.ob, image: 6, y: -8, x: -71, image_type:NonSolid}
-      - {sheet: kn4.ob, image: 1, y: -7, x: -63, image_type:NonSolid}
+      - {sheet: kn1.ob, image: 7, y: 24, x: -75, image_type: NonSolid}
+      - {sheet: kn1.ob, image: 6, y: -8, x: -71, image_type: NonSolid}
+      - {sheet: kn4.ob, image: 1, y: -7, x: -63, image_type: NonSolid}
     - images:
-      - {sheet: kn1.ob, image: 9, y: 27, x: -74, image_type:NonSolid}
-      - {sheet: kn1.ob, image: 8, y: -9, x: -65, image_type:NonSolid}
-      - {sheet: kn4.ob, image: 1, y: -9, x: -49, image_type:NonSolid}
+      - {sheet: kn1.ob, image: 9, y: 27, x: -74, image_type: NonSolid}
+      - {sheet: kn1.ob, image: 8, y: -9, x: -65, image_type: NonSolid}
+      - {sheet: kn4.ob, image: 1, y: -9, x: -49, image_type: NonSolid}
     - images:
-      - {sheet: kn1.ob, image: 3, y: 45, x: -53, image_type:NonSolid}
-      - {sheet: kn1.ob, image: 2, y: -10, x: -48, image_type:NonSolid}
-      - {sheet: kn4.ob, image: 1, y: -9, x: -36, image_type:NonSolid}
+      - {sheet: kn1.ob, image: 3, y: 45, x: -53, image_type: NonSolid}
+      - {sheet: kn1.ob, image: 2, y: -10, x: -48, image_type: NonSolid}
+      - {sheet: kn4.ob, image: 1, y: -9, x: -36, image_type: NonSolid}
     - images:
-      - {sheet: kn1.ob, image: 5, y: 34, x: -52, image_type:NonSolid}
-      - {sheet: kn1.ob, image: 4, y: -10, x: -42, image_type:NonSolid}
-      - {sheet: kn4.ob, image: 1, y: -7, x: -32, image_type:NonSolid}
+      - {sheet: kn1.ob, image: 5, y: 34, x: -52, image_type: NonSolid}
+      - {sheet: kn1.ob, image: 4, y: -10, x: -42, image_type: NonSolid}
+      - {sheet: kn4.ob, image: 1, y: -7, x: -32, image_type: NonSolid}
     - images:
-      - {sheet: kn1.ob, image: 7, y: 24, x: -30, image_type:NonSolid}
-      - {sheet: kn1.ob, image: 6, y: -8, x: -26, image_type:NonSolid}
-      - {sheet: kn4.ob, image: 1, y: -7, x: -17, image_type:NonSolid}
+      - {sheet: kn1.ob, image: 7, y: 24, x: -30, image_type: NonSolid}
+      - {sheet: kn1.ob, image: 6, y: -8, x: -26, image_type: NonSolid}
+      - {sheet: kn4.ob, image: 1, y: -7, x: -17, image_type: NonSolid}
     - images:
-      - {sheet: kn1.ob, image: 9, y: 27, x: -29, image_type:NonSolid}
-      - {sheet: kn1.ob, image: 8, y: -9, x: -20, image_type:NonSolid}
-      - {sheet: kn4.ob, image: 1, y: -9, x: -4, image_type:NonSolid}
+      - {sheet: kn1.ob, image: 9, y: 27, x: -29, image_type: NonSolid}
+      - {sheet: kn1.ob, image: 8, y: -9, x: -20, image_type: NonSolid}
+      - {sheet: kn4.ob, image: 1, y: -9, x: -4, image_type: NonSolid}
     - images:
-      - {sheet: kn2.ob, image: 13, y: -9, x: -13, image_type:NonSolid}
+      - {sheet: kn2.ob, image: 13, y: -9, x: -13, image_type: NonSolid}
   order: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 12, 12]
-  
 decapitate:
   frames:
     - images:
-      - {sheet: kn3.ob, image: 23, y: 40, x: -59, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 22, y: 21, x: -28, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 28, y: -19, x: -25, image_type:NonSolid}
+      - {sheet: kn3.ob, image: 23, y: 40, x: -59, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 22, y: 21, x: -28, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 28, y: -19, x: -25, image_type: NonSolid}
     - images:
-      - {sheet: kn3.ob, image: 29, y: -32, x: -23, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 30, y: -16, x: -6, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 31, y: 11, x: -30, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 31, y: 6, x: -7, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 23, y: 40, x: -59, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 22, y: 21, x: -28, image_type:NonSolid}
+      - {sheet: kn3.ob, image: 29, y: -32, x: -23, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 30, y: -16, x: -6, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 31, y: 11, x: -30, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 31, y: 6, x: -7, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 23, y: 40, x: -59, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 22, y: 21, x: -28, image_type: NonSolid}
     - images:
-      - {sheet: kn3.ob, image: 22, y: 21, x: -28, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 23, y: 40, x: -59, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 32, y: -39, x: -23, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 36, y: 53, x: -9, image_type:NonSolid}
+      - {sheet: kn3.ob, image: 22, y: 21, x: -28, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 23, y: 40, x: -59, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 32, y: -39, x: -23, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 36, y: 53, x: -9, image_type: NonSolid}
     - images:
-      - {sheet: kn3.ob, image: 33, y: -33, x: -17, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 34, y: -10, x: -28, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 35, y: 3, x: -23, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 23, y: 40, x: -59, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 36, y: 55, x: -6, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 22, y: 21, x: -28, image_type:NonSolid}
+      - {sheet: kn3.ob, image: 33, y: -33, x: -17, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 34, y: -10, x: -28, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 35, y: 3, x: -23, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 23, y: 40, x: -59, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 36, y: 55, x: -6, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 22, y: 21, x: -28, image_type: NonSolid}
     - images:
-      - {sheet: kn3.ob, image: 39, y: 55, x: -6, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 38, y: -18, x: -12, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 37, y: 3, x: -23, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 23, y: 40, x: -59, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 22, y: 21, x: -28, image_type:NonSolid}
+      - {sheet: kn3.ob, image: 39, y: 55, x: -6, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 38, y: -18, x: -12, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 37, y: 3, x: -23, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 23, y: 40, x: -59, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 22, y: 21, x: -28, image_type: NonSolid}
     - images:
-      - {sheet: kn3.ob, image: 41, y: 55, x: -7, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 40, y: -4, x: -23, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 23, y: 40, x: -59, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 22, y: 21, x: -28, image_type:NonSolid}
+      - {sheet: kn3.ob, image: 41, y: 55, x: -7, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 40, y: -4, x: -23, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 23, y: 40, x: -59, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 22, y: 21, x: -28, image_type: NonSolid}
     - images:
-      - {sheet: kn3.ob, image: 42, y: 12, x: -24, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 23, y: 40, x: -59, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 44, y: 55, x: -7, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 43, y: 19, x: -8, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 22, y: 21, x: -28, image_type:NonSolid}
+      - {sheet: kn3.ob, image: 42, y: 12, x: -24, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 23, y: 40, x: -59, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 44, y: 55, x: -7, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 43, y: 19, x: -8, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 22, y: 21, x: -28, image_type: NonSolid}
     - images:
-      - {sheet: kn3.ob, image: 45, y: 5, x: -23, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 23, y: 40, x: -59, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 46, y: 49, x: -22, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 47, y: 42, x: -5, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 22, y: 21, x: -28, image_type:NonSolid}
+      - {sheet: kn3.ob, image: 45, y: 5, x: -23, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 23, y: 40, x: -59, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 46, y: 49, x: -22, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 47, y: 42, x: -5, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 22, y: 21, x: -28, image_type: NonSolid}
     - images:
-      - {sheet: kn3.ob, image: 48, y: 5, x: -24, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 49, y: 40, x: -8, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 50, y: 50, x: -27, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 23, y: 40, x: -59, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 22, y: 21, x: -28, image_type:NonSolid}
+      - {sheet: kn3.ob, image: 48, y: 5, x: -24, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 49, y: 40, x: -8, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 50, y: 50, x: -27, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 23, y: 40, x: -59, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 22, y: 21, x: -28, image_type: NonSolid}
     - images:
-      - {sheet: kn3.ob, image: 51, y: 5, x: -25, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 52, y: 45, x: 10, image_type:NonSolid}
-        #- {sheet: kn3.ob, image: 53, y: 55, x: -8, image_type:Vm}
-      - {sheet: kn3.ob, image: 53, y: 55, x: -8, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 54, y: 52, x: -31, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 23, y: 40, x: -59, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 22, y: 21, x: -28, image_type:NonSolid}
+      - {sheet: kn3.ob, image: 51, y: 5, x: -25, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 52, y: 45, x: 10, image_type: NonSolid}
+        #- {sheet: kn3.ob, image: 53, y: 55, x: -8, image_type: Vm}
+      - {sheet: kn3.ob, image: 53, y: 55, x: -8, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 54, y: 52, x: -31, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 23, y: 40, x: -59, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 22, y: 21, x: -28, image_type: NonSolid}
     - images:
-      - {sheet: kn3.ob, image: 55, y: 8, x: -24, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 56, y: 47, x: 21, image_type:NonSolid}
-        #- {sheet: kn3.ob, image: 53, y: 55, x: -8, image_type:Vm}
-      - {sheet: kn3.ob, image: 53, y: 55, x: -8, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 23, y: 40, x: -59, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 22, y: 21, x: -28, image_type:NonSolid}
+      - {sheet: kn3.ob, image: 55, y: 8, x: -24, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 56, y: 47, x: 21, image_type: NonSolid}
+        #- {sheet: kn3.ob, image: 53, y: 55, x: -8, image_type: Vm}
+      - {sheet: kn3.ob, image: 53, y: 55, x: -8, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 23, y: 40, x: -59, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 22, y: 21, x: -28, image_type: NonSolid}
     - images:
-      - {sheet: kn3.ob, image: 57, y: 49, x: 19, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 58, y: 19, x: -50, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 59, y: 45, x: -72, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 25, y: 42, x: -52, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 26, y: 51, x: -62, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 27, y: 57, x: -98, image_type:NonSolid}
+      - {sheet: kn3.ob, image: 57, y: 49, x: 19, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 58, y: 19, x: -50, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 59, y: 45, x: -72, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 25, y: 42, x: -52, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 26, y: 51, x: -62, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 27, y: 57, x: -98, image_type: NonSolid}
     - images:
-      - {sheet: kn3.ob, image: 60, y: 45, x: -75, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 57, y: 49, x: 19, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 61, y: 52, x: 16, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 25, y: 42, x: -52, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 26, y: 51, x: -62, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 27, y: 57, x: -98, image_type:NonSolid}
+      - {sheet: kn3.ob, image: 60, y: 45, x: -75, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 57, y: 49, x: 19, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 61, y: 52, x: 16, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 25, y: 42, x: -52, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 26, y: 51, x: -62, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 27, y: 57, x: -98, image_type: NonSolid}
   order: [0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 8, 9, 10, 11, 12]
 decapitated:
   frames:
     - images:
-      - {sheet: kn3.ob, image: 57, y: 49, x: 19, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 62, y: 45, x: -80, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 63, y: 52, x: 17, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 25, y: 42, x: -52, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 26, y: 51, x: -62, image_type:NonSolid}
-      - {sheet: kn3.ob, image: 27, y: 57, x: -98, image_type:NonSolid}
+      - {sheet: kn3.ob, image: 57, y: 49, x: 19, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 62, y: 45, x: -80, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 63, y: 52, x: 17, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 25, y: 42, x: -52, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 26, y: 51, x: -62, image_type: NonSolid}
+      - {sheet: kn3.ob, image: 27, y: 57, x: -98, image_type: NonSolid}
