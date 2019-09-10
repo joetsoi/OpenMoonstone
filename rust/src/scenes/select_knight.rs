@@ -89,7 +89,9 @@ impl Iterator for ColourOscillate {
 }
 
 impl SelectKnight {
-    pub fn new(ctx: &mut Context, store: &mut Store<Context, SimpleKey>) -> Result<Self, Error> {
+    pub fn new(ctx: &mut Context, store: &mut Store<Context, SimpleKey>
+   //) -> Result<Self, Error> {
+   ) -> Result<Self, Box<dyn std::error::Error>> {
         let menu = Menu::new(ctx, store, "/select_knight.yaml")?;
 
         let swaps_res = store.get::<PaletteSwaps>(&SimpleKey::from("/palettes.yaml"), ctx)

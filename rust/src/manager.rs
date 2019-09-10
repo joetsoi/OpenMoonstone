@@ -1,13 +1,16 @@
+use std::error::Error;
+use std::fmt;
 use std::path::Path;
 
 use failure;
 use failure::err_msg;
 use failure_derive::Fail;
+use ggez;
 use ggez::{filesystem, Context};
 use serde_yaml::Value;
 use warmy::{Load, Loaded, SimpleKey, Storage};
 
-use crate::error::{err_from, CompatError};
+use crate::error::{err_from, CompatError, LoadError};
 use crate::files::collide::{parse_collide_hit, CollisionBoxes};
 use crate::files::TerrainFile;
 use crate::objects::{ObjectsFile, TextureAtlas};
@@ -20,14 +23,23 @@ struct GameDataError {
     message: String,
 }
 
+
 #[derive(Debug, Clone)]
 pub struct GameYaml {
+    resource_name: String,
     pub yaml: Value,
+}
+
+impl fmt::Display for GameYaml {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "GameYaml for {}", self.resource_name)
+    }
 }
 
 impl Load<Context, SimpleKey> for GameYaml {
     //type Key = warmy::LogicalKey;
-    type Error = CompatError;
+    // type Error = CompatError;
+    type Error = Box<dyn Error>;
 
     fn load(
         key: SimpleKey,
@@ -36,19 +48,24 @@ impl Load<Context, SimpleKey> for GameYaml {
     ) -> Result<Loaded<Self, SimpleKey>, Self::Error> {
         match key {
             warmy::SimpleKey::Logical(key) => {
-                let file = filesystem::open(ctx, key).map_err(err_from)?;
+                let file = filesystem::open(ctx, &key)?;
+                //let file = filesystem::open(ctx, key).map_err(err_from)?;
                 Ok(Loaded::from(GameYaml {
-                    yaml: serde_yaml::from_reader(file).map_err(err_from)?,
+                    resource_name: key.clone(),
+                    yaml: serde_yaml::from_reader(file)?,
+                    //yaml: serde_yaml::from_reader(file).map_err(err_from)?,
                 }))
             }
-            warmy::SimpleKey::Path(_) => return Err(err_msg("error").compat()),
+            // warmy::SimpleKey::Path(_) => return Err(err_msg("error").compat()),
+            warmy::SimpleKey::Path(_) => return Err(From::from("Tried to load path gameyaml")),
         }
     }
 }
 
 impl Load<Context, SimpleKey> for PivImage {
     // type Key = LogicalKey;
-    type Error = CompatError;
+    // type Error = CompatError;
+    type Error = LoadError<GameYaml>;
 
     fn load(
         key: SimpleKey,
@@ -56,9 +73,7 @@ impl Load<Context, SimpleKey> for PivImage {
         ctx: &mut ggez::Context,
     ) -> Result<Loaded<Self, SimpleKey>, Self::Error> {
         let yaml = store
-            .get::<GameYaml>(&SimpleKey::from("/files.yaml"), ctx)
-            // TODO: warmy::StoreErrorOr does not implement Error
-            .expect("store error that I can't handle yet");
+            .get::<GameYaml>(&SimpleKey::from("/files.yaml"), ctx)?;
         let scenes = &yaml.borrow().yaml["scenes"];
         match &key {
             warmy::SimpleKey::Logical(key) => {
@@ -68,16 +83,19 @@ impl Load<Context, SimpleKey> for PivImage {
                     Path::new("/moonstone/").join(
                         &scenes[key]
                             .as_str()
-                            .unwrap_or_else(|| panic!("yaml error for {}", key)),
+                            // .unwrap_or_else(|| panic!("yaml error for {}", key)),
+                            .ok_or_else(|| LoadError::YamlKeyDoesNotExist { key: key.clone() })?
                     ),
-                )
-                .map_err(err_from)?;
+                )?;
+                // )
+                // .map_err(err_from)?;
 
                 Ok(Loaded::from(
-                    PivImage::from_reader(&mut file).map_err(err_from)?,
+                    // PivImage::from_reader(&mut file).map_err(err_from)?,
+                    PivImage::from_reader(&mut file)?,
                 ))
             }
-            warmy::SimpleKey::Path(_) => return Err(err_msg("error").compat()),
+            warmy::SimpleKey::Path(_) => return Err(LoadError::PathLoadNotImplemented),
         }
     }
 }
@@ -85,6 +103,7 @@ impl Load<Context, SimpleKey> for PivImage {
 impl Load<Context, SimpleKey> for TextureAtlas {
     // type Key = LogicalKey;
     type Error = CompatError;
+    //type Error = LoadError<GameYaml>;
     fn load(
         key: SimpleKey,
         store: &mut Storage<ggez::Context, SimpleKey>,

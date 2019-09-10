@@ -1,3 +1,4 @@
+use std::fmt;
 use std::hash::Hash;
 use std::io;
 use std::io::prelude::*;
@@ -20,6 +21,12 @@ pub struct PivImage {
     pub palette: Vec<Colour>,
     pub raw_palette: Vec<u16>,
     pixels: Vec<usize>,
+}
+
+impl fmt::Display for PivImage {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "PivImage {} pixels", self.pixels.len())
+    }
 }
 
 impl PivImage {
@@ -120,7 +127,7 @@ pub fn extract_palette(data: &[u16]) -> Vec<Colour> {
             BigEndian::write_u16(&mut pel_bytes, *pel);
             Colour {
                 r: (pel_bytes[0]) << 4,
-                g: (((pel_bytes[1]) & 0xf0)),// >> 2) << 2,
+                g: ((pel_bytes[1]) & 0xf0), // >> 2) << 2,
                 b: ((pel_bytes[1]) & 0x0f) << 4,
                 a: 255,
             }

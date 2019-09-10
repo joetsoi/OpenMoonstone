@@ -65,6 +65,12 @@ pub struct Screen {
     pub cursor: Image,
 }
 
+impl fmt::Display for Screen {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Screen {}", self.background.as_ref().unwrap_or(&format!("test")))
+    }
+}
+
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct Text {
     pub string: String,

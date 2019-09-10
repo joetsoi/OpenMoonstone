@@ -23,11 +23,12 @@ serde_yaml = "*"
 #warmy = "0.8.0"
 warmy = "*"
 maplit = "*"
-lazy_static = "1.2.0"
+lazy_static = "*"
 #ggez = { git = "https://github.com/ggez/ggez" }
 ggez = "*"
 loadable_yaml_macro_derive = {path = "../loadable_yaml_macro_derive"}
 compat_error = {path = "../compat_error"}
+snafu = "*"
 
 # [dependencies.ggez]
 # git = "https://github.com/ggez/ggez"

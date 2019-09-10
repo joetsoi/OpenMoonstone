@@ -1,5 +1,6 @@
 use std::collections::hash_map::DefaultHasher;
 use std::collections::hash_map::Entry::{Occupied, Vacant};
+use std::error;
 use std::hash::{Hash, Hasher};
 use std::iter::repeat;
 
@@ -8,6 +9,7 @@ use ggez::nalgebra::{Point2, Vector2};
 use ggez::{graphics, Context, GameResult};
 use warmy::{SimpleKey, Store};
 
+use crate::error::LoadError;
 use crate::game::Game;
 use crate::objects::TextureAtlas;
 use crate::palette::PaletteSwaps;
@@ -33,19 +35,23 @@ impl Menu {
         ctx: &mut Context,
         store: &mut Store<Context, SimpleKey>,
         key: &str,
-    ) -> Result<Self, Error> {
+        // ) -> Result<Self, Error> {
+    ) -> Result<Self, Box<dyn error::Error>> {
         let screen = store
             .get::<Screen>(&warmy::SimpleKey::from(key), ctx)
+            .map_err(|e| LoadError::from(e))?
             //TODO: fix with ? syntax
-            .expect("err loading screen in menu")
+            // .expect("err loading screen in menu")
             .borrow()
             .clone();
 
         let (background, palette) = match &screen.background {
             Some(background) => {
-                let piv = store.get::<PivImage>(&SimpleKey::from(background.clone()), ctx)
+                let piv = store
+                    .get::<PivImage>(&SimpleKey::from(background.clone()), ctx)
                     // TODO: fix with ?
-                    .expect("error loading menu pivimage");
+                    .or_else(|err| Err(LoadError::Warmy { store_err: err }))?;
+                // .expect("error loading menu pivimage");
                 let mut palette = piv.borrow().palette.to_vec();
                 if palette.len() == 16 {
                     palette.extend(

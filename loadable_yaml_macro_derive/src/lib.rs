@@ -19,8 +19,7 @@ fn impl_loadable_yaml_macro(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
     let gen = quote! {
         impl warmy::Load<Context, warmy::SimpleKey> for #name {
-            // type Key = warmy::LogicalKey;
-            type Error = compat_error::CompatError;
+            type Error = crate::error::LoadError<crate::manager::GameYaml>;
             fn load(
                 key: warmy::SimpleKey,
                 _store: &mut warmy::Storage<Context, warmy::SimpleKey>,
@@ -28,12 +27,16 @@ fn impl_loadable_yaml_macro(ast: &syn::DeriveInput) -> TokenStream {
             ) -> Result<warmy::Loaded<Self, warmy::SimpleKey>, Self::Error> {
                 match key {
                     warmy::SimpleKey::Logical(key) => {
-                        let file = ggez::filesystem::open(ctx, key.as_str()).map_err(compat_error::err_from)?;
-                        let yaml: serde_yaml::Value = serde_yaml::from_reader(file).map_err(compat_error::err_from)?;
-                        let name: #name = serde_yaml::from_value(yaml).map_err(compat_error::err_from)?;
+                        let file = ggez::filesystem::open(ctx, key.as_str())?;
+                        let yaml: serde_yaml::Value = serde_yaml::from_reader(file)?;
+                        let name: #name = serde_yaml::from_value(yaml)?;
+                        // let file = ggez::filesystem::open(ctx, key.as_str()).map_err(compat_error::err_from)?;
+                        // let yaml: serde_yaml::Value = serde_yaml::from_reader(file).map_err(compat_error::err_from)?;
+                        // let name: #name = serde_yaml::from_value(yaml).map_err(compat_error::err_from)?;
                         Ok(warmy::Loaded::from(name))
                     }
-                    warmy::SimpleKey::Path(_) => Err(err_msg("error").compat())
+                    // warmy::SimpleKey::Path(_) => Err(err_msg("error").compat())
+                    warmy::SimpleKey::Path(_) => Err(crate::error::LoadError::PathLoadNotImplemented)
                 }
             }
         }

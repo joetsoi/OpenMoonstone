@@ -103,12 +103,12 @@ fn main() {
 
     let game = Game::new().expect("failed to initialize game");
     let mut scene_stack = scenes::FSceneStack::new(ctx, game);
-    let cmp = scene_stack
-        .world
-        .store
-        .get::<PivImage>(&SimpleKey::from("wa1".to_string()), ctx)
-        // TODO: fix with ? error syntax
-        .expect("error loading wa1");
+    // let cmp = scene_stack
+    //     .world
+    //     .store
+    //     .get::<PivImage>(&SimpleKey::from("wa1".to_string()), ctx)
+    //     // TODO: fix with ? error syntax
+    //     .expect("error loading wa1");
     // let image = RgbaImage::from_raw(512, 512, cmp.borrow().to_rgba8_512()).unwrap();
     // image.save("cmp.png");
 
