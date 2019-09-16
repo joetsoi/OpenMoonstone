@@ -20,6 +20,7 @@ fn impl_loadable_yaml_macro(ast: &syn::DeriveInput) -> TokenStream {
     let gen = quote! {
         impl warmy::Load<Context, warmy::SimpleKey> for #name {
             type Error = crate::error::LoadError<crate::manager::GameYaml>;
+            // type Error = crate::error::LoadError;
             fn load(
                 key: warmy::SimpleKey,
                 _store: &mut warmy::Storage<Context, warmy::SimpleKey>,

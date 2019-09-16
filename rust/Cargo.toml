@@ -28,7 +28,7 @@ lazy_static = "*"
 ggez = "*"
 loadable_yaml_macro_derive = {path = "../loadable_yaml_macro_derive"}
 compat_error = {path = "../compat_error"}
-snafu = "*"
+# snafu = "*"
 
 # [dependencies.ggez]
 # git = "https://github.com/ggez/ggez"

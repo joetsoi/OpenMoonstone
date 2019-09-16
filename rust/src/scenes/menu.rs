@@ -50,7 +50,8 @@ impl Menu {
                 let piv = store
                     .get::<PivImage>(&SimpleKey::from(background.clone()), ctx)
                     // TODO: fix with ?
-                    .or_else(|err| Err(LoadError::Warmy { store_err: err }))?;
+                    // .or_else(|err| Err(LoadError::Warmy { store_err: err }))?;
+                    .or_else(|err| Err(LoadError::Warmy(err)))?;
                 // .expect("error loading menu pivimage");
                 let mut palette = piv.borrow().palette.to_vec();
                 if palette.len() == 16 {

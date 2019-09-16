@@ -1,10 +1,8 @@
 use std::collections::hash_map::Entry::{Occupied, Vacant};
 use std::collections::HashMap;
+use std::error::Error;
 use std::fmt;
 
-use failure;
-use failure::err_msg;
-use failure_derive::Fail;
 use ggez::graphics::spritebatch::SpriteBatch;
 use ggez::nalgebra::Point2;
 use ggez::{filesystem, graphics, Context};
@@ -16,16 +14,34 @@ use warmy::{SimpleKey, Store};
 use compat_error::err_from;
 use loadable_yaml_macro_derive::LoadableYaml;
 
+use crate::error::LoadError;
+use crate::manager::GameYaml;
+
 use crate::game::Game;
 use crate::objects::TextureAtlas;
 use crate::piv::Colour;
 
-#[derive(Debug, Fail)]
+#[derive(Debug)]
 pub enum InvalidFont {
-    #[fail(display = "font {} not in font_lookup", font)]
+    //#[fail(display = "font {} not in font_lookup", font)]
+    // #[snafu(display("font {} not in font_lookup", font))]
     FontDoesNotExist { font: String },
-    #[fail(display = "image {} not in font", num)]
+    //#[fail(display = "image {} not in font", num)]
+    // #[snafu(display("image {} not in font", num))]
     ImageDoesNotExist { num: usize },
+}
+
+impl Error for InvalidFont {}
+
+impl fmt::Display for InvalidFont {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            InvalidFont::FontDoesNotExist { ref font } => {
+                write!(f, "font {} not in font_lookup", font)
+            }
+            InvalidFont::ImageDoesNotExist { num } => write!(f, "image {} not in font", num),
+        }
+    }
 }
 
 lazy_static! {
@@ -67,7 +83,11 @@ pub struct Screen {
 
 impl fmt::Display for Screen {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Screen {}", self.background.as_ref().unwrap_or(&format!("test")))
+        write!(
+            f,
+            "Screen {}",
+            self.background.as_ref().unwrap_or(&format!("test"))
+        )
     }
 }
 
@@ -86,7 +106,7 @@ impl Text {
         &self,
         ctx: &mut Context,
         store: &mut Store<Context, SimpleKey>,
-    ) -> Result<Vec<graphics::DrawParam>, failure::Error> {
+    ) -> Result<Vec<graphics::DrawParam>, Box<dyn Error>> {
         let lookup: &Vec<usize> =
             font_lookup
                 .get(self.font.as_str())
@@ -153,7 +173,7 @@ impl Text {
         game: &mut Game,
         palette: &[Colour],
         palette_hash: u64,
-    ) -> Result<SpriteBatch, failure::Error> {
+    ) -> Result<SpriteBatch, Box<dyn Error>> {
         let atlas = game
             .store
             .get::<TextureAtlas>(&SimpleKey::from(self.font.as_str()), ctx)
