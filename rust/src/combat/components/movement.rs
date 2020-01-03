@@ -2,6 +2,7 @@ use specs::{Component, VecStorage};
 use specs_derive::*;
 
 use super::Facing;
+use crate::input;
 use crate::rect::Point;
 
 #[derive(Component, Debug)]
@@ -32,10 +33,27 @@ pub struct WalkingState {
     pub step: u32,
 }
 
-#[derive(Component, Debug, Default)]
+#[derive(Component, Debug)]
 #[storage(VecStorage)]
 pub struct Controller {
     pub x: i32,
     pub y: i32,
     pub fire: bool,
+
+    pub x_axis: input::Axis,
+    pub y_axis: input::Axis,
+    pub button: input::Button,
+}
+
+impl Default for Controller {
+    fn default() -> Self {
+        Controller {
+            x: 0,
+            y: 0,
+            fire: false,
+            x_axis: input::Axis::Horz1,
+            y_axis: input::Axis::Vert1,
+            button: input::Button::Fire1,
+        }
+    }
 }

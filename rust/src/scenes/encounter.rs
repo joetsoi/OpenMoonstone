@@ -394,40 +394,62 @@ impl<'a> EncounterScene<'a> {
         raw_palette: &[u16],
         y_max: u32,
     ) -> (Index, Option<Index>, Option<Index>, Option<Index>) {
+        let mut control_map = HashMap::new();
+        control_map.insert(
+            0,
+            (input::Axis::Horz1, input::Axis::Vert1, input::Button::Fire1),
+        );
+        control_map.insert(
+            1,
+            (input::Axis::Horz2, input::Axis::Vert2, input::Button::Fire2),
+        );
+        control_map.insert(
+            2,
+            (input::Axis::Horz3, input::Axis::Vert3, input::Button::Fire3),
+        );
+        control_map.insert(
+            3,
+            (input::Axis::Horz4, input::Axis::Vert4, input::Button::Fire4),
+        );
+
         let starting_x = [250, 30, 240, 40];
         let colours = ["blue_knight", "green_knight", "red_knight", "orange_knight"];
 
-        let x = starting_x[0];
-        let y = EncounterScene::next_starting_position(game, y_max as i32);
-        let facing = match x {
-            x if x < 160 => Facing::Right,
-            _ => Facing::Left,
-        };
-        let player_1 = EncounterScene::build_entity(
-            ctx,
-            &mut game.store,
-            world,
-            "knight",
-            raw_palette,
-            colours[0],
-            x,
-            y,
-            facing,
-        )
-        .with(Controller {
-            ..Default::default()
-        })
-        .build();
+        // let x = starting_x[0];
+        // let y = EncounterScene::next_starting_position(game, y_max as i32);
+        // let facing = match x {
+        //     x if x < 160 => Facing::Right,
+        //     _ => Facing::Left,
+        // };
+        // let player_1 = EncounterScene::build_entity(
+        //     ctx,
+        //     &mut game.store,
+        //     world,
+        //     "knight",
+        //     raw_palette,
+        //     colours[0],
+        //     x,
+        //     y,
+        //     facing,
+        // )
+        // .with(Controller {
+        //     x_axis: input::Axis::Horz1,
+        //     y_axis: input::Axis::Vert1,
+        //     button: input::Button::Fire1,
+        //     ..Default::default()
+        // })
+        // .build();
 
         let mut players: Vec<Entity> = Vec::new();
 
-        for n in 1..game.num_players {
+        for n in 0..game.num_players {
             let x = starting_x[n as usize];
             let y = EncounterScene::next_starting_position(game, y_max as i32);
             let facing = match x {
                 x if x < 160 => Facing::Right,
                 _ => Facing::Left,
             };
+            let mapping = control_map.get(&n).unwrap();
             let player = EncounterScene::build_entity(
                 ctx,
                 &mut game.store,
@@ -440,12 +462,16 @@ impl<'a> EncounterScene<'a> {
                 facing,
             )
             .with(Controller {
+                x_axis: mapping.0,
+                y_axis: mapping.1,
+                button: mapping.2,
                 ..Default::default()
             })
             .build();
             players.push(player);
         }
 
+        let player_1 = players.get(0).unwrap();
         if game.num_players == 1 {
             let y = EncounterScene::next_starting_position(game, y_max as i32);
             EncounterScene::build_entity(
@@ -461,7 +487,7 @@ impl<'a> EncounterScene<'a> {
             )
             .with(AiState {
                 class: "black_knight".to_string(),
-                target: Some(player_1),
+                target: Some(*player_1),
                 y_range: 4,
                 close_range: 80,
                 long_range: 100,
@@ -471,9 +497,9 @@ impl<'a> EncounterScene<'a> {
 
         (
             player_1.id(),
-            players.get(0).and_then(|p| Some(p.id())),
             players.get(1).and_then(|p| Some(p.id())),
             players.get(2).and_then(|p| Some(p.id())),
+            players.get(3).and_then(|p| Some(p.id())),
         )
     }
 
@@ -537,23 +563,9 @@ impl<'a> EncounterScene<'a> {
         let entities = self.specs_world.entities();
         let mut controllers = self.specs_world.write_storage::<Controller>();
         for (e, controller) in (&*entities, &mut controllers).join() {
-            if e.id() == self.player_1 {
-                controller.x = input.get_axis_raw(input::Axis::Horz1) as i32;
-                controller.y = input.get_axis_raw(input::Axis::Vert1) as i32;
-                controller.fire = input.get_button_down(input::Button::Fire1);
-            } else if self.player_2.is_some() && e.id() == self.player_2.unwrap() {
-                controller.x = input.get_axis_raw(input::Axis::Horz2) as i32;
-                controller.y = input.get_axis_raw(input::Axis::Vert2) as i32;
-                controller.fire = input.get_button_down(input::Button::Fire2);
-            } else if self.player_3.is_some() && e.id() == self.player_3.unwrap() {
-                controller.x = input.get_axis_raw(input::Axis::Horz3) as i32;
-                controller.y = input.get_axis_raw(input::Axis::Vert3) as i32;
-                controller.fire = input.get_button_down(input::Button::Fire3);
-            } else if self.player_4.is_some() && e.id() == self.player_4.unwrap() {
-                controller.x = input.get_axis_raw(input::Axis::Horz4) as i32;
-                controller.y = input.get_axis_raw(input::Axis::Vert4) as i32;
-                controller.fire = input.get_button_down(input::Button::Fire4);
-            }
+            controller.x = input.get_axis_raw(controller.x_axis) as i32;
+            controller.y = input.get_axis_raw(controller.y_axis) as i32;
+            controller.fire = input.get_button_down(controller.button);
         }
     }
 
@@ -607,7 +619,13 @@ impl<'a> scene::Scene<Game, input::InputEvent> for EncounterScene<'a> {
                 .scale(Vector2::new(3.0, 3.0)),
         )?;
 
-        draw_entities(&self.specs_world, &self.palette, Some(&self.background), game, ctx);
+        draw_entities(
+            &self.specs_world,
+            &self.palette,
+            Some(&self.background),
+            game,
+            ctx,
+        );
 
         let body_storage = self.specs_world.read_storage::<Body>();
 
