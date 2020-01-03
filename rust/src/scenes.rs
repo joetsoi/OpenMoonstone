@@ -10,6 +10,7 @@ pub mod map;
 pub mod menu;
 pub mod select_knight;
 pub mod transition;
+pub mod world;
 
 pub use self::encounter::EncounterScene;
 pub use self::main::MainScene;

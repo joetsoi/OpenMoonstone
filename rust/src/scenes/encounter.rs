@@ -12,7 +12,7 @@ use warmy::{SimpleKey, Store};
 
 use super::transition::FadeStyle;
 use super::Fade;
-use crate::animation::{Image, ImageType, Sprite, SpriteData};
+use crate::animation::{Sprite, SpriteData};
 use crate::combat::components::{
     AiState, AnimationState, Body, Collided, Controller, DaggersInventory, Draw, Facing, Health,
     Intent, MustLive, Palette, Position, State, UnitType, Velocity, WalkingState, Weapon,
@@ -36,6 +36,7 @@ use crate::objects::TextureAtlas;
 use crate::palette::PaletteSwaps;
 use crate::piv::{palette_swap, Colour, PivImage};
 use crate::rect::Rect;
+use crate::scenes::world::draw_entities;
 use crate::scenes::FSceneSwitch;
 
 #[derive(Debug, Default, Clone)]
@@ -46,11 +47,11 @@ pub struct EncounterTextures {
 const TICKS_TO_WAIT: u32 = 35;
 
 pub struct EncounterScene<'a> {
+    // pub drawable_world: DrawableWorld,
     pub specs_world: World,
     pub dispatcher: Dispatcher<'a, 'a>,
     pub background: graphics::Canvas,
     pub palette: Vec<Colour>,
-
     player_1: Index,
     player_2: Option<Index>,
     player_3: Option<Index>,
@@ -149,8 +150,8 @@ impl<'a> EncounterScene<'a> {
         let damage_tables = store
             .get::<DamageTables>(&SimpleKey::from("/damage.yaml"), ctx)
             .expect("error loading damage.yaml");
-        world.add_resource(damage_tables.borrow().clone());
-        world.add_resource(CombatDone(false));
+        world.insert(damage_tables.borrow().clone());
+        world.insert(CombatDone(false));
         Ok(())
     }
 
@@ -170,7 +171,9 @@ impl<'a> EncounterScene<'a> {
             let yaml_borrow = &entities_yaml.borrow();
             let yaml_file = yaml_borrow.yaml[name].as_str().unwrap();
             // TODO: Fix to allow ? syntax
-            let entity_yaml = store.get::<Sprite>(&warmy::SimpleKey::from(yaml_file), ctx).expect("error loading entity yaml_file");
+            let entity_yaml = store
+                .get::<Sprite>(&warmy::SimpleKey::from(yaml_file), ctx)
+                .expect("error loading entity yaml_file");
             sprites.insert(name.to_string(), (*entity_yaml.borrow()).clone());
 
             for i in entity_yaml
@@ -186,7 +189,7 @@ impl<'a> EncounterScene<'a> {
                 atlas_names.insert(i.clone());
             }
         }
-        world.add_resource(SpriteData { sprites });
+        world.insert(SpriteData { sprites });
         let mut image_sizes: HashMap<String, Vec<Rect>> = HashMap::new();
         let mut texture_atlases: HashMap<String, TextureAtlas> = HashMap::new();
         for atlas_name in atlas_names {
@@ -197,7 +200,7 @@ impl<'a> EncounterScene<'a> {
             image_sizes.insert(atlas_name.clone(), atlas.borrow().rects.clone());
             texture_atlases.insert(atlas_name.clone(), atlas.borrow().clone());
         }
-        world.add_resource(EncounterTextures {
+        world.insert(EncounterTextures {
             data: texture_atlases,
         });
         Ok(())
@@ -318,7 +321,7 @@ impl<'a> EncounterScene<'a> {
             .get::<CollisionBoxes>(&SimpleKey::from("collide"), ctx)
             // TODO fix error handling, make this ?
             .expect("Error loading collision boxes");
-        world.add_resource(collide_hit.borrow().clone());
+        world.insert(collide_hit.borrow().clone());
 
         let (player_1, player_2, player_3, player_4) = EncounterScene::create_entities(
             ctx,
@@ -370,10 +373,11 @@ impl<'a> EncounterScene<'a> {
 
         let palette: Vec<Colour> = piv.borrow().palette.to_vec();
         Ok(Self {
+            // drawable_world,
             palette,
             specs_world: world,
-            dispatcher: EncounterScene::build_dispatcher(),
             background,
+            dispatcher: EncounterScene::build_dispatcher(),
             player_1,
             player_2,
             player_3,
@@ -523,7 +527,7 @@ impl<'a> EncounterScene<'a> {
             .map(|h| h.y)
             .max()
             .expect("error getting ymax");
-        world.add_resource(TopBoundary {
+        world.insert(TopBoundary {
             y: y_max as i32 - 30,
         });
         Ok(y_max)
@@ -602,87 +606,8 @@ impl<'a> scene::Scene<Game, input::InputEvent> for EncounterScene<'a> {
                 // TODO: this shouldn't be need investigate why it is.
                 .scale(Vector2::new(3.0, 3.0)),
         )?;
-        let position_storage = self.specs_world.read_storage::<Position>();
-        let draw_storage = self.specs_world.read_storage::<Draw>();
-        let entities = self.specs_world.entities();
 
-        let palette_storage = self.specs_world.read_storage::<Palette>();
-
-        let mut storage = (&position_storage, &draw_storage, &entities)
-            .join()
-            .collect::<Vec<_>>();
-        storage.sort_by(|&a, &b| a.0.y.cmp(&b.0.y));
-
-        for (position, draw, entity) in storage {
-            let images: Vec<&Image> = if game.gore_on {
-                draw.frame.images.iter().collect()
-            } else {
-                draw.frame.images.iter().filter(|i| !i.is_blood()).collect()
-            };
-            for image in images {
-                let atlas = game
-                    .store
-                    .get::<TextureAtlas>(&SimpleKey::from(image.sheet.as_str()), ctx)
-                    // TODO fix error handling, make this ?
-                    .expect("error loading texture atlas when drawing");
-
-                let atlas_dimension = atlas.borrow().image.width as u32;
-                // TODO: change with palettes
-                let palette: Option<&Palette> = palette_storage.get(entity);
-                let ggez_image = match palette {
-                    None => match game.images.entry(image.sheet.clone()) {
-                        Occupied(i) => i.into_mut(),
-                        Vacant(i) => i.insert(
-                            graphics::Image::from_rgba8(
-                                ctx,
-                                atlas_dimension as u16,
-                                atlas_dimension as u16,
-                                &atlas.borrow().image.to_rgba8(&self.palette),
-                            )
-                            .unwrap(),
-                        ),
-                    },
-                    Some(palette) => {
-                        let image_name = [image.sheet.clone(), palette.name.clone()].join("-");
-                        match game.images.entry(image_name) {
-                            Occupied(i) => i.into_mut(),
-                            Vacant(i) => i.insert(
-                                graphics::Image::from_rgba8(
-                                    ctx,
-                                    atlas_dimension as u16,
-                                    atlas_dimension as u16,
-                                    &atlas.borrow().image.to_rgba8(&palette.palette),
-                                )
-                                .unwrap(),
-                            ),
-                        }
-                    }
-                };
-
-                // Debug collision rects
-                let rect = atlas.borrow().rects[image.image];
-                let texture_size = atlas.borrow().image.width as f32;
-                let draw_params = graphics::DrawParam::default()
-                    .src(graphics::Rect {
-                        x: rect.x as f32 / texture_size,
-                        y: rect.y as f32 / texture_size,
-                        w: rect.w as f32 / texture_size,
-                        h: rect.h as f32 / texture_size,
-                    })
-                    .dest(Point2::new(
-                        (position.x as i32 + (draw.direction as i32 * image.x)) as f32 * 3.0,
-                        (position.y as i32 + image.y) as f32 * 3.0,
-                    ))
-                    .scale(Vector2::new((draw.direction as i32 * 3) as f32, 3.0));
-
-                graphics::draw(ctx, ggez_image, draw_params)?;
-                if let ImageType::BloodStain = image.image_type {
-                    graphics::set_canvas(ctx, Some(&self.background));
-                    graphics::draw(ctx, ggez_image, draw_params)?;
-                    graphics::set_canvas(ctx, None);
-                }
-            }
-        }
+        draw_entities(&self.specs_world, &self.palette, Some(&self.background), game, ctx);
 
         let body_storage = self.specs_world.read_storage::<Body>();
 
