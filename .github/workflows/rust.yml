@@ -1,0 +1,19 @@
+name: Nightly build
+on:
+  schedule:
+    - cron: "0 0 * * 0-6"
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build
+      run: cargo build --verbose --release
+      working-directory: rust
+    - uses: actions/upload-artifact@v1
+      with:
+        name: openmoonstone-nightly-build
+        path: rust/target/debug/openmoonstone.exe
