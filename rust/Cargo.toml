@@ -7,7 +7,7 @@ authors = ["Joe Tsoi <joetsoi@users.noreply.github.com>"]
 [dependencies]
 byteorder = "*"
 bv = "*"
-ggez-goodies = { git = "https://github.com/joetsoi/ggez-goodies.git", branch = "only-input-scene"}
+ggez-goodies = { git = "https://github.com/joetsoi/ggez-goodies.git", branch = "push-multiple"}
 failure = "*"
 failure_derive = "*"
 #image = "*"
