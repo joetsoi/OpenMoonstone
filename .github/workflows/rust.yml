@@ -16,4 +16,4 @@ jobs:
     - uses: actions/upload-artifact@v1
       with:
         name: openmoonstone-nightly-build
-        path: rust/target/debug/openmoonstone.exe
+        path: rust/target/release/openmoonstone.exe
