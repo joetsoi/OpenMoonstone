@@ -11,10 +11,14 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Build
-    - run: cargo build --verbose --release
-    - run: cd target/release
-    - run: cp -r ../../resources .
-    - run: zip -r openmoonstone.zip openmoonstone resources
+      run: cargo build --verbose --release
+      working-directory: rust
+    - name: Create archive
+      run: | 
+        cd target/release
+        cp -r ../../resources .
+        zip -r openmoonstone.zip openmoonstone resources
+      shell: bash
       working-directory: rust
     #- uses: actions/upload-artifact@v1
     #  with:
