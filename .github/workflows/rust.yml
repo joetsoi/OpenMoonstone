@@ -11,9 +11,22 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Build
-      run: cargo build --verbose --release
+    - run: cargo build --verbose --release
+    - run: cd target/release
+    - run: cp -r ../../resources .
+    - run: zip -r openmoonstone.zip openmoonstone resources
       working-directory: rust
-    - uses: actions/upload-artifact@v1
+    #- uses: actions/upload-artifact@v1
+    #  with:
+    #    name: openmoonstone-nightly-build
+    #    path: rust/target/release/openmoonstone.exe
+    - uses: WebFreak001/deploy-nightly@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
       with:
-        name: openmoonstone-nightly-build
-        path: rust/target/release/openmoonstone.exe
+        upload_url: https://uploads.github.com/repos/joetsoi/OpenMoonstone/releases/14994625/assets{?name,label}
+        release_id: 14994625 
+        asset_path: rust/target/release/openmoonstone.zip
+        asset_name: openmoonstone_windows-nightly-$$.zip
+        asset_content_type: application/zip
+        max_releases: 7
