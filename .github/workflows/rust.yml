@@ -15,10 +15,10 @@ jobs:
       working-directory: rust
     - name: Create archive
       run: | 
-        cd target/release
-        cp -r ../../resources .
-        zip -r openmoonstone.zip openmoonstone resources
-      shell: bash
+        cd target\release
+        Copy-Item '..\..\resouces' -Destination '.'
+        Compress-Archive -LiteralPath "." -DestinationPath "openmoonstone.zip"
+      shell: pwsh
       working-directory: rust
     #- uses: actions/upload-artifact@v1
     #  with:
