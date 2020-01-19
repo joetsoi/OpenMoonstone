@@ -16,7 +16,7 @@ jobs:
     - name: Create archive
       run: | 
         cd target\release
-        Copy-Item '..\..\resouces' -Destination '.'
+        Copy-Item '..\..\resources' -Destination '.'
         Compress-Archive -LiteralPath "." -DestinationPath "openmoonstone.zip"
       shell: pwsh
       working-directory: rust
