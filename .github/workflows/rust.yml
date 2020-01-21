@@ -16,8 +16,10 @@ jobs:
     - name: Create archive
       run: | 
         cd target\release
-        Copy-Item '..\..\resources' -Destination '.'
-        Compress-Archive -LiteralPath "." -DestinationPath "openmoonstone.zip"
+        mkdir openmoonstone
+        Move-Item 'openmoonstone.exe' -Destination 'openmoonstone'
+        Move-Item '..\..\resources' -Destination 'openmoonstone'
+        Compress-Archive -LiteralPath "openmoonstone" -DestinationPath "openmoonstone.zip"
       shell: pwsh
       working-directory: rust
     #- uses: actions/upload-artifact@v1
