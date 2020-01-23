@@ -30,7 +30,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
       with:
-        upload_url: https://uploads.github.com/repos/joetsoi/OpenMoonstone/releases/14994625/assets{?name,label}
+        upload_url: https://uploads.github.com/repos/joetsoi/OpenMoonstone/releases/22962285/assets{?name,label}
         release_id: 14994625 
         asset_path: rust/target/release/openmoonstone.zip
         asset_name: openmoonstone_windows-nightly-$$.zip
