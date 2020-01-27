@@ -9,14 +9,6 @@ struct Rect {
     h: i32,
 }
 
-// TODO: change to be SystemData
-const LAIR_BOUNDARY: Rect = Rect {
-    x: 0,   //10,
-    y: 0,   //30,
-    w: 320, // - 10,
-    h: 155, // - 30,
-};
-
 #[derive(Debug)]
 pub struct Boundary {
     pub x: i32,
@@ -49,19 +41,16 @@ impl<'a> System<'a> for RestrictMovementToBoundary {
         ReadStorage<'a, Intent>,
         WriteStorage<'a, Velocity>,
     );
-    fn run(&mut self, (top_boundary, position, intent, mut velocity): Self::SystemData) {
+    fn run(&mut self, (boundary, position, intent, mut velocity): Self::SystemData) {
         use specs::Join;
         for (position, _, velocity) in (&position, &intent, &mut velocity).join() {
             let new_x = position.x as i32 + velocity.x;
-            if new_x < LAIR_BOUNDARY.x && velocity.x < 0
-                || new_x > LAIR_BOUNDARY.w && velocity.x > 0
-            {
+            if new_x < boundary.x && velocity.x < 0 || new_x > boundary.w && velocity.x > 0 {
                 velocity.x = 0;
             }
 
             let new_y = position.y as i32 - velocity.y;
-            if new_y < top_boundary.y && velocity.y < 0 || new_y > LAIR_BOUNDARY.h && velocity.y > 0
-            {
+            if new_y < boundary.y && velocity.y < 0 || new_y > boundary.h && velocity.y > 0 {
                 velocity.y = 0;
             }
         }
