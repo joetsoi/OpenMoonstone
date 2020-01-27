@@ -12,6 +12,10 @@ scenes:
     fo2: DISKB/FO2.CMP
     sw1: DISKB/SW1.CMP
     wa1: DISKB/WA1.CMP
+    # others
+    waterdeep: DISKC/WATERDEE.PIV
+    tavern: DISKC/TAV.PIV
+    message: DISKA/MESSAGE.PIV
 
 terrain:
     wa1.t: DISKB/WA1.T
@@ -40,5 +44,6 @@ objects:
     small.f: {file: DISKB/SMALL.FON, texture_size: 128}
     # map
     mi.c: {file: DISKB/MI.C, texture_size: 256}
+    ki.cel: {file: DISKB/KI.CEL, texture_size: 256}
 
 collide: DISKB/COLLIDE.HIT

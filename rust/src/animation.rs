@@ -5,7 +5,10 @@ use serde_derive::{Deserialize, Serialize};
 use serde_yaml::Value;
 use warmy;
 
+use loadable_yaml_macro_derive::LoadableYaml;
 use crate::error::{err_from, CompatError};
+use crate::error::LoadError;
+use crate::manager::GameYaml;
 use failure::err_msg;
 
 #[derive(Default, Debug, Clone)]
@@ -67,7 +70,8 @@ pub struct Sprite {
 
 impl warmy::Load<Context, warmy::SimpleKey> for Sprite {
     // type Key = warmy::LogicalKey;
-    type Error = CompatError;
+    // type Error = CompatError;
+    type Error = LoadError<GameYaml>;
 
     fn load(
         key: warmy::SimpleKey,
@@ -76,14 +80,15 @@ impl warmy::Load<Context, warmy::SimpleKey> for Sprite {
     ) -> Result<warmy::Loaded<Self, warmy::SimpleKey>, Self::Error> {
         match key {
             warmy::SimpleKey::Logical(key) => {
-                let file = filesystem::open(ctx, key).map_err(err_from)?;
-                let yaml: Value = serde_yaml::from_reader(file).map_err(err_from)?;
+                let file = filesystem::open(ctx, key)?;
+                let yaml: Value = serde_yaml::from_reader(file)?;
 
                 Ok(warmy::Loaded::from(Sprite {
-                    animations: serde_yaml::from_value(yaml).map_err(err_from)?,
+                    animations: serde_yaml::from_value(yaml)?,
                 }))
             }
-            warmy::SimpleKey::Path(_) => return Err(err_msg("error").compat()),
+            // warmy::SimpleKey::Path(_) => return Err(err_msg("error").compat()),
+            warmy::SimpleKey::Path(_) => return Err(LoadError::PathLoadNotImplemented),
         }
         // Ok(Sprite {
         //     animations: serde_yaml::from_value(yaml).map_err(err_from)?,

@@ -18,13 +18,21 @@ const LAIR_BOUNDARY: Rect = Rect {
 };
 
 #[derive(Debug)]
-pub struct TopBoundary {
+pub struct Boundary {
+    pub x: i32,
     pub y: i32,
+    pub w: i32,
+    pub h: i32,
 }
 
-impl Default for TopBoundary {
-    fn default() -> TopBoundary {
-        TopBoundary { y: 30 }
+impl Default for Boundary {
+    fn default() -> Boundary {
+        Boundary {
+            x: 0,
+            y: 30,
+            w: 320,
+            h: 150,
+        }
     }
 }
 
@@ -34,7 +42,7 @@ pub struct RestrictMovementToBoundary;
 
 impl<'a> System<'a> for RestrictMovementToBoundary {
     type SystemData = (
-        ReadExpect<'a, TopBoundary>,
+        ReadExpect<'a, Boundary>,
         ReadStorage<'a, Position>,
         // anything which can take commands is bounded to the screen.
         // TODO: what happens with off screen (trogg war beasts) enemies?

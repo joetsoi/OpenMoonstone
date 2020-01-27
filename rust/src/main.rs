@@ -2,6 +2,7 @@
 
 use std::time::Duration;
 use std::{env, path};
+use std::iter::repeat;
 
 use ggez::conf;
 use ggez::event;
@@ -16,6 +17,9 @@ use warmy::SimpleKey;
 use openmoonstone::game::Game;
 use openmoonstone::input;
 use openmoonstone::piv::PivImage;
+use openmoonstone::piv::{extract_palette, Colour};
+use openmoonstone::palette::PaletteSwaps;
+use openmoonstone::objects::TextureAtlas;
 use openmoonstone::scenes;
 use openmoonstone::scenes::transition::FadeStyle;
 use openmoonstone::scenes::{FSceneStack, Fade, MainMenuScene, MainScene, SelectKnight};
@@ -103,14 +107,51 @@ fn main() {
 
     let game = Game::new().expect("failed to initialize game");
     let mut scene_stack = scenes::FSceneStack::new(ctx, game);
-    // let cmp = scene_stack
-    //     .world
-    //     .store
-    //     .get::<PivImage>(&SimpleKey::from("wa1".to_string()), ctx)
-    //     // TODO: fix with ? error syntax
-    //     .expect("error loading wa1");
-    // let image = RgbaImage::from_raw(512, 512, cmp.borrow().to_rgba8_512()).unwrap();
-    // image.save("cmp.png");
+     let map = scene_stack
+         .world
+         .store
+         .get::<PivImage>(&SimpleKey::from("map".to_string()), ctx)
+         // TODO: fix with ? error syntax
+         .expect("error loading wa1");
+     // let image = RgbaImage::from_raw(512, 512, map.borrow().to_rgba8_512()).unwrap();
+     // image.save("ch.png");
+
+    // let swaps_res = scene_stack.world.store
+    //     .get::<PaletteSwaps>(&SimpleKey::from("/palettes.yaml"), ctx)
+    //     // TODO: fix with ?
+    //     .expect("error loading palette.yaml");
+    // let swaps = swaps_res.borrow();
+    // let raw_palette = swaps
+    //     .0
+    //     .get("default")
+    //     .expect("failed to fetch default palette");
+    // let palette = extract_palette(raw_palette);
+    
+    let cmp = scene_stack
+        .world
+        .store
+        .get::<TextureAtlas>(&SimpleKey::from("mi.c".to_string()), ctx)
+        // TODO: fix with ? error syntax
+        .expect("error loading wa1");
+
+    let mut palette = map.borrow().palette.to_vec();
+    if palette.len() == 16 {
+        palette.extend(
+            repeat(Colour {
+                r: 0,
+                g: 0,
+                b: 0,
+                a: 0,
+            })
+            .take(16),
+        );
+    }
+    // let image = RgbaImage::from_raw(2048, 2048, cmp.borrow().image.to_rgba8(&map.borrow().palette)).unwrap();
+    // // let image = RgbaImage::from_raw(256, 256, cmp.borrow().image.to_rgba8(&palette)).unwrap();
+    // image.save("mi.c.png");
+    // println!("{:x?}", map.borrow().raw_palette);
+    // panic!("wee");
+
 
     let main_scene = MainScene::new();
     scene_stack.push(Box::new(main_scene));

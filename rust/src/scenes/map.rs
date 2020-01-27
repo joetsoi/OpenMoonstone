@@ -19,6 +19,8 @@ use crate::animation::Sprite;
 // TODO: move these components to common module out of combat
 use crate::combat::components::{Controller, Draw, Facing, Palette, Position, Velocity};
 use crate::combat::systems::Movement;
+use crate::campaign::components::MapIntent;
+use crate::campaign::systems::MapCommander;
 use crate::error::LoadError;
 use crate::game::{Game, SceneState};
 use crate::input::{Axis, Button, InputEvent};
@@ -99,11 +101,14 @@ impl<'a> MapScene<'a> {
         world.register::<Palette>();
         world.register::<Position>();
         world.register::<Velocity>();
+        world.register::<Controller>();
+        world.register::<MapIntent>();
         world
     }
 
     fn build_dispatcher() -> Dispatcher<'a, 'a> {
         DispatcherBuilder::new()
+            .with(MapCommander, "map_commander", &[])
             .with(Movement, "movement", &[])
             .build()
     }
@@ -164,6 +169,15 @@ impl<'a> MapScene<'a> {
                 resource_name: "mi".to_string(),
                 direction: Facing::default(),
             })
+            .with(Controller {
+                x_axis: Axis::Horz1,
+                y_axis: Axis::Vert1,
+                button: Button::Fire1,
+                ..Default::default()
+            })
+            .with(MapIntent {
+                ..Default::default()
+            })
             .build();
 
         Ok(Self {
@@ -190,6 +204,7 @@ impl<'a> MapScene<'a> {
 
 impl<'a> Scene<Game, InputEvent> for MapScene<'a> {
     fn update(&mut self, game: &mut Game, _ctx: &mut Context) -> FSceneSwitch {
+        self.dispatcher.dispatch_par(&self.specs_world);
         self.specs_world.maintain();
         self.background_frame += 1;
         if self.background_frame == MAP_ANIMATION_SPEED {
@@ -212,7 +227,12 @@ impl<'a> Scene<Game, InputEvent> for MapScene<'a> {
     }
 
     fn input(&mut self, gameworld: &mut Game, event: InputEvent, started: bool) {
-        // let entities = self.specs_world.entities();
-        // let mut controllers = self.specs_world.write_storage::<Controller>();
+        let entities = self.specs_world.entities();
+        let mut controllers = self.specs_world.write_storage::<Controller>();
+        for (e, controller) in (&*entities, &mut controllers).join() {
+            controller.x = gameworld.input.get_axis_raw(controller.x_axis) as i32;
+            controller.y = gameworld.input.get_axis_raw(controller.y_axis) as i32;
+            controller.fire = gameworld.input.get_button_down(controller.button);
+        }
     }
 }

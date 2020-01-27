@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-use failure::err_msg;
 use ggez::{filesystem, Context};
 use serde_yaml::Value;
 use warmy;

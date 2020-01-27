@@ -18,7 +18,7 @@ use crate::combat::components::{
     Intent, MustLive, Palette, Position, State, UnitType, Velocity, WalkingState, Weapon,
 };
 use crate::combat::damage::DamageTables;
-use crate::combat::systems::boundary::TopBoundary;
+use crate::combat::systems::boundary::Boundary;
 use crate::combat::systems::health::CombatDone;
 use crate::combat::systems::{
     ActionSystem, AiDirection, Animation, BlackKnightAi, CheckCollisions, CheckEndOfCombat,
@@ -553,8 +553,9 @@ impl<'a> EncounterScene<'a> {
             .map(|h| h.y)
             .max()
             .expect("error getting ymax");
-        world.insert(TopBoundary {
+        world.insert(Boundary {
             y: y_max as i32 - 30,
+            ..Default::default()
         });
         Ok(y_max)
     }
@@ -627,65 +628,65 @@ impl<'a> scene::Scene<Game, input::InputEvent> for EncounterScene<'a> {
             ctx,
         );
 
-        let body_storage = self.specs_world.read_storage::<Body>();
+        // let body_storage = self.specs_world.read_storage::<Body>();
 
-        // graphics::set_color(ctx, graphics::Color::new(0.4, 1.0, 0.0, 1.0))?;
-        for body in (&body_storage).join() {
-            if let Some(boxes) = &body.collision_boxes {
-                for collision_box in boxes {
-                    let mesh = graphics::MeshBuilder::new()
-                        .rectangle(
-                            graphics::DrawMode::stroke(1.0),
-                            graphics::Rect {
-                                x: (collision_box.rect.x) as f32 * 3.0,
-                                y: (collision_box.rect.y) as f32 * 3.0,
-                                w: collision_box.rect.w as f32 * 3.0,
-                                h: collision_box.rect.h as f32 * 3.0,
-                            },
-                            graphics::Color::new(0.4, 1.0, 0.0, 1.0),
-                        )
-                        .build(ctx)?;
-                    graphics::draw(ctx, &mesh, graphics::DrawParam::default())?;
-                }
-            }
-        }
+        // // graphics::set_color(ctx, graphics::Color::new(0.4, 1.0, 0.0, 1.0))?;
+        // for body in (&body_storage).join() {
+        //     if let Some(boxes) = &body.collision_boxes {
+        //         for collision_box in boxes {
+        //             let mesh = graphics::MeshBuilder::new()
+        //                 .rectangle(
+        //                     graphics::DrawMode::stroke(1.0),
+        //                     graphics::Rect {
+        //                         x: (collision_box.rect.x) as f32 * 3.0,
+        //                         y: (collision_box.rect.y) as f32 * 3.0,
+        //                         w: collision_box.rect.w as f32 * 3.0,
+        //                         h: collision_box.rect.h as f32 * 3.0,
+        //                     },
+        //                     graphics::Color::new(0.4, 1.0, 0.0, 1.0),
+        //                 )
+        //                 .build(ctx)?;
+        //             graphics::draw(ctx, &mesh, graphics::DrawParam::default())?;
+        //         }
+        //     }
+        // }
 
-        let weapon_storage = self.specs_world.read_storage::<Weapon>();
+        // let weapon_storage = self.specs_world.read_storage::<Weapon>();
 
-        for weapon in (&weapon_storage).join() {
-            if let Some(collision_rects) = &weapon.collision_points {
-                for rect in collision_rects {
-                    let mesh = graphics::MeshBuilder::new()
-                        .rectangle(
-                            graphics::DrawMode::stroke(1.0),
-                            graphics::Rect {
-                                x: (rect.bounding.x * 3) as f32,
-                                y: (rect.bounding.y * 3) as f32,
-                                w: rect.bounding.w as f32 * 3.0,
-                                h: rect.bounding.h as f32 * 3.0,
-                            },
-                            graphics::Color::new(1.0, 0.0, 1.0, 1.0),
-                        )
-                        .build(ctx)?;
-                    graphics::draw(ctx, &mesh, graphics::DrawParam::default())?;
-                    for point in &rect.points {
-                        let mesh = graphics::MeshBuilder::new()
-                            .rectangle(
-                                graphics::DrawMode::stroke(1.0),
-                                graphics::Rect {
-                                    x: (point.x as i32 * 3) as f32,
-                                    y: (point.y as i32 * 3) as f32,
-                                    w: 3.0,
-                                    h: 3.0,
-                                },
-                                graphics::Color::new(1.0, 0.0, 1.0, 1.0),
-                            )
-                            .build(ctx)?;
-                        graphics::draw(ctx, &mesh, graphics::DrawParam::default())?;
-                    }
-                }
-            }
-        }
+        // for weapon in (&weapon_storage).join() {
+        //     if let Some(collision_rects) = &weapon.collision_points {
+        //         for rect in collision_rects {
+        //             let mesh = graphics::MeshBuilder::new()
+        //                 .rectangle(
+        //                     graphics::DrawMode::stroke(1.0),
+        //                     graphics::Rect {
+        //                         x: (rect.bounding.x * 3) as f32,
+        //                         y: (rect.bounding.y * 3) as f32,
+        //                         w: rect.bounding.w as f32 * 3.0,
+        //                         h: rect.bounding.h as f32 * 3.0,
+        //                     },
+        //                     graphics::Color::new(1.0, 0.0, 1.0, 1.0),
+        //                 )
+        //                 .build(ctx)?;
+        //             graphics::draw(ctx, &mesh, graphics::DrawParam::default())?;
+        //             for point in &rect.points {
+        //                 let mesh = graphics::MeshBuilder::new()
+        //                     .rectangle(
+        //                         graphics::DrawMode::stroke(1.0),
+        //                         graphics::Rect {
+        //                             x: (point.x as i32 * 3) as f32,
+        //                             y: (point.y as i32 * 3) as f32,
+        //                             w: 3.0,
+        //                             h: 3.0,
+        //                         },
+        //                         graphics::Color::new(1.0, 0.0, 1.0, 1.0),
+        //                     )
+        //                     .build(ctx)?;
+        //                 graphics::draw(ctx, &mesh, graphics::DrawParam::default())?;
+        //             }
+        //         }
+        //     }
+        // }
 
         //let banner = &self.rects[73];
         //self.batch.add(graphics::DrawParam {

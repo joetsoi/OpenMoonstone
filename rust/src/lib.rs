@@ -1,4 +1,5 @@
 pub mod animation;
+pub mod campaign;
 pub mod combat;
 pub mod error;
 pub mod files;

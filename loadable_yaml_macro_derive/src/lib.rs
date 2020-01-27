@@ -31,12 +31,8 @@ fn impl_loadable_yaml_macro(ast: &syn::DeriveInput) -> TokenStream {
                         let file = ggez::filesystem::open(ctx, key.as_str())?;
                         let yaml: serde_yaml::Value = serde_yaml::from_reader(file)?;
                         let name: #name = serde_yaml::from_value(yaml)?;
-                        // let file = ggez::filesystem::open(ctx, key.as_str()).map_err(compat_error::err_from)?;
-                        // let yaml: serde_yaml::Value = serde_yaml::from_reader(file).map_err(compat_error::err_from)?;
-                        // let name: #name = serde_yaml::from_value(yaml).map_err(compat_error::err_from)?;
                         Ok(warmy::Loaded::from(name))
                     }
-                    // warmy::SimpleKey::Path(_) => Err(err_msg("error").compat())
                     warmy::SimpleKey::Path(_) => Err(crate::error::LoadError::PathLoadNotImplemented)
                 }
             }
