@@ -1,3 +1,4 @@
+![Nightly build](https://github.com/joetsoi/OpenMoonstone/workflows/Nightly%20build/badge.svg)
 # OpenMoonstone
 An open source reimplementation of the Amiga/DOS game [Moonstone](https://en.wikipedia.org/wiki/Moonstone:_A_Hard_Days_Knight)
 
