@@ -17,12 +17,14 @@ use loadable_yaml_macro_derive::LoadableYaml;
 use crate::animation::Image as SpriteImage;
 use crate::animation::Sprite;
 // TODO: move these components to common module out of combat
+use crate::campaign::components::MapIntent;
+use crate::campaign::systems::map_boundary::Boundary;
+use crate::campaign::systems::{MapCommander, RestrictMovementToMapBoundary, SetMapVelocity};
 use crate::combat::components::{Controller, Draw, Facing, Palette, Position, Velocity};
 use crate::combat::systems::Movement;
-use crate::campaign::components::MapIntent;
-use crate::campaign::systems::MapCommander;
 use crate::error::LoadError;
 use crate::game::{Game, SceneState};
+use crate::input;
 use crate::input::{Axis, Button, InputEvent};
 use crate::objects::TextureAtlas;
 use crate::piv::{palette_swap, Colour, PivImage};
@@ -30,7 +32,7 @@ use crate::scenes::world::draw_entities;
 use crate::scenes::FSceneSwitch;
 use crate::text::Image;
 
-const MAP_ANIMATION_SPEED: u32 = 3;
+const MAP_ANIMATION_SPEED: u32 = 6;
 
 #[derive(Debug)]
 pub enum SceneError {
@@ -109,7 +111,13 @@ impl<'a> MapScene<'a> {
     fn build_dispatcher() -> Dispatcher<'a, 'a> {
         DispatcherBuilder::new()
             .with(MapCommander, "map_commander", &[])
-            .with(Movement, "movement", &[])
+            .with(SetMapVelocity, "velocity", &["map_commander"])
+            .with(
+                RestrictMovementToMapBoundary,
+                "restrict_movement",
+                &["velocity"],
+            )
+            .with(Movement, "movement", &["restrict_movement"])
             .build()
     }
 
@@ -151,6 +159,12 @@ impl<'a> MapScene<'a> {
         piv.palette[21..24].rotate_right(1);
 
         let mut specs_world = Self::build_world();
+        specs_world.insert(Boundary {
+            x: 0,
+            y: 0,
+            w: 310,
+            h: 190,
+        });
 
         let sprite_res = store
             .get::<Sprite>(&SimpleKey::from(format!("/{}.yaml", "mi")), ctx)
@@ -200,10 +214,21 @@ impl<'a> MapScene<'a> {
         )?;
         Ok(())
     }
+
+    fn update_controllers(&mut self, input: &input::InputState) {
+        let entities = self.specs_world.entities();
+        let mut controllers = self.specs_world.write_storage::<Controller>();
+        for (e, controller) in (&*entities, &mut controllers).join() {
+            controller.x = input.get_axis_raw(controller.x_axis) as i32;
+            controller.y = input.get_axis_raw(controller.y_axis) as i32;
+            controller.fire = input.get_button_down(controller.button);
+        }
+    }
 }
 
 impl<'a> Scene<Game, InputEvent> for MapScene<'a> {
     fn update(&mut self, game: &mut Game, _ctx: &mut Context) -> FSceneSwitch {
+        self.update_controllers(&game.input);
         self.dispatcher.dispatch_par(&self.specs_world);
         self.specs_world.maintain();
         self.background_frame += 1;
@@ -227,12 +252,14 @@ impl<'a> Scene<Game, InputEvent> for MapScene<'a> {
     }
 
     fn input(&mut self, gameworld: &mut Game, event: InputEvent, started: bool) {
-        let entities = self.specs_world.entities();
-        let mut controllers = self.specs_world.write_storage::<Controller>();
-        for (e, controller) in (&*entities, &mut controllers).join() {
-            controller.x = gameworld.input.get_axis_raw(controller.x_axis) as i32;
-            controller.y = gameworld.input.get_axis_raw(controller.y_axis) as i32;
-            controller.fire = gameworld.input.get_button_down(controller.button);
-        }
+        // let entities = self.specs_world.entities();
+        // let mut controllers = self.specs_world.write_storage::<Controller>();
+        // for (e, controller) in (&*entities, &mut controllers).join() {
+        //     let x = gameworld.input.get_axis_raw(controller.x_axis);
+        //     controller.x = gameworld.input.get_axis_raw(controller.x_axis) as i32;
+        //     controller.y = gameworld.input.get_axis_raw(controller.y_axis) as i32;
+        //     controller.fire = gameworld.input.get_button_down(controller.button);
+        //     // println!("input {:?}", controller);
+        // }
     }
 }
