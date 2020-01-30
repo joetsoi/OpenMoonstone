@@ -242,7 +242,11 @@ impl<'a> Scene<Game, InputEvent> for MapScene<'a> {
     }
 
     fn draw(&mut self, game: &mut Game, ctx: &mut Context) -> GameResult<()> {
-        let screen_origin = Point2::new(0.0, 0.0);
+        // since some of the campaign map is transparent, a sprite passing over
+        // the transparent area would "colour in" that area, leaving behind the
+        // ghost image of the sprite on those pixels, we clear the screen each
+        // frame to get rid of these artifacts.
+        graphics::clear(ctx, graphics::Color::new(0.0, 0.0, 0.0, 1.0));
         self.draw_background_map(game, ctx);
         draw_entities(&self.specs_world, &self.palette, None, game, ctx);
         Ok(())
