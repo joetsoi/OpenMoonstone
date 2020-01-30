@@ -1,8 +1,8 @@
 #![warn(rust_2018_idioms)]
 
+use std::iter::repeat;
 use std::time::Duration;
 use std::{env, path};
-use std::iter::repeat;
 
 use ggez::conf;
 use ggez::event;
@@ -16,10 +16,10 @@ use warmy::SimpleKey;
 
 use openmoonstone::game::Game;
 use openmoonstone::input;
+use openmoonstone::objects::TextureAtlas;
+use openmoonstone::palette::PaletteSwaps;
 use openmoonstone::piv::PivImage;
 use openmoonstone::piv::{extract_palette, Colour};
-use openmoonstone::palette::PaletteSwaps;
-use openmoonstone::objects::TextureAtlas;
 use openmoonstone::scenes;
 use openmoonstone::scenes::transition::FadeStyle;
 use openmoonstone::scenes::{FSceneStack, Fade, MainMenuScene, MainScene, SelectKnight};
@@ -45,7 +45,11 @@ impl event::EventHandler for MainState {
         // are running this on a potato then they can.
         let mut ticks = 0;
 
-        const DESIRED_FPS: u32 = 1000 / (1_193_182 / 21845 * 2);
+        // https://en.wikibooks.org/wiki/X86_Assembly/Programmable_Interval_Timer
+        const DOS_PIT_FREQUENCY: u32 = 1_193_182; // hz
+        const FREQUENCY_DIVISOR: u32 = 21_845; // taken from DOS version of moonstone
+        const ONE_SECOND: u32 = 1000; // ms
+        const DESIRED_FPS: u32 = ONE_SECOND / (DOS_PIT_FREQUENCY / FREQUENCY_DIVISOR);
         while timer::check_update_time(ctx, DESIRED_FPS) {
             if ticks < MAX_UPDATES_PER_FRAME {
                 self.scene_stack.world.input.update(1.0);
@@ -90,8 +94,7 @@ impl event::EventHandler for MainState {
         }
     }
     fn text_input_event(&mut self, _ctx: &mut Context, c: char) {
-        self.scene_stack
-            .input(input::InputEvent::Text(c), true);
+        self.scene_stack.input(input::InputEvent::Text(c), true);
     }
 }
 
@@ -107,14 +110,14 @@ fn main() {
 
     let game = Game::new().expect("failed to initialize game");
     let mut scene_stack = scenes::FSceneStack::new(ctx, game);
-     let map = scene_stack
-         .world
-         .store
-         .get::<PivImage>(&SimpleKey::from("map".to_string()), ctx)
-         // TODO: fix with ? error syntax
-         .expect("error loading wa1");
-     // let image = RgbaImage::from_raw(512, 512, map.borrow().to_rgba8_512()).unwrap();
-     // image.save("ch.png");
+    let map = scene_stack
+        .world
+        .store
+        .get::<PivImage>(&SimpleKey::from("map".to_string()), ctx)
+        // TODO: fix with ? error syntax
+        .expect("error loading wa1");
+    // let image = RgbaImage::from_raw(512, 512, map.borrow().to_rgba8_512()).unwrap();
+    // image.save("ch.png");
 
     // let swaps_res = scene_stack.world.store
     //     .get::<PaletteSwaps>(&SimpleKey::from("/palettes.yaml"), ctx)
@@ -126,7 +129,7 @@ fn main() {
     //     .get("default")
     //     .expect("failed to fetch default palette");
     // let palette = extract_palette(raw_palette);
-    
+
     let cmp = scene_stack
         .world
         .store
@@ -152,7 +155,6 @@ fn main() {
     // println!("{:x?}", map.borrow().raw_palette);
     // panic!("wee");
 
-
     let main_scene = MainScene::new();
     scene_stack.push(Box::new(main_scene));
 
@@ -172,5 +174,5 @@ fn main() {
         scene_stack,
         input_binding: input::create_input_binding(),
     };
-    event::run(ctx, event_loop, &mut state).unwrap();;
+    event::run(ctx, event_loop, &mut state).unwrap();
 }

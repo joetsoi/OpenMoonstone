@@ -46,6 +46,11 @@ pub struct EncounterTextures {
 
 const TICKS_TO_WAIT: u32 = 35;
 
+// The original encounter scenes ran at half the FPS of the other scenes, this
+// is presumably because that meant that half the number of frames of art was
+// needed for a sprite saving on precious disk space.
+const TICKS_PER_UPDATE: u32 = 2;
+
 pub struct EncounterScene<'a> {
     // pub drawable_world: DrawableWorld,
     pub specs_world: World,
@@ -57,6 +62,8 @@ pub struct EncounterScene<'a> {
     player_3: Option<Index>,
     player_4: Option<Index>,
 
+    //
+    current_update_tick: u32,
     // the number of ticks since the encounter is done
     ticks_after: u32,
     // we do the fade out first, pop back to this scene then pop the encounter.
@@ -382,6 +389,7 @@ impl<'a> EncounterScene<'a> {
             player_2,
             player_3,
             player_4,
+            current_update_tick: 0,
             ticks_after: 0,
             fade_out_done: false,
         })
@@ -584,6 +592,10 @@ impl<'a> EncounterScene<'a> {
 
 impl<'a> scene::Scene<Game, input::InputEvent> for EncounterScene<'a> {
     fn update(&mut self, game: &mut Game, _ctx: &mut Context) -> FSceneSwitch {
+        self.current_update_tick = (self.current_update_tick + 1) % TICKS_PER_UPDATE;
+        if self.current_update_tick == 0 {
+            return scene::SceneSwitch::None;
+        }
         self.specs_world.maintain();
         self.update_controllers(&game.input);
         self.dispatcher.dispatch_par(&self.specs_world);
