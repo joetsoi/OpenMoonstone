@@ -311,18 +311,39 @@ impl<'a> EncounterScene<'a> {
             .expect("Error loading piv background");
         let background_image =
             graphics::Image::from_rgba8(ctx, 320, 200, &*piv.borrow().to_rgba8()).unwrap();
-        let background = graphics::Canvas::new(ctx, 320, 200, NumSamples::One)?;
-        graphics::set_canvas(ctx, Some(&background));
+
+        // We create a canvas using the screen coordinates instead of the window height as
+        // the current window height could have been resized, this causes some odd problems
+        // where anything rendered to the canvas is a few pixels off
+        let screen_coordinates = graphics::screen_coordinates(ctx);
+        let background = graphics::Canvas::new(
+            ctx,
+            screen_coordinates.w as u16,
+            screen_coordinates.h as u16,
+            NumSamples::One,
+        )?;
+        // We reset the transformation matrix here to the default here and reapply the game scale
+        // after. TODO: Investigate why we can't use a canvas of 320x200. If we've set the matrix
+        // to the default then everything should be drawing to 320x200 instead of the current
+        // screen coordinates that have been scaled up.
+        graphics::set_transform(ctx, graphics::DrawParam::default().to_matrix());
+        graphics::apply_transformations(ctx);
         let screen_origin = Point2::new(0.0, 0.0);
+
+        graphics::set_canvas(ctx, Some(&background));
         graphics::draw(
             ctx,
             &background_image,
-            graphics::DrawParam::default()
-                .dest(screen_origin)
-                .scale(Vector2::new(3.0, 3.0)),
+            graphics::DrawParam::default().dest(screen_origin),
         )?;
 
         let y_max = EncounterScene::draw_terrain(ctx, game, &mut world, terrain_name)?;
+        graphics::set_canvas(ctx, None);
+        let scale_matrix = graphics::DrawParam::default()
+            .scale(game.screen_scale)
+            .to_matrix();
+        graphics::push_transform(ctx, Some(scale_matrix));
+        graphics::apply_transformations(ctx);
         let collide_hit = game
             .store
             .get::<CollisionBoxes>(&SimpleKey::from("collide"), ctx)
@@ -548,11 +569,9 @@ impl<'a> EncounterScene<'a> {
                     w: rect.w as f32 / 512.0,
                     h: rect.h as f32 / 512.0,
                 })
-                .dest(Point2::new(p.x as f32 * 3.0, p.y as f32 * 3.0))
-                .scale(Vector2::new(3.0, 3.0));
+                .dest(Point2::new(p.x as f32, p.y as f32));
             graphics::draw(ctx, ggez_image, draw_params)?;
         }
-        graphics::set_canvas(ctx, None);
 
         let y_max: u32 = terrain
             .borrow()
@@ -623,14 +642,7 @@ impl<'a> scene::Scene<Game, input::InputEvent> for EncounterScene<'a> {
         let screen_origin = Point2::new(0.0, 0.0);
         // draw background
         let lair = &self.background;
-        graphics::draw(
-            ctx,
-            lair,
-            graphics::DrawParam::default()
-                .dest(screen_origin)
-                // TODO: this shouldn't be need investigate why it is.
-                .scale(Vector2::new(3.0, 3.0)),
-        )?;
+        graphics::draw(ctx, lair, graphics::DrawParam::default())?;
 
         draw_entities(
             &self.specs_world,
@@ -640,65 +652,65 @@ impl<'a> scene::Scene<Game, input::InputEvent> for EncounterScene<'a> {
             ctx,
         );
 
-        // let body_storage = self.specs_world.read_storage::<Body>();
+        let body_storage = self.specs_world.read_storage::<Body>();
 
-        // // graphics::set_color(ctx, graphics::Color::new(0.4, 1.0, 0.0, 1.0))?;
-        // for body in (&body_storage).join() {
-        //     if let Some(boxes) = &body.collision_boxes {
-        //         for collision_box in boxes {
-        //             let mesh = graphics::MeshBuilder::new()
-        //                 .rectangle(
-        //                     graphics::DrawMode::stroke(1.0),
-        //                     graphics::Rect {
-        //                         x: (collision_box.rect.x) as f32 * 3.0,
-        //                         y: (collision_box.rect.y) as f32 * 3.0,
-        //                         w: collision_box.rect.w as f32 * 3.0,
-        //                         h: collision_box.rect.h as f32 * 3.0,
-        //                     },
-        //                     graphics::Color::new(0.4, 1.0, 0.0, 1.0),
-        //                 )
-        //                 .build(ctx)?;
-        //             graphics::draw(ctx, &mesh, graphics::DrawParam::default())?;
-        //         }
-        //     }
-        // }
+        // graphics::set_color(ctx, graphics::Color::new(0.4, 1.0, 0.0, 1.0))?;
+        for body in (&body_storage).join() {
+            if let Some(boxes) = &body.collision_boxes {
+                for collision_box in boxes {
+                    let mesh = graphics::MeshBuilder::new()
+                        .rectangle(
+                            graphics::DrawMode::stroke(1.0),
+                            graphics::Rect {
+                                x: (collision_box.rect.x) as f32,
+                                y: (collision_box.rect.y) as f32,
+                                w: collision_box.rect.w as f32,
+                                h: collision_box.rect.h as f32,
+                            },
+                            graphics::Color::new(0.4, 1.0, 0.0, 1.0),
+                        )
+                        .build(ctx)?;
+                    graphics::draw(ctx, &mesh, graphics::DrawParam::default())?;
+                }
+            }
+        }
 
-        // let weapon_storage = self.specs_world.read_storage::<Weapon>();
+        let weapon_storage = self.specs_world.read_storage::<Weapon>();
 
-        // for weapon in (&weapon_storage).join() {
-        //     if let Some(collision_rects) = &weapon.collision_points {
-        //         for rect in collision_rects {
-        //             let mesh = graphics::MeshBuilder::new()
-        //                 .rectangle(
-        //                     graphics::DrawMode::stroke(1.0),
-        //                     graphics::Rect {
-        //                         x: (rect.bounding.x * 3) as f32,
-        //                         y: (rect.bounding.y * 3) as f32,
-        //                         w: rect.bounding.w as f32 * 3.0,
-        //                         h: rect.bounding.h as f32 * 3.0,
-        //                     },
-        //                     graphics::Color::new(1.0, 0.0, 1.0, 1.0),
-        //                 )
-        //                 .build(ctx)?;
-        //             graphics::draw(ctx, &mesh, graphics::DrawParam::default())?;
-        //             for point in &rect.points {
-        //                 let mesh = graphics::MeshBuilder::new()
-        //                     .rectangle(
-        //                         graphics::DrawMode::stroke(1.0),
-        //                         graphics::Rect {
-        //                             x: (point.x as i32 * 3) as f32,
-        //                             y: (point.y as i32 * 3) as f32,
-        //                             w: 3.0,
-        //                             h: 3.0,
-        //                         },
-        //                         graphics::Color::new(1.0, 0.0, 1.0, 1.0),
-        //                     )
-        //                     .build(ctx)?;
-        //                 graphics::draw(ctx, &mesh, graphics::DrawParam::default())?;
-        //             }
-        //         }
-        //     }
-        // }
+        for weapon in (&weapon_storage).join() {
+            if let Some(collision_rects) = &weapon.collision_points {
+                for rect in collision_rects {
+                    let mesh = graphics::MeshBuilder::new()
+                        .rectangle(
+                            graphics::DrawMode::stroke(1.0),
+                            graphics::Rect {
+                                x: rect.bounding.x as f32,
+                                y: rect.bounding.y as f32,
+                                w: rect.bounding.w as f32,
+                                h: rect.bounding.h as f32,
+                            },
+                            graphics::Color::new(1.0, 0.0, 1.0, 1.0),
+                        )
+                        .build(ctx)?;
+                    graphics::draw(ctx, &mesh, graphics::DrawParam::default())?;
+                    for point in &rect.points {
+                        let mesh = graphics::MeshBuilder::new()
+                            .rectangle(
+                                graphics::DrawMode::stroke(1.0),
+                                graphics::Rect {
+                                    x: point.x as i32 as f32,
+                                    y: point.y as i32 as f32,
+                                    w: 1.0,
+                                    h: 1.0,
+                                },
+                                graphics::Color::new(1.0, 0.0, 1.0, 1.0),
+                            )
+                            .build(ctx)?;
+                        graphics::draw(ctx, &mesh, graphics::DrawParam::default())?;
+                    }
+                }
+            }
+        }
 
         //let banner = &self.rects[73];
         //self.batch.add(graphics::DrawParam {

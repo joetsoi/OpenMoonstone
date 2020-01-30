@@ -206,11 +206,12 @@ impl<'a> MapScene<'a> {
     }
 
     fn draw_background_map(&mut self, game: &mut Game, ctx: &mut Context) -> GameResult<()> {
-        let draw_params = graphics::DrawParam::default().scale(game.screen_scale);
+        // let draw_params = graphics::DrawParam::default().scale(game.screen_scale);
         graphics::draw(
             ctx,
             &self.background[self.current_background_image],
-            draw_params,
+            // draw_params,
+            graphics::DrawParam::default(),
         )?;
         Ok(())
     }

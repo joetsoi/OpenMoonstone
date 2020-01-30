@@ -89,12 +89,14 @@ impl Iterator for ColourOscillate {
 }
 
 impl SelectKnight {
-    pub fn new(ctx: &mut Context, store: &mut Store<Context, SimpleKey>
-   //) -> Result<Self, Error> {
-   ) -> Result<Self, Box<dyn std::error::Error>> {
+    pub fn new(
+        ctx: &mut Context,
+        store: &mut Store<Context, SimpleKey>, //) -> Result<Self, Error> {
+    ) -> Result<Self, Box<dyn std::error::Error>> {
         let menu = Menu::new(ctx, store, "/select_knight.yaml")?;
 
-        let swaps_res = store.get::<PaletteSwaps>(&SimpleKey::from("/palettes.yaml"), ctx)
+        let swaps_res = store
+            .get::<PaletteSwaps>(&SimpleKey::from("/palettes.yaml"), ctx)
             //TODO: fix with ? syntax
             .expect("error loading pallete swaps in select knight");
         let swaps = swaps_res.borrow();
@@ -163,10 +165,9 @@ impl SelectKnight {
                 h: rect.h as f32 / texture_size,
             })
             .dest(Point2::new(
-                self.menu.screen.cursor.x as f32 * 3.0,
-                self.menu.screen.cursor.y as f32 * 3.0,
-            ))
-            .scale(Vector2::new(3.0, 3.0));
+                self.menu.screen.cursor.x as f32,
+                self.menu.screen.cursor.y as f32,
+            ));
         graphics::draw(ctx, ggez_image, draw_params)?;
 
         Ok(())
@@ -221,7 +222,7 @@ impl Scene<Game, InputEvent> for SelectKnight {
                 let spritebatch = text
                     .as_sprite_batch(ctx, game, &self.menu.palette, self.menu.palette_hash)
                     .expect("fix this sprite batch");
-                let draw_params = graphics::DrawParam::default().scale(Vector2::new(3.0, 3.0));
+                let draw_params = graphics::DrawParam::default();
                 graphics::draw(ctx, &spritebatch, draw_params)?;
             }
         };

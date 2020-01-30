@@ -9,7 +9,7 @@ min_height = 0.0
 max_width = 0.0
 max_height = 0.0
 hidpi = false
-resizable = false
+resizable = true
 
 [window_setup]
 title = "Open Moonstone"

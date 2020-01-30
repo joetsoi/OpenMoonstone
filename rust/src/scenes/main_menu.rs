@@ -83,7 +83,7 @@ impl MainMenuScene {
     pub fn new(
         ctx: &mut Context,
         store: &mut Store<Context, SimpleKey>, // ) -> Result<Self, Error> {
-    ) -> Result<Self, Box::<dyn std::error::Error>> {
+    ) -> Result<Self, Box<dyn std::error::Error>> {
         let menu = Menu::new(ctx, store, "/menu.yaml")?;
         // .unwrap_or_else(|| panic!("error in menu.yaml, must have 'background")),
         Ok(Self {
@@ -123,11 +123,7 @@ impl MainMenuScene {
                 w: rect.w as f32 / texture_size,
                 h: rect.h as f32 / texture_size,
             })
-            .dest(Point2::new(
-                self.menu.screen.cursor.x as f32 * 3.0,
-                y as f32 * 3.0,
-            ))
-            .scale(Vector2::new(3.0, 3.0));
+            .dest(Point2::new(self.menu.screen.cursor.x as f32, y as f32));
         graphics::draw(ctx, &arrow_image, draw_params)?;
         Ok(())
     }
@@ -141,11 +137,7 @@ impl MainMenuScene {
                 .expect("error drawing OFF")
         };
 
-        graphics::draw(
-            ctx,
-            &batch,
-            graphics::DrawParam::default().scale(Vector2::new(3.0, 3.0)),
-        )?;
+        graphics::draw(ctx, &batch, graphics::DrawParam::default())?;
         batch.clear();
         Ok(())
     }
@@ -156,11 +148,7 @@ impl MainMenuScene {
         let mut batch = text
             .as_sprite_batch(ctx, game, &self.menu.palette, self.menu.palette_hash)
             .expect("error drawing PLAYER_COUNT");
-        graphics::draw(
-            ctx,
-            &batch,
-            graphics::DrawParam::default().scale(Vector2::new(3.0, 3.0)),
-        )?;
+        graphics::draw(ctx, &batch, graphics::DrawParam::default())?;
         batch.clear();
         Ok(())
     }

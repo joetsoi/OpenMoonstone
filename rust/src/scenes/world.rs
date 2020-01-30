@@ -86,16 +86,31 @@ pub fn draw_entities(
                     h: rect.h as f32 / texture_size,
                 })
                 .dest(Point2::new(
-                    (position.x as i32 + (draw.direction as i32 * image.x)) as f32 * 3.0,
-                    (position.y as i32 + image.y) as f32 * 3.0,
+                    (position.x as i32 + (draw.direction as i32 * image.x)) as f32,
+                    (position.y as i32 + image.y) as f32,
                 ))
-                .scale(Vector2::new((draw.direction as i32 * 3) as f32, 3.0));
+                .scale(Vector2::new(draw.direction as i32 as f32, 1.0));
+            // .scale(Vector2::new((draw.direction as i32 * 3) as f32, 3.0));
+            // .dest(Point2::new(
+            //     (position.x as i32 + (draw.direction as i32 * image.x)) as f32 * 3.0,
+            //     (position.y as i32 + image.y) as f32 * 3.0,
+            // ))
+            // .scale(Vector2::new((draw.direction as i32 * 3) as f32, 3.0));
             graphics::draw(ctx, ggez_image, draw_params)?;
             if let ImageType::BloodStain = image.image_type {
                 if let Some(b) = background {
+                    graphics::pop_transform(ctx);
+                    graphics::apply_transformations(ctx);
+
                     graphics::set_canvas(ctx, Some(&*b));
                     graphics::draw(ctx, ggez_image, draw_params)?;
                     graphics::set_canvas(ctx, None);
+
+                    let scale_matrix = graphics::DrawParam::default()
+                        .scale(game.screen_scale)
+                        .to_matrix();
+                    graphics::push_transform(ctx, Some(scale_matrix));
+                    graphics::apply_transformations(ctx);
                 }
             }
         }

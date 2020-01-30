@@ -106,9 +106,17 @@ fn main() {
         builder = builder.add_resource_path(path);
     }
     let (ctx, event_loop) = &mut builder.build().unwrap();
+    println!("{:?}", graphics::screen_coordinates(ctx));
+    println!("{:?}", graphics::renderer_info(ctx));
     graphics::set_default_filter(ctx, graphics::FilterMode::Nearest);
 
     let game = Game::new().expect("failed to initialize game");
+    let scale_matrix = graphics::DrawParam::default()
+        .scale(game.screen_scale)
+        .to_matrix();
+    graphics::push_transform(ctx, Some(scale_matrix));
+    graphics::apply_transformations(ctx);
+
     let mut scene_stack = scenes::FSceneStack::new(ctx, game);
     let map = scene_stack
         .world

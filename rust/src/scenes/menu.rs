@@ -93,7 +93,7 @@ impl Menu {
     }
 
     pub fn draw(&mut self, game: &mut Game, ctx: &mut Context) -> GameResult<()> {
-        let draw_params = graphics::DrawParam::default().scale(Vector2::new(3.0, 3.0));
+        let draw_params = graphics::DrawParam::default();
         if let Some(background) = &self.background {
             graphics::draw(ctx, background, draw_params)?;
         }
@@ -135,8 +135,7 @@ impl Menu {
                     w: rect.w as f32 / texture_size,
                     h: rect.h as f32 / texture_size,
                 })
-                .dest(Point2::new(image.x as f32 * 3.0, image.y as f32 * 3.0))
-                .scale(Vector2::new(3.0, 3.0));
+                .dest(Point2::new(image.x as f32, image.y as f32));
             graphics::draw(ctx, ggez_image, draw_params)?;
         }
         Ok(())
