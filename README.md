@@ -25,10 +25,21 @@ Currently only Ubuntu and Windows have been tested.
 You run in full screen mode by changing `fullscreen_type` from `"Off"` to `"Desktop"` in `resources/conf.toml`
 
 ##  Developement
-Requires [rust stable 1.32](https://www.rust-lang.org/tools/install)
+Requires [rust stable](https://www.rust-lang.org/tools/install)
 ```
 cd rust
 cargo run
 ```
-### Progress videos
-https://www.youtube.com/watch?v=41iNdWDJwUY&list=PLub5fMuLNSIoc0oVM2NJSzmA4HHv1k_Ue
+## Progress
+### Screenshots
+#### Debug collision detection
+<img src="https://raw.githubusercontent.com/wiki/joetsoi/OpenMoonstone/screenshots/practice.png" alt="Practice" width="640"/>
+
+#### Four player practice mode
+<img src="https://raw.githubusercontent.com/wiki/joetsoi/OpenMoonstone/screenshots/four_player.png" alt="Four Player" width="640"/>
+
+#### In development campaign map
+<img src="https://raw.githubusercontent.com/wiki/joetsoi/OpenMoonstone/screenshots/map.png" alt="Campaign" width="640"/>
+
+### Videos
+https://www.youtube.com/watch?v=Jakht4PBzFE&list=PLub5fMuLNSIoc0oVM2NJSzmA4HHv1k_Ue
