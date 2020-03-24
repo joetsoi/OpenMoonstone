@@ -5,6 +5,7 @@ use failure::{self, Fail};
 use ggez::Context;
 use warmy;
 use warmy::{Load, SimpleKey};
+use ron;
 
 use crate::files::collide::CollideHitParseError;
 use crate::manager::GameYaml;
@@ -41,6 +42,7 @@ pub enum BaseLoadError {
     Io(std::io::Error),
     Ggez(ggez::error::GameError),
     Serde(serde_yaml::Error),
+    RonDeserialize(ron::de::Error),
     PathLoadNotImplemented,
 }
 
@@ -53,6 +55,7 @@ impl fmt::Display for BaseLoadError {
             BaseLoadError::Ggez(ref err) => err.fmt(f),
             BaseLoadError::Serde(ref err) => err.fmt(f),
             BaseLoadError::PathLoadNotImplemented => write!(f, "Path not implemented"),
+            BaseLoadError::RonDeserialize(ref err) => err.fmt(f),
         }
     }
 }
@@ -74,6 +77,13 @@ impl From<std::io::Error> for BaseLoadError {
         BaseLoadError::Io(err)
     }
 }
+
+impl From<ron::de::Error> for BaseLoadError {
+    fn from(err: ron::de::Error) -> BaseLoadError {
+        BaseLoadError::RonDeserialize(err)
+    }
+}
+
 
 #[derive(Debug)]
 pub enum LoadError<T>

@@ -10,16 +10,21 @@ use ggez_goodies::scene::{Scene, SceneSwitch};
 use serde_derive::{Deserialize, Serialize};
 use specs::world::{Builder, Index};
 use specs::{Dispatcher, DispatcherBuilder, Join, World, WorldExt};
-use warmy::{SimpleKey, Store, StoreErrorOr};
+use warmy::load::Load;
+use warmy::{Res, SimpleKey, Store, StoreErrorOr};
+// use warmy::ron::Ron;
 
 use loadable_yaml_macro_derive::LoadableYaml;
 
 use crate::animation::Image as SpriteImage;
 use crate::animation::Sprite;
 // TODO: move these components to common module out of combat
-use crate::campaign::components::MapIntent;
+use crate::campaign::components::{MapIntent, TimeSpentOnTerrain};
+use crate::campaign::movement_cost::CampaignMap;
 use crate::campaign::systems::map_boundary::Boundary;
-use crate::campaign::systems::{MapCommander, RestrictMovementToMapBoundary, SetMapVelocity};
+use crate::campaign::systems::{
+    MapCommander, RestrictMovementToMapBoundary, SetMapVelocity, TerrainCost,
+};
 use crate::combat::components::{Controller, Draw, Facing, Palette, Position, Velocity};
 use crate::combat::systems::Movement;
 use crate::error::LoadError;
@@ -28,6 +33,8 @@ use crate::input;
 use crate::input::{Axis, Button, InputEvent};
 use crate::objects::TextureAtlas;
 use crate::piv::{palette_swap, Colour, PivImage};
+// use crate::ron::GameRon;
+use crate::ron::{FromRon, GameRon};
 use crate::scenes::world::draw_entities;
 use crate::scenes::FSceneSwitch;
 use crate::text::Image;
@@ -38,6 +45,8 @@ const MAP_ANIMATION_SPEED: u32 = 6;
 pub enum SceneError {
     Map(StoreErrorOr<MapData, Context, SimpleKey>),
     Piv(StoreErrorOr<PivImage, Context, SimpleKey>),
+    // CampaignMap(StoreErrorOr<CampaignMap, Context, SimpleKey>),
+    Ron(StoreErrorOr<GameRon<CampaignMap>, Context, SimpleKey, FromRon>),
     Ggez(ggez::error::GameError),
 }
 
@@ -48,7 +57,9 @@ impl fmt::Display for SceneError {
         match *self {
             SceneError::Map(ref err) => err.fmt(f),
             SceneError::Piv(ref err) => err.fmt(f),
+            // SceneError::CampaignMap(ref err) => err.fmt(f),
             SceneError::Ggez(ref err) => err.fmt(f),
+            SceneError::Ron(ref err) => err.fmt(f),
         }
     }
 }
@@ -59,11 +70,23 @@ impl From<StoreErrorOr<MapData, Context, SimpleKey>> for SceneError {
     }
 }
 
+impl From<StoreErrorOr<GameRon<CampaignMap>, Context, SimpleKey, FromRon>> for SceneError {
+    fn from(err: StoreErrorOr<GameRon<CampaignMap>, Context, SimpleKey, FromRon>) -> SceneError {
+        SceneError::Ron(err)
+    }
+}
+
 impl From<StoreErrorOr<PivImage, Context, SimpleKey>> for SceneError {
     fn from(err: StoreErrorOr<PivImage, Context, SimpleKey>) -> SceneError {
         SceneError::Piv(err)
     }
 }
+
+// impl From<StoreErrorOr<CampaignMap, Context, SimpleKey>> for SceneError {
+//     fn from(err: StoreErrorOr<CampaignMap, Context, SimpleKey>) -> SceneError {
+//         SceneError::CampaignMap(err)
+//     }
+// }
 
 impl From<ggez::error::GameError> for SceneError {
     fn from(err: ggez::error::GameError) -> SceneError {
@@ -105,13 +128,15 @@ impl<'a> MapScene<'a> {
         world.register::<Velocity>();
         world.register::<Controller>();
         world.register::<MapIntent>();
+        world.register::<TimeSpentOnTerrain>();
         world
     }
 
     fn build_dispatcher() -> Dispatcher<'a, 'a> {
         DispatcherBuilder::new()
             .with(MapCommander, "map_commander", &[])
-            .with(SetMapVelocity, "velocity", &["map_commander"])
+            .with(TerrainCost, "terrain_cost", &["map_commander"])
+            .with(SetMapVelocity, "velocity", &["terrain_cost"])
             .with(
                 RestrictMovementToMapBoundary,
                 "restrict_movement",
@@ -192,7 +217,17 @@ impl<'a> MapScene<'a> {
             .with(MapIntent {
                 ..Default::default()
             })
+            .with(TimeSpentOnTerrain {
+                ..Default::default()
+            })
             .build();
+
+        let campaign_map_res = store.get_by::<GameRon<CampaignMap>, FromRon>(
+            &SimpleKey::from("/campaign_map.ron"),
+            ctx,
+            FromRon,
+        )?;
+        specs_world.insert(campaign_map_res.borrow().0.clone());
 
         Ok(Self {
             specs_world: specs_world,

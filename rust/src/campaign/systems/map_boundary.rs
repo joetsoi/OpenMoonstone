@@ -37,7 +37,7 @@ impl<'a> System<'a> for RestrictMovementToMapBoundary {
     type SystemData = (
         ReadExpect<'a, Boundary>,
         ReadStorage<'a, Position>,
-        ReadStorage<'a, MapIntent>,
+        WriteStorage<'a, MapIntent>,
         WriteStorage<'a, Velocity>,
     );
     fn run(&mut self, (boundary, position, intent, mut velocity): Self::SystemData) {
