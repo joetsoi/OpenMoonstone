@@ -11,5 +11,6 @@ pub mod objects;
 pub mod palette;
 pub mod piv;
 pub mod rect;
+pub mod ron;
 pub mod scenes;
 pub mod text;

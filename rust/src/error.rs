@@ -3,9 +3,9 @@ use std::fmt;
 
 use failure::{self, Fail};
 use ggez::Context;
+use ron;
 use warmy;
 use warmy::{Load, SimpleKey};
-use ron;
 
 use crate::files::collide::CollideHitParseError;
 use crate::manager::GameYaml;
@@ -83,7 +83,6 @@ impl From<ron::de::Error> for BaseLoadError {
         BaseLoadError::RonDeserialize(err)
     }
 }
-
 
 #[derive(Debug)]
 pub enum LoadError<T>
