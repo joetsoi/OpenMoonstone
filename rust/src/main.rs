@@ -63,7 +63,6 @@ impl event::EventHandler for MainState {
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         self.scene_stack.draw(ctx);
         graphics::present(ctx);
-        timer::sleep(Duration::from_millis(50));
         Ok(())
     }
 
