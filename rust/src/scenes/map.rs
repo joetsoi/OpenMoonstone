@@ -19,7 +19,7 @@ use loadable_yaml_macro_derive::LoadableYaml;
 use crate::animation::Image as SpriteImage;
 use crate::animation::Sprite;
 // TODO: move these components to common module out of combat
-use crate::campaign::components::{MapIntent, TimeSpentOnTerrain};
+use crate::campaign::components::{HitBox, MapIntent, TimeSpentOnTerrain};
 use crate::campaign::movement_cost::CampaignMap;
 use crate::campaign::systems::map_boundary::Boundary;
 use crate::campaign::systems::{
@@ -123,6 +123,7 @@ impl<'a> MapScene<'a> {
     fn build_world() -> World {
         let mut world = World::new();
         world.register::<Draw>();
+        world.register::<HitBox>();
         world.register::<Palette>();
         world.register::<Position>();
         world.register::<Velocity>();
@@ -191,6 +192,13 @@ impl<'a> MapScene<'a> {
             h: 190,
         });
 
+        let atlas = store
+            .get::<TextureAtlas>(&SimpleKey::from("mi.c"), ctx)
+            .expect("error loading texture atlas when drawing");
+        // the first image in mi.c is the blue knight head.
+        let knight_rect = atlas.borrow().rects[0];
+        let knight_width = atlas.borrow().visible_widths[0];
+
         let sprite_res = store
             .get::<Sprite>(&SimpleKey::from(format!("/{}.yaml", "mi")), ctx)
             // TODO fix error handling, make this ?
@@ -207,6 +215,10 @@ impl<'a> MapScene<'a> {
                 animation: "blue_knight".to_string(),
                 resource_name: "mi".to_string(),
                 direction: Facing::default(),
+            })
+            .with(HitBox {
+                w: knight_width,
+                h: knight_rect.h,
             })
             .with(Controller {
                 x_axis: Axis::Horz1,
