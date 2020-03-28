@@ -12,7 +12,7 @@ use crate::game::{Game, SceneState};
 use crate::input::{Axis, Button, InputEvent};
 use crate::objects::TextureAtlas;
 use crate::palette::PaletteSwaps;
-use crate::piv::{extract_palette, Colour};
+use crate::piv::{extract_palette, Colour, ColourOscillate};
 use crate::scenes::FSceneSwitch;
 use crate::text::Text;
 
@@ -35,57 +35,6 @@ pub struct SelectKnight {
     available: Vec<u32>,
 
     current_name: String,
-}
-
-struct ColourOscillate {
-    from: Colour,
-    to: Colour,
-    current: Colour,
-    target: Colour,
-}
-
-impl ColourOscillate {
-    pub fn new(from: Colour, to: Colour) -> Self {
-        ColourOscillate {
-            from: from.clone(),
-            to: to.clone(),
-            current: from.clone(),
-            target: to.clone(),
-        }
-    }
-}
-
-impl Iterator for ColourOscillate {
-    type Item = Colour;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.target.r > self.current.r {
-            self.current.r += 16
-        } else if self.target.r < self.current.r {
-            self.current.r -= 16
-        };
-
-        if self.target.g > self.current.g {
-            self.current.g += 16
-        } else if self.target.g < self.current.g {
-            self.current.g -= 16
-        };
-
-        if self.target.b > self.current.b {
-            self.current.b += 16
-        } else if self.target.b < self.current.b {
-            self.current.b -= 16
-        };
-
-        if self.current == self.target {
-            if self.target == self.from {
-                self.target = self.to
-            } else {
-                self.target = self.from
-            }
-        }
-        Some(self.current.clone())
-    }
 }
 
 impl SelectKnight {

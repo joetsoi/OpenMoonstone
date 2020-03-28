@@ -2,6 +2,7 @@ use std::collections::hash_map::Entry::{Occupied, Vacant};
 use std::collections::HashMap;
 use std::error::Error;
 use std::fmt;
+use std::iter;
 
 // use failure::{err_msg, Error};
 use ggez::nalgebra::{Point2, Vector2};
@@ -23,7 +24,7 @@ use crate::campaign::components::{HitBox, MapIntent, TimeSpentOnTerrain};
 use crate::campaign::movement_cost::CampaignMap;
 use crate::campaign::systems::map_boundary::Boundary;
 use crate::campaign::systems::{
-    MapCommander, RestrictMovementToMapBoundary, SetMapVelocity, TerrainCost,
+    HighlightPlayer, MapCommander, RestrictMovementToMapBoundary, SetMapVelocity, TerrainCost,
 };
 use crate::combat::components::{Controller, Draw, Facing, Palette, Position, Velocity};
 use crate::combat::systems::Movement;
@@ -32,7 +33,7 @@ use crate::game::{Game, SceneState};
 use crate::input;
 use crate::input::{Axis, Button, InputEvent};
 use crate::objects::TextureAtlas;
-use crate::piv::{palette_swap, Colour, PivImage};
+use crate::piv::{extract_palette, palette_swap, Colour, ColourOscillate, PivImage};
 // use crate::ron::GameRon;
 use crate::ron::{FromRon, GameRon};
 use crate::scenes::world::draw_entities;
@@ -94,6 +95,10 @@ impl From<ggez::error::GameError> for SceneError {
     }
 }
 
+pub struct FlashingPalettes {
+    pub palettes: Vec<Vec<Colour>>,
+}
+
 #[derive(Debug, Default, Clone, Serialize, Deserialize, LoadableYaml)]
 pub struct MapData {
     pub background: String,
@@ -144,6 +149,7 @@ impl<'a> MapScene<'a> {
                 &["velocity"],
             )
             .with(Movement, "movement", &["restrict_movement"])
+            .with(HighlightPlayer, "highlight_player", &[])
             .build()
     }
 
@@ -216,6 +222,10 @@ impl<'a> MapScene<'a> {
                 resource_name: "mi".to_string(),
                 direction: Facing::default(),
             })
+            .with(Palette {
+                name: "0".to_string(),
+                palette: piv.palette.clone(),
+            })
             .with(HitBox {
                 w: knight_width,
                 h: knight_rect.h,
@@ -240,6 +250,23 @@ impl<'a> MapScene<'a> {
             FromRon,
         )?;
         specs_world.insert(campaign_map_res.borrow().0.clone());
+
+        let mut swap_colour = extract_palette(&[0xff]).first().unwrap().clone();
+        swap_colour.a = 255;
+        let mut oscillate = ColourOscillate::new(piv.palette[31], swap_colour);
+        let mut colours = (0..30)
+            .map(|_| oscillate.next().unwrap())
+            .collect::<Vec<_>>();
+        colours.insert(0, piv.palette[31].clone());
+        println!("{:?}", colours.len());
+
+        let mut palettes = Vec::new();
+        for c in &colours {
+            let mut p = piv.palette.clone();
+            p[31] = c.clone();
+            palettes.push(p);
+        }
+        specs_world.insert(FlashingPalettes { palettes });
 
         Ok(Self {
             specs_world: specs_world,

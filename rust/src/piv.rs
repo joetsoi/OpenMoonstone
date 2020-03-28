@@ -144,3 +144,54 @@ pub fn palette_swap(base_palette: &[u16], swap: &[u16]) -> Vec<Colour> {
     let _: Vec<u16> = base_palette.splice(6..9, swap.to_vec()).collect();
     extract_palette(&base_palette)
 }
+
+pub struct ColourOscillate {
+    from: Colour,
+    to: Colour,
+    current: Colour,
+    target: Colour,
+}
+
+impl ColourOscillate {
+    pub fn new(from: Colour, to: Colour) -> Self {
+        ColourOscillate {
+            from: from.clone(),
+            to: to.clone(),
+            current: from.clone(),
+            target: to.clone(),
+        }
+    }
+}
+
+impl Iterator for ColourOscillate {
+    type Item = Colour;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.target.r > self.current.r {
+            self.current.r += 16
+        } else if self.target.r < self.current.r {
+            self.current.r -= 16
+        };
+
+        if self.target.g > self.current.g {
+            self.current.g += 16
+        } else if self.target.g < self.current.g {
+            self.current.g -= 16
+        };
+
+        if self.target.b > self.current.b {
+            self.current.b += 16
+        } else if self.target.b < self.current.b {
+            self.current.b -= 16
+        };
+
+        if self.current == self.target {
+            if self.target == self.from {
+                self.target = self.to
+            } else {
+                self.target = self.from
+            }
+        }
+        Some(self.current.clone())
+    }
+}
