@@ -153,16 +153,12 @@ impl<'a> MapScene<'a> {
             .build()
     }
 
-    pub fn new(
+    fn setup_background_map(
         ctx: &mut Context,
         store: &mut Store<Context, SimpleKey>,
         background_name: &str,
-    ) -> Result<Self, SceneError> {
-        let map_data = store
-            .get::<MapData>(&warmy::SimpleKey::from("/map.yaml"), ctx)?
-            .borrow()
-            .clone();
-        let piv_res = store.get::<PivImage>(&SimpleKey::from(map_data.background.clone()), ctx)?;
+    ) -> Result<Vec<graphics::Image>, SceneError> {
+        let piv_res = store.get::<PivImage>(&SimpleKey::from(background_name), ctx)?;
         let mut background: Vec<graphics::Image> = Vec::new();
         let mut piv = piv_res.borrow_mut();
         background.push(graphics::Image::from_rgba8(
@@ -189,6 +185,21 @@ impl<'a> MapScene<'a> {
         )?);
 
         piv.palette[21..24].rotate_right(1);
+        Ok(background)
+    }
+
+    pub fn new(
+        ctx: &mut Context,
+        store: &mut Store<Context, SimpleKey>,
+        background_name: &str,
+    ) -> Result<Self, SceneError> {
+        let map_data = store
+            .get::<MapData>(&warmy::SimpleKey::from("/map.yaml"), ctx)?
+            .borrow()
+            .clone();
+        let background = MapScene::setup_background_map(ctx, store, &map_data.background)?;
+        let piv_res = store.get::<PivImage>(&SimpleKey::from(map_data.background.clone()), ctx)?;
+        let mut piv = piv_res.borrow_mut();
 
         let mut specs_world = Self::build_world();
         specs_world.insert(Boundary {
@@ -258,7 +269,6 @@ impl<'a> MapScene<'a> {
             .map(|_| oscillate.next().unwrap())
             .collect::<Vec<_>>();
         colours.insert(0, piv.palette[31].clone());
-        println!("{:?}", colours.len());
 
         let mut palettes = Vec::new();
         for c in &colours {
