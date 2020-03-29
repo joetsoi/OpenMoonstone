@@ -28,7 +28,7 @@ use crate::campaign::systems::{
 };
 use crate::combat::components::{Controller, Draw, Facing, Palette, Position, Velocity};
 use crate::combat::systems::Movement;
-use crate::error::LoadError;
+use crate::error::{LoadError, MoonstoneError};
 use crate::game::{Game, SceneState};
 use crate::input;
 use crate::input::{Axis, Button, InputEvent};
@@ -41,59 +41,6 @@ use crate::scenes::FSceneSwitch;
 use crate::text::Image;
 
 const MAP_ANIMATION_SPEED: u32 = 12;
-
-#[derive(Debug)]
-pub enum SceneError {
-    Map(StoreErrorOr<MapData, Context, SimpleKey>),
-    Piv(StoreErrorOr<PivImage, Context, SimpleKey>),
-    // CampaignMap(StoreErrorOr<CampaignMap, Context, SimpleKey>),
-    Ron(StoreErrorOr<GameRon<CampaignMap>, Context, SimpleKey, FromRon>),
-    Ggez(ggez::error::GameError),
-}
-
-impl Error for SceneError {}
-
-impl fmt::Display for SceneError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            SceneError::Map(ref err) => err.fmt(f),
-            SceneError::Piv(ref err) => err.fmt(f),
-            // SceneError::CampaignMap(ref err) => err.fmt(f),
-            SceneError::Ggez(ref err) => err.fmt(f),
-            SceneError::Ron(ref err) => err.fmt(f),
-        }
-    }
-}
-
-impl From<StoreErrorOr<MapData, Context, SimpleKey>> for SceneError {
-    fn from(err: StoreErrorOr<MapData, Context, SimpleKey>) -> SceneError {
-        SceneError::Map(err)
-    }
-}
-
-impl From<StoreErrorOr<GameRon<CampaignMap>, Context, SimpleKey, FromRon>> for SceneError {
-    fn from(err: StoreErrorOr<GameRon<CampaignMap>, Context, SimpleKey, FromRon>) -> SceneError {
-        SceneError::Ron(err)
-    }
-}
-
-impl From<StoreErrorOr<PivImage, Context, SimpleKey>> for SceneError {
-    fn from(err: StoreErrorOr<PivImage, Context, SimpleKey>) -> SceneError {
-        SceneError::Piv(err)
-    }
-}
-
-// impl From<StoreErrorOr<CampaignMap, Context, SimpleKey>> for SceneError {
-//     fn from(err: StoreErrorOr<CampaignMap, Context, SimpleKey>) -> SceneError {
-//         SceneError::CampaignMap(err)
-//     }
-// }
-
-impl From<ggez::error::GameError> for SceneError {
-    fn from(err: ggez::error::GameError) -> SceneError {
-        SceneError::Ggez(err)
-    }
-}
 
 pub struct FlashingPalettes {
     pub palettes: Vec<Vec<Colour>>,
@@ -157,7 +104,7 @@ impl<'a> MapScene<'a> {
         ctx: &mut Context,
         store: &mut Store<Context, SimpleKey>,
         background_name: &str,
-    ) -> Result<Vec<graphics::Image>, SceneError> {
+    ) -> Result<Vec<graphics::Image>, MoonstoneError> {
         let piv_res = store.get::<PivImage>(&SimpleKey::from(background_name), ctx)?;
         let mut background: Vec<graphics::Image> = Vec::new();
         let mut piv = piv_res.borrow_mut();
@@ -192,7 +139,7 @@ impl<'a> MapScene<'a> {
         ctx: &mut Context,
         store: &mut Store<Context, SimpleKey>,
         background_name: &str,
-    ) -> Result<Self, SceneError> {
+    ) -> Result<Self, MoonstoneError> {
         let map_data = store
             .get::<MapData>(&warmy::SimpleKey::from("/map.yaml"), ctx)?
             .borrow()

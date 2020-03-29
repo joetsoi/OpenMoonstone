@@ -5,32 +5,70 @@ use failure::{self, Fail};
 use ggez::Context;
 use ron;
 use warmy;
-use warmy::{Load, SimpleKey};
+use warmy::{Load, SimpleKey, StoreErrorOr};
 
+use crate::campaign::movement_cost::CampaignMap;
 use crate::files::collide::CollideHitParseError;
 use crate::manager::GameYaml;
 use crate::objects::TextureSizeTooSmall;
+use crate::piv::PivImage;
+use crate::ron::{FromRon, GameRon};
+use crate::scenes::map::MapData;
 
-// #[derive(Debug)]
-// pub enum MoonstoneError {
-//     Io(std::io::Error),
-//     Collide(CollideHitParseError),
-// }
+#[derive(Debug)]
+pub enum MoonstoneError {
+    Map(StoreErrorOr<MapData, Context, SimpleKey>),
+    Piv(StoreErrorOr<PivImage, Context, SimpleKey>),
+    // CampaignMap(StoreErrorOr<CampaignMap, Context, SimpleKey>),
+    Ron(StoreErrorOr<GameRon<CampaignMap>, Context, SimpleKey, FromRon>),
+    Ggez(ggez::error::GameError),
+}
 
-// impl Error for MoonstoneError {}
+impl Error for MoonstoneError {}
 
-// impl fmt::Display for MoonstoneError {
-//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-//         match *self {}
+impl fmt::Display for MoonstoneError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            MoonstoneError::Map(ref err) => err.fmt(f),
+            MoonstoneError::Piv(ref err) => err.fmt(f),
+            // MoonstoneError::CampaignMap(ref err) => err.fmt(f),
+            MoonstoneError::Ggez(ref err) => err.fmt(f),
+            MoonstoneError::Ron(ref err) => err.fmt(f),
+        }
+    }
+}
+
+impl From<StoreErrorOr<MapData, Context, SimpleKey>> for MoonstoneError {
+    fn from(err: StoreErrorOr<MapData, Context, SimpleKey>) -> MoonstoneError {
+        MoonstoneError::Map(err)
+    }
+}
+
+impl From<StoreErrorOr<GameRon<CampaignMap>, Context, SimpleKey, FromRon>> for MoonstoneError {
+    fn from(
+        err: StoreErrorOr<GameRon<CampaignMap>, Context, SimpleKey, FromRon>,
+    ) -> MoonstoneError {
+        MoonstoneError::Ron(err)
+    }
+}
+
+impl From<StoreErrorOr<PivImage, Context, SimpleKey>> for MoonstoneError {
+    fn from(err: StoreErrorOr<PivImage, Context, SimpleKey>) -> MoonstoneError {
+        MoonstoneError::Piv(err)
+    }
+}
+
+// impl From<StoreErrorOr<CampaignMap, Context, SimpleKey>> for MoonstoneError {
+//     fn from(err: StoreErrorOr<CampaignMap, Context, SimpleKey>) -> MoonstoneError {
+//         MoonstoneError::CampaignMap(err)
 //     }
 // }
 
-// impl From<std::io::Error> for MoonstoneError {
-//     fn from(err: std::io::Error) -> MoonstoneError {
-//         MoonstoneError::Io(err)
-//     }
-// }
-
+impl From<ggez::error::GameError> for MoonstoneError {
+    fn from(err: ggez::error::GameError) -> MoonstoneError {
+        MoonstoneError::Ggez(err)
+    }
+}
 pub type CompatError = failure::Compat<failure::Error>;
 
 pub fn err_from<F: Fail>(f: F) -> CompatError {
