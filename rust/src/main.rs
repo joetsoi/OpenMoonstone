@@ -24,6 +24,18 @@ use openmoonstone::scenes;
 use openmoonstone::scenes::transition::FadeStyle;
 use openmoonstone::scenes::{FSceneStack, Fade, MainMenuScene, MainScene, SelectKnight};
 
+fn fps_for_scene(scene_name: &str) -> u32 {
+    // https://en.wikibooks.org/wiki/X86_Assembly/Programmable_Interval_Timer
+    const DOS_PIT_FREQUENCY: u32 = 1_193_182; // hz
+    const FREQUENCY_DIVISOR: u32 = 21_845; // taken from DOS version of moonstone
+    const ONE_SECOND: u32 = 1000; // ms
+    const ENCOUNTER_FPS: u32 = ONE_SECOND / (DOS_PIT_FREQUENCY / FREQUENCY_DIVISOR);
+    match scene_name {
+        "Encounter" => ENCOUNTER_FPS,
+        _ => 30,
+    }
+}
+
 struct MainState {
     input_binding: input::InputBinding,
     scene_stack: FSceneStack,
@@ -45,12 +57,9 @@ impl event::EventHandler for MainState {
         // are running this on a potato then they can.
         let mut ticks = 0;
 
-        // https://en.wikibooks.org/wiki/X86_Assembly/Programmable_Interval_Timer
-        const DOS_PIT_FREQUENCY: u32 = 1_193_182; // hz
-        const FREQUENCY_DIVISOR: u32 = 21_845; // taken from DOS version of moonstone
-        const ONE_SECOND: u32 = 1000; // ms
-        const DESIRED_FPS: u32 = ONE_SECOND / (DOS_PIT_FREQUENCY / FREQUENCY_DIVISOR);
-        while timer::check_update_time(ctx, DESIRED_FPS) {
+        let desired_fps: u32 = fps_for_scene(self.scene_stack.current().name());
+
+        while timer::check_update_time(ctx, desired_fps) {
             if ticks < MAX_UPDATES_PER_FRAME {
                 self.scene_stack.world.input.update(1.0);
                 self.scene_stack.update(ctx);

@@ -40,7 +40,7 @@ use crate::scenes::world::draw_entities;
 use crate::scenes::FSceneSwitch;
 use crate::text::Image;
 
-const MAP_ANIMATION_SPEED: u32 = 6;
+const MAP_ANIMATION_SPEED: u32 = 12;
 
 #[derive(Debug)]
 pub enum SceneError {
@@ -149,7 +149,7 @@ impl<'a> MapScene<'a> {
                 &["velocity"],
             )
             .with(Movement, "movement", &["restrict_movement"])
-            .with_thread_local(HighlightPlayer)
+            .with(HighlightPlayer, "highlight_player", &[])
             .build()
     }
 
@@ -316,9 +316,6 @@ impl<'a> Scene<Game, InputEvent> for MapScene<'a> {
     }
 
     fn draw(&mut self, game: &mut Game, ctx: &mut Context) -> GameResult<()> {
-        if timer::ticks(ctx) % 2 == 0 {
-            self.dispatcher.dispatch_thread_local(&self.specs_world);
-        }
         // since some of the campaign map is transparent, a sprite passing over
         // the transparent area would "colour in" that area, leaving behind the
         // ghost image of the sprite on those pixels, we clear the screen each
