@@ -10,7 +10,7 @@ use ggez::{graphics, timer, Context, GameResult};
 use ggez_goodies::scene::{Scene, SceneSwitch};
 use serde_derive::{Deserialize, Serialize};
 use specs::world::{Builder, Index};
-use specs::{Dispatcher, DispatcherBuilder, Join, World, WorldExt};
+use specs::{Dispatcher, DispatcherBuilder, EntityBuilder, Join, World, WorldExt};
 use warmy::load::Load;
 use warmy::{Res, SimpleKey, Store, StoreErrorOr};
 // use warmy::ron::Ron;
@@ -135,37 +135,25 @@ impl<'a> MapScene<'a> {
         Ok(background)
     }
 
-    pub fn new(
+    fn build_knight_entity(
         ctx: &mut Context,
         store: &mut Store<Context, SimpleKey>,
+        world: &'a mut World,
         background_name: &str,
-    ) -> Result<Self, MoonstoneError> {
-        let map_data = store
-            .get::<MapData>(&warmy::SimpleKey::from("/map.yaml"), ctx)?
-            .borrow()
-            .clone();
-        let background = MapScene::setup_background_map(ctx, store, &map_data.background)?;
-        let piv_res = store.get::<PivImage>(&SimpleKey::from(map_data.background.clone()), ctx)?;
-        let mut piv = piv_res.borrow_mut();
+    ) -> Result<(), MoonstoneError> {
+        let piv_res = store
+            .get::<PivImage>(&SimpleKey::from(background_name), ctx)
+            .unwrap();
+        let piv = piv_res.borrow();
 
-        let mut specs_world = Self::build_world();
-        specs_world.insert(Boundary {
-            x: 0,
-            y: 0,
-            w: 310,
-            h: 190,
-        });
-
-        let atlas = store
-            .get::<TextureAtlas>(&SimpleKey::from("mi.c"), ctx)?;
+        let atlas = store.get::<TextureAtlas>(&SimpleKey::from("mi.c"), ctx)?;
         // the first image in mi.c is the blue knight head.
         let knight_rect = atlas.borrow().rects[0];
         let knight_width = atlas.borrow().visible_widths[0];
 
-        let sprite_res = store
-            .get::<Sprite>(&SimpleKey::from(format!("/{}.yaml", "mi")), ctx)?;
+        let sprite_res = store.get::<Sprite>(&SimpleKey::from(format!("/{}.yaml", "mi")), ctx)?;
         let sprite = sprite_res.borrow();
-        specs_world
+        let entity_builder = world
             .create_entity()
             .with(Position { x: 10, y: 10 })
             .with(Velocity {
@@ -198,6 +186,31 @@ impl<'a> MapScene<'a> {
                 ..Default::default()
             })
             .build();
+        Ok(())
+    }
+
+    pub fn new(
+        ctx: &mut Context,
+        store: &mut Store<Context, SimpleKey>,
+        background_name: &str,
+    ) -> Result<Self, MoonstoneError> {
+        let map_data = store
+            .get::<MapData>(&warmy::SimpleKey::from("/map.yaml"), ctx)?
+            .borrow()
+            .clone();
+        let background = MapScene::setup_background_map(ctx, store, &map_data.background)?;
+
+        let mut specs_world = Self::build_world();
+        specs_world.insert(Boundary {
+            x: 0,
+            y: 0,
+            w: 310,
+            h: 190,
+        });
+
+        MapScene::build_knight_entity(ctx, store, &mut specs_world, &map_data.background);
+        let piv_res = store.get::<PivImage>(&SimpleKey::from(map_data.background.clone()), ctx)?;
+        let piv = piv_res.borrow();
 
         let campaign_map_res = store.get_by::<GameRon<CampaignMap>, FromRon>(
             &SimpleKey::from("/campaign_map.ron"),
