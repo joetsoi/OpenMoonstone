@@ -7,10 +7,11 @@ use ron;
 use warmy;
 use warmy::{Load, SimpleKey, StoreErrorOr};
 
+use crate::animation::Sprite;
 use crate::campaign::movement_cost::CampaignMap;
 use crate::files::collide::CollideHitParseError;
 use crate::manager::GameYaml;
-use crate::objects::TextureSizeTooSmall;
+use crate::objects::{TextureAtlas, TextureSizeTooSmall};
 use crate::piv::PivImage;
 use crate::ron::{FromRon, GameRon};
 use crate::scenes::map::MapData;
@@ -19,7 +20,8 @@ use crate::scenes::map::MapData;
 pub enum MoonstoneError {
     Map(StoreErrorOr<MapData, Context, SimpleKey>),
     Piv(StoreErrorOr<PivImage, Context, SimpleKey>),
-    // CampaignMap(StoreErrorOr<CampaignMap, Context, SimpleKey>),
+    Sprite(StoreErrorOr<Sprite, Context, SimpleKey>),
+    TextureAtlas(StoreErrorOr<TextureAtlas, Context, SimpleKey>),
     Ron(StoreErrorOr<GameRon<CampaignMap>, Context, SimpleKey, FromRon>),
     Ggez(ggez::error::GameError),
 }
@@ -31,7 +33,8 @@ impl fmt::Display for MoonstoneError {
         match *self {
             MoonstoneError::Map(ref err) => err.fmt(f),
             MoonstoneError::Piv(ref err) => err.fmt(f),
-            // MoonstoneError::CampaignMap(ref err) => err.fmt(f),
+            MoonstoneError::Sprite(ref err) => err.fmt(f),
+            MoonstoneError::TextureAtlas(ref err) => err.fmt(f),
             MoonstoneError::Ggez(ref err) => err.fmt(f),
             MoonstoneError::Ron(ref err) => err.fmt(f),
         }
@@ -58,11 +61,17 @@ impl From<StoreErrorOr<PivImage, Context, SimpleKey>> for MoonstoneError {
     }
 }
 
-// impl From<StoreErrorOr<CampaignMap, Context, SimpleKey>> for MoonstoneError {
-//     fn from(err: StoreErrorOr<CampaignMap, Context, SimpleKey>) -> MoonstoneError {
-//         MoonstoneError::CampaignMap(err)
-//     }
-// }
+impl From<StoreErrorOr<Sprite, Context, SimpleKey>> for MoonstoneError {
+    fn from(err: StoreErrorOr<Sprite, Context, SimpleKey>) -> MoonstoneError {
+        MoonstoneError::Sprite(err)
+    }
+}
+
+impl From<StoreErrorOr<TextureAtlas, Context, SimpleKey>> for MoonstoneError {
+    fn from(err: StoreErrorOr<TextureAtlas, Context, SimpleKey>) -> MoonstoneError {
+        MoonstoneError::TextureAtlas(err)
+    }
+}
 
 impl From<ggez::error::GameError> for MoonstoneError {
     fn from(err: ggez::error::GameError) -> MoonstoneError {

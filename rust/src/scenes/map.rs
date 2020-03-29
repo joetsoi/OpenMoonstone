@@ -157,16 +157,13 @@ impl<'a> MapScene<'a> {
         });
 
         let atlas = store
-            .get::<TextureAtlas>(&SimpleKey::from("mi.c"), ctx)
-            .expect("error loading texture atlas when drawing");
+            .get::<TextureAtlas>(&SimpleKey::from("mi.c"), ctx)?;
         // the first image in mi.c is the blue knight head.
         let knight_rect = atlas.borrow().rects[0];
         let knight_width = atlas.borrow().visible_widths[0];
 
         let sprite_res = store
-            .get::<Sprite>(&SimpleKey::from(format!("/{}.yaml", "mi")), ctx)
-            // TODO fix error handling, make this ?
-            .expect("error getting sprite in build entity");
+            .get::<Sprite>(&SimpleKey::from(format!("/{}.yaml", "mi")), ctx)?;
         let sprite = sprite_res.borrow();
         specs_world
             .create_entity()
