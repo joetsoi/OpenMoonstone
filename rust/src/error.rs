@@ -14,7 +14,7 @@ use crate::manager::GameYaml;
 use crate::objects::{TextureAtlas, TextureSizeTooSmall};
 use crate::piv::PivImage;
 use crate::ron::{FromRon, GameRon};
-use crate::scenes::map::MapData;
+use crate::scenes::map::{Locations, MapData};
 
 #[derive(Debug)]
 pub enum MoonstoneError {
@@ -23,6 +23,7 @@ pub enum MoonstoneError {
     Sprite(StoreErrorOr<Sprite, Context, SimpleKey>),
     TextureAtlas(StoreErrorOr<TextureAtlas, Context, SimpleKey>),
     Ron(StoreErrorOr<GameRon<CampaignMap>, Context, SimpleKey, FromRon>),
+    Locations(StoreErrorOr<GameRon<Locations>, Context, SimpleKey, FromRon>),
     Ggez(ggez::error::GameError),
 }
 
@@ -37,6 +38,7 @@ impl fmt::Display for MoonstoneError {
             MoonstoneError::TextureAtlas(ref err) => err.fmt(f),
             MoonstoneError::Ggez(ref err) => err.fmt(f),
             MoonstoneError::Ron(ref err) => err.fmt(f),
+            MoonstoneError::Locations(ref err) => err.fmt(f),
         }
     }
 }
@@ -52,6 +54,14 @@ impl From<StoreErrorOr<GameRon<CampaignMap>, Context, SimpleKey, FromRon>> for M
         err: StoreErrorOr<GameRon<CampaignMap>, Context, SimpleKey, FromRon>,
     ) -> MoonstoneError {
         MoonstoneError::Ron(err)
+    }
+}
+
+impl From<StoreErrorOr<GameRon<Locations>, Context, SimpleKey, FromRon>> for MoonstoneError {
+    fn from(
+        err: StoreErrorOr<GameRon<Locations>, Context, SimpleKey, FromRon>,
+    ) -> MoonstoneError {
+        MoonstoneError::Locations(err)
     }
 }
 
