@@ -1,6 +1,7 @@
 pub mod animation;
 pub mod campaign;
 pub mod combat;
+pub mod components;
 pub mod error;
 pub mod files;
 pub mod game;
@@ -13,4 +14,5 @@ pub mod piv;
 pub mod rect;
 pub mod ron;
 pub mod scenes;
+pub mod systems;
 pub mod text;

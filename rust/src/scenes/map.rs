@@ -39,7 +39,6 @@ use crate::piv::{extract_palette, palette_swap, Colour, ColourOscillate, PivImag
 use crate::ron::{FromRon, GameRon};
 use crate::scenes::world::draw_entities;
 use crate::scenes::FSceneSwitch;
-use crate::systems::SortRenderByYPosition;
 use crate::text::Image;
 
 const MAP_ANIMATION_SPEED: u32 = 12;
@@ -130,11 +129,6 @@ impl<'a> MapScene<'a> {
                 &["velocity"],
             )
             .with(Movement, "movement", &["restrict_movement"])
-            .with(
-                SortRenderByYPosition,
-                "sort_render_by_y_position",
-                &["movement"],
-            )
             .with(HighlightPlayer, "highlight_player", &[])
             .build()
     }
@@ -218,9 +212,7 @@ impl<'a> MapScene<'a> {
                 button: Button::Fire1,
                 ..Default::default()
             })
-            .with(RenderOrder {
-                ..Default::default()
-            })
+            .with(RenderOrder { depth: 1 })
             .with(MapIntent {
                 ..Default::default()
             })
@@ -267,9 +259,7 @@ impl<'a> MapScene<'a> {
                     resource_name: "mi".to_string(),
                     direction: Facing::default(),
                 })
-                .with(RenderOrder {
-                    ..Default::default()
-                })
+                .with(RenderOrder { depth: 0 })
                 .build();
         }
         Ok(())
