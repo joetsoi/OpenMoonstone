@@ -28,6 +28,7 @@ use crate::campaign::systems::{
 };
 use crate::combat::components::{Controller, Draw, Facing, Palette, Position, Velocity};
 use crate::combat::systems::Movement;
+use crate::components::RenderOrder;
 use crate::error::{LoadError, MoonstoneError};
 use crate::game::{Game, SceneState};
 use crate::input;
@@ -38,6 +39,7 @@ use crate::piv::{extract_palette, palette_swap, Colour, ColourOscillate, PivImag
 use crate::ron::{FromRon, GameRon};
 use crate::scenes::world::draw_entities;
 use crate::scenes::FSceneSwitch;
+use crate::systems::SortRenderByYPosition;
 use crate::text::Image;
 
 const MAP_ANIMATION_SPEED: u32 = 12;
@@ -109,6 +111,7 @@ impl<'a> MapScene<'a> {
         world.register::<HitBox>();
         world.register::<Palette>();
         world.register::<Position>();
+        world.register::<RenderOrder>();
         world.register::<Velocity>();
         world.register::<Controller>();
         world.register::<MapIntent>();
@@ -127,6 +130,11 @@ impl<'a> MapScene<'a> {
                 &["velocity"],
             )
             .with(Movement, "movement", &["restrict_movement"])
+            .with(
+                SortRenderByYPosition,
+                "sort_render_by_y_position",
+                &["movement"],
+            )
             .with(HighlightPlayer, "highlight_player", &[])
             .build()
     }
@@ -210,6 +218,9 @@ impl<'a> MapScene<'a> {
                 button: Button::Fire1,
                 ..Default::default()
             })
+            .with(RenderOrder {
+                ..Default::default()
+            })
             .with(MapIntent {
                 ..Default::default()
             })
@@ -255,6 +266,9 @@ impl<'a> MapScene<'a> {
                     animation: "".to_string(),
                     resource_name: "mi".to_string(),
                     direction: Facing::default(),
+                })
+                .with(RenderOrder {
+                    ..Default::default()
                 })
                 .build();
         }

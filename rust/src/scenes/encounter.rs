@@ -26,6 +26,7 @@ use crate::combat::systems::{
     PlayerDirection, ResolveCollisions, RestrictMovementToBoundary, StateUpdater,
     UpdateBoundingBoxes, UpdateImage, VelocitySystem,
 };
+use crate::components::RenderOrder;
 use crate::files::collide::CollisionBoxes;
 use crate::files::terrain::scenery_rects;
 use crate::files::TerrainFile;
@@ -38,6 +39,7 @@ use crate::piv::{palette_swap, Colour, PivImage};
 use crate::rect::Rect;
 use crate::scenes::world::draw_entities;
 use crate::scenes::FSceneSwitch;
+use crate::systems::SortRenderByYPosition;
 
 #[derive(Debug, Default, Clone)]
 pub struct EncounterTextures {
@@ -85,6 +87,7 @@ impl<'a> EncounterScene<'a> {
         world.register::<MustLive>();
         world.register::<Palette>();
         world.register::<Position>();
+        world.register::<RenderOrder>();
         world.register::<State>();
         world.register::<UnitType>();
         world.register::<Velocity>();
@@ -142,6 +145,11 @@ impl<'a> EncounterScene<'a> {
                 &["check_collisions"],
             )
             .with(StateUpdater, "state_updater", &["resolve_collisions"])
+            .with(
+                SortRenderByYPosition,
+                "sort_render_by_y_position",
+                &["resolve_collisions"],
+            )
             .with(OutOfBounds, "out_of_bounds", &[])
             // .with_thread_local(Renderer {
             //     store: Store::new(StoreOpt::default()).expect("store creation"),
@@ -276,6 +284,9 @@ impl<'a> EncounterScene<'a> {
                 ..Default::default()
             })
             .with(AnimationState {
+                ..Default::default()
+            })
+            .with(RenderOrder {
                 ..Default::default()
             })
             .with(State {

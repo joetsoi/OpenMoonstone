@@ -7,6 +7,7 @@ use warmy::SimpleKey;
 
 use crate::animation::{Image, ImageType};
 use crate::combat::components::{Draw, Palette, Position};
+use crate::components::RenderOrder;
 use crate::game::Game;
 use crate::objects::TextureAtlas;
 use crate::piv::Colour;
@@ -18,19 +19,24 @@ pub fn draw_entities(
     game: &mut Game,
     ctx: &mut Context,
 ) -> GameResult<()> {
+    let render_order_storage = specs_world.read_storage::<RenderOrder>();
     let position_storage = specs_world.read_storage::<Position>();
     let draw_storage = specs_world.read_storage::<Draw>();
     let entities = specs_world.entities();
 
     let palette_storage = specs_world.read_storage::<Palette>();
 
-    let mut storage = (&position_storage, &draw_storage, &entities)
+    let mut storage = (
+        &render_order_storage,
+        &position_storage,
+        &draw_storage,
+        &entities,
+    )
         .join()
         .collect::<Vec<_>>();
-    storage.sort_by(|&a, &b| a.0.y.cmp(&b.0.y));
-    storage.iter().map(|(position, draw, entity)| position);
+    storage.sort_by(|&a, &b| a.0.depth.cmp(&b.0.depth));
 
-    for (position, draw, entity) in storage {
+    for (_, position, draw, entity) in storage {
         let images: Vec<&Image> = if game.gore_on {
             draw.frame.images.iter().collect()
         } else {
