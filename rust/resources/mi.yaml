@@ -1,5 +1,5 @@
 blue_knight:
   frames:
     - images:
-      - {sheet: mi.c, image: 0, y: 0, x: 0, image_type: Collidee}
+      - {sheet: mi.c, image: 5, y: 0, x: 0, image_type: Collidee}
       # - {sheet: mi.c, image: 0, y: 10, x: 10, image_type: Collidee}

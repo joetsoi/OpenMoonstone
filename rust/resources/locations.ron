@@ -1,42 +1,720 @@
 Locations(
     locations: [
-        // forest lairs
-        (kind: Lair, image: (sheet: "mi.c", image: 20, x:0, y:0, image_type: Collidee), x: 24, y: 112),
-        (kind: Lair, image: (sheet: "mi.c", image: 20, x: 0, y: 0, image_type: Collidee), x: 24, y: 112),
-        (kind: Lair, image: (sheet: "mi.c", image: 20, x: 0, y: 0, image_type: Collidee), x: 104, y: 120),
-        (kind: Lair, image: (sheet: "mi.c", image: 20, x: 0, y: 0, image_type: Collidee), x: 120, y: 144),
-        (kind: Lair, image: (sheet: "mi.c", image: 20, x: 0, y: 0, image_type: Collidee), x: 80, y: 184),
-        (kind: Lair, image: (sheet: "mi.c", image: 20, x: 0, y: 0, image_type: Collidee), x: 24, y: 160),
-        (kind: Lair, image: (sheet: "mi.c", image: 20, x: 0, y: 0, image_type: Collidee), x: 48, y: 136),
-        // wasteland lairs
-        (kind: Lair, image: (sheet: "mi.c", image: 20, x: 0, y: 0, image_type: Collidee), x: 296, y: 32),
-        (kind: Lair, image: (sheet: "mi.c", image: 20, x: 0, y: 0, image_type: Collidee), x: 232, y: 16),
-        (kind: Lair, image: (sheet: "mi.c", image: 20, x: 0, y: 0, image_type: Collidee), x: 176, y: 48),
-        (kind: Lair, image: (sheet: "mi.c", image: 20, x: 0, y: 0, image_type: Collidee), x: 240, y: 48),
-        (kind: Lair, image: (sheet: "mi.c", image: 20, x: 0, y: 0, image_type: Collidee), x: 216, y: 72),
-        (kind: Lair, image: (sheet: "mi.c", image: 20, x: 0, y: 0, image_type: Collidee), x: 272, y: 80),
-        // wetlands lairs
-        (kind: Lair, image: (sheet: "mi.c", image: 20, x: 0, y: 0, image_type: Collidee), x: 208, y: 104),
-        (kind: Lair, image: (sheet: "mi.c", image: 20, x: 0, y: 0, image_type: Collidee), x: 248, y: 120),
-        (kind: Lair, image: (sheet: "mi.c", image: 20, x: 0, y: 0, image_type: Collidee), x: 168, y: 136),
-        (kind: Lair, image: (sheet: "mi.c", image: 20, x: 0, y: 0, image_type: Collidee), x: 152, y: 176),
-        (kind: Lair, image: (sheet: "mi.c", image: 20, x: 0, y: 0, image_type: Collidee), x: 232, y: 176),
-        (kind: Lair, image: (sheet: "mi.c", image: 20, x: 0, y: 0, image_type: Collidee), x: 288, y: 176),
-        // grasslands lairs
-        (kind: Lair, image: (sheet: "mi.c", image: 20, x: 0, y: 0, image_type: Collidee), x: 24, y: 24),
-        (kind: Lair, image: (sheet: "mi.c", image: 20, x: 0, y: 0, image_type: Collidee), x: 96, y: 16),
-        (kind: Lair, image: (sheet: "mi.c", image: 20, x: 0, y: 0, image_type: Collidee), x: 136, y: 49),
-        (kind: Lair, image: (sheet: "mi.c", image: 20, x: 0, y: 0, image_type: Collidee), x: 32, y: 64),
-        (kind: Lair, image: (sheet: "mi.c", image: 20, x: 0, y: 0, image_type: Collidee), x: 80, y: 64),
-        (kind: Lair, image: (sheet: "mi.c", image: 20, x: 0, y: 0, image_type: Collidee), x: 96, y: 88),
-        (kind: Village, image: (sheet: "mi.c", image: 21, x: 0, y: 0, image_type: Collidee), x: 18, y: 11, player: Some(1)),
-        (kind: Village, image: (sheet: "mi.c", image: 22, x: 0, y: 0, image_type: Collidee), x: 286, y: 11, player: Some(2)),
-        (kind: Village, image: (sheet: "mi.c", image: 23, x: 0, y: 0, image_type: Collidee), x: 0, y: 187, player: Some(3)),
-        (kind: Village, image: (sheet: "mi.c", image: 24, x: 0, y: 0, image_type: Collidee), x: 303, y: 192, player: Some(4)),
-        (kind: City, image: (sheet: "mi.c", image: 25, x: 0, y: 0, image_type: Collidee), x: 82, y: 28, name: Some("Highwood")),
-        (kind: City, image: (sheet: "mi.c", image: 26, x: 0, y: 0, image_type: Collidee), x: 277, y: 143, name: Some("Waterdeep")),
-        (kind: Stonehenge, image: (sheet: "mi.c", image: 27, x: 0, y: 0, image_type: Collidee), x: 88, y: 155),
-        (kind: Valley, image: (sheet: "mi.c", image: 28, x: 0, y: 0, image_type: Collidee), x: 152, y: 97),
-        (kind: WizardTower, image: (sheet: "mi.c", image: 30, x: 0, y: 0, image_type: Collidee), x: 217, y: 11),
+        (
+            kind: Lair,
+            image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 20,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            hover_image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 31,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            x: 24,
+            y: 112,
+        ),
+        (
+            kind: Lair,
+            image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 20,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            hover_image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 31,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            x: 24,
+            y: 112,
+        ),
+        (
+            kind: Lair,
+            image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 20,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            hover_image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 31,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            x: 104,
+            y: 120,
+        ),
+        (
+            kind: Lair,
+            image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 20,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            hover_image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 31,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            x: 120,
+            y: 144,
+        ),
+        (
+            kind: Lair,
+            image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 20,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            hover_image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 31,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            x: 80,
+            y: 184,
+        ),
+        (
+            kind: Lair,
+            image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 20,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            hover_image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 31,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            x: 24,
+            y: 160,
+        ),
+        (
+            kind: Lair,
+            image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 20,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            hover_image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 31,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            x: 48,
+            y: 136,
+        ),
+        (
+            kind: Lair,
+            image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 20,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            hover_image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 31,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            x: 296,
+            y: 32,
+        ),
+        (
+            kind: Lair,
+            image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 20,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            hover_image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 31,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            x: 232,
+            y: 16,
+        ),
+        (
+            kind: Lair,
+            image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 20,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            hover_image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 31,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            x: 176,
+            y: 48,
+        ),
+        (
+            kind: Lair,
+            image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 20,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            hover_image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 31,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            x: 240,
+            y: 48,
+        ),
+        (
+            kind: Lair,
+            image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 20,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            hover_image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 31,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            x: 216,
+            y: 72,
+        ),
+        (
+            kind: Lair,
+            image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 20,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            hover_image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 31,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            x: 272,
+            y: 80,
+        ),
+        (
+            kind: Lair,
+            image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 20,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            hover_image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 31,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            x: 208,
+            y: 104,
+        ),
+        (
+            kind: Lair,
+            image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 20,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            hover_image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 31,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            x: 248,
+            y: 120,
+        ),
+        (
+            kind: Lair,
+            image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 20,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            hover_image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 31,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            x: 168,
+            y: 136,
+        ),
+        (
+            kind: Lair,
+            image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 20,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            hover_image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 31,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            x: 152,
+            y: 176,
+        ),
+        (
+            kind: Lair,
+            image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 20,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            hover_image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 31,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            x: 232,
+            y: 176,
+        ),
+        (
+            kind: Lair,
+            image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 20,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            hover_image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 31,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            x: 288,
+            y: 176,
+        ),
+        (
+            kind: Lair,
+            image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 20,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            hover_image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 31,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            x: 24,
+            y: 24,
+        ),
+        (
+            kind: Lair,
+            image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 20,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            hover_image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 31,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            x: 96,
+            y: 16,
+        ),
+        (
+            kind: Lair,
+            image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 20,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            hover_image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 31,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            x: 136,
+            y: 49,
+        ),
+        (
+            kind: Lair,
+            image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 20,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            hover_image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 31,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            x: 32,
+            y: 64,
+        ),
+        (
+            kind: Lair,
+            image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 20,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            hover_image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 31,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            x: 80,
+            y: 64,
+        ),
+        (
+            kind: Lair,
+            image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 20,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            hover_image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 31,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            x: 96,
+            y: 88,
+        ),
+        (
+            kind: Village,
+            image: None,
+            hover_image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 21,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            x: 18,
+            y: 11,
+            player: Some(1),
+        ),
+        (
+            kind: Village,
+            image: None,
+            hover_image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 22,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            x: 286,
+            y: 11,
+            player: Some(2),
+        ),
+        (
+            kind: Village,
+            image: None,
+            hover_image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 23,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            x: 0,
+            y: 187,
+            player: Some(3),
+        ),
+        (
+            kind: Village,
+            image: None,
+            hover_image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 24,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            x: 303,
+            y: 192,
+            player: Some(4),
+        ),
+        (
+            kind: City,
+            image: None,
+            hover_image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 25,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            x: 82,
+            y: 28,
+            name: Some("Highwood"),
+        ),
+        (
+            kind: City,
+            image: None,
+            hober_image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 26,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            x: 277,
+            y: 143,
+            name: Some("Waterdeep"),
+        ),
+        (
+            kind: Stonehenge,
+            image: None,
+            hover_image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 27,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            x: 88,
+            y: 155,
+        ),
+        (
+            kind: Valley,
+            image: None,
+            hover_image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 28,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            x: 152,
+            y: 97,
+        ),
+        (
+            kind: WizardTower,
+            image: None,
+            hover_image: Some(
+                Image(
+                    sheet: "mi.c",
+                    image: 30,
+                    x: 0,
+                    y: 0,
+                    image_type: Collidee,
+                )
+            ),
+            x: 217,
+            y: 11,
+        ),
     ],
 )

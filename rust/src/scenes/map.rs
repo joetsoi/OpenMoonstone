@@ -1,4 +1,5 @@
 use std::collections::hash_map::Entry::{Occupied, Vacant};
+
 use std::collections::HashMap;
 use std::error::Error;
 use std::fmt;
@@ -20,11 +21,12 @@ use loadable_yaml_macro_derive::LoadableYaml;
 use crate::animation::Image as SpriteImage;
 use crate::animation::{Frame, Sprite};
 // TODO: move these components to common module out of combat
-use crate::campaign::components::{HitBox, MapIntent, TimeSpentOnTerrain};
+use crate::campaign::components::{HitBox, MapIntent, OnHoverImage, TimeSpentOnTerrain};
 use crate::campaign::movement_cost::CampaignMap;
 use crate::campaign::systems::map_boundary::Boundary;
 use crate::campaign::systems::{
-    HighlightPlayer, MapCommander, RestrictMovementToMapBoundary, SetMapVelocity, TerrainCost,
+    HighlightOnHover, HighlightPlayer, MapCommander, RestrictMovementToMapBoundary, SetMapVelocity,
+    TerrainCost,
 };
 use crate::combat::components::{Controller, Draw, Facing, Palette, Position, Velocity};
 use crate::combat::systems::Movement;
@@ -79,7 +81,8 @@ impl Default for LocationKind {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Location {
     pub kind: LocationKind,
-    pub image: SpriteImage,
+    pub image: Option<SpriteImage>,
+    pub hover_image: Option<SpriteImage>,
     pub x: i32,
     pub y: i32,
     pub player: Option<u32>,
@@ -108,6 +111,7 @@ impl<'a> MapScene<'a> {
         let mut world = World::new();
         world.register::<Draw>();
         world.register::<HitBox>();
+        world.register::<OnHoverImage>();
         world.register::<Palette>();
         world.register::<Position>();
         world.register::<RenderOrder>();
@@ -129,6 +133,7 @@ impl<'a> MapScene<'a> {
                 &["velocity"],
             )
             .with(Movement, "movement", &["restrict_movement"])
+            .with(HighlightOnHover, "highlight_on_hover", &["movement"])
             .with(HighlightPlayer, "highlight_player", &[])
             .build()
     }
@@ -238,29 +243,42 @@ impl<'a> MapScene<'a> {
             .get::<PivImage>(&SimpleKey::from(background_name), ctx)
             .unwrap();
         let piv = piv_res.borrow();
+
+        let atlas = store.get::<TextureAtlas>(&SimpleKey::from("mi.c"), ctx)?;
         for l in locations_res.borrow().0.locations.iter() {
-            println!("{:#?}", l);
             let sprite_res =
                 store.get::<Sprite>(&SimpleKey::from(format!("/{}.yaml", "mi")), ctx)?;
             let sprite = sprite_res.borrow();
 
-            let entity_builder = world
+            let mut entity_builder = world
                 .create_entity()
                 .with(Position { x: l.x, y: l.y })
                 .with(Palette {
                     name: "0".to_string(),
                     palette: piv.palette.clone(),
                 })
+                .with(RenderOrder { depth: 0 })
+                .with(OnHoverImage {
+                    image: l.image.clone(),
+                    hover: l.hover_image.clone(),
+                })
                 .with(Draw {
-                    frame: Frame {
-                        images: vec![l.image.clone()],
-                    },
+                    frame: Frame { images: vec![] },
                     animation: "".to_string(),
                     resource_name: "mi".to_string(),
                     direction: Facing::default(),
+                });
+
+            if let Some(i) = l.image.as_ref().or(l.hover_image.as_ref()) {
+                let rect = atlas.borrow().rects[i.image];
+                let width = atlas.borrow().visible_widths[i.image];
+                entity_builder = entity_builder.with(HitBox {
+                    w: width,
+                    h: rect.h,
                 })
-                .with(RenderOrder { depth: 0 })
-                .build();
+            }
+
+            entity_builder.build();
         }
         Ok(())
     }
@@ -310,7 +328,7 @@ impl<'a> MapScene<'a> {
             palettes.push(p);
         }
         specs_world.insert(FlashingPalettes { palettes });
-        MapScene::build_locations(ctx, store, &mut specs_world, &map_data.background);
+        MapScene::build_locations(ctx, store, &mut specs_world, &map_data.background)?;
 
         Ok(Self {
             specs_world: specs_world,
