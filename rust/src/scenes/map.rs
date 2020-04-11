@@ -98,7 +98,7 @@ pub struct MapScene<'a> {
     pub specs_world: World,
     pub dispatcher: Dispatcher<'a, 'a>,
 
-    map_data: MapData,
+    // map_data: MapData,
     pub background: Vec<graphics::Image>,
     background_frame: u32,
     current_background_image: usize,
@@ -283,36 +283,7 @@ impl<'a> MapScene<'a> {
         Ok(())
     }
 
-    pub fn new(
-        ctx: &mut Context,
-        store: &mut Store<Context, SimpleKey>,
-        background_name: &str,
-    ) -> Result<Self, MoonstoneError> {
-        let map_data = store
-            .get::<MapData>(&warmy::SimpleKey::from("/map.yaml"), ctx)?
-            .borrow()
-            .clone();
-        let background = MapScene::setup_background_map(ctx, store, &map_data.background)?;
-
-        let mut specs_world = Self::build_world();
-        specs_world.insert(Boundary {
-            x: 0,
-            y: 0,
-            w: 310,
-            h: 190,
-        });
-
-        MapScene::build_knight_entity(ctx, store, &mut specs_world, &map_data.background);
-        let piv_res = store.get::<PivImage>(&SimpleKey::from(map_data.background.clone()), ctx)?;
-        let piv = piv_res.borrow();
-
-        let campaign_map_res = store.get_by::<GameRon<CampaignMap>, FromRon>(
-            &SimpleKey::from("/campaign_map.ron"),
-            ctx,
-            FromRon,
-        )?;
-        specs_world.insert(campaign_map_res.borrow().0.clone());
-
+    fn insert_palettes(specs_world: &mut World, piv: &PivImage) -> Result<(), MoonstoneError> {
         let mut swap_colour = extract_palette(&[0xff]).first().unwrap().clone();
         swap_colour.a = 255;
         let mut oscillate = ColourOscillate::new(piv.palette[31], swap_colour);
@@ -328,12 +299,61 @@ impl<'a> MapScene<'a> {
             palettes.push(p);
         }
         specs_world.insert(FlashingPalettes { palettes });
-        MapScene::build_locations(ctx, store, &mut specs_world, &map_data.background)?;
+        Ok(())
+    }
 
+    fn insert_campaign_map(
+        ctx: &mut Context,
+        store: &mut Store<Context, SimpleKey>,
+        specs_world: &mut World,
+    ) -> Result<(), MoonstoneError> {
+        let campaign_map_res = store.get_by::<GameRon<CampaignMap>, FromRon>(
+            &SimpleKey::from("/campaign_map.ron"),
+            ctx,
+            FromRon,
+        )?;
+        specs_world.insert(campaign_map_res.borrow().0.clone());
+        Ok(())
+    }
+
+    fn insert_boundary(specs_world: &mut World) -> Result<(), MoonstoneError> {
+        specs_world.insert(Boundary {
+            x: 0,
+            y: 0,
+            w: 310,
+            h: 190,
+        });
+        Ok(())
+    }
+
+    pub fn new(
+        ctx: &mut Context,
+        store: &mut Store<Context, SimpleKey>,
+        background_name: &str,
+        num_players: u32,
+    ) -> Result<Self, MoonstoneError> {
+        let background = MapScene::setup_background_map(ctx, store, &background_name)?;
+
+        let mut specs_world = Self::build_world();
+
+        MapScene::build_knight_entity(ctx, store, &mut specs_world, &background_name);
+
+        MapScene::insert_boundary(&mut specs_world)?;
+        MapScene::insert_campaign_map(ctx, store, &mut specs_world)?;
+
+        let piv_res = store.get::<PivImage>(&SimpleKey::from(background_name), ctx)?;
+        let piv = piv_res.borrow();
+        MapScene::insert_palettes(&mut specs_world, &*piv)?;
+        MapScene::build_locations(ctx, store, &mut specs_world, background_name)?;
+
+        // let map_data = store
+        //     .get::<MapData>(&warmy::SimpleKey::from("/map.yaml"), ctx)?
+        //     .borrow()
+        //     .clone();
         Ok(Self {
             specs_world: specs_world,
             dispatcher: Self::build_dispatcher(),
-            map_data,
+            // map_data,
             background,
             background_frame: 0,
             current_background_image: 0,
