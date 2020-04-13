@@ -11,7 +11,7 @@ use ggez::{graphics, timer, Context, GameResult};
 use ggez_goodies::scene::{Scene, SceneSwitch};
 use serde_derive::{Deserialize, Serialize};
 use specs::world::{Builder, Index};
-use specs::{Dispatcher, DispatcherBuilder, EntityBuilder, Join, World, WorldExt};
+use specs::{Dispatcher, DispatcherBuilder, EntityBuilder, Join, Read, World, WorldExt};
 use warmy::load::Load;
 use warmy::{Res, SimpleKey, Store, StoreErrorOr};
 // use warmy::ron::Ron;
@@ -21,12 +21,12 @@ use loadable_yaml_macro_derive::LoadableYaml;
 use crate::animation::Image as SpriteImage;
 use crate::animation::{Frame, Sprite};
 // TODO: move these components to common module out of combat
-use crate::campaign::components::{HitBox, MapIntent, OnHoverImage, TimeSpentOnTerrain};
+use crate::campaign::components::{Endurance, HitBox, MapIntent, OnHoverImage, TimeSpentOnTerrain};
 use crate::campaign::movement_cost::CampaignMap;
 use crate::campaign::systems::map_boundary::Boundary;
 use crate::campaign::systems::{
-    HighlightOnHover, HighlightPlayer, MapCommander, RestrictMovementToMapBoundary, SetMapVelocity,
-    TerrainCost,
+    EnduranceTracker, HighlightOnHover, HighlightPlayer, MapCommander,
+    RestrictMovementToMapBoundary, SetMapVelocity, TerrainCost,
 };
 use crate::combat::components::{Controller, Draw, Facing, Palette, Position, Velocity};
 use crate::combat::systems::Movement;
@@ -94,6 +94,15 @@ pub struct Locations {
     pub locations: Vec<Location>,
 }
 
+struct State<'a> {
+    players: Vec<Index>,
+    current_player: &'a Index,
+    day: u32,
+}
+
+#[derive(Debug, Default, Copy, Clone)]
+pub struct TurnOver(pub bool);
+
 pub struct MapScene<'a> {
     pub specs_world: World,
     pub dispatcher: Dispatcher<'a, 'a>,
@@ -110,6 +119,7 @@ impl<'a> MapScene<'a> {
     fn build_world() -> World {
         let mut world = World::new();
         world.register::<Draw>();
+        world.register::<Endurance>();
         world.register::<HitBox>();
         world.register::<OnHoverImage>();
         world.register::<Palette>();
@@ -133,6 +143,7 @@ impl<'a> MapScene<'a> {
                 &["velocity"],
             )
             .with(Movement, "movement", &["restrict_movement"])
+            .with(EnduranceTracker, "endurance_tracker", &["movement"])
             .with(HighlightOnHover, "highlight_on_hover", &["movement"])
             .with(HighlightPlayer, "highlight_player", &[])
             .build()
@@ -203,6 +214,7 @@ impl<'a> MapScene<'a> {
                 resource_name: "mi".to_string(),
                 direction: Facing::default(),
             })
+            .with(Endurance { max: 96, used: 0 })
             .with(Palette {
                 name: "0".to_string(),
                 palette: piv.palette.clone(),
@@ -346,6 +358,7 @@ impl<'a> MapScene<'a> {
         MapScene::insert_palettes(&mut specs_world, &*piv)?;
         MapScene::build_locations(ctx, store, &mut specs_world, background_name)?;
 
+        specs_world.insert(TurnOver(false));
         // let map_data = store
         //     .get::<MapData>(&warmy::SimpleKey::from("/map.yaml"), ctx)?
         //     .borrow()
@@ -394,6 +407,10 @@ impl<'a> Scene<Game, InputEvent> for MapScene<'a> {
             self.current_background_image %= self.background.len();
         }
         self.background_frame %= MAP_ANIMATION_SPEED;
+        let turn_over: Read<TurnOver> = self.specs_world.system_data();
+        if turn_over.0 == true {
+            println!("over");
+        }
         SceneSwitch::None
     }
 

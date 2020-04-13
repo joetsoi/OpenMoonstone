@@ -6,5 +6,10 @@ use specs_derive::*;
 pub struct Endurance {
     pub max: u32,
     pub used: u32,
-    pub spent: u32,
 }
+// endurance * 2
+// chainmail + 2
+// battle armour + 4
+// + 4 in general
+//
+// number of ticks = result << 4
