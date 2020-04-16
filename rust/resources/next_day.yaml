@@ -1,0 +1,7 @@
+background: ch
+text:
+  - {string: "Next Day", font: bold.f, bordered: true, centered: true, x: 0, y: 95}
+  - {string: "Press fire to continue", font: bold.f, bordered: true, centered: true, x: 0, y: 182}
+images:
+  - {sheet: ki.cel, image: 45, x: 119, y: 12}
+cursor: {sheet: "sel.cel", image: 0, x: 50, y: 85}
