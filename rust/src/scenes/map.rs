@@ -11,12 +11,16 @@ use ggez::{graphics, timer, Context, GameResult};
 use ggez_goodies::scene::{Scene, SceneSwitch};
 use serde_derive::{Deserialize, Serialize};
 use specs::world::{Builder, Index};
-use specs::{Dispatcher, DispatcherBuilder, EntityBuilder, Join, Read, World, WorldExt};
+use specs::{Dispatcher, DispatcherBuilder, EntityBuilder, Join, Read, World, WorldExt, Write};
 use warmy::load::Load;
 use warmy::{Res, SimpleKey, Store, StoreErrorOr};
 // use warmy::ron::Ron;
 
 use loadable_yaml_macro_derive::LoadableYaml;
+
+use super::transition::FadeStyle;
+use super::Fade;
+use super::NextDay;
 
 use crate::animation::Image as SpriteImage;
 use crate::animation::{Frame, Sprite};
@@ -397,7 +401,7 @@ impl<'a> MapScene<'a> {
 }
 
 impl<'a> Scene<Game, InputEvent> for MapScene<'a> {
-    fn update(&mut self, game: &mut Game, _ctx: &mut Context) -> FSceneSwitch {
+    fn update(&mut self, game: &mut Game, ctx: &mut Context) -> FSceneSwitch {
         self.update_controllers(&game.input);
         self.dispatcher.dispatch_par(&self.specs_world);
         self.specs_world.maintain();
@@ -407,11 +411,22 @@ impl<'a> Scene<Game, InputEvent> for MapScene<'a> {
             self.current_background_image %= self.background.len();
         }
         self.background_frame %= MAP_ANIMATION_SPEED;
-        let turn_over: Read<TurnOver> = self.specs_world.system_data();
-        if turn_over.0 == true {
-            println!("over");
+        let mut turn_over: Write<TurnOver> = self.specs_world.system_data();
+        match turn_over.0 {
+            true => {
+                turn_over.0 = false;
+                SceneSwitch::PushMultiple(vec![
+                    // Once we finish the next day scene, want to fade back into
+                    // the map, hence the extra fade here.
+                    Box::new(Fade::new(274, 1, FadeStyle::In)),
+                    Box::new(
+                        NextDay::new(ctx, &mut game.store).expect("failed to init next day scene"),
+                    ),
+                    Box::new(Fade::new(274, 1, FadeStyle::In)),
+                ])
+            }
+            false => SceneSwitch::None,
         }
-        SceneSwitch::None
     }
 
     fn draw(&mut self, game: &mut Game, ctx: &mut Context) -> GameResult<()> {
