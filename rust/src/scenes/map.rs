@@ -29,7 +29,7 @@ use crate::campaign::components::{Endurance, HitBox, MapIntent, OnHoverImage, Ti
 use crate::campaign::movement_cost::CampaignMap;
 use crate::campaign::systems::map_boundary::Boundary;
 use crate::campaign::systems::{
-    EnduranceTracker, HighlightOnHover, HighlightPlayer, MapCommander,
+    EnduranceTracker, HighlightOnHover, HighlightPlayer, MapCommander, PrepareNextDay,
     RestrictMovementToMapBoundary, SetMapVelocity, TerrainCost,
 };
 use crate::combat::components::{Controller, Draw, Facing, Palette, Position, Velocity};
@@ -150,6 +150,7 @@ impl<'a> MapScene<'a> {
             .with(EnduranceTracker, "endurance_tracker", &["movement"])
             .with(HighlightOnHover, "highlight_on_hover", &["movement"])
             .with(HighlightPlayer, "highlight_player", &[])
+            .with(PrepareNextDay, "prepare_next_day", &[])
             .build()
     }
 
@@ -411,10 +412,9 @@ impl<'a> Scene<Game, InputEvent> for MapScene<'a> {
             self.current_background_image %= self.background.len();
         }
         self.background_frame %= MAP_ANIMATION_SPEED;
-        let mut turn_over: Write<TurnOver> = self.specs_world.system_data();
+        let turn_over: Read<TurnOver> = self.specs_world.system_data();
         match turn_over.0 {
             true => {
-                turn_over.0 = false;
                 SceneSwitch::PushMultiple(vec![
                     // Once we finish the next day scene, want to fade back into
                     // the map, hence the extra fade here.
