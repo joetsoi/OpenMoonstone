@@ -98,10 +98,34 @@ pub struct Locations {
     pub locations: Vec<Location>,
 }
 
-struct State<'a> {
+struct MapState<'a> {
     players: Vec<Index>,
     current_player: &'a Index,
     day: u32,
+}
+
+pub struct OrderedEntities {
+    entities: Vec<Index>,
+    curr: usize,
+}
+
+impl Iterator for OrderedEntities {
+    type Item = Index;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.curr += 1;
+        self.entities.get(self.curr).and_then(|x| Some(*x))
+    }
+}
+
+impl OrderedEntities {
+    pub fn current(&self) -> Option<&Index> {
+        self.entities.get(self.curr)
+    }
+
+    pub fn reset(&mut self) {
+        self.curr = 0;
+    }
 }
 
 #[derive(Debug, Default, Copy, Clone)]
@@ -117,6 +141,7 @@ pub struct MapScene<'a> {
     current_background_image: usize,
 
     pub palette: Vec<Colour>,
+    day: u32,
 }
 
 impl<'a> MapScene<'a> {
@@ -147,10 +172,14 @@ impl<'a> MapScene<'a> {
                 &["velocity"],
             )
             .with(Movement, "movement", &["restrict_movement"])
-            .with(EnduranceTracker, "endurance_tracker", &["movement"])
+            .with(PrepareNextDay, "prepare_next_day", &[])
+            .with(
+                EnduranceTracker,
+                "endurance_tracker",
+                &["movement", "prepare_next_day"],
+            )
             .with(HighlightOnHover, "highlight_on_hover", &["movement"])
             .with(HighlightPlayer, "highlight_player", &[])
-            .with(PrepareNextDay, "prepare_next_day", &[])
             .build()
     }
 
@@ -194,7 +223,7 @@ impl<'a> MapScene<'a> {
         store: &mut Store<Context, SimpleKey>,
         world: &'a mut World,
         background_name: &str,
-    ) -> Result<(), MoonstoneError> {
+    ) -> Result<Index, MoonstoneError> {
         let piv_res = store
             .get::<PivImage>(&SimpleKey::from(background_name), ctx)
             .unwrap();
@@ -207,7 +236,7 @@ impl<'a> MapScene<'a> {
 
         let sprite_res = store.get::<Sprite>(&SimpleKey::from(format!("/{}.yaml", "mi")), ctx)?;
         let sprite = sprite_res.borrow();
-        let entity_builder = world
+        let entity = world
             .create_entity()
             .with(Position { x: 10, y: 10 })
             .with(Velocity {
@@ -242,7 +271,7 @@ impl<'a> MapScene<'a> {
                 ..Default::default()
             })
             .build();
-        Ok(())
+        Ok(entity.id())
     }
 
     fn build_locations(
@@ -353,7 +382,14 @@ impl<'a> MapScene<'a> {
 
         let mut specs_world = Self::build_world();
 
-        MapScene::build_knight_entity(ctx, store, &mut specs_world, &background_name);
+        let player_index =
+            MapScene::build_knight_entity(ctx, store, &mut specs_world, &background_name)?;
+        let players = OrderedEntities {
+            entities: vec![player_index],
+            curr: 0,
+        };
+        specs_world.insert(players);
+        specs_world.insert(TurnOver(false));
 
         MapScene::insert_boundary(&mut specs_world)?;
         MapScene::insert_campaign_map(ctx, store, &mut specs_world)?;
@@ -363,7 +399,6 @@ impl<'a> MapScene<'a> {
         MapScene::insert_palettes(&mut specs_world, &*piv)?;
         MapScene::build_locations(ctx, store, &mut specs_world, background_name)?;
 
-        specs_world.insert(TurnOver(false));
         // let map_data = store
         //     .get::<MapData>(&warmy::SimpleKey::from("/map.yaml"), ctx)?
         //     .borrow()
@@ -376,6 +411,7 @@ impl<'a> MapScene<'a> {
             background_frame: 0,
             current_background_image: 0,
             palette: piv.palette.to_vec(),
+            day: 0,
         })
     }
 
