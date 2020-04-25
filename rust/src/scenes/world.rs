@@ -50,36 +50,25 @@ pub fn draw_entities(
                 .expect("error loading texture atlas when drawing");
 
             let atlas_dimension = atlas.borrow().image.width as u32;
-            // TODO: change with palettes
+
             let palette: Option<&Palette> = palette_storage.get(entity);
-            let ggez_image = match palette {
-                None => match game.images.entry(image.sheet.clone()) {
-                    Occupied(i) => i.into_mut(),
-                    Vacant(i) => i.insert(
-                        graphics::Image::from_rgba8(
-                            ctx,
-                            atlas_dimension as u16,
-                            atlas_dimension as u16,
-                            &atlas.borrow().image.to_rgba8(&default_palette),
-                        )
-                        .unwrap(),
-                    ),
-                },
-                Some(palette) => {
-                    let image_name = [image.sheet.clone(), palette.name.clone()].join("-");
-                    match game.images.entry(image_name) {
-                        Occupied(i) => i.into_mut(),
-                        Vacant(i) => i.insert(
-                            graphics::Image::from_rgba8(
-                                ctx,
-                                atlas_dimension as u16,
-                                atlas_dimension as u16,
-                                &atlas.borrow().image.to_rgba8(&palette.palette),
-                            )
-                            .unwrap(),
-                        ),
-                    }
-                }
+            let image_name = match palette {
+                None => image.sheet.clone(),
+                Some(palette) => format!("{}-{}", &image.sheet, &palette.name),
+            };
+
+            let p = palette.map_or(default_palette, |p| &p.palette[..]);
+            let ggez_image = match game.images.entry(image_name) {
+                Occupied(i) => i.into_mut(),
+                Vacant(i) => i.insert(
+                    graphics::Image::from_rgba8(
+                        ctx,
+                        atlas_dimension as u16,
+                        atlas_dimension as u16,
+                        &atlas.borrow().image.to_rgba8(p),
+                    )
+                    .unwrap(),
+                ),
             };
 
             let rect = atlas.borrow().rects[image.image];
@@ -96,12 +85,7 @@ pub fn draw_entities(
                     (position.y as i32 + image.y) as f32,
                 ))
                 .scale(Vector2::new(draw.direction as i32 as f32, 1.0));
-            // .scale(Vector2::new((draw.direction as i32 * 3) as f32, 3.0));
-            // .dest(Point2::new(
-            //     (position.x as i32 + (draw.direction as i32 * image.x)) as f32 * 3.0,
-            //     (position.y as i32 + image.y) as f32 * 3.0,
-            // ))
-            // .scale(Vector2::new((draw.direction as i32 * 3) as f32, 3.0));
+
             graphics::draw(ctx, ggez_image, draw_params)?;
             if let ImageType::BloodStain = image.image_type {
                 if let Some(b) = background {
