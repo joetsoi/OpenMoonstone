@@ -11,7 +11,7 @@ use crate::error::LoadError;
 use crate::manager::GameYaml;
 use failure::err_msg;
 
-#[derive(Default, Debug, Clone)]
+#[derive(Default, Debug, Clone, Serialize, Deserialize)]
 pub struct SpriteData {
     pub sprites: HashMap<String, Sprite>,
 }
@@ -63,7 +63,7 @@ pub struct Animation {
     pub order: Option<Vec<i32>>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Sprite {
     pub animations: HashMap<String, Animation>,
 }

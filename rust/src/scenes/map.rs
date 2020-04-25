@@ -23,13 +23,13 @@ use super::Fade;
 use super::NextDay;
 
 use crate::animation::Image as SpriteImage;
-use crate::animation::{Frame, Sprite};
+use crate::animation::{Frame, Sprite, SpriteData};
 // TODO: move these components to common module out of combat
 use crate::campaign::components::{Endurance, HitBox, MapIntent, OnHoverImage, TimeSpentOnTerrain};
 use crate::campaign::movement_cost::CampaignMap;
 use crate::campaign::systems::map_boundary::Boundary;
 use crate::campaign::systems::{
-    EnduranceTracker, HighlightOnHover, HighlightPlayer, MapCommander, PrepareNextDay,
+    EnduranceTracker, HighlightOnHover, HighlightPlayer, MapCommander, NextPlayer, PrepareNextDay,
     RestrictMovementToMapBoundary, SetMapVelocity, TerrainCost,
 };
 use crate::combat::components::{Controller, Draw, Facing, Palette, Position, Velocity};
@@ -104,9 +104,11 @@ struct MapState<'a> {
     day: u32,
 }
 
+#[derive(Debug, Default, Clone)]
 pub struct OrderedEntities {
     entities: Vec<Index>,
     curr: usize,
+    pub player_done: bool,
 }
 
 impl Iterator for OrderedEntities {
@@ -130,6 +132,9 @@ impl OrderedEntities {
 
 #[derive(Debug, Default, Copy, Clone)]
 pub struct TurnOver(pub bool);
+
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
+pub struct FileList(pub HashMap<String, String>);
 
 pub struct MapScene<'a> {
     pub specs_world: World,
@@ -172,7 +177,8 @@ impl<'a> MapScene<'a> {
                 &["velocity"],
             )
             .with(Movement, "movement", &["restrict_movement"])
-            .with(PrepareNextDay, "prepare_next_day", &[])
+            .with(NextPlayer, "next_player", &[])
+            .with(PrepareNextDay, "prepare_next_day", &["next_player"])
             .with(
                 EnduranceTracker,
                 "endurance_tracker",
@@ -243,9 +249,9 @@ impl<'a> MapScene<'a> {
                 ..Default::default()
             })
             .with(Draw {
-                frame: sprite.animations["blue_knight"].frames[0].clone(),
-                animation: "blue_knight".to_string(),
-                resource_name: "mi".to_string(),
+                frame: sprite.animations["selected"].frames[0].clone(),
+                animation: "selected".to_string(),
+                resource_name: "blue_knight".to_string(),
                 direction: Facing::default(),
             })
             .with(Endurance { max: 96, used: 0 })
@@ -372,6 +378,30 @@ impl<'a> MapScene<'a> {
         Ok(())
     }
 
+    fn insert_sprite_data(
+        ctx: &mut Context,
+        store: &mut Store<Context, SimpleKey>,
+        specs_world: &mut World,
+    ) -> Result<(), MoonstoneError> {
+        let entities = store.get_by::<GameRon<FileList>, FromRon>(
+            &SimpleKey::from("/map_entities.ron"),
+            ctx,
+            FromRon,
+        )?;
+
+        let mut sprites: HashMap<String, Sprite> = HashMap::new();
+        for (name, file_name) in &((entities.borrow().0).0) {
+            let sprite = store.get_by::<GameRon<Sprite>, FromRon>(
+                &SimpleKey::from(file_name.clone()),
+                ctx,
+                FromRon,
+            )?;
+            sprites.insert(name.clone(), sprite.borrow().0.clone());
+        }
+        specs_world.insert(SpriteData { sprites });
+        Ok(())
+    }
+
     pub fn new(
         ctx: &mut Context,
         store: &mut Store<Context, SimpleKey>,
@@ -387,6 +417,7 @@ impl<'a> MapScene<'a> {
         let players = OrderedEntities {
             entities: vec![player_index],
             curr: 0,
+            player_done: false,
         };
         specs_world.insert(players);
         specs_world.insert(TurnOver(false));
@@ -398,6 +429,8 @@ impl<'a> MapScene<'a> {
         let piv = piv_res.borrow();
         MapScene::insert_palettes(&mut specs_world, &*piv)?;
         MapScene::build_locations(ctx, store, &mut specs_world, background_name)?;
+
+        MapScene::insert_sprite_data(ctx, store, &mut specs_world)?;
 
         // let map_data = store
         //     .get::<MapData>(&warmy::SimpleKey::from("/map.yaml"), ctx)?
@@ -448,9 +481,10 @@ impl<'a> Scene<Game, InputEvent> for MapScene<'a> {
             self.current_background_image %= self.background.len();
         }
         self.background_frame %= MAP_ANIMATION_SPEED;
-        let turn_over: Read<TurnOver> = self.specs_world.system_data();
+        let mut turn_over: Write<TurnOver> = self.specs_world.system_data();
         match turn_over.0 {
             true => {
+                turn_over.0 = false;
                 SceneSwitch::PushMultiple(vec![
                     // Once we finish the next day scene, want to fade back into
                     // the map, hence the extra fade here.

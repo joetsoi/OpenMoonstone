@@ -16,7 +16,6 @@ impl<'a> System<'a> for UpdateImage {
     fn run(&mut self, (sprite_data, mut draw, animation_state, mut state): Self::SystemData) {
         use specs::Join;
         let sprites = &sprite_data.sprites;
-        // println!("{:?}", sprites);
         for (draw, animation_state, state) in (&mut draw, &animation_state, &mut state).join() {
             let animation = draw.animation.as_str();
             let sprite_resource = sprites.get(&draw.resource_name);
