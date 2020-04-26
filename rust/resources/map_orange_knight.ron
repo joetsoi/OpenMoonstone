@@ -1,0 +1,36 @@
+(
+    animations: {
+        "unselected": (
+            frames: [
+                (
+                    images: [
+                        (
+                            sheet: "mi.c",
+                            image: 1,
+                            x: 0,
+                            y: 0,
+                            image_type: Collidee,
+                        ),
+                    ],
+                ),
+            ],
+            order: None,
+        ),
+        "selected": (
+            frames: [
+                (
+                    images: [
+                        (
+                            sheet: "mi.c",
+                            image: 6,
+                            x: 0,
+                            y: 0,
+                            image_type: Collidee,
+                        ),
+                    ],
+                ),
+            ],
+            order: None,
+        ),
+    },
+)

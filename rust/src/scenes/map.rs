@@ -229,6 +229,10 @@ impl<'a> MapScene<'a> {
         store: &mut Store<Context, SimpleKey>,
         world: &'a mut World,
         background_name: &str,
+        resource_name: &str,
+        x: i32,
+        y: i32,
+        controlled: bool,
     ) -> Result<Index, MoonstoneError> {
         let piv_res = store
             .get::<PivImage>(&SimpleKey::from(background_name), ctx)
@@ -240,18 +244,28 @@ impl<'a> MapScene<'a> {
         let knight_rect = atlas.borrow().rects[0];
         let knight_width = atlas.borrow().visible_widths[0];
 
-        let sprite_res = store.get::<Sprite>(&SimpleKey::from(format!("/{}.yaml", "mi")), ctx)?;
-        let sprite = sprite_res.borrow();
-        let entity = world
+        // let sprite_res = store.get::<Sprite>(&SimpleKey::from(format!("/{}.yaml", "mi")), ctx)?;
+        let sprite_res = store.get_by::<GameRon<Sprite>, FromRon>(
+            &SimpleKey::from(format!("/map_{}.ron", resource_name)),
+            ctx,
+            FromRon,
+        )?;
+        let sprite = &sprite_res.borrow().0;
+
+        let animation = match controlled {
+            true => "selected",
+            false => "unselected",
+        };
+        let mut entity_builder = world
             .create_entity()
-            .with(Position { x: 10, y: 10 })
+            .with(Position { x: x, y: y })
             .with(Velocity {
                 ..Default::default()
             })
             .with(Draw {
-                frame: sprite.animations["selected"].frames[0].clone(),
-                animation: "selected".to_string(),
-                resource_name: "blue_knight".to_string(),
+                frame: sprite.animations[animation].frames[0].clone(),
+                animation: animation.to_string(),
+                resource_name: resource_name.to_string(),
                 direction: Facing::default(),
             })
             .with(Endurance { max: 96, used: 0 })
@@ -263,20 +277,22 @@ impl<'a> MapScene<'a> {
                 w: knight_width,
                 h: knight_rect.h,
             })
-            .with(Controller {
-                x_axis: Axis::Horz1,
-                y_axis: Axis::Vert1,
-                button: Button::Fire1,
-                ..Default::default()
-            })
             .with(RenderOrder { depth: 1 })
             .with(MapIntent {
                 ..Default::default()
             })
             .with(TimeSpentOnTerrain {
                 ..Default::default()
+            });
+        if controlled == true {
+            entity_builder = entity_builder.with(Controller {
+                x_axis: Axis::Horz1,
+                y_axis: Axis::Vert1,
+                button: Button::Fire1,
+                ..Default::default()
             })
-            .build();
+        }
+        let entity = entity_builder.build();
         Ok(entity.id())
     }
 
@@ -413,9 +429,11 @@ impl<'a> MapScene<'a> {
         let mut specs_world = Self::build_world();
 
         let player_index =
-            MapScene::build_knight_entity(ctx, store, &mut specs_world, &background_name)?;
+            MapScene::build_knight_entity(ctx, store, &mut specs_world, &background_name, "blue_knight", 10, 10, true)?;
+        let orange_index =
+            MapScene::build_knight_entity(ctx, store, &mut specs_world, &background_name, "orange_knight", 300, 5, false)?;
         let players = OrderedEntities {
-            entities: vec![player_index],
+            entities: vec![player_index, orange_index],
             curr: 0,
             player_done: false,
         };
