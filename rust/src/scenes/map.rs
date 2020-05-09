@@ -7,8 +7,9 @@ use std::iter;
 
 // use failure::{err_msg, Error};
 use ggez::nalgebra::{Point2, Vector2};
-use ggez::{graphics, timer, Context, GameResult};
+use ggez::{filesystem, graphics, timer, Context, GameResult};
 use ggez_goodies::scene::{Scene, SceneSwitch};
+use ron::de::from_reader;
 use serde_derive::{Deserialize, Serialize};
 use specs::world::{Builder, Index};
 use specs::{Dispatcher, DispatcherBuilder, EntityBuilder, Join, Read, World, WorldExt, Write};
@@ -25,12 +26,28 @@ use super::NextDay;
 use crate::animation::Image as SpriteImage;
 use crate::animation::{Frame, Sprite, SpriteData};
 // TODO: move these components to common module out of combat
-use crate::campaign::components::{Endurance, HitBox, MapIntent, OnHoverImage, TimeSpentOnTerrain};
+use crate::campaign::components::{
+    Endurance,
+    HitBox,
+    Interactable,
+    MapIntent,
+    OnHoverImage,
+    TimeSpentOnTerrain,
+};
 use crate::campaign::movement_cost::CampaignMap;
 use crate::campaign::systems::map_boundary::Boundary;
 use crate::campaign::systems::{
-    EnduranceTracker, HighlightOnHover, HighlightPlayer, MapCommander, NextPlayer, PrepareNextDay,
-    RestrictMovementToMapBoundary, SetMapVelocity, TerrainCost,
+    CheckMapCollision,
+    DehighlightOnExit,
+    EnduranceTracker,
+    HighlightOnHover,
+    HighlightPlayer,
+    MapCommander,
+    NextPlayer,
+    PrepareNextDay,
+    RestrictMovementToMapBoundary,
+    SetMapVelocity,
+    TerrainCost,
 };
 use crate::combat::components::{Controller, Draw, Facing, Palette, Position, Velocity};
 use crate::combat::systems::Movement;
@@ -94,8 +111,24 @@ pub struct Location {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Lair {
+    pub image: Option<SpriteImage>,
+    pub hover_image: Option<SpriteImage>,
+    pub x: i32,
+    pub y: i32,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Locations {
+    // pub lairs: Vec<Lair>,
     pub locations: Vec<Location>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PositionData {
+    pub id: usize,
+    pub x: u32,
+    pub y: u32,
 }
 
 struct MapState<'a> {
@@ -152,6 +185,7 @@ pub struct MapScene<'a> {
 impl<'a> MapScene<'a> {
     fn build_world() -> World {
         let mut world = World::new();
+        world.register::<Interactable>();
         world.register::<Draw>();
         world.register::<Endurance>();
         world.register::<HitBox>();
@@ -177,6 +211,7 @@ impl<'a> MapScene<'a> {
                 &["velocity"],
             )
             .with(Movement, "movement", &["restrict_movement"])
+            .with(CheckMapCollision, "check_map_collision", &["movement"])
             .with(NextPlayer, "next_player", &[])
             .with(PrepareNextDay, "prepare_next_day", &["next_player"])
             .with(
@@ -184,7 +219,16 @@ impl<'a> MapScene<'a> {
                 "endurance_tracker",
                 &["movement", "prepare_next_day"],
             )
-            .with(HighlightOnHover, "highlight_on_hover", &["movement"])
+            .with(
+                HighlightOnHover,
+                "highlight_on_hover",
+                &["check_map_collision"],
+            )
+            .with(
+                DehighlightOnExit::default(),
+                "dehighlight_on_exit",
+                &["highlight_on_hover"],
+            )
             .with(HighlightPlayer, "highlight_player", &[])
             .build()
     }
@@ -296,12 +340,72 @@ impl<'a> MapScene<'a> {
         Ok(entity.id())
     }
 
+    // fn build_lairs(
+    //     ctx: &mut Context,
+    //     store: &mut Store<Context, SimpleKey>,
+    //     world: &'a mut World,
+    //     background_name: &str,
+    // ) -> Result<(), MoonstoneError> {
+    //     let locations_res = store.get_by::<GameRon<Locations>, FromRon>(
+    //         &SimpleKey::from("/locations.ron"),
+    //         ctx,
+    //         FromRon,
+    //     )?;
+    //     let piv_res = store
+    //         .get::<PivImage>(&SimpleKey::from(background_name), ctx)
+    //         .unwrap();
+    //     let piv = piv_res.borrow();
+
+    //     let atlas = store.get::<TextureAtlas>(&SimpleKey::from("mi.c"), ctx)?;
+    //     for l in locations_res.borrow().0.lairs.iter() {
+    //         let sprite_res =
+    //             store.get::<Sprite>(&SimpleKey::from(format!("/{}.yaml", "mi")), ctx)?;
+    //         let sprite = sprite_res.borrow();
+
+    //         let mut entity_builder = world
+    //             .create_entity()
+    //             .with(Position { x: l.x, y: l.y })
+    //             .with(Palette {
+    //                 name: "0".to_string(),
+    //                 palette: piv.palette.clone(),
+    //             })
+    //             .with(RenderOrder { depth: 0 })
+    //             .with(OnHoverImage {
+    //                 image: l.image.clone(),
+    //                 hover: l.hover_image.clone(),
+    //             })
+    //             .with(Draw {
+    //                 frame: Frame { images: vec![] },
+    //                 animation: "".to_string(),
+    //                 resource_name: "mi".to_string(),
+    //                 direction: Facing::default(),
+    //             });
+
+    //         if let Some(i) = l.image.as_ref().or(l.hover_image.as_ref()) {
+    //             let rect = atlas.borrow().rects[i.image];
+    //             let width = atlas.borrow().visible_widths[i.image];
+    //             entity_builder = entity_builder.with(HitBox {
+    //                 w: width,
+    //                 h: rect.h,
+    //             })
+    //         }
+
+    //         entity_builder.build();
+    //     }
+    //     Ok(())
+    // }
+
     fn build_locations(
         ctx: &mut Context,
         store: &mut Store<Context, SimpleKey>,
         world: &'a mut World,
         background_name: &str,
     ) -> Result<(), MoonstoneError> {
+        // let file = filesystem::open(ctx, "/locations/positions.ron")?;
+        // let positions = from_reader::<filesystem::File, Vec<PositionData>>(file).unwrap();
+
+        // println!("{:?}", positions[0]);
+
         let locations_res = store.get_by::<GameRon<Locations>, FromRon>(
             &SimpleKey::from("/locations.ron"),
             ctx,
@@ -318,6 +422,7 @@ impl<'a> MapScene<'a> {
                 store.get::<Sprite>(&SimpleKey::from(format!("/{}.yaml", "mi")), ctx)?;
             let sprite = sprite_res.borrow();
 
+            let images: Vec<SpriteImage> = l.image.iter().map(|i| i.clone()).collect();
             let mut entity_builder = world
                 .create_entity()
                 .with(Position { x: l.x, y: l.y })
@@ -331,7 +436,7 @@ impl<'a> MapScene<'a> {
                     hover: l.hover_image.clone(),
                 })
                 .with(Draw {
-                    frame: Frame { images: vec![] },
+                    frame: Frame { images: images },
                     animation: "".to_string(),
                     resource_name: "mi".to_string(),
                     direction: Facing::default(),
@@ -428,10 +533,26 @@ impl<'a> MapScene<'a> {
 
         let mut specs_world = Self::build_world();
 
-        let player_index =
-            MapScene::build_knight_entity(ctx, store, &mut specs_world, &background_name, "blue_knight", 10, 10, true)?;
-        let orange_index =
-            MapScene::build_knight_entity(ctx, store, &mut specs_world, &background_name, "orange_knight", 300, 5, false)?;
+        let player_index = MapScene::build_knight_entity(
+            ctx,
+            store,
+            &mut specs_world,
+            &background_name,
+            "blue_knight",
+            10,
+            10,
+            true,
+        )?;
+        let orange_index = MapScene::build_knight_entity(
+            ctx,
+            store,
+            &mut specs_world,
+            &background_name,
+            "orange_knight",
+            300,
+            5,
+            false,
+        )?;
         let players = OrderedEntities {
             entities: vec![player_index, orange_index],
             curr: 0,
@@ -446,6 +567,7 @@ impl<'a> MapScene<'a> {
         let piv_res = store.get::<PivImage>(&SimpleKey::from(background_name), ctx)?;
         let piv = piv_res.borrow();
         MapScene::insert_palettes(&mut specs_world, &*piv)?;
+        // MapScene::build_lairs(ctx, store, &mut specs_world, background_name)?;
         MapScene::build_locations(ctx, store, &mut specs_world, background_name)?;
 
         MapScene::insert_sprite_data(ctx, store, &mut specs_world)?;
@@ -454,9 +576,11 @@ impl<'a> MapScene<'a> {
         //     .get::<MapData>(&warmy::SimpleKey::from("/map.yaml"), ctx)?
         //     .borrow()
         //     .clone();
+        let mut dispatcher = Self::build_dispatcher();
+        dispatcher.setup(&mut specs_world);
         Ok(Self {
             specs_world: specs_world,
-            dispatcher: Self::build_dispatcher(),
+            dispatcher: dispatcher,
             // map_data,
             background,
             background_frame: 0,

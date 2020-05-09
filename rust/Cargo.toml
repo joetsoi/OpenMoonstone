@@ -16,7 +16,7 @@ pest_derive = "*"
 rand = "*"
 rect_packer = "*"
 ron = "*"
-specs = "*"
+# specs = "*"
 specs-derive = "*"
 serde = "*"
 serde_derive = "*"
@@ -34,3 +34,7 @@ compat_error = {path = "../compat_error"}
 # [dependencies.ggez]
 # git = "https://github.com/ggez/ggez"
 # default-features = false
+
+[dependencies.specs]
+version = "*"
+features = ["serde"]
