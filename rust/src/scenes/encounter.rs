@@ -351,41 +351,13 @@ impl<'a> EncounterScene<'a> {
             .get::<PivImage>(&SimpleKey::from(background_name), ctx)
             // TODO fix error handling, make this ?
             .expect("Error loading piv background");
-        let background_image =
-            graphics::Image::from_rgba8(ctx, 320, 200, &*piv.borrow().to_rgba8()).unwrap();
-
-        // We create a canvas using the screen coordinates instead of the window height as
-        // the current window height could have been resized, this causes some odd problems
-        // where anything rendered to the canvas is a few pixels off
-        let screen_coordinates = graphics::screen_coordinates(ctx);
-        let background = graphics::Canvas::new(
+        let (background, y_max) = EncounterScene::build_background_canvas(
             ctx,
-            screen_coordinates.w as u16,
-            screen_coordinates.h as u16,
-            NumSamples::One,
+            game,
+            &mut world,
+            &piv.borrow(),
+            terrain_name,
         )?;
-        // We reset the transformation matrix here to the default here and reapply the game scale
-        // after. TODO: Investigate why we can't use a canvas of 320x200. If we've set the matrix
-        // to the default then everything should be drawing to 320x200 instead of the current
-        // screen coordinates that have been scaled up.
-        graphics::set_transform(ctx, graphics::DrawParam::default().to_matrix());
-        graphics::apply_transformations(ctx);
-        let screen_origin = Point2::new(0.0, 0.0);
-
-        graphics::set_canvas(ctx, Some(&background));
-        graphics::draw(
-            ctx,
-            &background_image,
-            graphics::DrawParam::default().dest(screen_origin),
-        )?;
-
-        let y_max = EncounterScene::draw_terrain(ctx, game, &mut world, terrain_name)?;
-        graphics::set_canvas(ctx, None);
-        let scale_matrix = graphics::DrawParam::default()
-            .scale(game.screen_scale)
-            .to_matrix();
-        graphics::push_transform(ctx, Some(scale_matrix));
-        graphics::apply_transformations(ctx);
         let collide_hit = game
             .store
             .get::<CollisionBoxes>(&SimpleKey::from("collide"), ctx)
@@ -456,6 +428,49 @@ impl<'a> EncounterScene<'a> {
             ticks_after: 0,
             fade_out_done: false,
         })
+    }
+
+    fn build_background_canvas(
+        ctx: &mut Context,
+        game: &mut Game,
+        world: &mut World,
+        piv: &PivImage,
+        terrain_name: &str,
+    ) -> Result<(graphics::Canvas, u32), MoonstoneError> {
+        let background_image = graphics::Image::from_rgba8(ctx, 320, 200, &piv.to_rgba8()).unwrap();
+        // We create a canvas using the screen coordinates instead of the window height as
+        // the current window height could have been resized, this causes some odd problems
+        // where anything rendered to the canvas is a few pixels off
+        let screen_coordinates = graphics::screen_coordinates(ctx);
+        let background = graphics::Canvas::new(
+            ctx,
+            screen_coordinates.w as u16,
+            screen_coordinates.h as u16,
+            NumSamples::One,
+        )?;
+        // We reset the transformation matrix here to the default here and reapply the game scale
+        // after. TODO: Investigate why we can't use a canvas of 320x200. If we've set the matrix
+        // to the default then everything should be drawing to 320x200 instead of the current
+        // screen coordinates that have been scaled up.
+        graphics::set_transform(ctx, graphics::DrawParam::default().to_matrix());
+        graphics::apply_transformations(ctx);
+        let screen_origin = Point2::new(0.0, 0.0);
+
+        graphics::set_canvas(ctx, Some(&background));
+        graphics::draw(
+            ctx,
+            &background_image,
+            graphics::DrawParam::default().dest(screen_origin),
+        )?;
+
+        let y_max = EncounterScene::draw_terrain(ctx, game, world, terrain_name)?;
+        graphics::set_canvas(ctx, None);
+        let scale_matrix = graphics::DrawParam::default()
+            .scale(game.screen_scale)
+            .to_matrix();
+        graphics::push_transform(ctx, Some(scale_matrix));
+        graphics::apply_transformations(ctx)?;
+        Ok((background, y_max))
     }
 
     fn create_entities(
