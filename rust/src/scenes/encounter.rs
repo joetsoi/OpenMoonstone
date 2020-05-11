@@ -1,7 +1,6 @@
 use std::collections::hash_map::Entry::{Occupied, Vacant};
 use std::collections::{HashMap, HashSet};
 
-use failure::Error;
 use ggez::conf::NumSamples;
 use ggez::nalgebra::{Point2, Vector2};
 use ggez::{graphics, Context, GameResult};
@@ -14,19 +13,51 @@ use super::transition::FadeStyle;
 use super::Fade;
 use crate::animation::{Sprite, SpriteData};
 use crate::combat::components::{
-    AiState, AnimationState, Body, Collided, Controller, DaggersInventory, Draw, Facing, Health,
-    Intent, MustLive, Palette, Position, State, UnitType, Velocity, WalkingState, Weapon,
+    AiState,
+    AnimationState,
+    Body,
+    Collided,
+    Controller,
+    DaggersInventory,
+    Draw,
+    Facing,
+    Health,
+    Intent,
+    MustLive,
+    Palette,
+    Position,
+    State,
+    UnitType,
+    Velocity,
+    WalkingState,
+    Weapon,
 };
 use crate::combat::damage::DamageTables;
 use crate::combat::systems::boundary::Boundary;
 use crate::combat::systems::health::CombatDone;
 use crate::combat::systems::{
-    ActionSystem, AiDirection, Animation, BlackKnightAi, CheckCollisions, CheckEndOfCombat,
-    Commander, ConfirmVelocity, EntityDeath, EntityEntityCollision, Movement, OutOfBounds,
-    PlayerDirection, ResolveCollisions, RestrictMovementToBoundary, StateUpdater,
-    UpdateBoundingBoxes, UpdateImage, VelocitySystem,
+    ActionSystem,
+    AiDirection,
+    Animation,
+    BlackKnightAi,
+    CheckCollisions,
+    CheckEndOfCombat,
+    Commander,
+    ConfirmVelocity,
+    EntityDeath,
+    EntityEntityCollision,
+    Movement,
+    OutOfBounds,
+    PlayerDirection,
+    ResolveCollisions,
+    RestrictMovementToBoundary,
+    StateUpdater,
+    UpdateBoundingBoxes,
+    UpdateImage,
+    VelocitySystem,
 };
 use crate::components::RenderOrder;
+use crate::error::{LoadError, MoonstoneError};
 use crate::files::collide::CollisionBoxes;
 use crate::files::terrain::scenery_rects;
 use crate::files::TerrainFile;
@@ -161,7 +192,7 @@ impl<'a> EncounterScene<'a> {
         ctx: &mut Context,
         store: &mut Store<Context, SimpleKey>,
         world: &mut World,
-    ) -> Result<(), Error> {
+    ) -> Result<(), MoonstoneError> {
         let damage_tables = store
             .get::<DamageTables>(&SimpleKey::from("/damage.yaml"), ctx)
             .expect("error loading damage.yaml");
@@ -175,7 +206,7 @@ impl<'a> EncounterScene<'a> {
         store: &mut Store<Context, SimpleKey>,
         world: &mut World,
         entity_names: &[&str],
-    ) -> Result<(), Error> {
+    ) -> Result<(), MoonstoneError> {
         let entities_yaml =
             // TODO: fix to allow ? syntax
             store.get::<GameYaml>(&warmy::SimpleKey::from("/entities.yaml"), ctx).expect("Error loading entities.yaml");
@@ -310,7 +341,7 @@ impl<'a> EncounterScene<'a> {
         entity_names: &[&str],
         background_name: &str,
         terrain_name: &str,
-    ) -> Result<Self, Error> {
+    ) -> Result<Self, MoonstoneError> {
         let mut world = EncounterScene::build_world();
         EncounterScene::load_sprite_data(ctx, &mut game.store, &mut world, entity_names)?;
         EncounterScene::load_resources(ctx, &mut game.store, &mut world)?;
@@ -548,7 +579,7 @@ impl<'a> EncounterScene<'a> {
         game: &mut Game,
         world: &mut World,
         terrain_name: &str,
-    ) -> Result<u32, Error> {
+    ) -> Result<u32, MoonstoneError> {
         let terrain = game
             .store
             .get::<TerrainFile>(&SimpleKey::from(terrain_name.to_string()), ctx)
