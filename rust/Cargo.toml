@@ -8,8 +8,6 @@ authors = ["Joe Tsoi <joetsoi@users.noreply.github.com>"]
 byteorder = "*"
 bv = "*"
 ggez-goodies = { git = "https://github.com/joetsoi/ggez-goodies.git", branch = "push-multiple"}
-failure = "*"
-failure_derive = "*"
 image = "*"
 pest = "*"
 pest_derive = "*"
@@ -28,8 +26,6 @@ lazy_static = "*"
 #ggez = { git = "https://github.com/ggez/ggez" }
 ggez = "*"
 loadable_yaml_macro_derive = {path = "../loadable_yaml_macro_derive"}
-compat_error = {path = "../compat_error"}
-# snafu = "*"
 
 # [dependencies.ggez]
 # git = "https://github.com/ggez/ggez"

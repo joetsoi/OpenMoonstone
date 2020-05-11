@@ -7,7 +7,7 @@ use ggez::{filesystem, Context};
 use serde_yaml::Value;
 use warmy::{Load, Loaded, SimpleKey, Storage};
 
-use crate::error::{BaseLoadError, CompatError, LoadError};
+use crate::error::{BaseLoadError, LoadError};
 use crate::files::collide::{parse_collide_hit, CollisionBoxes};
 use crate::files::TerrainFile;
 use crate::objects::{ObjectsFile, TextureAtlas};

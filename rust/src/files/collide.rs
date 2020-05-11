@@ -3,8 +3,6 @@ use std::error::Error;
 use std::fmt;
 use std::io::Read;
 
-// use failure::err_msg;
-// use failure::Error;
 use pest::Parser;
 use pest_derive::*;
 
@@ -92,12 +90,10 @@ pub fn parse_collide_hit<T: Read>(reader: &mut T) -> Result<CollisionBoxes, Coll
         let mut inner = i.into_inner();
         let filename = inner
             .next()
-            // .ok_or_else(|| err_msg("No filename parsing collide.hit"))?
             .ok_or_else(|| CollideHitParseError::NoFileName)?
             .as_str();
         let collisions = inner
             .next()
-            // .ok_or_else(|| err_msg("no collisions parsing collide.hit"))?;
             .ok_or_else(|| CollideHitParseError::NoCollisions)?;
 
         let mut collision_boxes: Vec<Option<Points>> = Vec::new();
@@ -108,7 +104,6 @@ pub fn parse_collide_hit<T: Read>(reader: &mut T) -> Result<CollisionBoxes, Coll
                     let mut inner_bounding_boxes = collision_entry.into_inner();
                     let _count = inner_bounding_boxes
                         .next()
-                        // .ok_or_else(|| err_msg("No count for bounding boxes"))?
                         .ok_or_else(|| CollideHitParseError::NoBoundingBoxCount)?
                         .as_str();
 
@@ -119,13 +114,11 @@ pub fn parse_collide_hit<T: Read>(reader: &mut T) -> Result<CollisionBoxes, Coll
                         let mut inner_rules = coordinates.into_inner();
                         let x: u32 = inner_rules
                             .next()
-                            // .ok_or_else(|| err_msg("Couldn't parse x coord"))?
                             .ok_or_else(|| CollideHitParseError::XCoord)?
                             .as_str()
                             .parse::<u32>()?;
                         let y: u32 = inner_rules
                             .next()
-                            // .ok_or_else(|| err_msg("Couldn't parse y coord"))?
                             .ok_or_else(|| CollideHitParseError::YCoord)?
                             .as_str()
                             .parse::<u32>()?;

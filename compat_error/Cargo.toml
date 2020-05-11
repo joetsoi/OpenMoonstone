@@ -1,8 +1,0 @@
-[package]
-name = "compat_error"
-version = "0.1.0"
-authors = ["Joe Tsoi <joetsoi@users.noreply.github.com>"]
-edition = "2018"
-
-[dependencies]
-failure = "*"

@@ -1,6 +1,5 @@
 use std::collections::hash_map::Entry::{Occupied, Vacant};
 
-use failure::{err_msg, Error};
 use ggez::event;
 use ggez::input::keyboard::KeyCode;
 use ggez::nalgebra::{Point2, Vector2};
@@ -52,10 +51,10 @@ impl SelectKnight {
         let raw_palette = swaps
             .0
             .get("select_knight")
-            .ok_or_else(|| err_msg("failed to load select_knight.yaml"))?;
+            .expect("failed to load select_knight.yaml");
         let mut swap_colour = extract_palette(raw_palette)
             .first()
-            .ok_or_else(|| err_msg("select_knight palette does not have a colour defined"))?
+            .expect(("select_knight palette does not have a colour defined"))
             .clone();
         swap_colour.a = 255;
 

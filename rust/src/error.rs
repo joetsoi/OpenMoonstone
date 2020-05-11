@@ -1,7 +1,6 @@
 use std::error::Error;
 use std::fmt;
 
-use failure::{self, Fail};
 use ggez::Context;
 use ron;
 use warmy;
@@ -109,11 +108,6 @@ impl From<ggez::error::GameError> for MoonstoneError {
     fn from(err: ggez::error::GameError) -> MoonstoneError {
         MoonstoneError::Ggez(err)
     }
-}
-pub type CompatError = failure::Compat<failure::Error>;
-
-pub fn err_from<F: Fail>(f: F) -> CompatError {
-    failure::Error::from(f).compat()
 }
 
 #[derive(Debug)]

@@ -6,7 +6,6 @@ use serde_yaml::Value;
 use warmy;
 
 use loadable_yaml_macro_derive::LoadableYaml;
-use crate::error::{err_from, CompatError};
 use crate::error::LoadError;
 use crate::manager::GameYaml;
 
