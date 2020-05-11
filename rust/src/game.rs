@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 
-use failure::Error;
 use ggez::graphics;
 use ggez::nalgebra::Vector2;
 use ggez::Context;
 use warmy::{SimpleKey, Store, StoreOpt};
 
+use crate::error::{LoadError, MoonstoneError};
 use crate::input;
 
 #[derive(Debug)]
@@ -32,7 +32,7 @@ pub struct Game {
 }
 
 impl Game {
-    pub fn new() -> Result<Game, Error> {
+    pub fn new() -> Result<Game, MoonstoneError> {
         let store = Store::new(StoreOpt::default()).expect("error creating store");
         Ok(Game {
             input: input::InputState::new(),
@@ -47,7 +47,7 @@ impl Game {
             encounter_starting_position: 0,
             practice_encounter: 1,
 
-            screen_scale: Vector2::new(3.0, 3.0),
+            screen_scale: Vector2::new(2.0, 2.0),
         })
     }
 }
