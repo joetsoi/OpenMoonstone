@@ -5,7 +5,6 @@ use std::error::Error;
 use std::fmt;
 use std::iter;
 
-// use failure::{err_msg, Error};
 use ggez::nalgebra::{Point2, Vector2};
 use ggez::{filesystem, graphics, timer, Context, GameResult};
 use ggez_goodies::scene::{Scene, SceneSwitch};

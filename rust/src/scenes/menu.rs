@@ -4,7 +4,6 @@ use std::error;
 use std::hash::{Hash, Hasher};
 use std::iter::repeat;
 
-use failure::Error;
 use ggez::nalgebra::{Point2, Vector2};
 use ggez::{graphics, Context, GameResult};
 use warmy::{SimpleKey, Store};
@@ -35,7 +34,6 @@ impl Menu {
         ctx: &mut Context,
         store: &mut Store<Context, SimpleKey>,
         key: &str,
-        // ) -> Result<Self, Error> {
     ) -> Result<Self, Box<dyn error::Error>> {
         let screen = store
             .get::<Screen>(&warmy::SimpleKey::from(key), ctx)
@@ -50,9 +48,7 @@ impl Menu {
                 let piv = store
                     .get::<PivImage>(&SimpleKey::from(background.clone()), ctx)
                     // TODO: fix with ?
-                    // .or_else(|err| Err(LoadError::Warmy { store_err: err }))?;
                     .or_else(|err| Err(LoadError::Warmy(err)))?;
-                // .expect("error loading menu pivimage");
                 let mut palette = piv.borrow().palette.to_vec();
                 if palette.len() == 16 {
                     palette.extend(
