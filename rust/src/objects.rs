@@ -162,7 +162,7 @@ impl Image {
         let num_bit_planes = if header.blit_type == 32 {
             2
         } else {
-            (8 - header.blit_type.leading_zeros()) as usize
+            header.blit_type.count_ones() as usize
         };
         let bit_plane_size = packed_image_width * header.height;
         let unpacked_image_width = packed_image_width * 8;
