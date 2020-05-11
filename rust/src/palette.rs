@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 use ggez::{filesystem, Context};
-use failure::err_msg;
 use serde_yaml::Value;
 use warmy;
 
@@ -25,9 +24,9 @@ impl warmy::Load<Context, warmy::SimpleKey> for PaletteSwaps {
                 let file = filesystem::open(ctx, key.as_str())?;
                 let yaml: Value = serde_yaml::from_reader(file)?;
 
-                Ok(warmy::Loaded::from(PaletteSwaps(
-                    serde_yaml::from_value(yaml)?,
-                )))
+                Ok(warmy::Loaded::from(PaletteSwaps(serde_yaml::from_value(
+                    yaml,
+                )?)))
             }
             warmy::SimpleKey::Path(_) => return Err(LoadError::PathLoadNotImplemented),
         }

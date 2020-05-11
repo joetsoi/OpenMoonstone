@@ -9,7 +9,6 @@ use loadable_yaml_macro_derive::LoadableYaml;
 use crate::error::{err_from, CompatError};
 use crate::error::LoadError;
 use crate::manager::GameYaml;
-use failure::err_msg;
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 pub struct SpriteData {
@@ -69,8 +68,6 @@ pub struct Sprite {
 }
 
 impl warmy::Load<Context, warmy::SimpleKey> for Sprite {
-    // type Key = warmy::LogicalKey;
-    // type Error = CompatError;
     type Error = LoadError<GameYaml>;
 
     fn load(
@@ -87,11 +84,7 @@ impl warmy::Load<Context, warmy::SimpleKey> for Sprite {
                     animations: serde_yaml::from_value(yaml)?,
                 }))
             }
-            // warmy::SimpleKey::Path(_) => return Err(err_msg("error").compat()),
             warmy::SimpleKey::Path(_) => return Err(LoadError::PathLoadNotImplemented),
         }
-        // Ok(Sprite {
-        //     animations: serde_yaml::from_value(yaml).map_err(err_from)?,
-        // })
     }
 }

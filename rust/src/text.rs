@@ -11,7 +11,6 @@ use maplit::hashmap;
 use serde_derive::{Deserialize, Serialize};
 use warmy::{SimpleKey, Store};
 
-use compat_error::err_from;
 use loadable_yaml_macro_derive::LoadableYaml;
 
 use crate::error::LoadError;
@@ -23,11 +22,7 @@ use crate::piv::Colour;
 
 #[derive(Debug)]
 pub enum InvalidFont {
-    //#[fail(display = "font {} not in font_lookup", font)]
-    // #[snafu(display("font {} not in font_lookup", font))]
     FontDoesNotExist { font: String },
-    //#[fail(display = "image {} not in font", num)]
-    // #[snafu(display("image {} not in font", num))]
     ImageDoesNotExist { num: usize },
 }
 
