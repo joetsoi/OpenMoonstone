@@ -1,0 +1,22 @@
+(
+    terrain: {
+        // grass
+        "gl1.t": (file: "DISKB/GLL1.T", terrain: Grassland),
+        "gl2.t": (file: "DISKB/GL2.T", terrain: Grassland),
+        "gl3.t": (file: "DISKB/GL3.T", terrain: Grassland),
+        "gl4.t": (file: "DISKB/GL4.T", terrain: Grassland),
+        "gl5.t": (file: "DISKB/GL5.T", terrain: Grassland),
+        "gl6.t": (file: "DISKB/GL6.T", terrain: Grassland),
+        "gl7.t": (file: "DISKB/GL7.T", terrain: Grassland),
+        "gl8.t": (file: "DISKB/GL8.T", terrain: Grassland),
+        //wasteland
+        "wa1.t": (file: "DISKB/WA1.T", terrain: Wasteland),
+        "wa2.t": (file: "DISKB/WA2.T", terrain: Wasteland),
+        "wa3.t": (file: "DISKB/WA3.T", terrain: Wasteland),
+        "wa4.t": (file: "DISKB/WA4.T", terrain: Wasteland),
+        "wa5.t": (file: "DISKB/WA5.T", terrain: Wasteland),
+        "wa6.t": (file: "DISKB/WA6.T", terrain: Wasteland),
+        "wa7.t": (file: "DISKB/WA7.T", terrain: Wasteland),
+        "wa8.t": (file: "DISKB/WA8.T", terrain: Wasteland),
+    },
+)

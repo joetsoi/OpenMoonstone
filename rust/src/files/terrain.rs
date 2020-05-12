@@ -6,17 +6,25 @@ use std::io::Cursor;
 use byteorder::{BigEndian, ByteOrder, ReadBytesExt};
 use lazy_static::lazy_static;
 use maplit::hashmap;
+use serde::{Deserialize, Serialize};
 
 use crate::lz77;
 use crate::rect::Rect;
 
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum Background {
+    Grassland,
+    Forest,
+    Swampland,
+    Wasteland,
+}
+
 lazy_static! {
-    static ref scenery_lookup: HashMap<u32, &'static str> = hashmap! {
-        0 => "fo1",
-        1 => "fo1",
-        2 => "sw1",
-        3 => "wa1",
-        4 => "fo2",
+    static ref scenery_lookup: HashMap<Background, &'static str> = hashmap! {
+        Background::Grassland => "fo1",
+        Background::Forest => "fo1",
+        Background::Swampland => "sw1",
+        Background::Wasteland => "wa1",
     };
     pub static ref scenery_rects: Vec<Rect> = {
         let mut rects: Vec<Rect> = Vec::new();
@@ -66,31 +74,40 @@ impl TerrainFile {
         Ok(headers)
     }
 
-    fn read_terrain_positions(data: &[u8]) -> Result<Vec<Position>, io::Error> {
+    fn read_terrain_positions(
+        data: &[u8],
+        background: Background,
+    ) -> Result<Vec<Position>, io::Error> {
         let mut rdr = Cursor::new(data);
         let mut positions: Vec<Position> = Vec::new();
 
         loop {
             let atlas = u32::from(rdr.read_u8()?);
             let image_number = rdr.read_u8()? as usize;
+            let scenery_file = match atlas {
+                4 => "fo2",
+                3 => scenery_lookup.get(&background).unwrap_or(&"fo2"),
+                _ => "fo2",
+            };
 
             let position = Position {
-                atlas: scenery_lookup.get(&atlas).unwrap_or(&"fo2").to_string(),
+                atlas: scenery_file.to_string(),
                 image_number,
                 x: u32::from(rdr.read_u16::<BigEndian>()?),
                 y: u32::from(rdr.read_u16::<BigEndian>()?),
             };
             if atlas == 0xff {
                 break;
+            } else if atlas != 0xfe {
+                positions.push(position);
             }
-            positions.push(position);
         }
         Ok(positions)
     }
 }
 
 impl TerrainFile {
-    pub fn from_reader<T: Read>(reader: &mut T) -> Result<TerrainFile, io::Error> {
+    pub fn from_reader<T: Read>(reader: &mut T, background: Background) -> Result<TerrainFile, io::Error> {
         let mut data: Vec<u8> = Vec::new();
         reader.read_to_end(&mut data)?;
 
@@ -100,7 +117,7 @@ impl TerrainFile {
         let positions_start = (8 * header_count) + 2;
 
         let headers = TerrainFile::read_headers(header_count, &extracted[2..positions_start])?;
-        let positions = TerrainFile::read_terrain_positions(&extracted[positions_start..])?;
+        let positions = TerrainFile::read_terrain_positions(&extracted[positions_start..], background)?;
         Ok(TerrainFile { headers, positions })
     }
 }

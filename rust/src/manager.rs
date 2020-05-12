@@ -1,6 +1,7 @@
 use std::error::Error;
 use std::fmt;
 use std::path::Path;
+use std::collections::HashMap;
 
 use ggez;
 use ggez::{filesystem, Context};
@@ -9,7 +10,7 @@ use warmy::{Load, Loaded, SimpleKey, Storage};
 
 use crate::error::{BaseLoadError, LoadError};
 use crate::files::collide::{parse_collide_hit, CollisionBoxes};
-use crate::files::TerrainFile;
+use crate::files::{terrain::Background, TerrainFile};
 use crate::objects::{ObjectsFile, TextureAtlas};
 use crate::piv::PivImage;
 
@@ -149,16 +150,17 @@ impl Load<Context, SimpleKey> for TerrainFile {
             .expect("store error loading TerrainFile");
         match key {
             warmy::SimpleKey::Logical(key) => {
-                let terrain = &yaml.borrow().yaml["terrain"][key.as_str()];
+                let filename = &yaml.borrow().yaml["terrain"][key.as_str()];
                 let mut file = filesystem::open(
                     ctx,
-                    Path::new("/moonstone/").join(&terrain.as_str().expect("invalid yaml error")),
+                    Path::new("/moonstone/").join(&filename.as_str().expect("invalid yaml error")),
                 )?;
                 Ok(
-                    TerrainFile::from_reader(&mut file).map(Loaded::from)?,
+                    TerrainFile::from_reader(&mut file, Background::Wasteland).map(Loaded::from)?,
                 )
             }
             warmy::SimpleKey::Path(_) => return Err(BaseLoadError::PathLoadNotImplemented),
         }
     }
 }
+

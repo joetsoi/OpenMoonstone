@@ -3,8 +3,10 @@ use std::collections::{HashMap, HashSet};
 
 use ggez::conf::NumSamples;
 use ggez::nalgebra::{Point2, Vector2};
-use ggez::{graphics, Context, GameResult};
+use ggez::{filesystem, graphics, Context, GameResult};
 use ggez_goodies::scene;
+use ron::de::from_reader;
+use serde_derive::{Deserialize, Serialize};
 use specs::world::{Builder, Index};
 use specs::{Dispatcher, DispatcherBuilder, Entity, EntityBuilder, Join, World, WorldExt};
 use warmy::{SimpleKey, Store};
@@ -68,6 +70,7 @@ use crate::objects::TextureAtlas;
 use crate::palette::PaletteSwaps;
 use crate::piv::{palette_swap, Colour, PivImage};
 use crate::rect::Rect;
+use crate::ron::FromDosFilesRon;
 use crate::scenes::world::draw_entities;
 use crate::scenes::FSceneSwitch;
 use crate::systems::SortRenderByYPosition;
@@ -595,9 +598,18 @@ impl<'a> EncounterScene<'a> {
         world: &mut World,
         terrain_name: &str,
     ) -> Result<u32, MoonstoneError> {
+        // let terrain = game
+        //     .store
+        //     .get::<TerrainFile>(&SimpleKey::from(terrain_name.to_string()), ctx)
+        //     // TODO fix error handling, make this ?
+        //     .expect("Error loading terrain file whlie drawing");
         let terrain = game
             .store
-            .get::<TerrainFile>(&SimpleKey::from(terrain_name.to_string()), ctx)
+            .get_by::<TerrainFile, FromDosFilesRon>(
+                &SimpleKey::from(terrain_name.to_string()),
+                ctx,
+                FromDosFilesRon,
+            )
             // TODO fix error handling, make this ?
             .expect("Error loading terrain file whlie drawing");
         for p in &terrain.borrow().positions {

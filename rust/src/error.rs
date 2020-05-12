@@ -12,11 +12,12 @@ use crate::files::collide::CollideHitParseError;
 use crate::manager::GameYaml;
 use crate::objects::{TextureAtlas, TextureSizeTooSmall};
 use crate::piv::PivImage;
-use crate::ron::{FromRon, GameRon};
+use crate::ron::{FromRon, GameRon, Files};
 use crate::scenes::map::{FileList, Locations, MapData};
 
 #[derive(Debug)]
 pub enum MoonstoneError {
+    Io(std::io::Error),
     Map(StoreErrorOr<MapData, Context, SimpleKey>),
     Piv(StoreErrorOr<PivImage, Context, SimpleKey>),
     Sprite(StoreErrorOr<Sprite, Context, SimpleKey>),
@@ -26,7 +27,10 @@ pub enum MoonstoneError {
     Locations(StoreErrorOr<GameRon<Locations>, Context, SimpleKey, FromRon>),
     SpriteRon(StoreErrorOr<GameRon<Sprite>, Context, SimpleKey, FromRon>),
     SpriteData(StoreErrorOr<GameRon<SpriteData>, Context, SimpleKey, FromRon>),
+    FilesRon(StoreErrorOr<GameRon<Files>, Context, SimpleKey, FromRon>),
     Ggez(ggez::error::GameError),
+    PathLoadNotImplemented,
+    NotInDosFiles,
 }
 
 impl Error for MoonstoneError {}
@@ -34,17 +38,28 @@ impl Error for MoonstoneError {}
 impl fmt::Display for MoonstoneError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
+            MoonstoneError::Io(ref err) => err.fmt(f),
             MoonstoneError::Map(ref err) => err.fmt(f),
             MoonstoneError::Piv(ref err) => err.fmt(f),
             MoonstoneError::Sprite(ref err) => err.fmt(f),
             MoonstoneError::TextureAtlas(ref err) => err.fmt(f),
-            MoonstoneError::Ggez(ref err) => err.fmt(f),
             MoonstoneError::Ron(ref err) => err.fmt(f),
             MoonstoneError::FileList(ref err) => err.fmt(f),
             MoonstoneError::Locations(ref err) => err.fmt(f),
             MoonstoneError::SpriteRon(ref err) => err.fmt(f),
             MoonstoneError::SpriteData(ref err) => err.fmt(f),
+            MoonstoneError::FilesRon(ref err) => err.fmt(f),
+            MoonstoneError::FilesRon(ref err) => err.fmt(f),
+            MoonstoneError::Ggez(ref err) => err.fmt(f),
+            MoonstoneError::PathLoadNotImplemented => write!(f, "Path not implemented"),
+            MoonstoneError::NotInDosFiles => write!(f, "File not found in dos_files.ron"),
         }
+    }
+}
+
+impl From<std::io::Error> for MoonstoneError {
+    fn from(err: std::io::Error) -> MoonstoneError {
+        MoonstoneError::Io(err)
     }
 }
 
@@ -83,6 +98,12 @@ impl From<StoreErrorOr<GameRon<Sprite>, Context, SimpleKey, FromRon>> for Moonst
 impl From<StoreErrorOr<GameRon<SpriteData>, Context, SimpleKey, FromRon>> for MoonstoneError {
     fn from(err: StoreErrorOr<GameRon<SpriteData>, Context, SimpleKey, FromRon>) -> MoonstoneError {
         MoonstoneError::SpriteData(err)
+    }
+}
+
+impl From<StoreErrorOr<GameRon<Files>, Context, SimpleKey, FromRon>> for MoonstoneError {
+    fn from(err: StoreErrorOr<GameRon<Files>, Context, SimpleKey, FromRon>) -> MoonstoneError {
+        MoonstoneError::FilesRon(err)
     }
 }
 
