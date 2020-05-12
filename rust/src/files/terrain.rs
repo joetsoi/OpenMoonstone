@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::io;
 use std::io::prelude::*;
 use std::io::Cursor;
+use std::fmt;
 
 use byteorder::{BigEndian, ByteOrder, ReadBytesExt};
 use lazy_static::lazy_static;
@@ -17,6 +18,12 @@ pub enum Background {
     Forest,
     Swampland,
     Wasteland,
+}
+
+impl fmt::Display for Background {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
 }
 
 lazy_static! {
@@ -51,6 +58,7 @@ pub struct Header {
 pub struct TerrainFile {
     pub headers: Vec<Header>,
     pub positions: Vec<Position>,
+    pub background: Background,
 }
 
 #[derive(Debug)]
@@ -118,6 +126,6 @@ impl TerrainFile {
 
         let headers = TerrainFile::read_headers(header_count, &extracted[2..positions_start])?;
         let positions = TerrainFile::read_terrain_positions(&extracted[positions_start..], background)?;
-        Ok(TerrainFile { headers, positions })
+        Ok(TerrainFile { headers, positions, background })
     }
 }

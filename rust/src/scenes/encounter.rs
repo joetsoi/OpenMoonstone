@@ -1,5 +1,7 @@
+use std::cell::{Ref, RefCell};
 use std::collections::hash_map::Entry::{Occupied, Vacant};
 use std::collections::{HashMap, HashSet};
+use std::fmt;
 
 use ggez::conf::NumSamples;
 use ggez::nalgebra::{Point2, Vector2};
@@ -61,7 +63,7 @@ use crate::combat::systems::{
 use crate::components::RenderOrder;
 use crate::error::{LoadError, MoonstoneError};
 use crate::files::collide::CollisionBoxes;
-use crate::files::terrain::scenery_rects;
+use crate::files::terrain::{scenery_rects, Background};
 use crate::files::TerrainFile;
 use crate::game::{Game, SceneState};
 use crate::input;
@@ -74,6 +76,44 @@ use crate::ron::FromDosFilesRon;
 use crate::scenes::world::draw_entities;
 use crate::scenes::FSceneSwitch;
 use crate::systems::SortRenderByYPosition;
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Deserialize)]
+pub enum Asset {
+    BlueKnight,
+    OrangeKnight,
+    RedKnight,
+    GreenKnight,
+    BlackKnight,
+    BlueFlashKnight,
+    OrangeFlashKnight,
+    RedFlashKnight,
+    GreenFlashKnight,
+    BlackFlashKnight,
+    TroggSpear,
+    Grassland,
+    Forest,
+    Swampland,
+    Wasteland,
+}
+
+impl fmt::Display for Asset {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+        // or, alternatively:
+        // fmt::Debug::fmt(self, f)
+    }
+}
+
+impl From<Background> for Asset {
+    fn from(background: Background) -> Self {
+        match background {
+            Background::Grassland => Asset::Grassland,
+            Background::Forest => Asset::Forest,
+            Background::Swampland => Asset::Swampland,
+            Background::Wasteland => Asset::Wasteland,
+        }
+    }
+}
 
 #[derive(Debug, Default, Clone)]
 pub struct EncounterTextures {
@@ -290,13 +330,13 @@ impl<'a> EncounterScene<'a> {
             .with(UnitType {
                 name: resource.to_string(),
             })
-            .with(Palette {
-                name: palette_name.to_string(),
-                palette: palette_swap(
-                    &raw_palette,
-                    &swaps.0.get(&palette_name.to_string()).expect("no palette"),
-                ),
-            })
+            // .with(Palette {
+            //     name: palette_name.to_string(),
+            //     palette: palette_swap(
+            //         &raw_palette,
+            //         &swaps.0.get(&palette_name.to_string()).expect("no palette"),
+            //     ),
+            // })
             .with(MustLive {})
             .with(Position { x, y })
             .with(Health {
@@ -354,11 +394,23 @@ impl<'a> EncounterScene<'a> {
             .get::<PivImage>(&SimpleKey::from(background_name), ctx)
             // TODO fix error handling, make this ?
             .expect("Error loading piv background");
+
+        let file = filesystem::open(ctx, "/palettes.ron")?;
+        let swaps =
+            from_reader::<filesystem::File, HashMap<Asset, HashMap<usize, u16>>>(file).unwrap();
+        let mut piv_clone: PivImage = piv.borrow().clone();
+        println!("{:X?}", piv_clone.raw_palette);
+        piv_clone = piv_clone
+            .swap_colours(swaps.get(&Asset::TroggSpear).unwrap())
+            .swap_colours(swaps.get(&Asset::Grassland).unwrap())
+            .build_palette();
+        println!("{:X?}", piv_clone.raw_palette);
+
         let (background, y_max) = EncounterScene::build_background_canvas(
             ctx,
             game,
             &mut world,
-            &piv.borrow(),
+            &piv_clone,
             terrain_name,
         )?;
         let collide_hit = game
@@ -368,11 +420,15 @@ impl<'a> EncounterScene<'a> {
             .expect("Error loading collision boxes");
         world.insert(collide_hit.borrow().clone());
 
+        // piv.raw_with_swap();
+
         let (player_1, player_2, player_3, player_4) = EncounterScene::create_entities(
             ctx,
             game,
             &mut world,
-            &piv.borrow().raw_palette,
+            &piv_clone.raw_palette,
+            // &piv.borrow().raw_palette,
+            // .raw_with_swap(swaps.get(&Asset::TroggSpear).unwrap()),
             y_max,
         );
         // let y = EncounterScene::next_starting_position(game, y_max as i32);
@@ -416,7 +472,7 @@ impl<'a> EncounterScene<'a> {
         // })
         // .build();
 
-        let palette: Vec<Colour> = piv.borrow().palette.to_vec();
+        let palette: Vec<Colour> = piv_clone.palette.to_vec();
         Ok(Self {
             // drawable_world,
             palette,
@@ -612,24 +668,35 @@ impl<'a> EncounterScene<'a> {
             )
             // TODO fix error handling, make this ?
             .expect("Error loading terrain file whlie drawing");
+
+        let file = filesystem::open(ctx, "/palettes.ron")?;
+        let swaps =
+            from_reader::<filesystem::File, HashMap<Asset, HashMap<usize, u16>>>(file).unwrap();
+
         for p in &terrain.borrow().positions {
             let cmp = game
                 .store
                 .get::<PivImage>(&SimpleKey::from(p.atlas.clone()), ctx)
                 // TODO fix error handling, make this ?
                 .expect("error loading piv image in draw_terrain");
-            let ggez_image = match game.images.entry(p.atlas.clone()) {
+
+            let mut cmp_clone: PivImage = cmp.borrow().clone();
+            cmp_clone = cmp_clone
+                .swap_colours(swaps.get(&Asset::Grassland).unwrap())
+                .build_palette();
+            let entry = format!("{}-{}", p.atlas, terrain.borrow().background);
+
+            let ggez_image = match game.images.entry(entry) {
                 Occupied(i) => i.into_mut(),
                 Vacant(i) => i.insert(graphics::Image::from_rgba8(
                     ctx,
                     512u16,
                     512u16,
-                    &cmp.borrow().to_rgba8_512(),
+                    &cmp_clone.to_rgba8_512(),
                 )?),
             };
 
             let rect = scenery_rects[p.image_number];
-            // println!("{:#?}",rect);
 
             let draw_params = graphics::DrawParam::default()
                 .src(graphics::Rect {

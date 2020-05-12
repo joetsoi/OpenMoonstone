@@ -1,7 +1,9 @@
+use std::collections::HashMap;
 use std::fmt;
 use std::hash::Hash;
 use std::io;
 use std::io::prelude::*;
+use std::io::Write;
 
 use bv::BitSlice;
 use byteorder::{BigEndian, ByteOrder};
@@ -16,7 +18,13 @@ pub struct Colour {
     pub a: u8,
 }
 
-#[derive(Debug)]
+// impl fmt::Display for Colour {
+//     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+//         write!(f, "0x{:x}{:x}{:x}{:x}", self.r, self.g, self.b, self.a)
+//     }
+// }
+
+#[derive(Debug, Clone)]
 pub struct PivImage {
     pub palette: Vec<Colour>,
     pub raw_palette: Vec<u16>,
@@ -79,6 +87,31 @@ impl PivImage {
             }
         }
         pixels
+    }
+
+    pub fn swap_colours(mut self, swaps: &HashMap<usize, u16>) -> Self {
+        // let mut base_palette = self.raw_palette.to_vec();
+        for (i, new_colour) in swaps {
+            let mut old_colour = self.raw_palette.get_mut(*i);
+            if let Some(c) = old_colour {
+                *c = *new_colour;
+            } else {
+                writeln!(
+                    io::stderr(),
+                    "Tried swapping the {}th colour when the palette only has {} colours",
+                    self.palette.len(),
+                    i
+                );
+            }
+        }
+        self
+    }
+
+    pub fn build_palette(mut self) -> Self {
+        println!("{:#?}", self.palette[10]);
+        self.palette.splice(.., extract_palette(&self.raw_palette));
+        println!("{:#?}", self.palette[10]);
+        self
     }
 
     fn read_header(data: &[u8]) -> Header {
