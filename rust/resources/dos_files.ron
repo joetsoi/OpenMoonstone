@@ -1,7 +1,7 @@
 (
     terrain: {
-        // grass
-        "gl1.t": (file: "DISKB/GLL1.T", terrain: Grassland),
+        // grassland
+        "gl1.t": (file: "DISKB/GL1.T", terrain: Grassland),
         "gl2.t": (file: "DISKB/GL2.T", terrain: Grassland),
         "gl3.t": (file: "DISKB/GL3.T", terrain: Grassland),
         "gl4.t": (file: "DISKB/GL4.T", terrain: Grassland),
