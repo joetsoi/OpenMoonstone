@@ -405,13 +405,22 @@ impl<'a> EncounterScene<'a> {
             .swap_colours(swaps.get(&Asset::Grassland).unwrap())
             .build_palette();
         println!("{:X?}", piv_clone.raw_palette);
+        let scenery = game
+            .store
+            .get_by::<TerrainFile, FromDosFilesRon>(
+                &SimpleKey::from(terrain_name.to_string()),
+                ctx,
+                FromDosFilesRon,
+            )
+            // TODO fix error handling, make this ?
+            .expect("Error loading terrain file while building encounter scene");
 
         let (background, y_max) = EncounterScene::build_background_canvas(
             ctx,
             game,
             &mut world,
             &piv_clone,
-            terrain_name,
+            &scenery.borrow(),
         )?;
         let collide_hit = game
             .store
@@ -493,10 +502,10 @@ impl<'a> EncounterScene<'a> {
         ctx: &mut Context,
         game: &mut Game,
         world: &mut World,
-        piv: &PivImage,
-        terrain_name: &str,
+        background: &PivImage,
+        scenery: &TerrainFile,
     ) -> Result<(graphics::Canvas, u32), MoonstoneError> {
-        let background_image = graphics::Image::from_rgba8(ctx, 320, 200, &piv.to_rgba8()).unwrap();
+        let background_image = graphics::Image::from_rgba8(ctx, 320, 200, &background.to_rgba8()).unwrap();
         // We create a canvas using the screen coordinates instead of the window height as
         // the current window height could have been resized, this causes some odd problems
         // where anything rendered to the canvas is a few pixels off
@@ -522,7 +531,7 @@ impl<'a> EncounterScene<'a> {
             graphics::DrawParam::default().dest(screen_origin),
         )?;
 
-        let y_max = EncounterScene::draw_terrain(ctx, game, world, terrain_name)?;
+        let y_max = EncounterScene::draw_terrain(ctx, game, world, scenery)?;
         graphics::set_canvas(ctx, None);
         let scale_matrix = graphics::DrawParam::default()
             .scale(game.screen_scale)
@@ -652,28 +661,23 @@ impl<'a> EncounterScene<'a> {
         ctx: &mut Context,
         game: &mut Game,
         world: &mut World,
-        terrain_name: &str,
+        scenery: &TerrainFile,
     ) -> Result<u32, MoonstoneError> {
         // let terrain = game
         //     .store
-        //     .get::<TerrainFile>(&SimpleKey::from(terrain_name.to_string()), ctx)
+        //     .get_by::<TerrainFile, FromDosFilesRon>(
+        //         &SimpleKey::from(terrain_name.to_string()),
+        //         ctx,
+        //         FromDosFilesRon,
+        //     )
         //     // TODO fix error handling, make this ?
         //     .expect("Error loading terrain file whlie drawing");
-        let terrain = game
-            .store
-            .get_by::<TerrainFile, FromDosFilesRon>(
-                &SimpleKey::from(terrain_name.to_string()),
-                ctx,
-                FromDosFilesRon,
-            )
-            // TODO fix error handling, make this ?
-            .expect("Error loading terrain file whlie drawing");
 
         let file = filesystem::open(ctx, "/palettes.ron")?;
         let swaps =
             from_reader::<filesystem::File, HashMap<Asset, HashMap<usize, u16>>>(file).unwrap();
 
-        for p in &terrain.borrow().positions {
+        for p in &scenery.positions {
             let cmp = game
                 .store
                 .get::<PivImage>(&SimpleKey::from(p.atlas.clone()), ctx)
@@ -684,7 +688,7 @@ impl<'a> EncounterScene<'a> {
             cmp_clone = cmp_clone
                 .swap_colours(swaps.get(&Asset::Grassland).unwrap())
                 .build_palette();
-            let entry = format!("{}-{}", p.atlas, terrain.borrow().background);
+            let entry = format!("{}-{}", p.atlas, scenery.background);
 
             let ggez_image = match game.images.entry(entry) {
                 Occupied(i) => i.into_mut(),
@@ -709,8 +713,7 @@ impl<'a> EncounterScene<'a> {
             graphics::draw(ctx, ggez_image, draw_params)?;
         }
 
-        let y_max: u32 = terrain
-            .borrow()
+        let y_max: u32 = scenery
             .headers
             .iter()
             .map(|h| h.y)
