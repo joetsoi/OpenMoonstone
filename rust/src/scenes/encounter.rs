@@ -330,13 +330,13 @@ impl<'a> EncounterScene<'a> {
             .with(UnitType {
                 name: resource.to_string(),
             })
-            // .with(Palette {
-            //     name: palette_name.to_string(),
-            //     palette: palette_swap(
-            //         &raw_palette,
-            //         &swaps.0.get(&palette_name.to_string()).expect("no palette"),
-            //     ),
-            // })
+            .with(Palette {
+                name: palette_name.to_string(),
+                palette: palette_swap(
+                    &raw_palette,
+                    &swaps.0.get(&palette_name.to_string()).expect("no palette"),
+                ),
+            })
             .with(MustLive {})
             .with(Position { x, y })
             .with(Health {
@@ -399,12 +399,10 @@ impl<'a> EncounterScene<'a> {
         let swaps =
             from_reader::<filesystem::File, HashMap<Asset, HashMap<usize, u16>>>(file).unwrap();
         let mut piv_clone: PivImage = piv.borrow().clone();
-        println!("{:X?}", piv_clone.raw_palette);
         piv_clone = piv_clone
-            .swap_colours(swaps.get(&Asset::TroggSpear).unwrap())
-            .swap_colours(swaps.get(&Asset::Grassland).unwrap())
+            // .swap_colours(swaps.get(&Asset::Grassland).unwrap())
             .build_palette();
-        println!("{:X?}", piv_clone.raw_palette);
+
         let scenery = game
             .store
             .get_by::<TerrainFile, FromDosFilesRon>(
@@ -414,6 +412,17 @@ impl<'a> EncounterScene<'a> {
             )
             // TODO fix error handling, make this ?
             .expect("Error loading terrain file while building encounter scene");
+        let scenery_piv = game
+            .store
+            .get::<PivImage>(&SimpleKey::from(scenery.borrow().background.to_atlas_name()), ctx)
+            // TODO fix error handling, make this ?
+            .expect("Error loading piv background")
+            .borrow()
+            .clone()
+            // .swap_colours(swaps.get(&Asset::Grassland).unwrap())
+            .swap_colours(swaps.get(&Asset::TroggSpear).unwrap())
+            .build_palette();
+
 
         let (background, y_max) = EncounterScene::build_background_canvas(
             ctx,
@@ -435,9 +444,8 @@ impl<'a> EncounterScene<'a> {
             ctx,
             game,
             &mut world,
-            &piv_clone.raw_palette,
+            &scenery_piv.raw_palette,
             // &piv.borrow().raw_palette,
-            // .raw_with_swap(swaps.get(&Asset::TroggSpear).unwrap()),
             y_max,
         );
         // let y = EncounterScene::next_starting_position(game, y_max as i32);
@@ -686,7 +694,7 @@ impl<'a> EncounterScene<'a> {
 
             let mut cmp_clone: PivImage = cmp.borrow().clone();
             cmp_clone = cmp_clone
-                .swap_colours(swaps.get(&Asset::Grassland).unwrap())
+                // .swap_colours(swaps.get(&Asset::Grassland).unwrap())
                 .build_palette();
             let entry = format!("{}-{}", p.atlas, scenery.background);
 

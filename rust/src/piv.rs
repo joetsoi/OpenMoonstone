@@ -18,12 +18,6 @@ pub struct Colour {
     pub a: u8,
 }
 
-// impl fmt::Display for Colour {
-//     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-//         write!(f, "0x{:x}{:x}{:x}{:x}", self.r, self.g, self.b, self.a)
-//     }
-// }
-
 #[derive(Debug, Clone)]
 pub struct PivImage {
     pub palette: Vec<Colour>,
@@ -108,9 +102,7 @@ impl PivImage {
     }
 
     pub fn build_palette(mut self) -> Self {
-        println!("{:#?}", self.palette[10]);
         self.palette.splice(.., extract_palette(&self.raw_palette));
-        println!("{:#?}", self.palette[10]);
         self
     }
 

@@ -26,8 +26,19 @@ impl fmt::Display for Background {
     }
 }
 
+impl Background {
+    pub fn to_atlas_name(self) -> &'static str {
+        match self {
+            Background::Grassland => "fo1",
+            Background::Forest => "fo1",
+            Background::Swampland => "sw1",
+            Background::Wasteland => "wa1",
+        }
+    }
+}
+
 lazy_static! {
-    static ref scenery_lookup: HashMap<Background, &'static str> = hashmap! {
+    pub static ref scenery_lookup: HashMap<Background, &'static str> = hashmap! {
         Background::Grassland => "fo1",
         Background::Forest => "fo1",
         Background::Swampland => "sw1",
@@ -49,19 +60,19 @@ lazy_static! {
     };
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Header {
     pub y: u32,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TerrainFile {
     pub headers: Vec<Header>,
     pub positions: Vec<Position>,
     pub background: Background,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Position {
     pub atlas: String,
     pub image_number: usize,
