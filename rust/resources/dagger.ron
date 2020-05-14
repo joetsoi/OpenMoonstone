@@ -1,0 +1,18 @@
+{
+    "fly": (
+        frames: [
+            (
+                images: [
+                    (
+                        sheet: "kn4.ob",
+                        image: 10,
+                        x: 61,
+                        y: 8,
+                        image_type: Collider,
+                    ),
+                ],
+            ),
+        ],
+        order: None,
+    ),
+}

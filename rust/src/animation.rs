@@ -7,7 +7,7 @@ use warmy;
 
 use crate::error::LoadError;
 use crate::manager::GameYaml;
-use loadable_macro_derive::LoadableYaml;
+use loadable_macro_derive::{LoadableRon, LoadableYaml};
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 pub struct SpriteData {
@@ -61,7 +61,7 @@ pub struct Animation {
     pub order: Option<Vec<i32>>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, LoadableYaml)]
+#[derive(Debug, Clone, Serialize, Deserialize, LoadableRon, LoadableYaml)]
 #[serde(transparent)]
 pub struct Sprite {
     pub animations: HashMap<String, Animation>,

@@ -72,7 +72,7 @@ use crate::objects::TextureAtlas;
 use crate::palette::PaletteSwaps;
 use crate::piv::{palette_swap, Colour, PivImage};
 use crate::rect::Rect;
-use crate::ron::FromDosFilesRon;
+use crate::ron::{FromDosFilesRon, FromRon, GameRon};
 use crate::scenes::world::draw_entities;
 use crate::scenes::FSceneSwitch;
 use crate::systems::SortRenderByYPosition;
@@ -254,18 +254,29 @@ impl<'a> EncounterScene<'a> {
             // TODO: fix to allow ? syntax
             store.get::<GameYaml>(&warmy::SimpleKey::from("/entities.yaml"), ctx).expect("Error loading entities.yaml");
 
+        let entities_res = store
+            .get_by::<GameRon<HashMap<String, String>>, FromRon>(
+                &SimpleKey::from("/entities.ron"),
+                ctx,
+                FromRon,
+            )
+            .expect("error loading entities.ron");
+        let entities = &entities_res.borrow().0;
+        println!("ent {:?}", entities);
+
         let mut sprites: HashMap<String, Sprite> = HashMap::new();
         let mut atlas_names: HashSet<String> = HashSet::new();
         for name in entity_names {
             let yaml_borrow = &entities_yaml.borrow();
             let yaml_file = yaml_borrow.yaml[name].as_str().unwrap();
+            let res_file = entities.get(*name).unwrap();
             // TODO: Fix to allow ? syntax
-            let entity_yaml = store
-                .get::<Sprite>(&warmy::SimpleKey::from(yaml_file), ctx)
-                .expect("error loading entity yaml_file");
-            sprites.insert(name.to_string(), (*entity_yaml.borrow()).clone());
+            let sprite_res = store
+                .get_by::<Sprite, FromRon>(&warmy::SimpleKey::from(res_file.clone()), ctx, FromRon)
+                .expect("error loading entity ron file");
+            sprites.insert(name.to_string(), (*sprite_res.borrow()).clone());
 
-            for i in entity_yaml
+            for i in sprite_res
                 .borrow()
                 .animations
                 .values()
@@ -315,9 +326,10 @@ impl<'a> EncounterScene<'a> {
         direction: Facing,
     ) -> EntityBuilder<'a> {
         let sprite_res = store
-            .get::<Sprite>(&SimpleKey::from(format!("/{}.yaml", resource)), ctx)
+            .get_by::<Sprite, FromRon>(&SimpleKey::from(format!("/{}.ron", resource)), ctx, FromRon)
             // TODO fix error handling, make this ?
-            .expect("error getting sprite in build entity");
+            // .expect("error getting sprite in build entity");
+            .unwrap();
         let sprite = sprite_res.borrow();
 
         let swaps_res = store
@@ -422,7 +434,6 @@ impl<'a> EncounterScene<'a> {
             // .swap_colours(swaps.get(&Asset::Grassland).unwrap())
             .swap_colours(swaps.get(&Asset::TroggSpear).unwrap())
             .build_palette();
-
 
         let (background, y_max) = EncounterScene::build_background_canvas(
             ctx,
