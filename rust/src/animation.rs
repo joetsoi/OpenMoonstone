@@ -61,26 +61,8 @@ pub struct Animation {
     pub order: Option<Vec<i32>>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, LoadableYaml)]
 #[serde(transparent)]
 pub struct Sprite {
     pub animations: HashMap<String, Animation>,
-}
-
-impl warmy::Load<Context, warmy::SimpleKey> for Sprite {
-    type Error = LoadError<GameYaml>;
-
-    fn load(
-        key: warmy::SimpleKey,
-        _store: &mut warmy::Storage<ggez::Context, warmy::SimpleKey>,
-        ctx: &mut ggez::Context,
-    ) -> Result<warmy::Loaded<Self, warmy::SimpleKey>, Self::Error> {
-        match key {
-            warmy::SimpleKey::Logical(key) => filesystem::open(ctx, key)
-                .map(serde_yaml::from_reader::<filesystem::File, Sprite>)?
-                .map(warmy::Loaded::from)
-                .map_err(|e| e.into()),
-            warmy::SimpleKey::Path(_) => return Err(LoadError::PathLoadNotImplemented),
-        }
-    }
 }

@@ -10,11 +10,3 @@ proc-macro = true
 [dependencies]
 quote = "0.6.3"
 syn = "0.14.4"
-# warmy = "0.8.0"
-# serde_yaml = "*"
-
-# compat_error = {path = "../compat_error"}
-
-# [dependencies.ggez]
-# git = "https://github.com/ggez/ggez"
-# default-features = false
