@@ -25,7 +25,7 @@ maplit = "*"
 lazy_static = "*"
 #ggez = { git = "https://github.com/ggez/ggez" }
 ggez = "*"
-loadable_yaml_macro_derive = {path = "../loadable_yaml_macro_derive"}
+loadable_macro_derive = {path = "../loadable_macro_derive"}
 
 # [dependencies.ggez]
 # git = "https://github.com/ggez/ggez"

@@ -7,7 +7,7 @@ use warmy;
 
 use crate::error::LoadError;
 use crate::manager::GameYaml;
-use loadable_yaml_macro_derive::LoadableYaml;
+use loadable_macro_derive::LoadableYaml;
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 pub struct SpriteData {

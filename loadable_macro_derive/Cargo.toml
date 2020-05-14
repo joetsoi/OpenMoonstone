@@ -1,5 +1,5 @@
 [package]
-name = "loadable_yaml_macro_derive"
+name = "loadable_macro_derive"
 version = "0.1.0"
 authors = ["Joe Tsoi <joetsoi@users.noreply.github.com>"]
 edition = "2018"

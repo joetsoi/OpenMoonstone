@@ -11,7 +11,7 @@ use maplit::hashmap;
 use serde_derive::{Deserialize, Serialize};
 use warmy::{SimpleKey, Store};
 
-use loadable_yaml_macro_derive::LoadableYaml;
+use loadable_macro_derive::LoadableYaml;
 
 use crate::error::LoadError;
 use crate::manager::GameYaml;

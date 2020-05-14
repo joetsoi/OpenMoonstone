@@ -16,7 +16,7 @@ use warmy::load::Load;
 use warmy::{Res, SimpleKey, Store, StoreErrorOr};
 // use warmy::ron::Ron;
 
-use loadable_yaml_macro_derive::LoadableYaml;
+use loadable_macro_derive::LoadableYaml;
 
 use super::transition::FadeStyle;
 use super::Fade;
