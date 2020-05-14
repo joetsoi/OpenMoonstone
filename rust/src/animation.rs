@@ -5,9 +5,9 @@ use serde_derive::{Deserialize, Serialize};
 use serde_yaml::Value;
 use warmy;
 
-use loadable_yaml_macro_derive::LoadableYaml;
 use crate::error::LoadError;
 use crate::manager::GameYaml;
+use loadable_yaml_macro_derive::LoadableYaml;
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 pub struct SpriteData {
@@ -62,6 +62,7 @@ pub struct Animation {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(transparent)]
 pub struct Sprite {
     pub animations: HashMap<String, Animation>,
 }
@@ -75,14 +76,10 @@ impl warmy::Load<Context, warmy::SimpleKey> for Sprite {
         ctx: &mut ggez::Context,
     ) -> Result<warmy::Loaded<Self, warmy::SimpleKey>, Self::Error> {
         match key {
-            warmy::SimpleKey::Logical(key) => {
-                let file = filesystem::open(ctx, key)?;
-                let yaml: Value = serde_yaml::from_reader(file)?;
-
-                Ok(warmy::Loaded::from(Sprite {
-                    animations: serde_yaml::from_value(yaml)?,
-                }))
-            }
+            warmy::SimpleKey::Logical(key) => filesystem::open(ctx, key)
+                .map(serde_yaml::from_reader::<filesystem::File, Sprite>)?
+                .map(warmy::Loaded::from)
+                .map_err(|e| e.into()),
             warmy::SimpleKey::Path(_) => return Err(LoadError::PathLoadNotImplemented),
         }
     }
