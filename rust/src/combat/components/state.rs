@@ -47,7 +47,7 @@ impl Default for Action {
     }
 }
 
-#[derive(Component, Debug, Default)]
+#[derive(Component, Clone, Debug, Default)]
 #[storage(VecStorage)]
 pub struct State {
     pub action: Action,

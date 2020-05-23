@@ -4,7 +4,7 @@ use crate::piv::Colour;
 use specs::{Component, VecStorage};
 use specs_derive::*;
 
-#[derive(Component, Debug)]
+#[derive(Component, Debug, Clone)]
 #[storage(VecStorage)]
 pub struct Draw {
     pub frame: Frame,
@@ -14,7 +14,7 @@ pub struct Draw {
 }
 
 /// Used for assigning a different palette to a knight
-#[derive(Component, Debug)]
+#[derive(Component, Debug, Clone, Default)]
 #[storage(VecStorage)]
 pub struct Palette {
     pub name: String,

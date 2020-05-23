@@ -339,28 +339,18 @@ impl<'a> EncounterScene<'a> {
             .expect("error loading palette.yaml");
         let swaps = swaps_res.borrow();
         let mut spawn_pool = SpawnPool::new(resource);
-        spawn_pool.character.position(x, y);
-
-        let entity_builder = spawn_pool.spawn(world).unwrap();
-
-        entity_builder
-            .with(Palette {
-                name: palette_name.to_string(),
-                palette: palette_swap(
+        spawn_pool.character
+            .position(x, y)
+            .state(direction)
+            .draw(&sprite.animations["entrance"].frames[0], "entrance", direction)
+            .palette(
+                palette_name,
+                &palette_swap(
                     &raw_palette,
                     &swaps.0.get(&palette_name.to_string()).expect("no palette"),
                 ),
-            })
-            .with(Draw {
-                frame: sprite.animations["entrance"].frames[0].clone(),
-                animation: "entrance".to_string(),
-                resource_name: resource.to_string(),
-                direction,
-            })
-            .with(State {
-                direction,
-                ..Default::default()
-            })
+            );
+        spawn_pool.spawn(world).unwrap()
     }
 
     pub fn new(

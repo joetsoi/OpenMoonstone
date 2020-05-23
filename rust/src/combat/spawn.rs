@@ -15,7 +15,9 @@ use super::components::{
     WalkingState,
     Weapon,
 };
+use crate::animation::Frame;
 use crate::components::RenderOrder;
+use crate::piv::Colour;
 use specs::{Builder, EntityBuilder, World, WorldExt};
 
 /// Non consuming (but mutating) builder for Entities
@@ -31,15 +33,15 @@ use specs::{Builder, EntityBuilder, World, WorldExt};
 pub struct CharacterTemplate {
     resource: String,
     position: Position,
+    state: State,
+    palette: Palette,
+    draw: Option<Draw>,
 }
 
 impl CharacterTemplate {
     pub fn build_entity<'a>(&mut self, world: &'a mut World) -> EntityBuilder<'a> {
-        world
+        let mut builder = world
             .create_entity()
-            .with(UnitType {
-                name: self.resource.clone(),
-            })
             .with(MustLive {})
             .with(self.position.clone())
             .with(Intent {
@@ -57,6 +59,8 @@ impl CharacterTemplate {
             .with(RenderOrder {
                 ..Default::default()
             })
+            .with(self.state.clone())
+            .with(self.palette.clone())
             .with(Health {
                 ..Default::default()
             })
@@ -68,18 +72,41 @@ impl CharacterTemplate {
             })
             .with(DaggersInventory {
                 ..Default::default()
-            })
+            });
+
+        if let Some(draw) = &self.draw {
+            builder = builder.with(draw.clone());
+        }
+        builder
     }
 
-    pub fn position<'a>(&'a mut self, x: i32, y: i32) -> &'a Self {
+    pub fn position<'a>(&'a mut self, x: i32, y: i32) -> &'a mut Self {
         self.position.x = x;
         self.position.y = y;
         self
     }
 
-    // pub fn animation<'a>(&'a mut self, frame: Frame, animation: &str) {
-    //     self
-    // }
+    pub fn draw<'a>(&'a mut self, frame: &Frame, animation: &str, direction: Facing) -> &'a mut Self {
+        self.draw = Some(Draw {
+            frame: frame.clone(),
+            animation: animation.to_string(),
+            resource_name: self.resource.clone(),
+            direction: direction,
+        });
+        self
+    }
+
+    pub fn state<'a>(&'a mut self, direction: Facing) -> &'a mut Self {
+        self.state.direction = direction;
+        self
+    }
+
+    pub fn palette<'a>(&'a mut self, name: &str, colours: &[Colour]) -> &'a mut Self {
+        self.palette.name = name.to_string();
+        self.palette.palette.splice(.., colours.to_vec());
+        self
+    }
+
 }
 
 pub struct SpawnPoint {
@@ -91,6 +118,7 @@ pub struct SpawnPoint {
 pub struct SpawnPool {
     pub character: CharacterTemplate,
     pub remaining: u32,
+    pub max_active: u32,
 }
 
 impl Default for SpawnPool {
@@ -98,9 +126,10 @@ impl Default for SpawnPool {
         SpawnPool {
             character: CharacterTemplate {
                 resource: "knight".to_string(),
-                position: Position { x: 0, y: 0 },
+                ..Default::default()
             },
             remaining: 1,
+            max_active: 1,
         }
     }
 }
