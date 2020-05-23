@@ -35,12 +35,12 @@ pub struct CharacterTemplate {
     position: Position,
     state: State,
     palette: Palette,
-    draw: Option<Draw>,
+    draw: Draw,
 }
 
 impl CharacterTemplate {
     pub fn build_entity<'a>(&mut self, world: &'a mut World) -> EntityBuilder<'a> {
-        let mut builder = world
+        world
             .create_entity()
             .with(MustLive {})
             .with(self.position.clone())
@@ -59,8 +59,9 @@ impl CharacterTemplate {
             .with(RenderOrder {
                 ..Default::default()
             })
-            .with(self.state.clone())
+            .with(self.draw.clone())
             .with(self.palette.clone())
+            .with(self.state.clone())
             .with(Health {
                 ..Default::default()
             })
@@ -72,12 +73,7 @@ impl CharacterTemplate {
             })
             .with(DaggersInventory {
                 ..Default::default()
-            });
-
-        if let Some(draw) = &self.draw {
-            builder = builder.with(draw.clone());
-        }
-        builder
+            })
     }
 
     pub fn position<'a>(&'a mut self, x: i32, y: i32) -> &'a mut Self {
@@ -87,12 +83,12 @@ impl CharacterTemplate {
     }
 
     pub fn draw<'a>(&'a mut self, frame: &Frame, animation: &str, direction: Facing) -> &'a mut Self {
-        self.draw = Some(Draw {
+        self.draw = Draw {
             frame: frame.clone(),
             animation: animation.to_string(),
             resource_name: self.resource.clone(),
             direction: direction,
-        });
+        };
         self
     }
 

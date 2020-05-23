@@ -4,7 +4,7 @@ use crate::piv::Colour;
 use specs::{Component, VecStorage};
 use specs_derive::*;
 
-#[derive(Component, Debug, Clone)]
+#[derive(Component, Default, Debug, Clone)]
 #[storage(VecStorage)]
 pub struct Draw {
     pub frame: Frame,

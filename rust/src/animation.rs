@@ -49,7 +49,7 @@ impl Image {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Frame {
     pub images: Vec<Image>,
 }
