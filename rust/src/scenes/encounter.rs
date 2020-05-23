@@ -37,6 +37,7 @@ use crate::combat::components::{
     Weapon,
 };
 use crate::combat::damage::DamageTables;
+use crate::combat::spawn::SpawnPool;
 use crate::combat::systems::boundary::Boundary;
 use crate::combat::systems::health::CombatDone;
 use crate::combat::systems::{
@@ -337,11 +338,12 @@ impl<'a> EncounterScene<'a> {
             // TODO fix error handling, make this ?
             .expect("error loading palette.yaml");
         let swaps = swaps_res.borrow();
-        world
-            .create_entity()
-            .with(UnitType {
-                name: resource.to_string(),
-            })
+        let mut spawn_pool = SpawnPool::new(resource);
+        spawn_pool.character.position(x, y);
+
+        let entity_builder = spawn_pool.spawn(world).unwrap();
+
+        entity_builder
             .with(Palette {
                 name: palette_name.to_string(),
                 palette: palette_swap(
@@ -349,43 +351,14 @@ impl<'a> EncounterScene<'a> {
                     &swaps.0.get(&palette_name.to_string()).expect("no palette"),
                 ),
             })
-            .with(MustLive {})
-            .with(Position { x, y })
-            .with(Health {
-                ..Default::default()
-            })
             .with(Draw {
                 frame: sprite.animations["entrance"].frames[0].clone(),
                 animation: "entrance".to_string(),
                 resource_name: resource.to_string(),
                 direction,
             })
-            .with(Intent {
-                ..Default::default()
-            })
-            .with(WalkingState {
-                ..Default::default()
-            })
-            .with(Velocity {
-                ..Default::default()
-            })
-            .with(AnimationState {
-                ..Default::default()
-            })
-            .with(RenderOrder {
-                ..Default::default()
-            })
             .with(State {
                 direction,
-                ..Default::default()
-            })
-            .with(Body {
-                ..Default::default()
-            })
-            .with(Weapon {
-                ..Default::default()
-            })
-            .with(DaggersInventory {
                 ..Default::default()
             })
     }

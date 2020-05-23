@@ -5,7 +5,7 @@ use super::Facing;
 use crate::input;
 use crate::rect::Point;
 
-#[derive(Component, Debug)]
+#[derive(Component, Debug, Default, Clone)]
 #[storage(VecStorage)]
 pub struct Position {
     pub x: i32,
