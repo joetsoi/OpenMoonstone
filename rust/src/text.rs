@@ -29,7 +29,7 @@ impl fmt::Display for InvalidFont {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             InvalidFont::FontDoesNotExist { ref font } => {
-                write!(f, "font {} not in font_lookup", font)
+                write!(f, "font {} not in FONT_LOOKUP", font)
             }
             InvalidFont::ImageDoesNotExist { num } => write!(f, "image {} not in font", num),
         }
@@ -37,7 +37,7 @@ impl fmt::Display for InvalidFont {
 }
 
 lazy_static! {
-    static ref font_lookup: HashMap<&'static str, Vec<usize>> = hashmap! {
+    static ref FONT_LOOKUP: HashMap<&'static str, Vec<usize>> = hashmap! {
         "bold.f" => vec![
             69, 62, 69, 66, 67, 68, 69, 70, 69, 69,
             69, 69, 65, 69, 64, 71, 52, 53, 54, 55,
@@ -100,7 +100,7 @@ impl Text {
         store: &mut Store<Context, SimpleKey>,
     ) -> Result<Vec<graphics::DrawParam>, Box<dyn Error>> {
         let lookup: &Vec<usize> =
-            font_lookup
+            FONT_LOOKUP
                 .get(self.font.as_str())
                 .ok_or_else(|| InvalidFont::FontDoesNotExist {
                     font: self.font.clone(),

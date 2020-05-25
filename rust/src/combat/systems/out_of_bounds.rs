@@ -13,7 +13,7 @@ impl<'a> System<'a> for OutOfBounds {
         for (position, entity) in (&position_storage, &*entities).join() {
             // TODO: change these hardcoded values?
             if position.x < -100 || position.x > 420 {
-                entities.delete(entity);
+                entities.delete(entity).expect("failed to delete out of bound entity");
             }
         }
     }

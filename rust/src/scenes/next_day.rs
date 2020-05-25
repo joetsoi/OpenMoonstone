@@ -44,7 +44,7 @@ impl Scene<Game, InputEvent> for NextDay {
 
     fn draw(&mut self, game: &mut Game, ctx: &mut Context) -> GameResult<()> {
         graphics::clear(ctx, graphics::Color::from((0, 0, 0, 255)));
-        self.menu.draw(game, ctx);
+        self.menu.draw(game, ctx)?;
         Ok(())
     }
 

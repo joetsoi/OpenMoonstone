@@ -90,7 +90,7 @@ pub fn draw_entities(
             if let ImageType::BloodStain = image.image_type {
                 if let Some(b) = background {
                     graphics::pop_transform(ctx);
-                    graphics::apply_transformations(ctx);
+                    graphics::apply_transformations(ctx)?;
 
                     graphics::set_canvas(ctx, Some(&*b));
                     graphics::draw(ctx, ggez_image, draw_params)?;
@@ -100,7 +100,7 @@ pub fn draw_entities(
                         .scale(game.screen_scale)
                         .to_matrix();
                     graphics::push_transform(ctx, Some(scale_matrix));
-                    graphics::apply_transformations(ctx);
+                    graphics::apply_transformations(ctx)?;
                 }
             }
         }

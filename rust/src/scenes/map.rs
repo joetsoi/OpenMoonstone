@@ -635,8 +635,8 @@ impl<'a> Scene<Game, InputEvent> for MapScene<'a> {
         // ghost image of the sprite on those pixels, we clear the screen each
         // frame to get rid of these artifacts.
         graphics::clear(ctx, graphics::Color::new(0.0, 0.0, 0.0, 1.0));
-        self.draw_background_map(game, ctx);
-        draw_entities(&self.specs_world, &self.palette, None, game, ctx);
+        self.draw_background_map(game, ctx)?;
+        draw_entities(&self.specs_world, &self.palette, None, game, ctx)?;
         Ok(())
     }
 

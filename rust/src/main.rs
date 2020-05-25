@@ -1,12 +1,9 @@
 #![warn(rust_2018_idioms)]
 
 use std::iter::repeat;
-use std::time::Duration;
 use std::{env, path};
 
-use ggez::conf;
 use ggez::event;
-use ggez::filesystem;
 use ggez::graphics;
 use ggez::timer;
 use ggez::{Context, ContextBuilder, GameResult};
@@ -17,12 +14,10 @@ use warmy::SimpleKey;
 use openmoonstone::game::Game;
 use openmoonstone::input;
 use openmoonstone::objects::TextureAtlas;
-use openmoonstone::palette::PaletteSwaps;
 use openmoonstone::piv::PivImage;
-use openmoonstone::piv::{extract_palette, Colour};
+use openmoonstone::piv::{Colour};
 use openmoonstone::scenes;
-use openmoonstone::scenes::transition::FadeStyle;
-use openmoonstone::scenes::{FSceneStack, Fade, MainMenuScene, MainScene, SelectKnight};
+use openmoonstone::scenes::{FSceneStack, MainMenuScene, MainScene};
 
 fn fps_for_scene(scene_name: &str) -> u32 {
     // https://en.wikibooks.org/wiki/X86_Assembly/Programmable_Interval_Timer
@@ -71,16 +66,16 @@ impl event::EventHandler for MainState {
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         self.scene_stack.draw(ctx);
-        graphics::present(ctx);
+        graphics::present(ctx)?;
         Ok(())
     }
 
     fn key_down_event(
         &mut self,
-        ctx: &mut Context,
+        _ctx: &mut Context,
         keycode: event::KeyCode,
-        keymods: event::KeyMods,
-        repeat: bool,
+        _keymods: event::KeyMods,
+        _repeat: bool,
     ) {
         self.scene_stack
             .input(input::InputEvent::Key(keycode), true);
@@ -92,9 +87,9 @@ impl event::EventHandler for MainState {
 
     fn key_up_event(
         &mut self,
-        ctx: &mut Context,
+        _ctx: &mut Context,
         keycode: event::KeyCode,
-        keymods: event::KeyMods,
+        _keymods: event::KeyMods,
     ) {
         if let Some(ev) = self.input_binding.resolve(keycode) {
             self.scene_stack.input(input::InputEvent::Binded(ev), false);
@@ -123,7 +118,7 @@ fn main() {
         .scale(game.screen_scale)
         .to_matrix();
     graphics::push_transform(ctx, Some(scale_matrix));
-    graphics::apply_transformations(ctx);
+    graphics::apply_transformations(ctx).expect("failed to apply transform in main");
 
     let mut scene_stack = scenes::FSceneStack::new(ctx, game);
     let map = scene_stack
@@ -146,7 +141,7 @@ fn main() {
     //     .expect("failed to fetch default palette");
     // let palette = extract_palette(raw_palette);
 
-    let cmp = scene_stack
+    let _cmp = scene_stack
         .world
         .store
         .get::<TextureAtlas>(&SimpleKey::from("mi.c".to_string()), ctx)

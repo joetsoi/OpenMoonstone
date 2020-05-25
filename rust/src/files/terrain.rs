@@ -38,13 +38,13 @@ impl Background {
 }
 
 lazy_static! {
-    pub static ref scenery_lookup: HashMap<Background, &'static str> = hashmap! {
+    pub static ref SCENERY_LOOKUP: HashMap<Background, &'static str> = hashmap! {
         Background::Grassland => "fo1",
         Background::Forest => "fo1",
         Background::Swampland => "sw1",
         Background::Wasteland => "wa1",
     };
-    pub static ref scenery_rects: Vec<Rect> = {
+    pub static ref SCENERY_RECTS: Vec<Rect> = {
         let mut rects: Vec<Rect> = Vec::new();
         for y in 0..10 {
             for x in 0..10 {
@@ -105,7 +105,7 @@ impl TerrainFile {
             let image_number = rdr.read_u8()? as usize;
             let scenery_file = match atlas {
                 4 => "fo2",
-                3 => scenery_lookup.get(&background).unwrap_or(&"fo2"),
+                3 => SCENERY_LOOKUP.get(&background).unwrap_or(&"fo2"),
                 _ => "fo2",
             };
 

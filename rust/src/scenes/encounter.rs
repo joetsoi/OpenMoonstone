@@ -64,7 +64,7 @@ use crate::combat::systems::{
 use crate::components::RenderOrder;
 use crate::error::MoonstoneError;
 use crate::files::collide::CollisionBoxes;
-use crate::files::terrain::{scenery_rects, Background};
+use crate::files::terrain::{SCENERY_RECTS, Background};
 use crate::files::TerrainFile;
 use crate::game::{Game, SceneState};
 use crate::input;
@@ -735,7 +735,7 @@ impl<'a> EncounterScene<'a> {
                 )?),
             };
 
-            let rect = scenery_rects[p.image_number];
+            let rect = SCENERY_RECTS[p.image_number];
 
             let draw_params = graphics::DrawParam::default()
                 .src(graphics::Rect {

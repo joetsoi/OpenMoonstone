@@ -281,7 +281,7 @@ impl CheckCollisions {
 }
 
 lazy_static! {
-    static ref blocks_attack: HashMap<Action, Action> = hashmap! {
+    static ref BLOCKS_ATTACK: HashMap<Action, Action> = hashmap! {
         Action::Attack(AttackType::Swing) => Action::Defend(DefendType::Block),
         Action::Attack(AttackType::BackSwing) => Action::Defend(DefendType::Block),
         Action::Attack(AttackType::Thrust) => Action::Defend(DefendType::Dodge),
@@ -332,11 +332,11 @@ impl<'a> System<'a> for ResolveCollisions {
                 let state: Option<&State> = state_storage.get(entity);
                 let target_state: Option<&State> = state_storage.get(*target);
                 if let (Some(state), Some(target_state)) = (state, target_state) {
-                    has_defended = blocks_attack
+                    has_defended = BLOCKS_ATTACK
                         .get(&state.action)
                         .and_then(|a| Some(a == &target_state.action))
                         .unwrap_or_else(|| {
-                            panic!("attack {:?} not in blocks_attack lookup", &state.action)
+                            panic!("attack {:?} not in BLOCKS_ATTACK lookup", &state.action)
                         });
                     target_used_block = target_state.action == Action::Defend(DefendType::Block);
                     if target_used_block && target_state.direction == state.direction {
@@ -392,7 +392,7 @@ impl<'a> System<'a> for ResolveCollisions {
                     // this is currently for thrown daggers, it would be better
                     // to make this explicit, perhaps add a DeleteOnCollision component.
                     println!("deleting entity {:?}", entity);
-                    entities.delete(entity);
+                    entities.delete(entity).expect("failed to delete entity");
                 }
             }
         }
