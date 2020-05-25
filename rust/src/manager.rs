@@ -1,7 +1,5 @@
-use std::error::Error;
 use std::fmt;
 use std::path::Path;
-use std::collections::HashMap;
 
 use ggez;
 use ggez::{filesystem, Context};
@@ -32,7 +30,7 @@ impl Load<Context, SimpleKey> for GameYaml {
 
     fn load(
         key: SimpleKey,
-        store: &mut Storage<ggez::Context, SimpleKey>,
+        _store: &mut Storage<ggez::Context, SimpleKey>,
         ctx: &mut ggez::Context,
     ) -> Result<Loaded<Self, SimpleKey>, Self::Error> {
         match key {

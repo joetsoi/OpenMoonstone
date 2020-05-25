@@ -5,7 +5,7 @@ use ggez::nalgebra::Vector2;
 use ggez::Context;
 use warmy::{SimpleKey, Store, StoreOpt};
 
-use crate::error::{LoadError, MoonstoneError};
+use crate::error::MoonstoneError;
 use crate::input;
 
 #[derive(Debug)]

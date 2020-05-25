@@ -2,7 +2,6 @@ use std::cmp::min;
 
 use specs::{
     storage::BTreeStorage,
-    world::EntityResBuilder,
     Builder,
     Component,
     Entities,
@@ -12,7 +11,6 @@ use specs::{
     Read,
     World,
     WorldExt,
-    WriteStorage,
 };
 use specs_derive::*;
 
@@ -28,7 +26,6 @@ use super::{
     Palette,
     Position,
     State,
-    UnitType,
     Velocity,
     WalkingState,
     Weapon,

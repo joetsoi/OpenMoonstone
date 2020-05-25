@@ -3,7 +3,6 @@ use specs::{
     storage::ComponentEvent,
     BitSet,
     Join,
-    ReadExpect,
     ReadStorage,
     ReaderId,
     System,
@@ -14,7 +13,6 @@ use specs::{
 
 use crate::campaign::components::{Interactable, OnHoverImage};
 use crate::combat::components::Draw;
-use crate::rect::Rect;
 
 pub struct HighlightOnHover;
 
@@ -28,7 +26,7 @@ impl<'a> System<'a> for HighlightOnHover {
         &mut self,
         (collided_storage, on_hover_image_storage, mut draw_storage): Self::SystemData,
     ) {
-        for (collided, on_hover_image, draw) in (
+        for (_collided, on_hover_image, draw) in (
             &collided_storage,
             &on_hover_image_storage,
             &mut draw_storage,

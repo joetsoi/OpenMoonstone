@@ -1,19 +1,12 @@
-use std::collections::hash_map::Entry::{Occupied, Vacant};
-
 use std::collections::HashMap;
-use std::error::Error;
 use std::fmt;
-use std::iter;
 
-use ggez::nalgebra::{Point2, Vector2};
-use ggez::{filesystem, graphics, timer, Context, GameResult};
+use ggez::{graphics, Context, GameResult};
 use ggez_goodies::scene::{Scene, SceneSwitch};
-use ron::de::from_reader;
 use serde_derive::{Deserialize, Serialize};
 use specs::world::{Builder, Index};
-use specs::{Dispatcher, DispatcherBuilder, EntityBuilder, Join, Read, World, WorldExt, Write};
-use warmy::load::Load;
-use warmy::{Res, SimpleKey, Store, StoreErrorOr};
+use specs::{Dispatcher, DispatcherBuilder, Join, World, WorldExt, Write};
+use warmy::{SimpleKey, Store};
 // use warmy::ron::Ron;
 
 use loadable_macro_derive::LoadableYaml;
@@ -51,12 +44,12 @@ use crate::campaign::systems::{
 use crate::combat::components::{Controller, Draw, Facing, Palette, Position, Velocity};
 use crate::combat::systems::Movement;
 use crate::components::RenderOrder;
-use crate::error::{LoadError, MoonstoneError};
-use crate::game::{Game, SceneState};
+use crate::error::MoonstoneError;
+use crate::game::Game;
 use crate::input;
 use crate::input::{Axis, Button, InputEvent};
 use crate::objects::TextureAtlas;
-use crate::piv::{extract_palette, palette_swap, Colour, ColourOscillate, PivImage};
+use crate::piv::{extract_palette, Colour, ColourOscillate, PivImage};
 // use crate::ron::GameRon;
 use crate::ron::{FromRon, GameRon};
 use crate::scenes::world::draw_entities;
@@ -417,10 +410,6 @@ impl<'a> MapScene<'a> {
 
         let atlas = store.get::<TextureAtlas>(&SimpleKey::from("mi.c"), ctx)?;
         for l in locations_res.borrow().0.locations.iter() {
-            let sprite_res =
-                store.get::<Sprite>(&SimpleKey::from(format!("/{}.yaml", "mi")), ctx)?;
-            let sprite = sprite_res.borrow();
-
             let images: Vec<SpriteImage> = l.image.iter().map(|i| i.clone()).collect();
             let mut entity_builder = world
                 .create_entity()
@@ -526,7 +515,7 @@ impl<'a> MapScene<'a> {
         ctx: &mut Context,
         store: &mut Store<Context, SimpleKey>,
         background_name: &str,
-        num_players: u32,
+        _num_players: u32,
     ) -> Result<Self, MoonstoneError> {
         let background = MapScene::setup_background_map(ctx, store, &background_name)?;
 
@@ -589,7 +578,7 @@ impl<'a> MapScene<'a> {
         })
     }
 
-    fn draw_background_map(&mut self, game: &mut Game, ctx: &mut Context) -> GameResult<()> {
+    fn draw_background_map(&mut self, _game: &mut Game, ctx: &mut Context) -> GameResult<()> {
         // let draw_params = graphics::DrawParam::default().scale(game.screen_scale);
         graphics::draw(
             ctx,
@@ -603,7 +592,7 @@ impl<'a> MapScene<'a> {
     fn update_controllers(&mut self, input: &input::InputState) {
         let entities = self.specs_world.entities();
         let mut controllers = self.specs_world.write_storage::<Controller>();
-        for (e, controller) in (&*entities, &mut controllers).join() {
+        for (_e, controller) in (&*entities, &mut controllers).join() {
             controller.x = input.get_axis_raw(controller.x_axis) as i32;
             controller.y = input.get_axis_raw(controller.y_axis) as i32;
             controller.fire = input.get_button_down(controller.button);
@@ -655,7 +644,7 @@ impl<'a> Scene<Game, InputEvent> for MapScene<'a> {
         "Map"
     }
 
-    fn input(&mut self, gameworld: &mut Game, event: InputEvent, started: bool) {
+    fn input(&mut self, _gameworld: &mut Game, _event: InputEvent, _started: bool) {
         // let entities = self.specs_world.entities();
         // let mut controllers = self.specs_world.write_storage::<Controller>();
         // for (e, controller) in (&*entities, &mut controllers).join() {

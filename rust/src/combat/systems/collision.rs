@@ -12,7 +12,7 @@ use crate::combat::components::{
     Action, Body, Collided, Draw, Facing, Health, Position, State, UnitType, Velocity, Weapon,
 };
 use crate::combat::damage::DamageTables;
-use crate::combat::systems::animation::action_to_animation;
+use crate::combat::systems::animation::ACTION_TO_ANIMATION;
 use crate::files::collide::CollisionBoxes;
 use crate::objects::TextureAtlas;
 use crate::rect::{Interval, Point, Rect};
@@ -318,7 +318,7 @@ impl<'a> System<'a> for ResolveCollisions {
 
         let mut set_recovery: Vec<Index> = Vec::new();
         let mut set_sliced: Vec<Index> = Vec::new();
-        let mut set_chopped: Vec<Index> = Vec::new();
+        let set_chopped: Vec<Index> = Vec::new();
         let mut set_decapitated: Vec<Index> = Vec::new();
 
         for (unit_type, collided, entity) in
@@ -444,7 +444,7 @@ fn calculate_damage(
         .0
         .get(&unit_type.name)
         .and_then(|t| {
-            action_to_animation
+            ACTION_TO_ANIMATION
                 .get(&attacker_action)
                 .and_then(|name| t.get(name))
         })

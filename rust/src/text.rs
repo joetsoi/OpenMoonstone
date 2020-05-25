@@ -5,16 +5,13 @@ use std::fmt;
 
 use ggez::graphics::spritebatch::SpriteBatch;
 use ggez::nalgebra::Point2;
-use ggez::{filesystem, graphics, Context};
+use ggez::{graphics, Context};
 use lazy_static::lazy_static;
 use maplit::hashmap;
 use serde_derive::{Deserialize, Serialize};
 use warmy::{SimpleKey, Store};
 
 use loadable_macro_derive::LoadableYaml;
-
-use crate::error::LoadError;
-use crate::manager::GameYaml;
 
 use crate::game::Game;
 use crate::objects::TextureAtlas;

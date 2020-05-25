@@ -86,8 +86,7 @@ impl PivImage {
     pub fn swap_colours(mut self, swaps: &HashMap<usize, u16>) -> Self {
         // let mut base_palette = self.raw_palette.to_vec();
         for (i, new_colour) in swaps {
-            let mut old_colour = self.raw_palette.get_mut(*i);
-            if let Some(c) = old_colour {
+            if let Some(c) = self.raw_palette.get_mut(*i) {
                 *c = *new_colour;
             } else {
                 writeln!(

@@ -1,8 +1,8 @@
 // Checks
-use specs::{Entities, Join, ReadExpect, ReadStorage, System, WriteStorage};
+use specs::{Entities, Join, ReadStorage, System, WriteStorage};
 
-use crate::campaign::components::{Interactable, HitBox, OnHoverImage};
-use crate::combat::components::{Controller, Draw, Position};
+use crate::campaign::components::{HitBox, Interactable};
+use crate::combat::components::{Controller, Position};
 use crate::rect::Rect;
 
 pub struct CheckMapCollision;
@@ -43,8 +43,14 @@ impl<'a> System<'a> for CheckMapCollision {
                     h: loc_hitbox.h,
                 };
                 if mover_rect.intersects(&loc_rect) {
-                    let result =
-                        interact_storage.insert(location, Interactable { target:  moving_entity });
+                    interact_storage
+                        .insert(
+                            location,
+                            Interactable {
+                                target: moving_entity,
+                            },
+                        )
+                        .expect("couldn't insert");
                 } else {
                     interact_storage.remove(location);
                 }

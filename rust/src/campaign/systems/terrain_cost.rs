@@ -26,7 +26,7 @@ impl<'a> System<'a> for TerrainCost {
             let x: i32 = position.x + (hitbox.w / 2) as i32;
             let y: i32 = position.y + hitbox.h as i32;
             let move_cost: u32 = campaign_map.movement_cost(x as u32, y as u32);
-            if let MapCommand::Move { x, y } = intent.command {
+            if let MapCommand::Move { .. } = intent.command {
                 if time_on_terrain.count < move_cost {
                     time_on_terrain.count += 1;
                     intent.command = MapCommand::Idle;

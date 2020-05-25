@@ -13,7 +13,7 @@ impl<'a> System<'a> for PrepareNextDay {
     type SystemData = (
         ReadExpect<'a, SpriteData>,
         WriteExpect<'a, OrderedEntities>,
-        WriteExpect<'a, TurnOver>,
+        ReadExpect<'a, TurnOver>,
         WriteStorage<'a, Endurance>,
         WriteStorage<'a, Draw>,
         WriteStorage<'a, Controller>,
@@ -25,7 +25,7 @@ impl<'a> System<'a> for PrepareNextDay {
         (
             sprite_data,
             mut ordered_entities,
-            mut turn_over,
+            turn_over,
             mut endurance,
             mut draw_storage,
             mut controller_storage,
@@ -33,7 +33,7 @@ impl<'a> System<'a> for PrepareNextDay {
         ): Self::SystemData,
     ) {
         if turn_over.0 == true {
-            for (endurance) in (&mut endurance).join() {
+            for endurance in (&mut endurance).join() {
                 endurance.used = 0;
             }
             ordered_entities.reset();
@@ -42,15 +42,17 @@ impl<'a> System<'a> for PrepareNextDay {
                 .and_then(|id| Some(entities.entity(*id)));
             println!("{:?}", first_player);
             if let Some(player) = first_player {
-                controller_storage.insert(
-                    player,
-                    Controller {
-                        x_axis: Axis::Horz1,
-                        y_axis: Axis::Vert1,
-                        button: Button::Fire1,
-                        ..Default::default()
-                    },
-                );
+                controller_storage
+                    .insert(
+                        player,
+                        Controller {
+                            x_axis: Axis::Horz1,
+                            y_axis: Axis::Vert1,
+                            button: Button::Fire1,
+                            ..Default::default()
+                        },
+                    )
+                    .expect("could not assign player controller");
 
                 let sprites = &sprite_data.sprites;
                 let draw = draw_storage
@@ -93,7 +95,7 @@ impl<'a> System<'a> for NextPlayer {
             sprite_data,
             mut ordering,
             mut turn_over,
-            endurance_storage,
+            _endurance_storage,
             mut draw_storage,
             mut controller_storage,
             mut intent_storage,
@@ -149,15 +151,17 @@ impl<'a> System<'a> for NextPlayer {
                             // adjust this for the dragon, all other map figures are unanimated
                             draw.frame = animation.frames[0usize].clone();
                         }
-                        controller_storage.insert(
-                            player,
-                            Controller {
-                                x_axis: Axis::Horz1,
-                                y_axis: Axis::Vert1,
-                                button: Button::Fire1,
-                                ..Default::default()
-                            },
-                        );
+                        controller_storage
+                            .insert(
+                                player,
+                                Controller {
+                                    x_axis: Axis::Horz1,
+                                    y_axis: Axis::Vert1,
+                                    button: Button::Fire1,
+                                    ..Default::default()
+                                },
+                            )
+                            .expect("failed to setup controller for player");
                     }
                     None => {
                         turn_over.0 = true;

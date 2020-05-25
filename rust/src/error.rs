@@ -9,7 +9,6 @@ use warmy::{Load, SimpleKey, StoreErrorOr};
 use crate::animation::{Sprite, SpriteData};
 use crate::campaign::movement_cost::CampaignMap;
 use crate::files::collide::CollideHitParseError;
-use crate::manager::GameYaml;
 use crate::objects::{TextureAtlas, TextureSizeTooSmall};
 use crate::piv::PivImage;
 use crate::ron::{FromRon, GameRon, Files};
@@ -48,7 +47,6 @@ impl fmt::Display for MoonstoneError {
             MoonstoneError::Locations(ref err) => err.fmt(f),
             MoonstoneError::SpriteRon(ref err) => err.fmt(f),
             MoonstoneError::SpriteData(ref err) => err.fmt(f),
-            MoonstoneError::FilesRon(ref err) => err.fmt(f),
             MoonstoneError::FilesRon(ref err) => err.fmt(f),
             MoonstoneError::Ggez(ref err) => err.fmt(f),
             MoonstoneError::PathLoadNotImplemented => write!(f, "Path not implemented"),

@@ -1,4 +1,4 @@
-use ggez::{graphics, timer, Context, GameResult};
+use ggez::{graphics, Context, GameResult};
 use ggez_goodies::scene::{Scene, SceneSwitch};
 use warmy::{SimpleKey, Store};
 
@@ -6,9 +6,8 @@ use super::menu::Menu;
 use super::transition::FadeStyle;
 use super::Fade;
 
-use crate::error::MoonstoneError;
 use crate::game::Game;
-use crate::input::{Axis, Button, InputEvent};
+use crate::input::{Button, InputEvent};
 use crate::scenes::FSceneSwitch;
 
 enum MoonPhase {
@@ -36,7 +35,7 @@ impl NextDay {
 }
 
 impl Scene<Game, InputEvent> for NextDay {
-    fn update(&mut self, game: &mut Game, _ctx: &mut Context) -> FSceneSwitch {
+    fn update(&mut self, _game: &mut Game, _ctx: &mut Context) -> FSceneSwitch {
         match self.done {
             true => SceneSwitch::push(Fade::new(274, 1, FadeStyle::Out)),
             false =>SceneSwitch::None,
@@ -53,7 +52,7 @@ impl Scene<Game, InputEvent> for NextDay {
         "NextDay"
     }
 
-    fn input(&mut self, gameworld: &mut Game, event: InputEvent, started: bool) {
+    fn input(&mut self, gameworld: &mut Game, _event: InputEvent, _started: bool) {
         if gameworld.input.get_button_down(Button::Fire1) {
             self.done = true
         }

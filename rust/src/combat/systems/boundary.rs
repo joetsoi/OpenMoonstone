@@ -2,12 +2,6 @@ use specs::{ReadExpect, ReadStorage, System, WriteStorage};
 
 use crate::combat::components::{Intent, Position, Velocity};
 
-struct Rect {
-    x: i32,
-    y: i32,
-    w: i32,
-    h: i32,
-}
 
 #[derive(Debug)]
 pub struct Boundary {

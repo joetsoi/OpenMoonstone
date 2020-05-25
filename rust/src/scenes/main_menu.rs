@@ -1,4 +1,4 @@
-use ggez::nalgebra::{Point2, Vector2};
+use ggez::nalgebra::Point2;
 use ggez::{graphics, Context, GameResult};
 use ggez_goodies::scene::{Scene, SceneSwitch};
 use lazy_static::lazy_static;

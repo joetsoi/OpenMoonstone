@@ -1,14 +1,13 @@
-use std::cell::{Ref, RefCell};
 use std::collections::hash_map::Entry::{Occupied, Vacant};
 use std::collections::{HashMap, HashSet};
 use std::fmt;
 
 use ggez::conf::NumSamples;
-use ggez::nalgebra::{Point2, Vector2};
+use ggez::nalgebra::Point2;
 use ggez::{filesystem, graphics, Context, GameResult};
 use ggez_goodies::scene;
 use ron::de::from_reader;
-use serde_derive::{Deserialize, Serialize};
+use serde_derive::Deserialize;
 use specs::world::{Builder, Index};
 use specs::{Dispatcher, DispatcherBuilder, Entity, EntityBuilder, Join, World, WorldExt};
 use warmy::{SimpleKey, Store};
@@ -56,20 +55,19 @@ use crate::combat::systems::{
     PlayerDirection,
     ResolveCollisions,
     RestrictMovementToBoundary,
-    StateUpdater,
     SpawnControl,
+    StateUpdater,
     UpdateBoundingBoxes,
     UpdateImage,
     VelocitySystem,
 };
 use crate::components::RenderOrder;
-use crate::error::{LoadError, MoonstoneError};
+use crate::error::MoonstoneError;
 use crate::files::collide::CollisionBoxes;
 use crate::files::terrain::{scenery_rects, Background};
 use crate::files::TerrainFile;
 use crate::game::{Game, SceneState};
 use crate::input;
-use crate::manager::GameYaml;
 use crate::objects::TextureAtlas;
 use crate::palette::PaletteSwaps;
 use crate::piv::{palette_swap, Colour, PivImage};
@@ -254,10 +252,6 @@ impl<'a> EncounterScene<'a> {
         world: &mut World,
         entity_names: &[&str],
     ) -> Result<(), MoonstoneError> {
-        let entities_yaml =
-            // TODO: fix to allow ? syntax
-            store.get::<GameYaml>(&warmy::SimpleKey::from("/entities.yaml"), ctx).expect("Error loading entities.yaml");
-
         let entities_res = store
             .get_by::<GameRon<HashMap<String, String>>, FromRon>(
                 &SimpleKey::from("/entities.ron"),
@@ -271,8 +265,6 @@ impl<'a> EncounterScene<'a> {
         let mut sprites: HashMap<String, Sprite> = HashMap::new();
         let mut atlas_names: HashSet<String> = HashSet::new();
         for name in entity_names {
-            let yaml_borrow = &entities_yaml.borrow();
-            let yaml_file = yaml_borrow.yaml[name].as_str().unwrap();
             let res_file = entities.get(*name).unwrap();
             // TODO: Fix to allow ? syntax
             let sprite_res = store
@@ -437,7 +429,10 @@ impl<'a> EncounterScene<'a> {
             .expect("Error loading terrain file while building encounter scene");
         let scenery_piv = game
             .store
-            .get::<PivImage>(&SimpleKey::from(scenery.borrow().background.to_atlas_name()), ctx)
+            .get::<PivImage>(
+                &SimpleKey::from(scenery.borrow().background.to_atlas_name()),
+                ctx,
+            )
             // TODO fix error handling, make this ?
             .expect("Error loading piv background")
             .borrow()
@@ -521,7 +516,7 @@ impl<'a> EncounterScene<'a> {
         // .build();
 
         let palette: Vec<Colour> = piv_clone.palette.to_vec();
-        Ok(Self {
+        Ok(EncounterScene {
             // drawable_world,
             palette,
             specs_world: world,
@@ -544,7 +539,8 @@ impl<'a> EncounterScene<'a> {
         background: &PivImage,
         scenery: &TerrainFile,
     ) -> Result<(graphics::Canvas, u32), MoonstoneError> {
-        let background_image = graphics::Image::from_rgba8(ctx, 320, 200, &background.to_rgba8()).unwrap();
+        let background_image =
+            graphics::Image::from_rgba8(ctx, 320, 200, &background.to_rgba8()).unwrap();
         // We create a canvas using the screen coordinates instead of the window height as
         // the current window height could have been resized, this causes some odd problems
         // where anything rendered to the canvas is a few pixels off
@@ -560,7 +556,7 @@ impl<'a> EncounterScene<'a> {
         // to the default then everything should be drawing to 320x200 instead of the current
         // screen coordinates that have been scaled up.
         graphics::set_transform(ctx, graphics::DrawParam::default().to_matrix());
-        graphics::apply_transformations(ctx);
+        graphics::apply_transformations(ctx)?;
         let screen_origin = Point2::new(0.0, 0.0);
 
         graphics::set_canvas(ctx, Some(&background));
@@ -712,9 +708,9 @@ impl<'a> EncounterScene<'a> {
         //     // TODO fix error handling, make this ?
         //     .expect("Error loading terrain file whlie drawing");
 
-        let file = filesystem::open(ctx, "/palettes.ron")?;
-        let swaps =
-            from_reader::<filesystem::File, HashMap<Asset, HashMap<usize, u16>>>(file).unwrap();
+        // let file = filesystem::open(ctx, "/palettes.ron")?;
+        // let swaps =
+        //     from_reader::<filesystem::File, HashMap<Asset, HashMap<usize, u16>>>(file).unwrap();
 
         for p in &scenery.positions {
             let cmp = game
@@ -768,7 +764,7 @@ impl<'a> EncounterScene<'a> {
     fn update_controllers(&mut self, input: &input::InputState) {
         let entities = self.specs_world.entities();
         let mut controllers = self.specs_world.write_storage::<Controller>();
-        for (e, controller) in (&*entities, &mut controllers).join() {
+        for (_e, controller) in (&*entities, &mut controllers).join() {
             controller.x = input.get_axis_raw(controller.x_axis) as i32;
             controller.y = input.get_axis_raw(controller.y_axis) as i32;
             controller.fire = input.get_button_down(controller.button);
@@ -817,7 +813,6 @@ impl<'a> scene::Scene<Game, input::InputEvent> for EncounterScene<'a> {
         // graphics::set_background_color(ctx, graphics::Color::from((0, 0, 0, 255)));
         // graphics::clear(ctx);
 
-        let screen_origin = Point2::new(0.0, 0.0);
         // draw background
         let lair = &self.background;
         graphics::draw(ctx, lair, graphics::DrawParam::default())?;
@@ -828,7 +823,7 @@ impl<'a> scene::Scene<Game, input::InputEvent> for EncounterScene<'a> {
             Some(&self.background),
             game,
             ctx,
-        );
+        )?;
 
         let body_storage = self.specs_world.read_storage::<Body>();
 

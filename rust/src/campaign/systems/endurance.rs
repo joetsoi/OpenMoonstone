@@ -18,7 +18,7 @@ impl<'a> System<'a> for EnduranceTracker {
 
     fn run(&mut self, (mut ordered_entities, intent, controller, mut endurance): Self::SystemData) {
         for (intent, _, endurance) in (&intent, &controller, &mut endurance).join() {
-            if let MapCommand::Move { x, y } = intent.command {
+            if let MapCommand::Move{ .. } = intent.command {
                 endurance.used += 1;
                 if endurance.used >= endurance.max {
                     ordered_entities.player_done = true;

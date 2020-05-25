@@ -1,5 +1,4 @@
-use ggez::graphics::DrawMode;
-use ggez::{graphics, Context, GameResult};
+use ggez::{Context, GameResult};
 use ggez_goodies::scene::{Scene, SceneSwitch};
 
 use crate::game::{Game, SceneState};
@@ -55,7 +54,7 @@ impl Scene<Game, InputEvent> for MainScene {
         }
     }
 
-    fn draw(&mut self, _game: &mut Game, ctx: &mut Context) -> GameResult<()> {
+    fn draw(&mut self, _game: &mut Game, _ctx: &mut Context) -> GameResult<()> {
         Ok(())
     }
 

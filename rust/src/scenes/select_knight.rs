@@ -1,13 +1,12 @@
 use std::collections::hash_map::Entry::{Occupied, Vacant};
 
-use ggez::event;
 use ggez::input::keyboard::KeyCode;
-use ggez::nalgebra::{Point2, Vector2};
+use ggez::nalgebra::Point2;
 use ggez::{graphics, Context, GameResult};
 use ggez_goodies::scene::{Scene, SceneSwitch};
 use warmy::{SimpleKey, Store};
 
-use crate::game::{Game, SceneState};
+use crate::game::Game;
 use crate::input::{Axis, Button, InputEvent};
 use crate::objects::TextureAtlas;
 use crate::palette::PaletteSwaps;
@@ -54,7 +53,7 @@ impl SelectKnight {
             .expect("failed to load select_knight.yaml");
         let mut swap_colour = extract_palette(raw_palette)
             .first()
-            .expect(("select_knight palette does not have a colour defined"))
+            .expect("select_knight palette does not have a colour defined")
             .clone();
         swap_colour.a = 255;
 
@@ -181,7 +180,7 @@ impl Scene<Game, InputEvent> for SelectKnight {
         "Select a Knight"
     }
 
-    fn input(&mut self, gameworld: &mut Game, event: InputEvent, started: bool) {
+    fn input(&mut self, gameworld: &mut Game, event: InputEvent, _started: bool) {
         match self.state {
             State::Selecting => {
                 let x = gameworld.input.get_axis_raw(Axis::Horz1) as i32;

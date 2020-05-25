@@ -4,7 +4,7 @@ use std::error;
 use std::hash::{Hash, Hasher};
 use std::iter::repeat;
 
-use ggez::nalgebra::{Point2, Vector2};
+use ggez::nalgebra::Point2;
 use ggez::{graphics, Context, GameResult};
 use warmy::{SimpleKey, Store};
 
@@ -95,7 +95,6 @@ impl Menu {
         }
 
         for text in &self.screen.text {
-            let palette_name = self.screen.background.as_ref();
             let mut batch: graphics::spritebatch::SpriteBatch = text
                 .as_sprite_batch(ctx, game, &self.palette, self.palette_hash)
                 .expect("error drawing text to screen");

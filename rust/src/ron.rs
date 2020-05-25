@@ -28,7 +28,7 @@ where
 
     fn load(
         key: SimpleKey,
-        store: &mut Storage<ggez::Context, SimpleKey>,
+        _store: &mut Storage<ggez::Context, SimpleKey>,
         ctx: &mut ggez::Context,
     ) -> Result<Loaded<Self, SimpleKey>, Self::Error> {
         match key {

@@ -1,24 +1,6 @@
-use specs::{Entities, Join, LazyUpdate, Read, ReadStorage, System, WriteStorage};
+use specs::{Entities, Join, LazyUpdate, Read, System, WriteStorage};
 
-use crate::combat::components::{
-    AnimationState,
-    Body,
-    DaggersInventory,
-    Draw,
-    Facing,
-    Health,
-    Intent,
-    MustLive,
-    Palette,
-    Position,
-    SpawnPool,
-    State,
-    UnitType,
-    Velocity,
-    WalkingState,
-    Weapon,
-};
-use crate::components::RenderOrder;
+use crate::combat::components::SpawnPool;
 
 pub struct SpawnControl;
 

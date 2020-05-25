@@ -1,5 +1,4 @@
 //! Typedefs for input shortcuts.
-use ggez::event::*;
 use ggez::input::keyboard::KeyCode;
 use ggez_goodies::input;
 
