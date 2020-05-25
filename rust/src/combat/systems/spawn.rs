@@ -28,16 +28,8 @@ impl<'a> System<'a> for SpawnControl {
         Read<'a, LazyUpdate>,
         Entities<'a>,
     );
-
-    fn run(
-        &mut self,
-        (
-            mut spawn_pool,
-            lazy,
-            entities,
-        ): Self::SystemData,
-    ) {
-        for (spawn_pool) in (&mut spawn_pool).join() {
+    fn run(&mut self, (mut spawn_pool, lazy, entities): Self::SystemData) {
+        for spawn_pool in (&mut spawn_pool).join() {
             spawn_pool.spawn_lazy(&lazy, &entities);
         }
     }

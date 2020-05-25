@@ -1,5 +1,4 @@
-use specs::{storage::BTreeStorage, Component, Entity, FlaggedStorage, VecStorage};
-use specs_derive::*;
+use specs::{storage::BTreeStorage, Component, Entity, FlaggedStorage};
 
 #[derive(Debug)]
 pub struct Interactable {

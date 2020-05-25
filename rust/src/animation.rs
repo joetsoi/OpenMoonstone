@@ -1,12 +1,9 @@
 use std::collections::HashMap;
 
-use ggez::{filesystem, Context};
+use ggez::Context;
 use serde_derive::{Deserialize, Serialize};
-use serde_yaml::Value;
 use warmy;
 
-use crate::error::LoadError;
-use crate::manager::GameYaml;
 use loadable_macro_derive::{LoadableRon, LoadableYaml};
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
