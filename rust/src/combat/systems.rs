@@ -10,6 +10,7 @@ pub mod health;
 pub mod movement;
 pub mod out_of_bounds;
 pub mod state;
+pub mod spawn;
 pub mod velocity;
 
 pub use self::action::ActionSystem;
@@ -26,4 +27,5 @@ pub use self::health::{CheckEndOfCombat, EntityDeath};
 pub use self::movement::Movement;
 pub use self::out_of_bounds::OutOfBounds;
 pub use self::state::StateUpdater;
+pub use self::spawn::SpawnControl;
 pub use self::velocity::{ConfirmVelocity, VelocitySystem};

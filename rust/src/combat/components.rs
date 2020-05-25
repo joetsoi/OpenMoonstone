@@ -9,6 +9,7 @@ pub mod identity;
 pub mod intent;
 pub mod movement;
 pub mod state;
+pub mod spawn;
 
 pub use self::ai::AiState;
 pub use self::animation::AnimationState;
@@ -21,3 +22,4 @@ pub use self::identity::UnitType;
 pub use self::intent::{Command, Intent};
 pub use self::movement::{Controller, Position, Velocity, WalkingState};
 pub use self::state::{Action, State};
+pub use self::spawn::SpawnPool;

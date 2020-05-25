@@ -30,6 +30,7 @@ use crate::combat::components::{
     MustLive,
     Palette,
     Position,
+    SpawnPool,
     State,
     UnitType,
     Velocity,
@@ -37,7 +38,6 @@ use crate::combat::components::{
     Weapon,
 };
 use crate::combat::damage::DamageTables;
-use crate::combat::spawn::SpawnPool;
 use crate::combat::systems::boundary::Boundary;
 use crate::combat::systems::health::CombatDone;
 use crate::combat::systems::{
@@ -57,6 +57,7 @@ use crate::combat::systems::{
     ResolveCollisions,
     RestrictMovementToBoundary,
     StateUpdater,
+    SpawnControl,
     UpdateBoundingBoxes,
     UpdateImage,
     VelocitySystem,
@@ -164,6 +165,7 @@ impl<'a> EncounterScene<'a> {
         world.register::<Position>();
         world.register::<RenderOrder>();
         world.register::<State>();
+        world.register::<SpawnPool>();
         world.register::<UnitType>();
         world.register::<Velocity>();
         world.register::<WalkingState>();
@@ -226,6 +228,7 @@ impl<'a> EncounterScene<'a> {
                 &["resolve_collisions"],
             )
             .with(OutOfBounds, "out_of_bounds", &[])
+            .with(SpawnControl, "spawn_control", &[])
             // .with_thread_local(Renderer {
             //     store: Store::new(StoreOpt::default()).expect("store creation"),
             // })
@@ -339,10 +342,15 @@ impl<'a> EncounterScene<'a> {
             .expect("error loading palette.yaml");
         let swaps = swaps_res.borrow();
         let mut spawn_pool = SpawnPool::new(resource);
-        spawn_pool.character
+        spawn_pool
+            .character
             .position(x, y)
             .state(direction)
-            .draw(&sprite.animations["entrance"].frames[0], "entrance", direction)
+            .draw(
+                &sprite.animations["entrance"].frames[0],
+                "entrance",
+                direction,
+            )
             .palette(
                 palette_name,
                 &palette_swap(
@@ -351,6 +359,46 @@ impl<'a> EncounterScene<'a> {
                 ),
             );
         spawn_pool.spawn(world).unwrap()
+    }
+
+    pub fn build_spawn_pool(
+        ctx: &mut Context,
+        store: &mut Store<Context, SimpleKey>,
+        world: &'a mut World,
+        resource: &str,
+        raw_palette: &[u16],
+        palette_name: &str,
+    ) -> EntityBuilder<'a> {
+        let sprite_res = store
+            .get_by::<Sprite, FromRon>(&SimpleKey::from(format!("/{}.ron", resource)), ctx, FromRon)
+            // TODO fix error handling, make this ?
+            // .expect("error getting sprite in build entity");
+            .unwrap();
+        let sprite = sprite_res.borrow();
+
+        let swaps_res = store
+            .get::<PaletteSwaps>(&SimpleKey::from("/palettes.yaml"), ctx)
+            // TODO fix error handling, make this ?
+            .expect("error loading palette.yaml");
+        let swaps = swaps_res.borrow();
+
+        let mut spawn_pool = SpawnPool::new(resource);
+        spawn_pool
+            .character
+            .draw(
+                &sprite.animations["entrance"].frames[0],
+                "entrance",
+                Facing::default(),
+            )
+            .palette(
+                palette_name,
+                &palette_swap(
+                    &raw_palette,
+                    &swaps.0.get(&palette_name.to_string()).expect("no palette"),
+                ),
+            );
+
+        world.create_entity().with(spawn_pool)
     }
 
     pub fn new(
@@ -421,6 +469,15 @@ impl<'a> EncounterScene<'a> {
             &scenery_piv.raw_palette,
             // &piv.borrow().raw_palette,
             y_max,
+        );
+
+        EncounterScene::build_spawn_pool(
+            ctx,
+            &mut game.store,
+            &mut world,
+            "knight",
+            &scenery_piv.raw_palette,
+            "blue_knight",
         );
         // let y = EncounterScene::next_starting_position(game, y_max as i32);
         // let player_1 = EncounterScene::build_entity(
