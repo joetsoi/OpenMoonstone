@@ -26,6 +26,7 @@ use super::{
     Palette,
     Position,
     State,
+    UnitType,
     Velocity,
     WalkingState,
     Weapon,
@@ -56,6 +57,9 @@ impl CharacterTemplate {
     pub fn build_entity<'a>(&mut self, world: &'a mut World) -> EntityBuilder<'a> {
         world
             .create_entity()
+            .with(UnitType {
+                name: self.resource.clone(),
+            })
             .with(MustLive {})
             .with(self.position.clone())
             .with(Intent {
