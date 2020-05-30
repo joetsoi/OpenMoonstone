@@ -2,6 +2,7 @@ use std::cmp::min;
 
 use specs::{
     storage::BTreeStorage,
+    world::Index,
     Builder,
     Component,
     Entities,
@@ -22,7 +23,6 @@ use super::{
     Facing,
     Health,
     Intent,
-    MustLive,
     Palette,
     Position,
     State,
@@ -60,7 +60,6 @@ impl CharacterTemplate {
             .with(UnitType {
                 name: self.resource.clone(),
             })
-            .with(MustLive {})
             .with(self.position.clone())
             .with(Intent {
                 ..Default::default()
@@ -94,9 +93,11 @@ impl CharacterTemplate {
             })
     }
 
-    pub fn build_from_template<'a>(&self, builder: impl Builder) -> impl Builder {
+    pub fn create<'a>(&self, builder: impl Builder) -> Entity {
         builder
-            .with(MustLive {})
+            .with(UnitType {
+                name: self.resource.clone(),
+            })
             .with(self.position.clone())
             .with(Intent {
                 ..Default::default()
@@ -128,6 +129,7 @@ impl CharacterTemplate {
             .with(DaggersInventory {
                 ..Default::default()
             })
+            .build()
     }
 
     pub fn position<'a>(&'a mut self, x: i32, y: i32) -> &'a mut Self {
@@ -146,7 +148,7 @@ impl CharacterTemplate {
             frame: frame.clone(),
             animation: animation.to_string(),
             resource_name: self.resource.clone(),
-            direction: direction,
+            direction,
         };
         self
     }
@@ -176,7 +178,7 @@ pub struct SpawnPool {
     pub character: CharacterTemplate,
     pub remaining: usize,
     pub max_active: usize,
-    pub active: Vec<Entity>,
+    pub active: Vec<Index>,
     pub spawn_points: Vec<SpawnPoint>,
 }
 
@@ -196,12 +198,13 @@ impl Default for SpawnPool {
 }
 
 impl SpawnPool {
-    pub fn new(resource: &str) -> Self {
+    pub fn new(resource: &str, x: i32, y: i32, direction: Facing) -> Self {
         SpawnPool {
             character: CharacterTemplate {
                 resource: resource.to_string(),
                 ..Default::default()
             },
+            spawn_points: vec![SpawnPoint { x, y, direction }],
             ..Default::default()
         }
     }
@@ -218,10 +221,14 @@ impl SpawnPool {
     pub fn spawn_lazy<'a>(&mut self, lazy: &Read<'a, LazyUpdate>, entities: &Entities<'a>) {
         let spaces = min(self.max_active - self.active.len(), self.remaining);
         for _ in 0..spaces {
-            let builder = self
-                .character
-                .build_from_template(lazy.create_entity(&entities));
-            builder.build();
+            let entity = self.character.create(lazy.create_entity(&entities));
+            self.active.push(entity.id());
+            self.remaining -= 1;
+            print!("spawned");
         }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.remaining <= 0 && self.active.len() == 0
     }
 }

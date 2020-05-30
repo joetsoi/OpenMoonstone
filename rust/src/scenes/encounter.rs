@@ -48,6 +48,7 @@ use crate::combat::systems::{
     CheckEndOfCombat,
     Commander,
     ConfirmVelocity,
+    DestroySpawnPool,
     EntityDeath,
     EntityEntityCollision,
     Movement,
@@ -64,7 +65,7 @@ use crate::combat::systems::{
 use crate::components::RenderOrder;
 use crate::error::MoonstoneError;
 use crate::files::collide::CollisionBoxes;
-use crate::files::terrain::{SCENERY_RECTS, Background};
+use crate::files::terrain::{Background, SCENERY_RECTS};
 use crate::files::TerrainFile;
 use crate::game::{Game, SceneState};
 use crate::input;
@@ -227,6 +228,7 @@ impl<'a> EncounterScene<'a> {
             )
             .with(OutOfBounds, "out_of_bounds", &[])
             .with(SpawnControl, "spawn_control", &[])
+            .with(DestroySpawnPool, "destroy_spawn_pool", &[])
             // .with_thread_local(Renderer {
             //     store: Store::new(StoreOpt::default()).expect("store creation"),
             // })
@@ -333,7 +335,7 @@ impl<'a> EncounterScene<'a> {
             // TODO fix error handling, make this ?
             .expect("error loading palette.yaml");
         let swaps = swaps_res.borrow();
-        let mut spawn_pool = SpawnPool::new(resource);
+        let mut spawn_pool = SpawnPool::new(resource, x, y, direction);
         spawn_pool
             .character
             .position(x, y)
@@ -360,6 +362,9 @@ impl<'a> EncounterScene<'a> {
         resource: &str,
         raw_palette: &[u16],
         palette_name: &str,
+        x: i32,
+        y: i32,
+        direction: Facing,
     ) -> EntityBuilder<'a> {
         let sprite_res = store
             .get_by::<Sprite, FromRon>(&SimpleKey::from(format!("/{}.ron", resource)), ctx, FromRon)
@@ -374,9 +379,11 @@ impl<'a> EncounterScene<'a> {
             .expect("error loading palette.yaml");
         let swaps = swaps_res.borrow();
 
-        let mut spawn_pool = SpawnPool::new(resource);
+        let mut spawn_pool = SpawnPool::new(resource, x, y, direction);
         spawn_pool
             .character
+            .position(x, y)
+            .state(direction)
             .draw(
                 &sprite.animations["entrance"].frames[0],
                 "entrance",
@@ -390,7 +397,7 @@ impl<'a> EncounterScene<'a> {
                 ),
             );
 
-        world.create_entity().with(spawn_pool)
+        world.create_entity().with(spawn_pool).with(MustLive {})
     }
 
     pub fn new(
@@ -466,14 +473,6 @@ impl<'a> EncounterScene<'a> {
             y_max,
         );
 
-        EncounterScene::build_spawn_pool(
-            ctx,
-            &mut game.store,
-            &mut world,
-            "knight",
-            &scenery_piv.raw_palette,
-            "blue_knight",
-        );
         // let y = EncounterScene::next_starting_position(game, y_max as i32);
         // let player_1 = EncounterScene::build_entity(
         //     ctx,
@@ -639,7 +638,15 @@ impl<'a> EncounterScene<'a> {
                 _ => Facing::Left,
             };
             let mapping = control_map.get(&n).unwrap();
-            let player = EncounterScene::build_entity(
+            // EncounterScene::build_spawn_pool(
+            //     ctx,
+            //     &mut game.store,
+            //     &mut world,
+            //     "knight",
+            //     &scenery_piv.raw_palette,
+            //     "blue_knight",
+            // );
+            let player = EncounterScene::build_spawn_pool(
                 ctx,
                 &mut game.store,
                 world,
@@ -650,6 +657,17 @@ impl<'a> EncounterScene<'a> {
                 y,
                 facing,
             )
+            // let player = EncounterScene::build_entity(
+            //     ctx,
+            //     &mut game.store,
+            //     world,
+            //     "knight",
+            //     raw_palette,
+            //     colours[n as usize],
+            //     x,
+            //     y,
+            //     facing,
+            // )
             .with(Controller {
                 x_axis: mapping.0,
                 y_axis: mapping.1,
