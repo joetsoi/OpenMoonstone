@@ -30,20 +30,15 @@ pub struct CombatDone(pub bool);
 pub struct CheckEndOfCombat;
 
 impl<'a> System<'a> for CheckEndOfCombat {
-    type SystemData = (
-        WriteExpect<'a, CombatDone>,
-        ReadStorage<'a, Health>,
-        ReadStorage<'a, MustLive>,
-    );
+    type SystemData = (WriteExpect<'a, CombatDone>, ReadStorage<'a, MustLive>);
 
-    fn run(&mut self, (mut combat_done, health, must_live): Self::SystemData) {
+    fn run(&mut self, (mut combat_done, must_live): Self::SystemData) {
         use specs::Join;
         // let live_entity_count = (&health, &must_live)
         let live_entity_count = (&must_live)
             .join()
             // .filter(|(h, _)| h.points > 0)
             .fold(0, |acc, _| acc + 1);
-        println!("{:?}", live_entity_count);
 
         if live_entity_count <= 1 {
             combat_done.0 = true;

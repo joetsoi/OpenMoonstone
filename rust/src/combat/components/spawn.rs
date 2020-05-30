@@ -18,6 +18,7 @@ use specs_derive::*;
 use super::{
     AnimationState,
     Body,
+    Controller,
     DaggersInventory,
     Draw,
     Facing,
@@ -33,6 +34,7 @@ use super::{
 };
 use crate::animation::Frame;
 use crate::components::RenderOrder;
+use crate::input;
 use crate::piv::Colour;
 
 /// Non consuming (but mutating) builder for Entities
@@ -51,11 +53,12 @@ pub struct CharacterTemplate {
     state: State,
     palette: Palette,
     draw: Draw,
+    controller: Option<Controller>,
 }
 
 impl CharacterTemplate {
     pub fn build_entity<'a>(&mut self, world: &'a mut World) -> EntityBuilder<'a> {
-        world
+        let mut builder = world
             .create_entity()
             .with(UnitType {
                 name: self.resource.clone(),
@@ -90,11 +93,16 @@ impl CharacterTemplate {
             })
             .with(DaggersInventory {
                 ..Default::default()
-            })
+            });
+        if let Some(controller) = &self.controller {
+            builder = builder.with(controller.clone());
+            println!("adding controller");
+        }
+        builder
     }
 
     pub fn create<'a>(&self, builder: impl Builder) -> Entity {
-        builder
+        let mut builder = builder
             .with(UnitType {
                 name: self.resource.clone(),
             })
@@ -128,8 +136,12 @@ impl CharacterTemplate {
             })
             .with(DaggersInventory {
                 ..Default::default()
-            })
-            .build()
+            });
+        if let Some(controller) = &self.controller {
+            builder = builder.with(controller.clone());
+            println!("adding controller");
+        }
+        builder.build()
     }
 
     pub fn position<'a>(&'a mut self, x: i32, y: i32) -> &'a mut Self {
@@ -161,6 +173,16 @@ impl CharacterTemplate {
     pub fn palette<'a>(&'a mut self, name: &str, colours: &[Colour]) -> &'a mut Self {
         self.palette.name = name.to_string();
         self.palette.palette.splice(.., colours.to_vec());
+        self
+    }
+
+    pub fn controller<'a>(&'a mut self, x_axis: input::Axis, y_axis: input::Axis, button: input::Button) -> &'a mut Self {
+        self.controller = Some(Controller {
+                x_axis,
+                y_axis,
+                button,
+                ..Default::default()
+        });
         self
     }
 }

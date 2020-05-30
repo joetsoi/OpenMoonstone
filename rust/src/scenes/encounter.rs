@@ -358,14 +358,14 @@ impl<'a> EncounterScene<'a> {
     pub fn build_spawn_pool(
         ctx: &mut Context,
         store: &mut Store<Context, SimpleKey>,
-        world: &'a mut World,
+        // world: &'a mut World,
         resource: &str,
         raw_palette: &[u16],
         palette_name: &str,
         x: i32,
         y: i32,
         direction: Facing,
-    ) -> EntityBuilder<'a> {
+    ) -> SpawnPool {
         let sprite_res = store
             .get_by::<Sprite, FromRon>(&SimpleKey::from(format!("/{}.ron", resource)), ctx, FromRon)
             // TODO fix error handling, make this ?
@@ -396,8 +396,7 @@ impl<'a> EncounterScene<'a> {
                     &swaps.0.get(&palette_name.to_string()).expect("no palette"),
                 ),
             );
-
-        world.create_entity().with(spawn_pool).with(MustLive {})
+        spawn_pool
     }
 
     pub fn new(
@@ -646,17 +645,19 @@ impl<'a> EncounterScene<'a> {
             //     &scenery_piv.raw_palette,
             //     "blue_knight",
             // );
-            let player = EncounterScene::build_spawn_pool(
+            let mut spawn_pool = EncounterScene::build_spawn_pool(
                 ctx,
                 &mut game.store,
-                world,
+                // world,
                 "knight",
                 raw_palette,
                 colours[n as usize],
                 x,
                 y,
                 facing,
-            )
+            );
+            spawn_pool.character.controller(mapping.0, mapping.1 ,mapping.2);
+            let player = world.create_entity().with(spawn_pool).with(MustLive {}).build();
             // let player = EncounterScene::build_entity(
             //     ctx,
             //     &mut game.store,
@@ -668,13 +669,13 @@ impl<'a> EncounterScene<'a> {
             //     y,
             //     facing,
             // )
-            .with(Controller {
-                x_axis: mapping.0,
-                y_axis: mapping.1,
-                button: mapping.2,
-                ..Default::default()
-            })
-            .build();
+            // .with(Controller {
+            //     x_axis: mapping.0,
+            //     y_axis: mapping.1,
+            //     button: mapping.2,
+            //     ..Default::default()
+            // })
+            // .build();
             players.push(player);
         }
 

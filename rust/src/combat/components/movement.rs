@@ -33,7 +33,7 @@ pub struct WalkingState {
     pub step: u32,
 }
 
-#[derive(Component, Debug)]
+#[derive(Component, Clone, Debug)]
 #[storage(VecStorage)]
 pub struct Controller {
     pub x: i32,
