@@ -661,7 +661,6 @@ impl<'a> EncounterScene<'a> {
                 .character
                 .ai_state(
                     "black_knight",
-                    None,
                     4,
                     80,
                     100,

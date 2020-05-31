@@ -151,14 +151,13 @@ impl CharacterTemplate {
     pub fn ai_state<'a>(
         &'a mut self,
         class: &str,
-        target: Option<Entity>,
         y_range: u32,
         close_range: u32,
         long_range: u32,
     ) -> &'a mut Self {
         self.ai_state = Some(AiState {
             class: class.to_string(),
-            target,
+            target: None,
             y_range,
             close_range,
             long_range,
