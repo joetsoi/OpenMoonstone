@@ -1,18 +1,27 @@
-use specs::{ReadStorage, System, WriteExpect, WriteStorage};
+use specs::{Entities, ReadStorage, System, WriteExpect, WriteStorage};
 
 use crate::combat::components::{Action, Health, MustLive, State};
 
 pub struct EntityDeath;
 
 impl<'a> System<'a> for EntityDeath {
-    type SystemData = (ReadStorage<'a, Health>, WriteStorage<'a, State>);
+    type SystemData = (
+        ReadStorage<'a, Health>,
+        WriteStorage<'a, State>,
+        Entities<'a>,
+    );
 
-    fn run(&mut self, (health, mut state): Self::SystemData) {
+    fn run(&mut self, (health, mut state, entities): Self::SystemData) {
         use specs::Join;
 
-        for (health, state) in (&health, &mut state).join() {
+        for (health, state, entity) in (&health, &mut state, &entities).join() {
             match state.action {
-                Action::Death(_) | Action::Dead => (),
+                Action::Death(_) => (),
+                Action::Dead => {
+                    println!("dead so deleting {}", entity.id());
+                    entities.delete(entity).expect("failed to delete entity");
+                    println!("test {}", entities.is_alive(entity));
+                }
                 _ => {
                     if health.points <= 0 {
                         state.action = Action::Death("death".to_string());

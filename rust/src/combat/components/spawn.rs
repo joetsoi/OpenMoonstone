@@ -1,4 +1,5 @@
 use std::cmp::min;
+use std::collections::HashSet;
 
 use specs::{
     storage::BTreeStorage,
@@ -200,7 +201,7 @@ pub struct SpawnPool {
     pub character: CharacterTemplate,
     pub remaining: usize,
     pub max_active: usize,
-    pub active: Vec<Index>,
+    pub active: HashSet<Index>,
     pub spawn_points: Vec<SpawnPoint>,
 }
 
@@ -213,7 +214,7 @@ impl Default for SpawnPool {
             },
             remaining: 1,
             max_active: 1,
-            active: Vec::new(),
+            active: HashSet::new(),
             spawn_points: Vec::new(),
         }
     }
@@ -244,13 +245,13 @@ impl SpawnPool {
         let spaces = min(self.max_active - self.active.len(), self.remaining);
         for _ in 0..spaces {
             let entity = self.character.create(lazy.create_entity(&entities));
-            self.active.push(entity.id());
+            self.active.insert(entity.id());
             self.remaining -= 1;
             print!("spawned");
         }
     }
 
     pub fn is_empty(&self) -> bool {
-        self.remaining <= 0 && self.active.len() == 0
+        self.remaining <= 0 && self.active.is_empty()
     }
 }

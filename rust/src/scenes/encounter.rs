@@ -184,7 +184,17 @@ impl<'a> EncounterScene<'a> {
                 &["player_direction", "ai_direction"],
             )
             .with(EntityDeath, "entity_death", &["action"])
-            .with(CheckEndOfCombat, "check_end_of_combat", &["entity_death"])
+            .with(DestroySpawnPool, "destroy_spawn_pool", &["entity_death"])
+            .with(
+                CheckEndOfCombat,
+                "check_end_of_combat",
+                &["destroy_spawn_pool"],
+            )
+            .with(
+                SpawnControl,
+                "spawn_control",
+                &["entity_death", "destroy_spawn_pool"],
+            )
             .with(
                 VelocitySystem,
                 "velocity",
@@ -227,8 +237,6 @@ impl<'a> EncounterScene<'a> {
                 &["resolve_collisions"],
             )
             .with(OutOfBounds, "out_of_bounds", &[])
-            .with(SpawnControl, "spawn_control", &[])
-            .with(DestroySpawnPool, "destroy_spawn_pool", &[])
             // .with_thread_local(Renderer {
             //     store: Store::new(StoreOpt::default()).expect("store creation"),
             // })
@@ -656,8 +664,14 @@ impl<'a> EncounterScene<'a> {
                 y,
                 facing,
             );
-            spawn_pool.character.controller(mapping.0, mapping.1 ,mapping.2);
-            let player = world.create_entity().with(spawn_pool).with(MustLive {}).build();
+            spawn_pool
+                .character
+                .controller(mapping.0, mapping.1, mapping.2);
+            let player = world
+                .create_entity()
+                .with(spawn_pool)
+                .with(MustLive {})
+                .build();
             // let player = EncounterScene::build_entity(
             //     ctx,
             //     &mut game.store,
