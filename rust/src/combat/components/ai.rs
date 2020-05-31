@@ -1,7 +1,7 @@
 use specs::{Component, Entity, VecStorage};
 use specs_derive::*;
 
-#[derive(Component, Debug, Default)]
+#[derive(Clone, Component, Debug, Default)]
 #[storage(VecStorage)]
 pub struct AiState {
     pub class: String,

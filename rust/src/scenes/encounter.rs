@@ -41,6 +41,7 @@ use crate::combat::systems::boundary::Boundary;
 use crate::combat::systems::health::CombatDone;
 use crate::combat::systems::{
     ActionSystem,
+    SetAiTarget,
     AiDirection,
     Animation,
     BlackKnightAi,
@@ -176,7 +177,8 @@ impl<'a> EncounterScene<'a> {
         DispatcherBuilder::new()
             .with(Commander, "commander", &[])
             .with(PlayerDirection, "player_direction", &["commander"])
-            .with(BlackKnightAi, "black_knight_ai", &[])
+            .with(SetAiTarget, "set_ai_target", &[])
+            .with(BlackKnightAi, "black_knight_ai", &["set_ai_target"])
             .with(AiDirection, "ai_direction", &["black_knight_ai"])
             .with(
                 ActionSystem,
@@ -694,27 +696,53 @@ impl<'a> EncounterScene<'a> {
         }
 
         let player_1 = players.get(0).unwrap();
+
         if game.num_players == 1 {
             let y = EncounterScene::next_starting_position(game, y_max as i32);
-            EncounterScene::build_entity(
+            let mut spawn_pool = EncounterScene::build_spawn_pool(
                 ctx,
                 &mut game.store,
-                world,
+                // world,
                 "knight",
                 raw_palette,
                 "black_knight",
                 30,
                 y,
                 Facing::default(),
-            )
-            .with(AiState {
-                class: "black_knight".to_string(),
-                target: Some(*player_1),
-                y_range: 4,
-                close_range: 80,
-                long_range: 100,
-            })
-            .build();
+            );
+            spawn_pool
+                .character
+                .ai_state(
+                    "black_knight",
+                    None,
+                    4,
+                    80,
+                    100,
+                );
+            world
+                .create_entity()
+                .with(spawn_pool)
+                .with(MustLive {})
+                .build();
+            // EncounterScene::build_entity(
+            //     ctx,
+            //     &mut game.store,
+            //     world,
+            //     "knight",
+            //     raw_palette,
+            //     "black_knight",
+            //     30,
+            //     y,
+            //     Facing::default(),
+            // )
+            // .with(AiState {
+            //     class: "black_knight".to_string(),
+            //     target: Some(*player_1),
+            //     y_range: 4,
+            //     close_range: 80,
+            //     long_range: 100,
+            // })
+            // .build();
         }
 
         (

@@ -1,11 +1,41 @@
 use rand::Rng;
-use specs::{ReadStorage, System, WriteStorage};
+use specs::{Entities, Join, ReadStorage, System, WriteStorage};
 
 use crate::combat::components::intent::{AttackType, DefendType, XAxis, YAxis};
 use crate::combat::components::movement::get_distance;
 use crate::combat::components::state::Action;
-use crate::combat::components::{AiState, Command, DaggersInventory, Intent, Position, State};
+use crate::combat::components::{
+    AiState,
+    Command,
+    Controller,
+    DaggersInventory,
+    Intent,
+    Position,
+    State,
+};
 use crate::rect::Point;
+
+pub struct SetAiTarget;
+
+impl<'a> System<'a> for SetAiTarget {
+    type SystemData = (
+        ReadStorage<'a, Controller>,
+        WriteStorage<'a, AiState>,
+        Entities<'a>,
+    );
+
+    fn run(&mut self, (controller, mut ai, entities): Self::SystemData) {
+        for ai in (&mut ai).join() {
+            if let None = &ai.target {
+                for (_controller, entity) in (&controller, &*entities).join() {
+                    // target the first entity with a human controller
+                    ai.target = Some(entity);
+                    break;
+                }
+            }
+        }
+    }
+}
 
 const ACTION_CHANCE: [u32; 19] = [20, 10, 8, 7, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5];
 
@@ -24,8 +54,6 @@ impl<'a> System<'a> for BlackKnightAi {
         &mut self,
         (ai_storage, position_storage, state_storage, dagger_storage, mut intent_storage): Self::SystemData,
     ) {
-        use specs::Join;
-
         for (ai, position, state, daggers, intent) in (
             &ai_storage,
             &position_storage,

@@ -17,6 +17,7 @@ use specs::{
 use specs_derive::*;
 
 use super::{
+    AiState,
     AnimationState,
     Body,
     Controller,
@@ -55,6 +56,7 @@ pub struct CharacterTemplate {
     palette: Palette,
     draw: Draw,
     controller: Option<Controller>,
+    ai_state: Option<AiState>,
 }
 
 impl CharacterTemplate {
@@ -97,7 +99,10 @@ impl CharacterTemplate {
             });
         if let Some(controller) = &self.controller {
             builder = builder.with(controller.clone());
-            println!("adding controller");
+        }
+        if let Some(ai_state) = &self.ai_state {
+            builder = builder.with(ai_state.clone());
+            println!("ai")
         }
         builder
     }
@@ -141,6 +146,9 @@ impl CharacterTemplate {
         if let Some(controller) = &self.controller {
             builder = builder.with(controller.clone());
             println!("adding controller");
+        } else if let Some(ai_state) = &self.ai_state {
+            builder = builder.with(ai_state.clone());
+            println!("ai")
         }
         builder.build()
     }
@@ -177,12 +185,35 @@ impl CharacterTemplate {
         self
     }
 
-    pub fn controller<'a>(&'a mut self, x_axis: input::Axis, y_axis: input::Axis, button: input::Button) -> &'a mut Self {
+    pub fn controller<'a>(
+        &'a mut self,
+        x_axis: input::Axis,
+        y_axis: input::Axis,
+        button: input::Button,
+    ) -> &'a mut Self {
         self.controller = Some(Controller {
-                x_axis,
-                y_axis,
-                button,
-                ..Default::default()
+            x_axis,
+            y_axis,
+            button,
+            ..Default::default()
+        });
+        self
+    }
+
+    pub fn ai_state<'a>(
+        &'a mut self,
+        class: &str,
+        target: Option<Entity>,
+        y_range: u32,
+        close_range: u32,
+        long_range: u32,
+    ) -> &'a mut Self {
+        self.ai_state = Some(AiState {
+            class: class.to_string(),
+            target,
+            y_range,
+            close_range,
+            long_range,
         });
         self
     }
