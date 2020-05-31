@@ -18,9 +18,7 @@ impl<'a> System<'a> for EntityDeath {
             match state.action {
                 Action::Death(_) => (),
                 Action::Dead => {
-                    println!("dead so deleting {}", entity.id());
                     entities.delete(entity).expect("failed to delete entity");
-                    println!("test {}", entities.is_alive(entity));
                 }
                 _ => {
                     if health.points <= 0 {

@@ -8,11 +8,8 @@ use specs::{
     Component,
     Entities,
     Entity,
-    EntityBuilder,
     LazyUpdate,
     Read,
-    World,
-    WorldExt,
 };
 use specs_derive::*;
 
@@ -60,53 +57,6 @@ pub struct CharacterTemplate {
 }
 
 impl CharacterTemplate {
-    pub fn build_entity<'a>(&mut self, world: &'a mut World) -> EntityBuilder<'a> {
-        let mut builder = world
-            .create_entity()
-            .with(UnitType {
-                name: self.resource.clone(),
-            })
-            .with(self.position.clone())
-            .with(Intent {
-                ..Default::default()
-            })
-            .with(WalkingState {
-                ..Default::default()
-            })
-            .with(Velocity {
-                ..Default::default()
-            })
-            .with(AnimationState {
-                ..Default::default()
-            })
-            .with(RenderOrder {
-                ..Default::default()
-            })
-            .with(self.draw.clone())
-            .with(self.palette.clone())
-            .with(self.state.clone())
-            .with(Health {
-                ..Default::default()
-            })
-            .with(Body {
-                ..Default::default()
-            })
-            .with(Weapon {
-                ..Default::default()
-            })
-            .with(DaggersInventory {
-                ..Default::default()
-            });
-        if let Some(controller) = &self.controller {
-            builder = builder.with(controller.clone());
-        }
-        if let Some(ai_state) = &self.ai_state {
-            builder = builder.with(ai_state.clone());
-            println!("ai")
-        }
-        builder
-    }
-
     pub fn create<'a>(&self, builder: impl Builder) -> Entity {
         let mut builder = builder
             .with(UnitType {
@@ -145,10 +95,8 @@ impl CharacterTemplate {
             });
         if let Some(controller) = &self.controller {
             builder = builder.with(controller.clone());
-            println!("adding controller");
         } else if let Some(ai_state) = &self.ai_state {
             builder = builder.with(ai_state.clone());
-            println!("ai")
         }
         builder.build()
     }
@@ -260,15 +208,6 @@ impl SpawnPool {
             },
             spawn_points: vec![SpawnPoint { x, y, direction }],
             ..Default::default()
-        }
-    }
-
-    pub fn spawn<'a>(&mut self, world: &'a mut World) -> Option<EntityBuilder<'a>> {
-        if self.remaining > 0 {
-            self.remaining -= 1;
-            Some(self.character.build_entity(world))
-        } else {
-            None
         }
     }
 

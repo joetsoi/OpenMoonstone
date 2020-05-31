@@ -9,7 +9,7 @@ use ggez_goodies::scene;
 use ron::de::from_reader;
 use serde_derive::Deserialize;
 use specs::world::{Builder, Index};
-use specs::{Dispatcher, DispatcherBuilder, Entity, EntityBuilder, Join, World, WorldExt};
+use specs::{Dispatcher, DispatcherBuilder, Entity, Join, World, WorldExt};
 use warmy::{SimpleKey, Store};
 
 use super::transition::FadeStyle;
@@ -135,11 +135,6 @@ pub struct EncounterScene<'a> {
     pub dispatcher: Dispatcher<'a, 'a>,
     pub background: graphics::Canvas,
     pub palette: Vec<Colour>,
-    player_1: Index,
-    player_2: Option<Index>,
-    player_3: Option<Index>,
-    player_4: Option<Index>,
-
     //
     current_update_tick: u32,
     // the number of ticks since the encounter is done
@@ -272,7 +267,6 @@ impl<'a> EncounterScene<'a> {
             )
             .expect("error loading entities.ron");
         let entities = &entities_res.borrow().0;
-        println!("ent {:?}", entities);
 
         let mut sprites: HashMap<String, Sprite> = HashMap::new();
         let mut atlas_names: HashSet<String> = HashSet::new();
@@ -321,49 +315,6 @@ impl<'a> EncounterScene<'a> {
     //         })
     //         .build()
     // }
-
-    fn build_entity(
-        ctx: &mut Context,
-        store: &mut Store<Context, SimpleKey>,
-        world: &'a mut World,
-        resource: &str,
-        raw_palette: &[u16],
-        palette_name: &str,
-        x: i32,
-        y: i32,
-        direction: Facing,
-    ) -> EntityBuilder<'a> {
-        let sprite_res = store
-            .get_by::<Sprite, FromRon>(&SimpleKey::from(format!("/{}.ron", resource)), ctx, FromRon)
-            // TODO fix error handling, make this ?
-            // .expect("error getting sprite in build entity");
-            .unwrap();
-        let sprite = sprite_res.borrow();
-
-        let swaps_res = store
-            .get::<PaletteSwaps>(&SimpleKey::from("/palettes.yaml"), ctx)
-            // TODO fix error handling, make this ?
-            .expect("error loading palette.yaml");
-        let swaps = swaps_res.borrow();
-        let mut spawn_pool = SpawnPool::new(resource, x, y, direction);
-        spawn_pool
-            .character
-            .position(x, y)
-            .state(direction)
-            .draw(
-                &sprite.animations["entrance"].frames[0],
-                "entrance",
-                direction,
-            )
-            .palette(
-                palette_name,
-                &palette_swap(
-                    &raw_palette,
-                    &swaps.0.get(&palette_name.to_string()).expect("no palette"),
-                ),
-            );
-        spawn_pool.spawn(world).unwrap()
-    }
 
     pub fn build_spawn_pool(
         ctx: &mut Context,
@@ -473,7 +424,7 @@ impl<'a> EncounterScene<'a> {
 
         // piv.raw_with_swap();
 
-        let (player_1, player_2, player_3, player_4) = EncounterScene::create_entities(
+        EncounterScene::create_entities(
             ctx,
             game,
             &mut world,
@@ -530,10 +481,6 @@ impl<'a> EncounterScene<'a> {
             specs_world: world,
             background,
             dispatcher: EncounterScene::build_dispatcher(),
-            player_1,
-            player_2,
-            player_3,
-            player_4,
             current_update_tick: 0,
             ticks_after: 0,
             fade_out_done: false,
