@@ -1,7 +1,16 @@
-use specs::{ReadStorage, System, WriteStorage};
-
 use crate::combat::components::intent::{XAxis, YAxis};
-use crate::combat::components::{Action, Command, Facing, Intent, State, Velocity, WalkingState};
+use crate::combat::components::{
+    Action,
+    Command,
+    Facing,
+    Intent,
+    State,
+    UnitType,
+    Velocity,
+    WalkingState,
+};
+use crate::combat::resources::MoveDistances;
+use specs::{ReadExpect, ReadStorage, System, WriteStorage};
 
 pub const X_STEP_SIZES: [[i32; 4]; 3] = [[-25, -3, -23, -4], [0, 0, 0, 0], [25, 3, 23, 4]];
 pub const Y_STEP_SIZES: [[i32; 4]; 3] = [[-2, -9, -2, -9], [0, 0, 0, 0], [8, 2, 9, 2]];
@@ -10,17 +19,28 @@ pub struct VelocitySystem;
 
 impl<'a> System<'a> for VelocitySystem {
     type SystemData = (
+        ReadExpect<'a, MoveDistances>,
+        ReadStorage<'a, UnitType>,
         ReadStorage<'a, Intent>,
         WriteStorage<'a, State>,
         WriteStorage<'a, Velocity>,
         WriteStorage<'a, WalkingState>,
     );
 
-    fn run(&mut self, (intent, mut state, mut velocity, mut walking_state): Self::SystemData) {
+    fn run(
+        &mut self,
+        (move_data, unit_type, intent, mut state, mut velocity, mut walking_state): Self::SystemData,
+    ) {
         use specs::Join;
 
-        for (intent, state, velocity, walking_state) in
-            (&intent, &mut state, &mut velocity, &mut walking_state).join()
+        for (unit_type, intent, state, velocity, walking_state) in (
+            &unit_type,
+            &intent,
+            &mut state,
+            &mut velocity,
+            &mut walking_state,
+        )
+            .join()
         {
             match state.action {
                 Action::Idle | Action::Move { .. } => match intent.command {
@@ -49,8 +69,22 @@ impl<'a> System<'a> for VelocitySystem {
                                 // types.
                                 step = (step + 1) % 4;
                             }
-                            velocity.x = X_STEP_SIZES[(x as i32 + 1) as usize][step as usize];
-                            velocity.y = Y_STEP_SIZES[(y as i32 + 1) as usize][step as usize];
+                            match move_data.distances.get(&unit_type.name) {
+                                Some(step_sizes) => {
+                                    velocity.y =
+                                        step_sizes.y_axis[(y as i32 + 1) as usize][step as usize].j;
+                                    velocity.x =
+                                        step_sizes.y_axis[(x as i32 + 1) as usize][step as usize].i;
+                                    if x as i32 != 0 {
+                                        velocity.x = step_sizes.x_axis[(x as i32 + 1) as usize]
+                                            [step as usize]
+                                            .i;
+                                    };
+                                }
+                                None => {
+                                    eprintln!("Couldn't find {} in movement.ron", unit_type.name)
+                                }
+                            }
                         }
                     }
                     _ => {

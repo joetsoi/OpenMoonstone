@@ -78,6 +78,7 @@ use crate::ron::{FromDosFilesRon, FromRon, GameRon};
 use crate::scenes::world::draw_entities;
 use crate::scenes::FSceneSwitch;
 use crate::systems::SortRenderByYPosition;
+use crate::combat::resources::MoveDistances;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Deserialize)]
 pub enum Asset {
@@ -250,6 +251,13 @@ impl<'a> EncounterScene<'a> {
             .expect("error loading damage.yaml");
         world.insert(damage_tables.borrow().clone());
         world.insert(CombatDone(false));
+        let move_distances = store
+            .get_by::<MoveDistances, FromRon>(
+                &SimpleKey::from("/movement.ron"),
+                ctx,
+                FromRon,
+            ).expect("error in movement.ron file");
+        world.insert(move_distances.borrow().clone());
         Ok(())
     }
 
