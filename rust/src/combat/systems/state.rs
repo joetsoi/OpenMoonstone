@@ -2,6 +2,7 @@ use specs::{Entities, LazyUpdate, Read, ReadExpect, ReadStorage, System, WriteSt
 
 use crate::animation::SpriteData;
 use crate::combat::components::{Action, Draw, Position, State, UnitType, Velocity, Weapon};
+use crate::components::RenderOrder;
 
 pub struct StateUpdater;
 
@@ -29,6 +30,12 @@ impl<'a> System<'a> for StateUpdater {
                         Position {
                             x: position.x + 5 * state.direction as i32,
                             y: position.y,
+                        },
+                    );
+                    updater.insert(
+                        dagger,
+                        RenderOrder {
+                            ..Default::default()
                         },
                     );
                     updater.insert(
