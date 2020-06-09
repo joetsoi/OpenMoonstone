@@ -3,7 +3,7 @@ use specs::{Entities, Join, ReadExpect, ReadStorage, System, WriteExpect, WriteS
 use crate::animation::SpriteData;
 use crate::campaign::components::map_intent::MapCommand;
 use crate::campaign::components::{Endurance, MapIntent};
-use crate::combat::components::{Controller, Draw};
+use crate::combat::components::{UnitType, Controller, Draw};
 use crate::input::{Axis, Button};
 use crate::scenes::map::{OrderedEntities, TurnOver};
 
@@ -14,6 +14,7 @@ impl<'a> System<'a> for PrepareNextDay {
         ReadExpect<'a, SpriteData>,
         WriteExpect<'a, OrderedEntities>,
         ReadExpect<'a, TurnOver>,
+        ReadStorage<'a, UnitType>,
         WriteStorage<'a, Endurance>,
         WriteStorage<'a, Draw>,
         WriteStorage<'a, Controller>,
@@ -26,6 +27,7 @@ impl<'a> System<'a> for PrepareNextDay {
             sprite_data,
             mut ordered_entities,
             turn_over,
+            unit_type_storage,
             mut endurance,
             mut draw_storage,
             mut controller_storage,
@@ -58,8 +60,11 @@ impl<'a> System<'a> for PrepareNextDay {
                 let draw = draw_storage
                     .get_mut(player)
                     .unwrap_or_else(|| panic!("player doesn't have a draw component"));
+                let unit_type = unit_type_storage
+                    .get(player)
+                    .unwrap_or_else(|| panic!("player doesn't have a unit_type component"));
                 let animation = draw.animation.as_str();
-                let sprite_resource = sprites.get(&draw.resource_name);
+                let sprite_resource = sprites.get(&unit_type.name);
 
                 if let Some(sprite) = sprite_resource {
                     let animation = sprite
@@ -82,6 +87,7 @@ impl<'a> System<'a> for NextPlayer {
         ReadExpect<'a, SpriteData>,
         WriteExpect<'a, OrderedEntities>,
         WriteExpect<'a, TurnOver>,
+        ReadStorage<'a, UnitType>,
         ReadStorage<'a, Endurance>,
         WriteStorage<'a, Draw>,
         WriteStorage<'a, Controller>,
@@ -95,6 +101,7 @@ impl<'a> System<'a> for NextPlayer {
             sprite_data,
             mut ordering,
             mut turn_over,
+            unit_type_storage,
             _endurance_storage,
             mut draw_storage,
             mut controller_storage,
@@ -114,8 +121,11 @@ impl<'a> System<'a> for NextPlayer {
                 let draw = draw_storage
                     .get_mut(player)
                     .unwrap_or_else(|| panic!("player doesn't have a draw component"));
+                let unit_type = unit_type_storage
+                    .get(player)
+                    .unwrap_or_else(|| panic!("player doesn't have a unit_type component"));
                 let animation = draw.animation.as_str();
-                let sprite_resource = sprites.get(&draw.resource_name);
+                let sprite_resource = sprites.get(&unit_type.name);
 
                 if let Some(sprite) = sprite_resource {
                     let animation = sprite
@@ -139,8 +149,11 @@ impl<'a> System<'a> for NextPlayer {
                         let draw = draw_storage
                             .get_mut(player)
                             .unwrap_or_else(|| panic!("player doesn't have a draw component"));
+                        let unit_type = unit_type_storage
+                            .get(player)
+                            .unwrap_or_else(|| panic!("player doesn't have a unit_type component"));
                         let animation = draw.animation.as_str();
-                        let sprite_resource = sprites.get(&draw.resource_name);
+                        let sprite_resource = sprites.get(&unit_type.name);
 
                         if let Some(sprite) = sprite_resource {
                             let animation = sprite
