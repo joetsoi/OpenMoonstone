@@ -54,7 +54,6 @@ impl<'a> System<'a> for StateUpdater {
                         Draw {
                             frame: frame.clone(),
                             animation: "fly".to_string(),
-                            resource_name: "dagger".to_string(),
                             direction: state.direction,
                         },
                     );

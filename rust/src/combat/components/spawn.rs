@@ -116,7 +116,6 @@ impl CharacterTemplate {
         self.draw = Draw {
             frame: frame.clone(),
             animation: animation.to_string(),
-            resource_name: self.resource.clone(),
             direction,
         };
         self

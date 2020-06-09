@@ -41,7 +41,7 @@ use crate::campaign::systems::{
     SetMapVelocity,
     TerrainCost,
 };
-use crate::combat::components::{Controller, Draw, Facing, Palette, Position, Velocity};
+use crate::combat::components::{UnitType, Controller, Draw, Facing, Palette, Position, Velocity};
 use crate::combat::systems::Movement;
 use crate::components::RenderOrder;
 use crate::error::MoonstoneError;
@@ -294,14 +294,16 @@ impl<'a> MapScene<'a> {
         };
         let mut entity_builder = world
             .create_entity()
-            .with(Position { x: x, y: y })
+            .with(Position { x, y })
             .with(Velocity {
                 ..Default::default()
+            })
+            .with(UnitType {
+                name: resource_name.to_string(),
             })
             .with(Draw {
                 frame: sprite.animations[animation].frames[0].clone(),
                 animation: animation.to_string(),
-                resource_name: resource_name.to_string(),
                 direction: Facing::default(),
             })
             .with(Endurance { max: 96, used: 0 })
@@ -423,10 +425,12 @@ impl<'a> MapScene<'a> {
                     image: l.image.clone(),
                     hover: l.hover_image.clone(),
                 })
+                .with(UnitType {
+                    name: "mi".to_string(),
+                })
                 .with(Draw {
-                    frame: Frame { images: images },
+                    frame: Frame { images },
                     animation: "".to_string(),
-                    resource_name: "mi".to_string(),
                     direction: Facing::default(),
                 });
 
@@ -567,8 +571,8 @@ impl<'a> MapScene<'a> {
         let mut dispatcher = Self::build_dispatcher();
         dispatcher.setup(&mut specs_world);
         Ok(Self {
-            specs_world: specs_world,
-            dispatcher: dispatcher,
+            specs_world,
+            dispatcher,
             // map_data,
             background,
             background_frame: 0,
