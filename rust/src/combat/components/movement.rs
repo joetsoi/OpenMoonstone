@@ -4,6 +4,7 @@ use specs_derive::*;
 use super::Facing;
 use crate::input;
 use crate::rect::Point;
+use crate::combat::resources::StepDistance;
 
 #[derive(Component, Debug, Default, Clone)]
 #[storage(VecStorage)]
@@ -26,11 +27,12 @@ pub struct Velocity {
     pub y: i32,
 }
 
-#[derive(Component, Debug, Default)]
+#[derive(Component, Clone, Debug, Default)]
 #[storage(VecStorage)]
 pub struct WalkingState {
     pub direction: Facing,
     pub step: u32,
+    pub step_distances: StepDistance,
 }
 
 #[derive(Component, Clone, Debug)]

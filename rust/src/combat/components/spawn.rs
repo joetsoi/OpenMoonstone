@@ -31,6 +31,7 @@ use super::{
     WalkingState,
     Weapon,
 };
+use crate::combat::resources::StepDistance;
 use crate::animation::Frame;
 use crate::components::RenderOrder;
 use crate::input;
@@ -52,6 +53,7 @@ pub struct CharacterTemplate {
     state: State,
     palette: Palette,
     draw: Draw,
+    walking_state: WalkingState,
     controller: Option<Controller>,
     ai_state: Option<AiState>,
 }
@@ -66,9 +68,7 @@ impl CharacterTemplate {
             .with(Intent {
                 ..Default::default()
             })
-            .with(WalkingState {
-                ..Default::default()
-            })
+            .with(self.walking_state.clone())
             .with(Velocity {
                 ..Default::default()
             })
@@ -163,6 +163,14 @@ impl CharacterTemplate {
         });
         self
     }
+
+    pub fn walking_state<'a>(
+        &'a mut self,
+        step_distances:  StepDistance,
+    ) -> &'a mut Self {
+        self.walking_state.step_distances = step_distances;
+        self
+    }
 }
 
 #[derive(Copy, Clone, Debug)]
@@ -215,7 +223,6 @@ impl SpawnPool {
             let entity = self.character.create(lazy.create_entity(&entities));
             self.active.insert(entity.id());
             self.remaining -= 1;
-            print!("spawned");
         }
     }
 

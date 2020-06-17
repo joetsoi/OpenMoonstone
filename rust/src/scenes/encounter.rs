@@ -37,11 +37,11 @@ use crate::combat::components::{
     Weapon,
 };
 use crate::combat::damage::DamageTables;
+use crate::combat::resources::MoveDistances;
 use crate::combat::systems::boundary::Boundary;
 use crate::combat::systems::health::CombatDone;
 use crate::combat::systems::{
     ActionSystem,
-    SetAiTarget,
     AiDirection,
     Animation,
     BlackKnightAi,
@@ -57,6 +57,7 @@ use crate::combat::systems::{
     PlayerDirection,
     ResolveCollisions,
     RestrictMovementToBoundary,
+    SetAiTarget,
     SpawnControl,
     StateUpdater,
     UpdateBoundingBoxes,
@@ -78,7 +79,6 @@ use crate::ron::{FromDosFilesRon, FromRon, GameRon};
 use crate::scenes::world::draw_entities;
 use crate::scenes::FSceneSwitch;
 use crate::systems::SortRenderByYPosition;
-use crate::combat::resources::MoveDistances;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Deserialize)]
 pub enum Asset {
@@ -251,13 +251,6 @@ impl<'a> EncounterScene<'a> {
             .expect("error loading damage.yaml");
         world.insert(damage_tables.borrow().clone());
         world.insert(CombatDone(false));
-        let move_distances = store
-            .get_by::<MoveDistances, FromRon>(
-                &SimpleKey::from("/movement.ron"),
-                ctx,
-                FromRon,
-            ).expect("error in movement.ron file");
-        world.insert(move_distances.borrow().clone());
         Ok(())
     }
 
@@ -348,11 +341,21 @@ impl<'a> EncounterScene<'a> {
             .expect("error loading palette.yaml");
         let swaps = swaps_res.borrow();
 
+        let move_distances = store
+            .get_by::<MoveDistances, FromRon>(&SimpleKey::from("/movement.ron"), ctx, FromRon)
+            .expect("error in movement.ron file");
+
+        let move_res = move_distances.borrow();
+        let step_distance = move_res.distances
+            .get(resource)
+            .expect("could not lookup movement data");
+
         let mut spawn_pool = SpawnPool::new(resource, x, y, direction);
         spawn_pool
             .character
             .position(x, y)
             .state(direction)
+            .walking_state(step_distance.clone())
             .draw(
                 &sprite.animations["entrance"].frames[0],
                 "entrance",
@@ -665,14 +668,7 @@ impl<'a> EncounterScene<'a> {
                 y,
                 Facing::default(),
             );
-            spawn_pool
-                .character
-                .ai_state(
-                    "black_knight",
-                    4,
-                    80,
-                    100,
-                );
+            spawn_pool.character.ai_state("black_knight", 4, 80, 100);
             world
                 .create_entity()
                 .with(spawn_pool)

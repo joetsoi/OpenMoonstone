@@ -11,7 +11,7 @@ pub struct Vector {
     pub j: i32,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct StepDistance {
     pub x_axis: Vec<Vec<Vector>>,
     pub y_axis: Vec<Vec<Vector>>,
