@@ -11,6 +11,7 @@ use warmy::load::{Load, Loaded, Storage};
 
 use crate::error::{BaseLoadError, MoonstoneError};
 use crate::files::{terrain::Background, TerrainFile};
+use crate::piv::PivImage;
 
 // Copied from the warmy ron universal implementation, except loads from
 // a ggez filesystem instead.
@@ -46,6 +47,7 @@ where
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Files {
+    scenes: HashMap<String, String>,
     terrain: HashMap<String, Terrain>,
 }
 
@@ -77,12 +79,42 @@ impl Load<Context, SimpleKey, FromDosFilesRon> for TerrainFile {
                 let entry = dos_files.terrain.get(key.as_str());
                 match entry {
                     Some(t) => {
+                        let mut file =
+                            filesystem::open(ctx, Path::new("/moonstone/").join(t.file.as_str()))?;
+                        Ok(TerrainFile::from_reader(&mut file, t.terrain).map(Loaded::from)?)
+                    }
+                    None => Err(MoonstoneError::NotInDosFiles),
+                }
+            }
+            warmy::SimpleKey::Path(_) => return Err(MoonstoneError::PathLoadNotImplemented),
+        }
+    }
+}
+
+impl Load<Context, SimpleKey, FromDosFilesRon> for PivImage {
+    type Error = MoonstoneError;
+
+    fn load(
+        key: SimpleKey,
+        store: &mut Storage<ggez::Context, SimpleKey>,
+        ctx: &mut ggez::Context,
+    ) -> Result<Loaded<Self, SimpleKey>, Self::Error> {
+        let dos_files_ron = store.get_by::<GameRon<Files>, FromRon>(
+            &SimpleKey::from("/dos_files.ron"),
+            ctx,
+            FromRon,
+        )?;
+        let dos_files = &dos_files_ron.borrow().0;
+        match key {
+            warmy::SimpleKey::Logical(key) => {
+                let entry = dos_files.scenes.get(key.as_str());
+                match entry {
+                    Some(filename) => {
                         let mut file = filesystem::open(
                             ctx,
-                            Path::new("/moonstone/").join(t.file.as_str()),
+                            Path::new("/moonstone/").join(filename.as_str()),
                         )?;
-                        Ok(TerrainFile::from_reader(&mut file, t.terrain)
-                            .map(Loaded::from)?)
+                        Ok(PivImage::from_reader(&mut file).map(Loaded::from)?)
                     }
                     None => Err(MoonstoneError::NotInDosFiles),
                 }

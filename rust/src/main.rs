@@ -18,6 +18,9 @@ use openmoonstone::piv::PivImage;
 use openmoonstone::piv::{Colour};
 use openmoonstone::scenes;
 use openmoonstone::scenes::{FSceneStack, MainMenuScene, MainScene};
+use openmoonstone::animation::Sprite;
+use openmoonstone::ron::{FromDosFilesRon, FromRon};
+use ron::ser::{PrettyConfig, to_string_pretty, to_string};
 
 fn fps_for_scene(scene_name: &str) -> u32 {
     // https://en.wikibooks.org/wiki/X86_Assembly/Programmable_Interval_Timer
@@ -124,7 +127,11 @@ fn main() {
     let map = scene_stack
         .world
         .store
-        .get::<PivImage>(&SimpleKey::from("map".to_string()), ctx)
+        .get_by::<PivImage, FromDosFilesRon>(
+            &SimpleKey::from("fo2".to_string()),
+            ctx,
+            FromDosFilesRon
+        )
         // TODO: fix with ? error syntax
         .expect("error loading wa1");
     // let image = RgbaImage::from_raw(512, 512, map.borrow().to_rgba8_512()).unwrap();
