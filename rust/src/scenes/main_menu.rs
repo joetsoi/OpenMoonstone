@@ -7,6 +7,7 @@ use warmy::{SimpleKey, Store};
 use crate::game::{Game, SceneState};
 use crate::input::{Axis, Button, InputEvent};
 use crate::objects::TextureAtlas;
+use crate::ron::FromDosFilesRon;
 use crate::scenes::FSceneSwitch;
 use crate::text::Text;
 
@@ -14,12 +15,12 @@ use super::menu::Menu;
 use super::transition::FadeStyle;
 use super::Fade;
 
-struct MenuImage {
-    sheet: &'static str,
-    image: usize,
-    x: u32,
-    y: u32,
-}
+// struct MenuImage {
+//     sheet: &'static str,
+//     image: usize,
+//     x: u32,
+//     y: u32,
+// }
 
 const ARROW_POSITIONS: [u32; 4] = [85, 110, 152, 172];
 
@@ -101,7 +102,11 @@ impl MainMenuScene {
         // by 16 empty colours so to_rgba8 won't break.
         let atlas = game
             .store
-            .get::<TextureAtlas>(&SimpleKey::from(self.menu.screen.cursor.sheet.clone()), ctx)
+            .get_by::<TextureAtlas, FromDosFilesRon>(
+                &SimpleKey::from(self.menu.screen.cursor.sheet.clone()),
+                ctx,
+                FromDosFilesRon,
+            )
             // TODO: raise error
             .expect("Couldn't find sel.cel yaml metadata");
 
