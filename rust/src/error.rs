@@ -11,8 +11,9 @@ use crate::campaign::movement_cost::CampaignMap;
 use crate::files::collide::CollideHitParseError;
 use crate::objects::{TextureAtlas, TextureSizeTooSmall};
 use crate::piv::PivImage;
-use crate::ron::{FromRon, GameRon, Files};
+use crate::ron::{Files, FromDosFilesRon, FromRon, GameRon};
 use crate::scenes::map::{FileList, Locations, MapData};
+use crate::text::Screen;
 
 #[derive(Debug)]
 pub enum MoonstoneError {
@@ -21,9 +22,11 @@ pub enum MoonstoneError {
     Piv(StoreErrorOr<PivImage, Context, SimpleKey>),
     Sprite(StoreErrorOr<Sprite, Context, SimpleKey>),
     TextureAtlas(StoreErrorOr<TextureAtlas, Context, SimpleKey>),
+    TextureSizeTooSmall(TextureSizeTooSmall),
     Ron(StoreErrorOr<GameRon<CampaignMap>, Context, SimpleKey, FromRon>),
     FileList(StoreErrorOr<GameRon<FileList>, Context, SimpleKey, FromRon>),
     Locations(StoreErrorOr<GameRon<Locations>, Context, SimpleKey, FromRon>),
+    ScreenRon(StoreErrorOr<Screen, Context, SimpleKey, FromRon>),
     SpriteRon(StoreErrorOr<GameRon<Sprite>, Context, SimpleKey, FromRon>),
     SpriteData(StoreErrorOr<GameRon<SpriteData>, Context, SimpleKey, FromRon>),
     FilesRon(StoreErrorOr<GameRon<Files>, Context, SimpleKey, FromRon>),
@@ -42,9 +45,11 @@ impl fmt::Display for MoonstoneError {
             MoonstoneError::Piv(ref err) => err.fmt(f),
             MoonstoneError::Sprite(ref err) => err.fmt(f),
             MoonstoneError::TextureAtlas(ref err) => err.fmt(f),
+            MoonstoneError::TextureSizeTooSmall(ref err) => err.fmt(f),
             MoonstoneError::Ron(ref err) => err.fmt(f),
             MoonstoneError::FileList(ref err) => err.fmt(f),
             MoonstoneError::Locations(ref err) => err.fmt(f),
+            MoonstoneError::ScreenRon(ref err) => err.fmt(f),
             MoonstoneError::SpriteRon(ref err) => err.fmt(f),
             MoonstoneError::SpriteData(ref err) => err.fmt(f),
             MoonstoneError::FilesRon(ref err) => err.fmt(f),
@@ -58,6 +63,12 @@ impl fmt::Display for MoonstoneError {
 impl From<std::io::Error> for MoonstoneError {
     fn from(err: std::io::Error) -> MoonstoneError {
         MoonstoneError::Io(err)
+    }
+}
+
+impl From<TextureSizeTooSmall> for MoonstoneError {
+    fn from(err: TextureSizeTooSmall) -> MoonstoneError {
+        MoonstoneError::TextureSizeTooSmall(err)
     }
 }
 
@@ -84,6 +95,12 @@ impl From<StoreErrorOr<GameRon<FileList>, Context, SimpleKey, FromRon>> for Moon
 impl From<StoreErrorOr<GameRon<Locations>, Context, SimpleKey, FromRon>> for MoonstoneError {
     fn from(err: StoreErrorOr<GameRon<Locations>, Context, SimpleKey, FromRon>) -> MoonstoneError {
         MoonstoneError::Locations(err)
+    }
+}
+
+impl From<StoreErrorOr<Screen, Context, SimpleKey, FromRon>> for MoonstoneError {
+    fn from(err: StoreErrorOr<Screen, Context, SimpleKey, FromRon>) -> MoonstoneError {
+        MoonstoneError::ScreenRon(err)
     }
 }
 
@@ -186,6 +203,7 @@ where
     Ggez(ggez::error::GameError),
     Serde(serde_yaml::Error),
     Warmy(warmy::load::StoreErrorOr<T, Context, SimpleKey>),
+    // WarmyFromDosFilesRon(warmy::load::StoreErrorOr<T, Context, SimpleKey, FromDosFilesRon>),
     PathLoadNotImplemented,
     YamlKeyDoesNotExist { key: String },
     TextureSizeTooSmall(TextureSizeTooSmall),
@@ -203,6 +221,7 @@ where
             LoadError::Ggez(ref err) => err.fmt(f),
             LoadError::Serde(ref err) => err.fmt(f),
             LoadError::Warmy(ref err) => err.fmt(f),
+            // LoadError::WarmyFromDosFilesRon(ref err) => err.fmt(f),
             LoadError::PathLoadNotImplemented => write!(f, "Path not implemented"),
             LoadError::YamlKeyDoesNotExist { ref key } => {
                 write!(f, "Yaml key {} does not exist", key)
@@ -284,3 +303,13 @@ where
         LoadError::Warmy(err)
     }
 }
+
+// impl<T> From<warmy::load::StoreErrorOr<T, Context, SimpleKey, FromDosFilesRon>> for LoadError<T>
+// where
+//     T: Load<Context, SimpleKey, FromDosFilesRon>,
+//     T::Error: fmt::Debug,
+// {
+//     fn from(err: warmy::load::StoreErrorOr<T, Context, SimpleKey, FromDosFilesRon>) -> LoadError<T> {
+//         LoadError::WarmyFromDosFilesRon(err)
+//     }
+// }
