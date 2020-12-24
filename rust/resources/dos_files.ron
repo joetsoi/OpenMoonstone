@@ -1,4 +1,8 @@
 (
+    scenes: {
+        "wa1": "DISKB/WA1.CMP",
+        "fo2": "DISKB/FO2.CMP",
+    },
     terrain: {
         // grassland
         "gl1.t": (file: "DISKB/GL1.T", terrain: Grassland),
@@ -18,5 +22,8 @@
         "wa6.t": (file: "DISKB/WA6.T", terrain: Wasteland),
         "wa7.t": (file: "DISKB/WA7.T", terrain: Wasteland),
         "wa8.t": (file: "DISKB/WA8.T", terrain: Wasteland),
+    },
+    objects: {
+        "troggsp2.cel": TextureAtlasFile(file: "DISKB/TROGGSP2.CEL", texture_size: 512),
     },
 )

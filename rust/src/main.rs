@@ -151,7 +151,11 @@ fn main() {
     let _cmp = scene_stack
         .world
         .store
-        .get::<TextureAtlas>(&SimpleKey::from("mi.c".to_string()), ctx)
+        .get_by::<TextureAtlas, FromDosFilesRon>(
+            &SimpleKey::from("troggsp2.cel".to_string()),
+            ctx,
+            FromDosFilesRon,
+        )
         // TODO: fix with ? error syntax
         .expect("error loading wa1");
 
