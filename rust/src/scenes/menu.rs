@@ -8,11 +8,12 @@ use ggez::nalgebra::Point2;
 use ggez::{graphics, Context, GameResult};
 use warmy::{SimpleKey, Store};
 
-use crate::error::LoadError;
+use crate::error::{LoadError, MoonstoneError};
 use crate::game::Game;
 use crate::objects::TextureAtlas;
 use crate::palette::PaletteSwaps;
 use crate::piv::{extract_palette, Colour, PivImage};
+use crate::ron::{FromDosFilesRon, FromRon};
 use crate::text::Screen;
 
 #[derive(Debug)]
@@ -36,19 +37,21 @@ impl Menu {
         key: &str,
     ) -> Result<Self, Box<dyn error::Error>> {
         let screen = store
-            .get::<Screen>(&warmy::SimpleKey::from(key), ctx)
-            .map_err(|e| LoadError::from(e))?
-            //TODO: fix with ? syntax
-            // .expect("err loading screen in menu")
+            .get_by::<Screen, FromRon>(&warmy::SimpleKey::from(key), ctx, FromRon)
+            .map_err(|e| MoonstoneError::from(e))?
             .borrow()
             .clone();
 
         let (background, palette) = match &screen.background {
             Some(background) => {
                 let piv = store
-                    .get::<PivImage>(&SimpleKey::from(background.clone()), ctx)
-                    // TODO: fix with ?
-                    .or_else(|err| Err(LoadError::Warmy(err)))?;
+                    .get_by::<PivImage, FromDosFilesRon>(
+                        &SimpleKey::from(background.clone()),
+                        ctx,
+                        FromDosFilesRon,
+                    )
+                    .expect(&format!("unable to load piv image {}", background));
+                // TODO: fix with ?
                 let mut palette = piv.borrow().palette.to_vec();
                 if palette.len() == 16 {
                     palette.extend(

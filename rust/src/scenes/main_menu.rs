@@ -83,7 +83,7 @@ impl MainMenuScene {
         ctx: &mut Context,
         store: &mut Store<Context, SimpleKey>, // ) -> Result<Self, Error> {
     ) -> Result<Self, Box<dyn std::error::Error>> {
-        let menu = Menu::new(ctx, store, "/menu.yaml")?;
+        let menu = Menu::new(ctx, store, "/menu.ron")?;
         // .unwrap_or_else(|| panic!("error in menu.yaml, must have 'background")),
         Ok(Self {
             menu,

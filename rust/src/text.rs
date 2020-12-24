@@ -11,11 +11,12 @@ use maplit::hashmap;
 use serde_derive::{Deserialize, Serialize};
 use warmy::{SimpleKey, Store};
 
-use loadable_macro_derive::LoadableYaml;
+use loadable_macro_derive::{LoadableRon, LoadableYaml};
 
 use crate::game::Game;
 use crate::objects::TextureAtlas;
 use crate::piv::Colour;
+use crate::ron::FromDosFilesRon;
 
 #[derive(Debug)]
 pub enum InvalidFont {
@@ -65,7 +66,7 @@ lazy_static! {
     };
 }
 
-#[derive(Debug, Default, Clone, Serialize, Deserialize, LoadableYaml)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize, LoadableRon)]
 pub struct Screen {
     pub background: Option<String>,
     pub text: Vec<Text>,
@@ -168,9 +169,16 @@ impl Text {
     ) -> Result<SpriteBatch, Box<dyn Error>> {
         let atlas = game
             .store
-            .get::<TextureAtlas>(&SimpleKey::from(self.font.as_str()), ctx)
+            .get_by::<TextureAtlas, FromDosFilesRon>(
+                &SimpleKey::from(self.font.as_str()),
+                ctx,
+                FromDosFilesRon,
+            )
             //TODO: fix with ? syntax
-            .expect("error with textureatlas in as_sprite_batch");
+            .expect(&format!(
+                "error with textureatlas {} in as_sprite_batch",
+                self.font
+            ));
 
         let image_name = format!("{}{}", self.font, palette_hash);
         let atlas_dimension = atlas.borrow().image.width as u32;

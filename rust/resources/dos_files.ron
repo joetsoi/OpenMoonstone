@@ -1,5 +1,6 @@
 (
     scenes: {
+        "ch": "DISKB/CH.PIV",
         "wa1": "DISKB/WA1.CMP",
         "fo2": "DISKB/FO2.CMP",
     },
@@ -24,6 +25,8 @@
         "wa8.t": (file: "DISKB/WA8.T", terrain: Wasteland),
     },
     objects: {
-        "troggsp2.cel": TextureAtlasFile(file: "DISKB/TROGGSP2.CEL", texture_size: 512),
+        "troggsp2.cel": (file: "DISKB/TROGGSP2.CEL", texture_size: 512),
+        "bold.f": (file: "DISKA/BOLD.F", texture_size: 512),
+        "small.f": (file: "DISKB/SMALL.FON", texture_size: 128),
     },
 )

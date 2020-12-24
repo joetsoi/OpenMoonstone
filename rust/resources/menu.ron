@@ -1,0 +1,14 @@
+(
+    background: Some("ch"),
+    text: [
+        (string: "Players", font: "bold.f", bordered: true, centered: false, x: 86, y: 83),
+        (string: "Gore", font: "bold.f", bordered: true, centered: false, x: 86, y: 108),
+        (string: "Practice", font: "bold.f", bordered: true, centered: true, x: 0, y: 150),
+        (string: "Select Knight", font: "bold.f", bordered: true, centered: true, x: 0, y: 170),
+    ],
+    images: [
+        (sheet: "bold.f", image: 73, x: 5, y: 10)
+    ],
+    cursor: (sheet: "sel.cel", image: 0, x: 50, y: 85)
+)
+
