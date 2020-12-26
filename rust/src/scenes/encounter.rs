@@ -247,8 +247,8 @@ impl<'a> EncounterScene<'a> {
         world: &mut World,
     ) -> Result<(), MoonstoneError> {
         let damage_tables = store
-            .get::<DamageTables>(&SimpleKey::from("/damage.yaml"), ctx)
-            .expect("error loading damage.yaml");
+            .get_by::<DamageTables, FromRon>(&SimpleKey::from("/damage.ron"), ctx, FromRon)
+            .expect("error loading damage.ron");
         world.insert(damage_tables.borrow().clone());
         world.insert(CombatDone(false));
         Ok(())
@@ -739,7 +739,12 @@ impl<'a> EncounterScene<'a> {
         for p in &scenery.positions {
             let cmp = game
                 .store
-                .get::<PivImage>(&SimpleKey::from(p.atlas.clone()), ctx)
+                .get_by::<PivImage, FromDosFilesRon>(
+                    &SimpleKey::from(
+                        p.atlas.clone()),
+                        ctx,
+                        FromDosFilesRon,
+                    )
                 // TODO fix error handling, make this ?
                 .expect("error loading piv image in draw_terrain");
 
