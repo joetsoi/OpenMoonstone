@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::fmt;
 use std::path::Path;
 
 use ggez;
@@ -9,7 +10,8 @@ use serde::{Deserialize, Serialize};
 use warmy::key::SimpleKey;
 use warmy::load::{Load, Loaded, Storage};
 
-use crate::error::{BaseLoadError, MoonstoneError};
+use crate::error::{BaseLoadError, LoadError, MoonstoneError, RonLoadError};
+use crate::files::collide::{parse_collide_hit, CollisionBoxes};
 use crate::files::{terrain::Background, TerrainFile};
 use crate::objects::{ObjectsFile, TextureAtlas};
 use crate::piv::PivImage;
@@ -51,6 +53,13 @@ pub struct Files {
     scenes: HashMap<String, String>,
     terrain: HashMap<String, Terrain>,
     objects: HashMap<String, TextureAtlasFile>,
+    collide: String,
+}
+
+impl<T> fmt::Display for GameRon<T> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "GameRon")
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -164,6 +173,33 @@ impl Load<Context, SimpleKey, FromDosFilesRon> for TextureAtlas {
                 }
             }
             warmy::SimpleKey::Path(_) => return Err(MoonstoneError::PathLoadNotImplemented),
+        }
+    }
+}
+
+impl Load<Context, SimpleKey, FromDosFilesRon> for CollisionBoxes {
+    type Error = RonLoadError<GameRon<Files>>;
+
+    fn load(
+        key: SimpleKey,
+        store: &mut Storage<ggez::Context, SimpleKey>,
+        ctx: &mut ggez::Context,
+    ) -> Result<Loaded<Self, SimpleKey>, Self::Error> {
+        let dos_files_ron = store.get_by::<GameRon<Files>, FromRon>(
+            &SimpleKey::from("/dos_files.ron"),
+            ctx,
+            FromRon,
+        )?;
+        let dos_files = &dos_files_ron.borrow().0;
+        match key {
+            warmy::SimpleKey::Logical(key) => {
+                let collide = Path::new("/moonstone/").join(&dos_files.collide);
+                let mut file = filesystem::open(ctx, collide)?;
+                parse_collide_hit(&mut file)
+                    .map(Loaded::from)
+                    .map_err(|e| e.into())
+            }
+            warmy::SimpleKey::Path(_) => return Err(RonLoadError::PathLoadNotImplemented),
         }
     }
 }

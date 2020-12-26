@@ -194,6 +194,71 @@ impl From<ron::de::Error> for BaseLoadError {
 }
 
 #[derive(Debug)]
+pub enum RonLoadError<T>
+where
+    T: Load<Context, SimpleKey, FromRon>,
+    T::Error: fmt::Debug,
+{
+    CollideHit(CollideHitParseError),
+    Ggez(ggez::error::GameError),
+    PathLoadNotImplemented,
+    Warmy(warmy::load::StoreErrorOr<T, Context, SimpleKey, FromRon>),
+}
+
+impl<T> fmt::Display for RonLoadError<T>
+where
+    T: Load<Context, SimpleKey, FromRon> + fmt::Display,
+    T::Error: fmt::Debug,
+{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            RonLoadError::CollideHit(ref err) => err.fmt(f),
+            RonLoadError::Ggez(ref err) => err.fmt(f),
+            RonLoadError::PathLoadNotImplemented => write!(f, "Path not implemented"),
+            RonLoadError::Warmy(ref err) => err.fmt(f),
+        }
+    }
+}
+
+impl<T> Error for RonLoadError<T>
+where
+    T: Load<Context, SimpleKey, FromRon> + fmt::Display + fmt::Debug,
+    T::Error: fmt::Debug,
+{
+}
+
+impl<T> From<CollideHitParseError> for RonLoadError<T>
+where
+    T: Load<Context, SimpleKey, FromRon>,
+    T::Error: fmt::Debug,
+{
+    fn from(err: CollideHitParseError) -> RonLoadError<T> {
+        RonLoadError::CollideHit(err)
+    }
+}
+
+impl<T> From<ggez::error::GameError> for RonLoadError<T>
+where
+    T: Load<Context, SimpleKey, FromRon>,
+    T::Error: fmt::Debug,
+{
+    fn from(err: ggez::error::GameError) -> RonLoadError<T> {
+        RonLoadError::Ggez(err)
+    }
+}
+
+impl<T> From<warmy::load::StoreErrorOr<T, Context, SimpleKey, FromRon>> for RonLoadError<T>
+where
+    T: Load<Context, SimpleKey, FromRon>,
+    T::Error: fmt::Debug,
+{
+    fn from(err: warmy::load::StoreErrorOr<T, Context, SimpleKey, FromRon>) -> RonLoadError<T> {
+        RonLoadError::Warmy(err)
+    }
+}
+
+// older yaml load error
+#[derive(Debug)]
 pub enum LoadError<T>
 where
     T: Load<Context, SimpleKey>,

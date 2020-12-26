@@ -1,8 +1,12 @@
 (
     scenes: {
         "ch": "DISKB/CH.PIV",
+        "glb1": "DISKB/GLB1.CMP",
         "wa1": "DISKB/WA1.CMP",
+        "fo1": "DISKB/FO1.CMP",
         "fo2": "DISKB/FO2.CMP",
+        "sw1": "DISKB/SW1.CMP",
+        "wa1": "DISKB/WA1.CMP",
     },
     terrain: {
         // grassland
@@ -26,8 +30,17 @@
     },
     objects: {
         "sel.cel": (file: "DISKB/SEL.CEL", texture_size: 256),
+        // knight
+        "kn1.ob": (file: "DISKB/KN1.OB", texture_size: 512),
+        "kn2.ob": (file: "DISKB/KN2.OB", texture_size: 256),
+        "kn3.ob": (file: "DISKB/KN3.OB", texture_size: 256),
+        "kn4.ob": (file: "DISKB/KN4.OB", texture_size: 128),
+        // trogg spear
+        "troggsp1.cel": (file: "DISKB/TROGGSP1.CEL", texture_size: 512),
         "troggsp2.cel": (file: "DISKB/TROGGSP2.CEL", texture_size: 512),
+        // fonts
         "bold.f": (file: "DISKA/BOLD.F", texture_size: 512),
         "small.f": (file: "DISKB/SMALL.FON", texture_size: 128),
     },
+    collide: "DISKB/COLLIDE.HIT",
 )

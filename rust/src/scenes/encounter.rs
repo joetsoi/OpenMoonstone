@@ -297,9 +297,13 @@ impl<'a> EncounterScene<'a> {
         let mut texture_atlases: HashMap<String, TextureAtlas> = HashMap::new();
         for atlas_name in atlas_names {
             let atlas = store
-                .get::<TextureAtlas>(&SimpleKey::from(atlas_name.clone()), ctx)
+                .get_by::<TextureAtlas, FromDosFilesRon>(
+                    &SimpleKey::from(atlas_name.clone()),
+                    ctx,
+                    FromDosFilesRon,
+                )
                 // TODO: Fix to allow ? syntax
-                .expect("Error loading texture atlas");
+                .expect(&format!("Error loading texture atlas {}", atlas_name));
             image_sizes.insert(atlas_name.clone(), atlas.borrow().rects.clone());
             texture_atlases.insert(atlas_name.clone(), atlas.borrow().clone());
         }
@@ -384,9 +388,13 @@ impl<'a> EncounterScene<'a> {
 
         let piv = game
             .store
-            .get::<PivImage>(&SimpleKey::from(background_name), ctx)
+            .get_by::<PivImage, FromDosFilesRon>(
+                &SimpleKey::from(background_name),
+                ctx,
+                FromDosFilesRon,
+            )
             // TODO fix error handling, make this ?
-            .expect("Error loading piv background");
+            .expect(&format!("Error loading piv background {}", background_name));
 
         let file = filesystem::open(ctx, "/palettes.ron")?;
         let swaps =
@@ -407,12 +415,13 @@ impl<'a> EncounterScene<'a> {
             .expect("Error loading terrain file while building encounter scene");
         let scenery_piv = game
             .store
-            .get::<PivImage>(
+            .get_by::<PivImage, FromDosFilesRon>(
                 &SimpleKey::from(scenery.borrow().background.to_atlas_name()),
                 ctx,
+                FromDosFilesRon,
             )
             // TODO fix error handling, make this ?
-            .expect("Error loading piv background")
+            .expect(&format!("Error loading piv background {}", scenery.borrow().background.to_atlas_name()))
             .borrow()
             .clone()
             // .swap_colours(swaps.get(&Asset::Grassland).unwrap())
@@ -428,7 +437,11 @@ impl<'a> EncounterScene<'a> {
         )?;
         let collide_hit = game
             .store
-            .get::<CollisionBoxes>(&SimpleKey::from("collide"), ctx)
+            .get_by::<CollisionBoxes, FromDosFilesRon>(
+                &SimpleKey::from("collide"),
+                ctx,
+                FromDosFilesRon,
+            )
             // TODO fix error handling, make this ?
             .expect("Error loading collision boxes");
         world.insert(collide_hit.borrow().clone());
