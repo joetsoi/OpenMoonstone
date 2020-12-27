@@ -17,6 +17,7 @@ use crate::text::Screen;
 
 #[derive(Debug)]
 pub enum MoonstoneError {
+    ColourSwapFailed(String),
     Io(std::io::Error),
     Map(StoreErrorOr<MapData, Context, SimpleKey>),
     Piv(StoreErrorOr<PivImage, Context, SimpleKey>),
@@ -40,6 +41,7 @@ impl Error for MoonstoneError {}
 impl fmt::Display for MoonstoneError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
+            MoonstoneError::ColourSwapFailed(ref err) => err.fmt(f),
             MoonstoneError::Io(ref err) => err.fmt(f),
             MoonstoneError::Map(ref err) => err.fmt(f),
             MoonstoneError::Piv(ref err) => err.fmt(f),

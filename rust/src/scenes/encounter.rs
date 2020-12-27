@@ -425,7 +425,7 @@ impl<'a> EncounterScene<'a> {
             .borrow()
             .clone()
             // .swap_colours(swaps.get(&Asset::Grassland).unwrap())
-            .swap_colours(swaps.get(&Asset::TroggSpear).unwrap())
+            .swap_colours(swaps.get(&Asset::TroggSpear).unwrap())?
             .build_palette();
 
         let (background, y_max) = EncounterScene::build_background_canvas(

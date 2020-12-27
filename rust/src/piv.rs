@@ -8,6 +8,7 @@ use std::io::Write;
 use bv::BitSlice;
 use byteorder::{BigEndian, ByteOrder};
 
+use crate::error::MoonstoneError;
 use crate::lz77;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
@@ -83,21 +84,20 @@ impl PivImage {
         pixels
     }
 
-    pub fn swap_colours(mut self, swaps: &HashMap<usize, u16>) -> Self {
+    pub fn swap_colours(mut self, swaps: &HashMap<usize, u16>) -> Result<Self, MoonstoneError> {
         // let mut base_palette = self.raw_palette.to_vec();
         for (i, new_colour) in swaps {
             if let Some(c) = self.raw_palette.get_mut(*i) {
                 *c = *new_colour;
             } else {
-                writeln!(
-                    io::stderr(),
+                return Err(MoonstoneError::ColourSwapFailed(format!(
                     "Tried swapping the {}th colour when the palette only has {} colours",
                     self.palette.len(),
                     i
-                );
+                )))
             }
         }
-        self
+        Ok(self)
     }
 
     pub fn build_palette(mut self) -> Self {
