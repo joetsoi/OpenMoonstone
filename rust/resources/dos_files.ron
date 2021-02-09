@@ -48,6 +48,7 @@
         "kn2.ob": (file: "DISKB/KN2.OB", texture_size: 256),
         "kn3.ob": (file: "DISKB/KN3.OB", texture_size: 256),
         "kn4.ob": (file: "DISKB/KN4.OB", texture_size: 128),
+        "kn5.ob": (file: "DISKB/KN5.OB", texture_size: 512),
         // other knight
         "he1.ob": (file: "DISKB/HE1.OB", texture_size: 512),
         "he2.ob": (file: "DISKB/HE2.OB", texture_size: 256),
@@ -55,6 +56,10 @@
         // trogg spear
         "troggsp1.cel": (file: "DISKB/TROGGSP1.CEL", texture_size: 512),
         "troggsp2.cel": (file: "DISKB/TROGGSP2.CEL", texture_size: 512),
+        // balok
+        "balok1.cel": (file: "DISKC/BALOK1.CEL", texture_size: 512),
+        "balok2.cel": (file: "DISKC/BALOK2.CEL", texture_size: 512),
+        "balok3.cel": (file: "DISKC/BALOK3.CEL", texture_size: 512),
         // fonts
         "bold.f": (file: "DISKA/BOLD.F", texture_size: 512),
         "small.f": (file: "DISKB/SMALL.FON", texture_size: 128),
