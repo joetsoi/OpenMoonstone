@@ -29,7 +29,7 @@ spritesheets = {
         4: 'kn2.ob',
         8: 'kn3.ob',
         12: 'kn4.ob',
-        16: 'kn4.ob',
+        16: 'kn5.ob',
     },
     TROGG_SPEAR: {
         0: 'troggsp1.cel',
@@ -37,8 +37,8 @@ spritesheets = {
     },
     BALOK: {
         0: 'balok1.cel',
-        4: 'balok2.cel',
-        8: 'balok3.cel',
+        8: 'balok2.cel',
+        4: 'balok3.cel',
     },
 }
 
@@ -46,8 +46,10 @@ collide_type = {
     0: 'NonSolid',
     1: 'Collidee',
     2: 'Collider',
+    3: 'Collider',
     16: 'Vm',
     32: 'WeaponHand',
+    48: 'Blood',
     64: 'UpdateEdge',
     65: 'Collidee',
     66: 'Collider',
@@ -75,7 +77,7 @@ while next_line:
         collide = collide_type[collide]
 
         #test = "ImagePosition('{}', {}, {}, {}, {}),".format(sprite, img_num, y, x, collide)
-        test = '  (sheet: "{}", image: {}, y: {}, x: {}, image_type:{}),'.format(sprite, img_num, y, x, collide)
+        test = '    (sheet: "{}", image: {}, y: {}, x: {}, image_type:{}),'.format(sprite, img_num, y, x, collide)
         print test
         line = line.next
     elif line.disasm.startswith('EndOfAnimFrame <0FFh, 0>'):
