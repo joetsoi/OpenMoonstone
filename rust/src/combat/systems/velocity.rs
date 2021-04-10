@@ -89,11 +89,27 @@ pub struct ConfirmVelocity;
 // so we want to update the final velocity here.
 
 impl<'a> System<'a> for ConfirmVelocity {
-    type SystemData = (WriteStorage<'a, State>, WriteStorage<'a, WalkingState>);
-    fn run(&mut self, (mut state, mut walking_state): Self::SystemData) {
+    type SystemData = (
+        ReadStorage<'a, Velocity>,
+        WriteStorage<'a, State>,
+        WriteStorage<'a, WalkingState>,
+    );
+    fn run(&mut self, (velocity, mut state, mut walking_state): Self::SystemData) {
         use specs::Join;
-        for (state, walking_state) in (&mut state, &mut walking_state).join() {
-            if let Action::Move { x, y } = state.action {
+        for (velocity, state, walking_state) in (&velocity, &mut state, &mut walking_state).join() {
+            if let Action::Move { mut x, mut y } = state.action {
+
+                let x_step_size = walking_state.step_distances.x_axis[(x as i32 + 1) as usize][walking_state.step as usize].i;
+                // Trogg spears have an animation where the size of the step they take is x = 0
+                // if we only checked velocity here, then the x axis would be centered and we'd
+                // incorrectly set the action as Idle. This check will also be needed if I come
+                // across another enemy type that has 0 step size animations in the y direction.
+                if velocity.x == 0 && x_step_size != 0 {
+                    x = XAxis::Centre;
+                }
+                if velocity.y == 0 {
+                    y = YAxis::Centre;
+                }
                 if x == XAxis::Centre && y == YAxis::Centre {
                     state.action = Action::Idle;
                 } else {
