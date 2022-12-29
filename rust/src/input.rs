@@ -1,6 +1,6 @@
 //! Typedefs for input shortcuts.
+use crate::input_binding;
 use ggez::input::keyboard::KeyCode;
-use ggez_goodies::input;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum Button {
@@ -25,9 +25,9 @@ pub enum Axis {
     Horz4,
 }
 
-pub type InputBinding = input::InputBinding<Axis, Button>;
-pub type InputEffect = input::InputEffect<Axis, Button>;
-pub type InputState = input::InputState<Axis, Button>;
+pub type InputBinding = input_binding::InputBinding<Axis, Button>;
+pub type InputEffect = input_binding::InputEffect<Axis, Button>;
+pub type InputState = input_binding::InputState<Axis, Button>;
 
 pub enum InputEvent {
     Binded(InputEffect),
@@ -36,8 +36,8 @@ pub enum InputEvent {
 }
 
 /// Create the default keybindings for our input state.
-pub fn create_input_binding() -> input::InputBinding<Axis, Button> {
-    input::InputBinding::new()
+pub fn create_input_binding() -> input_binding::InputBinding<Axis, Button> {
+    input_binding::InputBinding::new()
         .bind_key_to_axis(KeyCode::Up, Axis::Vert1, false)
         .bind_key_to_axis(KeyCode::Down, Axis::Vert1, true)
         .bind_key_to_axis(KeyCode::Left, Axis::Horz1, false)

@@ -1,36 +1,9 @@
 [package]
-edition = '2018'
 name = "openmoonstone"
-version = "0.2.0"
-authors = ["Joe Tsoi <joetsoi@users.noreply.github.com>"]
+version = "0.3.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-byteorder = "*"
-bv = "*"
-ggez-goodies = { git = "https://github.com/joetsoi/ggez-goodies.git", branch = "push-multiple"}
-image = "*"
-pest = "*"
-pest_derive = "*"
-rand = "*"
-rect_packer = "*"
-ron = "*"
-# specs = "*"
-specs-derive = "*"
-serde = "*"
-serde_derive = "*"
-serde_yaml = "*"
-#warmy = "0.8.0"
-warmy = "*"
-maplit = "*"
-lazy_static = "*"
-#ggez = { git = "https://github.com/ggez/ggez" }
 ggez = "*"
-loadable_macro_derive = {path = "../loadable_macro_derive"}
-
-# [dependencies.ggez]
-# git = "https://github.com/ggez/ggez"
-# default-features = false
-
-[dependencies.specs]
-version = "*"
-features = ["serde"]
