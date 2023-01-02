@@ -7,6 +7,8 @@ use ggez::input::keyboard;
 mod game;
 mod input;
 mod input_binding;
+mod lz77;
+mod piv;
 mod scenes;
 mod scenestack;
 
@@ -101,10 +103,13 @@ fn main() {
         println!("Adding 'resources' path {:?}", path);
         builder = builder.add_resource_path(path);
     }
-    let (ctx, event_loop) = builder.build().unwrap();
+    let (mut ctx, event_loop) = builder.build().unwrap();
 
     let game = game::Game::new();
-    let scene_stack = scenes::FSceneStack::new(&ctx, game);
+    let mut scene_stack = scenes::FSceneStack::new(&ctx, game);
+    let encounter_builder = scenes::EncounterBuilder::new("/moonstone/DISKB/MAP.CMP");
+    let encounter_scene = Box::new(encounter_builder.build(&mut ctx));
+    scene_stack.push(encounter_scene);
 
     let state = MainState {
         scene_stack,

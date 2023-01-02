@@ -1,29 +1,24 @@
 [window_mode]
-width = 960.0
-height = 600.0
+width = 1280.0
+height = 800.0
 maximized = false
 fullscreen_type = "Windowed"
 borderless = false
-min_width = 0.0
-min_height = 0.0
+transparent = false
+min_width = 1.0
+min_height = 1.0
 max_width = 0.0
 max_height = 0.0
-hidpi = false
-resizable = true
+resizable = false
+visible = true
+resize_on_scale_factor_change = false
 
 [window_setup]
-title = "Open Moonstone"
-samples = "Zero"
+title = "OpenMoonstone"
+samples = "One"
 vsync = true
-transparent = false
 icon = ""
 srgb = true
 
 [backend]
-type = "OpenGL"
-major = 3
-minor = 2
-
-[modules]
-gamepad = true
-audio = true
+type = "All"

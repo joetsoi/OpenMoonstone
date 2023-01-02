@@ -3,7 +3,12 @@ name = "openmoonstone"
 version = "0.3.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
-ggez = "*"
+bv = "*"
+byteorder = "*"
+# TODO: change to next release after 0.8.1
+# Canvas.set_sampler is currently broken in 0.8.1
+# https://github.com/ggez/ggez/issues/1138 
+ggez = { git = "https://github.com/ggez/ggez", branch = "devel" }
+mint = "*"
+thiserror = "*"

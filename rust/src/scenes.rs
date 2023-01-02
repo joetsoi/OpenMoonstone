@@ -4,7 +4,7 @@ use crate::game;
 use crate::input;
 use crate::scenestack;
 
-// pub mod encounter;
+pub mod encounter;
 // pub mod main;
 // pub mod main_menu;
 // pub mod map;
@@ -14,7 +14,7 @@ use crate::scenestack;
 // pub mod transition;
 // pub mod world;
 
-// pub use self::encounter::EncounterScene;
+pub use self::encounter::{EncounterBuilder, EncounterScene};
 // pub use self::main::MainScene;
 // pub use self::main_menu::MainMenuScene;
 // pub use self::map::MapScene;

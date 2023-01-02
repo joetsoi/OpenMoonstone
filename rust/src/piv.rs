@@ -7,9 +7,15 @@ use std::io::Write;
 
 use bv::BitSlice;
 use byteorder::{BigEndian, ByteOrder};
+use thiserror;
 
-use crate::error::MoonstoneError;
 use crate::lz77;
+
+#[derive(thiserror::Error, Debug)]
+pub enum PivError {
+    #[error("Tried swapping the {nth}th colour when the palette only has {total} colours")]
+    ColourSwapFailed { nth: usize, total: usize },
+}
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub struct Colour {
@@ -27,7 +33,7 @@ pub struct PivImage {
 }
 
 impl fmt::Display for PivImage {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "PivImage {} pixels", self.pixels.len())
     }
 }
@@ -84,17 +90,16 @@ impl PivImage {
         pixels
     }
 
-    pub fn swap_colours(mut self, swaps: &HashMap<usize, u16>) -> Result<Self, MoonstoneError> {
+    pub fn swap_colours(mut self, swaps: &HashMap<usize, u16>) -> Result<Self, PivError> {
         // let mut base_palette = self.raw_palette.to_vec();
         for (i, new_colour) in swaps {
             if let Some(c) = self.raw_palette.get_mut(*i) {
                 *c = *new_colour;
             } else {
-                return Err(MoonstoneError::ColourSwapFailed(format!(
-                    "Tried swapping the {}th colour when the palette only has {} colours",
-                    self.palette.len(),
-                    i
-                )))
+                return Err(PivError::ColourSwapFailed {
+                    nth: *i,
+                    total: self.palette.len(),
+                });
             }
         }
         Ok(self)
@@ -114,7 +119,7 @@ impl PivImage {
     }
 
     fn combine_bit_planes(data: &[u8]) -> Vec<usize> {
-        let planes: Vec<BitSlice<u8>> =
+        let planes: Vec<BitSlice<'_, u8>> =
             data.chunks(8000).map(|p| BitSlice::from_slice(p)).collect();
 
         let mut pixels: Vec<usize> = Vec::with_capacity(64000);

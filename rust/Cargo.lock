@@ -168,6 +168,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "572f695136211188308f16ad2ca5c851a712c464060ae6974944458eb83880ba"
 
 [[package]]
+name = "bv"
+version = "0.11.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8834bb1d8ee5dc048ee3124f2c7c1afcc6bc9aed03f11e9dfd8c69470a5db340"
+dependencies = [
+ "feature-probe",
+]
+
+[[package]]
 name = "bytecount"
 version = "0.6.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -739,6 +748,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "feature-probe"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "835a3dc7d1ec9e75e2b5fb4ba75396837112d2060b03f7d43bc1897c7f7211da"
+
+[[package]]
 name = "flate2"
 version = "1.0.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -850,8 +865,7 @@ dependencies = [
 [[package]]
 name = "ggez"
 version = "0.8.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9b5afdff588614f146cddaabe68ee21de08947594c7a7329aad0a0563f848552"
+source = "git+https://github.com/ggez/ggez?branch=devel#921ab3cdf5e3a309c466d800568868a749832dd9"
 dependencies = [
  "approx",
  "bitflags",
@@ -1705,7 +1719,11 @@ checksum = "86f0b0d4bf799edbc74508c1e8bf170ff5f41238e5f8225603ca7caaae2b7860"
 name = "openmoonstone"
 version = "0.3.0"
 dependencies = [
+ "bv",
+ "byteorder",
  "ggez",
+ "mint",
+ "thiserror",
 ]
 
 [[package]]
