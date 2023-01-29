@@ -1,8 +1,8 @@
 use std::collections::HashMap;
+use std::fmt;
 use std::io;
 use std::io::prelude::*;
 use std::io::Cursor;
-use std::fmt;
 
 use byteorder::{BigEndian, ByteOrder, ReadBytesExt};
 use lazy_static::lazy_static;
@@ -29,7 +29,7 @@ impl fmt::Display for Background {
 impl Background {
     pub fn to_atlas_name(self) -> &'static str {
         match self {
-            Background::Grassland => "fo1",
+            Background::Grassland => "gl1",
             Background::Forest => "fo1",
             Background::Swampland => "sw1",
             Background::Wasteland => "wa1",
@@ -39,7 +39,7 @@ impl Background {
 
 lazy_static! {
     pub static ref SCENERY_LOOKUP: HashMap<Background, &'static str> = hashmap! {
-        Background::Grassland => "fo1",
+        Background::Grassland => "gl1",
         Background::Forest => "fo1",
         Background::Swampland => "sw1",
         Background::Wasteland => "wa1",
@@ -102,12 +102,15 @@ impl TerrainFile {
 
         loop {
             let atlas = u32::from(rdr.read_u8()?);
+
             let image_number = rdr.read_u8()? as usize;
             let scenery_file = match atlas {
                 4 => "fo2",
                 3 => SCENERY_LOOKUP.get(&background).unwrap_or(&"fo2"),
                 _ => "fo2",
             };
+            dbg!(atlas);
+            dbg!(scenery_file);
 
             let position = Position {
                 atlas: scenery_file.to_string(),
@@ -126,7 +129,10 @@ impl TerrainFile {
 }
 
 impl TerrainFile {
-    pub fn from_reader<T: Read>(reader: &mut T, background: Background) -> Result<TerrainFile, io::Error> {
+    pub fn from_reader<T: Read>(
+        reader: &mut T,
+        background: Background,
+    ) -> Result<TerrainFile, io::Error> {
         let mut data: Vec<u8> = Vec::new();
         reader.read_to_end(&mut data)?;
 
@@ -136,7 +142,12 @@ impl TerrainFile {
         let positions_start = (8 * header_count) + 2;
 
         let headers = TerrainFile::read_headers(header_count, &extracted[2..positions_start])?;
-        let positions = TerrainFile::read_terrain_positions(&extracted[positions_start..], background)?;
-        Ok(TerrainFile { headers, positions, background })
+        let positions =
+            TerrainFile::read_terrain_positions(&extracted[positions_start..], background)?;
+        Ok(TerrainFile {
+            headers,
+            positions,
+            background,
+        })
     }
 }

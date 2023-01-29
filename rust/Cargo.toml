@@ -8,7 +8,13 @@ bv = "*"
 byteorder = "*"
 # TODO: change to next release after 0.8.1
 # Canvas.set_sampler is currently broken in 0.8.1
-# https://github.com/ggez/ggez/issues/1138 
+# https://github.com/ggez/ggez/issues/1138
 ggez = { git = "https://github.com/ggez/ggez", branch = "devel" }
+lazy_static = "*"
+maplit = "*"
 mint = "*"
+pest = "*"
+pest_derive = "*"
+ron = "*"
+serde = "*"
 thiserror = "*"

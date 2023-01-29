@@ -1,3 +1,4 @@
+use std::borrow::{Borrow, Cow};
 use std::collections::HashMap;
 use std::fmt;
 use std::hash::Hash;
@@ -42,6 +43,24 @@ impl PivImage {
     pub fn from_reader<T: Read>(reader: &mut T) -> Result<PivImage, io::Error> {
         let mut data: Vec<u8> = Vec::new();
         reader.read_to_end(&mut data)?;
+        let header = PivImage::read_header(&data[..6]);
+
+        let raw_palette = read_palette(header.bit_depth, &data[6..6 + (header.bit_depth * 2)]);
+        let palette: Vec<Colour> = extract_palette(&raw_palette);
+
+        let extracted = lz77::decompress(
+            u32::from(header.file_length),
+            &data[6 + (header.bit_depth * 2)..],
+        )?;
+        let pixels = PivImage::combine_bit_planes(&extracted);
+        Ok(PivImage {
+            palette,
+            raw_palette,
+            pixels,
+        })
+    }
+
+    pub fn new(data: &[u8]) -> Result<PivImage, io::Error> {
         let header = PivImage::read_header(&data[..6]);
 
         let raw_palette = read_palette(header.bit_depth, &data[6..6 + (header.bit_depth * 2)]);

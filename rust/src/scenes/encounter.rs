@@ -1,7 +1,10 @@
+use std::collections::hash_map::Entry::{Occupied, Vacant};
 use std::path;
 
 use ggez::graphics;
 
+use crate::assets;
+use crate::files;
 use crate::game;
 use crate::input;
 use crate::piv;
@@ -10,16 +13,20 @@ use crate::scenestack;
 
 pub struct EncounterBuilder {
     pub background: &'static str,
+    pub terrain: &'static str,
 }
 
 impl EncounterBuilder {
-    pub fn new(background: &'static str) -> Self {
-        Self { background }
+    pub fn new(background: &'static str, terrain: &'static str) -> Self {
+        Self {
+            background,
+            terrain,
+        }
     }
 
-    pub fn build(&self, ctx: &mut ggez::Context) -> EncounterScene {
-        let mut file = ctx.fs.open(path::Path::new(self.background)).unwrap();
-        let background = piv::PivImage::from_reader(&mut file).unwrap();
+    pub fn build(&self, ctx: &mut ggez::Context, assets: &mut assets::Assets) -> EncounterScene {
+        let background = assets.piv.get(self.background).unwrap();
+
         let background_image = graphics::Image::from_pixels(
             ctx,
             &background.to_rgba8(),
@@ -27,6 +34,12 @@ impl EncounterBuilder {
             320,
             200,
         );
+
+        let scenery = assets.terrain.get(self.terrain).unwrap();
+        // for p in &scenery.positions {
+        //     dbg!(p);
+        // }
+
         EncounterScene {
             background: background_image,
         }

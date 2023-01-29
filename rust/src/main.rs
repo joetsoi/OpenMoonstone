@@ -1,14 +1,22 @@
 #![warn(rust_2018_idioms)]
+use std::io::Read;
 use std::{env, path};
 
+use files::terrain::Background;
+use files::{Files, TerrainFile};
 use ggez::event;
 use ggez::input::keyboard;
+use piv::PivImage;
+use ron;
 
+mod assets;
+mod files;
 mod game;
 mod input;
 mod input_binding;
 mod lz77;
 mod piv;
+mod rect;
 mod scenes;
 mod scenestack;
 
@@ -96,8 +104,22 @@ impl event::EventHandler for MainState {
     }
 }
 
+fn load_assets(ctx: &mut ggez::Context, assets: &mut assets::Assets) {
+    assets.load_scene(ctx, "wab1");
+
+    let mut file = ctx
+        .fs
+        .open(path::Path::new("/moonstone/DISKB/FO2.T"))
+        .unwrap();
+    assets.terrain.insert(
+        "/moonstone/DISKB/FO2.T".to_string(),
+        TerrainFile::from_reader(&mut file, Background::Forest).unwrap(),
+    );
+}
+
 fn main() {
-    let mut builder = ggez::ContextBuilder::new("openmoonstone", "joetsoi");
+    let game_id = "openmoonstone";
+    let mut builder = ggez::ContextBuilder::new(game_id, game_id);
     if let Ok(manifest_dir) = env::var("CARGO_MANIFEST_DIR") {
         let path = path::PathBuf::from(manifest_dir).join("resources");
         println!("Adding 'resources' path {:?}", path);
@@ -105,10 +127,12 @@ fn main() {
     }
     let (mut ctx, event_loop) = builder.build().unwrap();
 
-    let game = game::Game::new();
+    let game = game::Game::new(&mut ctx);
     let mut scene_stack = scenes::FSceneStack::new(&ctx, game);
-    let encounter_builder = scenes::EncounterBuilder::new("/moonstone/DISKB/MAP.CMP");
-    let encounter_scene = Box::new(encounter_builder.build(&mut ctx));
+    load_assets(&mut ctx, &mut scene_stack.world.assets);
+    let encounter_builder = scenes::EncounterBuilder::new("wab1", "/moonstone/DISKB/FO2.T");
+    let encounter_scene =
+        Box::new(encounter_builder.build(&mut ctx, &mut scene_stack.world.assets));
     scene_stack.push(encounter_scene);
 
     let state = MainState {
