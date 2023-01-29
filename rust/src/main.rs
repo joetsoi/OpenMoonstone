@@ -106,15 +106,7 @@ impl event::EventHandler for MainState {
 
 fn load_assets(ctx: &mut ggez::Context, assets: &mut assets::Assets) {
     assets.load_scene(ctx, "wab1");
-
-    let mut file = ctx
-        .fs
-        .open(path::Path::new("/moonstone/DISKB/FO2.T"))
-        .unwrap();
-    assets.terrain.insert(
-        "/moonstone/DISKB/FO2.T".to_string(),
-        TerrainFile::from_reader(&mut file, Background::Forest).unwrap(),
-    );
+    assets.load_terrain(ctx, "wa1.t");
 }
 
 fn main() {
@@ -130,7 +122,7 @@ fn main() {
     let game = game::Game::new(&mut ctx);
     let mut scene_stack = scenes::FSceneStack::new(&ctx, game);
     load_assets(&mut ctx, &mut scene_stack.world.assets);
-    let encounter_builder = scenes::EncounterBuilder::new("wab1", "/moonstone/DISKB/FO2.T");
+    let encounter_builder = scenes::EncounterBuilder::new("wab1", "wa1.t");
     let encounter_scene =
         Box::new(encounter_builder.build(&mut ctx, &mut scene_stack.world.assets));
     scene_stack.push(encounter_scene);

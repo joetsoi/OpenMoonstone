@@ -17,8 +17,8 @@ pub struct Files {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Terrain {
-    file: String,
-    terrain: Background,
+    pub file: String,
+    pub terrain: Background,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
