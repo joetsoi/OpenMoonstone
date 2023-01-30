@@ -109,8 +109,6 @@ impl TerrainFile {
                 3 => SCENERY_LOOKUP.get(&background).unwrap_or(&"fo2"),
                 _ => "fo2",
             };
-            dbg!(atlas);
-            dbg!(scenery_file);
 
             let position = Position {
                 atlas: scenery_file.to_string(),

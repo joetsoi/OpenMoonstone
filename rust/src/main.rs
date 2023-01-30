@@ -106,6 +106,7 @@ impl event::EventHandler for MainState {
 
 fn load_assets(ctx: &mut ggez::Context, assets: &mut assets::Assets) {
     assets.load_scene(ctx, "wab1");
+    assets.load_scene(ctx, "wa1");
     assets.load_terrain(ctx, "wa1.t");
 }
 
