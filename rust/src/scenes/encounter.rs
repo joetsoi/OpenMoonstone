@@ -6,11 +6,15 @@ use std::{
 use color_eyre::eyre::{eyre, Result, WrapErr};
 use ggez::{
     glam::Vec2,
-    graphics::{self, Canvas},
+    graphics::{self, Canvas, DrawParam, Image, ImageFormat, Rect, Sampler},
+    Context,
 };
+use specs::world::{Builder, Index};
+use specs::{Dispatcher, DispatcherBuilder, Entity, Join, World, WorldExt};
 
 use crate::{
-    assets, files,
+    assets::Assets,
+    files,
     files::terrain::{Background, SCENERY_RECTS},
     game, input, piv, scenes, scenestack,
 };
@@ -28,11 +32,19 @@ impl EncounterBuilder {
         }
     }
 
-    pub fn build(
-        &self,
-        ctx: &mut ggez::Context,
-        assets: &mut assets::Assets,
-    ) -> Result<EncounterScene> {
+    pub fn build<'a>(&self, ctx: &mut Context, assets: &mut Assets) -> Result<EncounterScene<'a>> {
+        let background = self.build_background(ctx, assets)?;
+        let world = World::new();
+        let dispatcher = DispatcherBuilder::new().build();
+
+        Ok(EncounterScene {
+            world,
+            dispatcher,
+            background,
+        })
+    }
+
+    fn build_background(&self, ctx: &mut Context, assets: &mut Assets) -> Result<Image> {
         let background = assets.piv.get(self.background).ok_or_else(|| {
             eyre!(format!(
                 "{} has not been loaded as a piv asset",
@@ -40,7 +52,7 @@ impl EncounterBuilder {
             ))
         })?;
 
-        let background_image = graphics::Image::from_pixels(
+        let background_image = Image::from_pixels(
             ctx,
             &background.to_rgba8(),
             graphics::ImageFormat::Rgba8UnormSrgb,
@@ -55,16 +67,10 @@ impl EncounterBuilder {
         // https://github.com/ggez/ggez/issues/1056
         ctx.gfx.begin_frame()?;
 
-        let canvas_image = graphics::Image::new_canvas_image(
-            ctx,
-            graphics::ImageFormat::Rgba8UnormSrgb,
-            320,
-            200,
-            1,
-        );
+        let canvas_image = Image::new_canvas_image(ctx, ImageFormat::Rgba8UnormSrgb, 320, 200, 1);
         let mut canvas = Canvas::from_image(ctx, canvas_image.clone(), Option::None);
         // Draw the basic background
-        canvas.draw(&background_image, graphics::DrawParam::default());
+        canvas.draw(&background_image, DrawParam::default());
 
         // Draw scenery from terrain tileset
         let scenery = assets.terrain.get(self.terrain).ok_or_else(|| {
@@ -108,27 +114,28 @@ impl EncounterBuilder {
             .finish(ctx)
             .wrap_err("Failed to draw encounter background")?;
         ctx.gfx.end_frame()?;
-
-        Ok(EncounterScene {
-            background: canvas_image,
-        })
+        Ok(canvas_image)
     }
 }
 
-pub struct EncounterScene {
-    pub background: graphics::Image,
+pub struct EncounterScene<'a> {
+    pub world: World,
+    pub dispatcher: Dispatcher<'a, 'a>,
+    pub background: Image,
 }
 
-impl scenestack::Scene<game::Game, input::InputEvent> for EncounterScene {
+impl<'a> scenestack::Scene<game::Game, input::InputEvent> for EncounterScene<'a> {
     fn update(&mut self, _game: &mut game::Game, _ctx: &mut ggez::Context) -> scenes::FSceneSwitch {
+        self.world.maintain();
+        self.dispatcher.dispatch_par(&self.world);
         return scenestack::SceneSwitch::None;
     }
 
     fn draw(&mut self, _game: &mut game::Game, ctx: &mut ggez::Context) -> ggez::GameResult<()> {
         let mut canvas = Canvas::from_frame(ctx, Option::None);
-        canvas.set_sampler(graphics::Sampler::nearest_clamp());
-        canvas.set_screen_coordinates(graphics::Rect::new(0., 0., 320., 200.));
-        canvas.draw(&self.background, graphics::DrawParam::default());
+        canvas.set_sampler(Sampler::nearest_clamp());
+        canvas.set_screen_coordinates(Rect::new(0., 0., 320., 200.));
+        canvas.draw(&self.background, DrawParam::default());
         canvas.finish(ctx)?;
         Ok(())
     }
