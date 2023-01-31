@@ -1,6 +1,7 @@
 use std::collections::hash_map::Entry::{Occupied, Vacant};
 use std::path;
 
+use color_eyre::eyre::{eyre, Result, WrapErr};
 use ggez::glam::Vec2;
 use ggez::graphics::{self, Canvas};
 
@@ -26,8 +27,17 @@ impl EncounterBuilder {
         }
     }
 
-    pub fn build(&self, ctx: &mut ggez::Context, assets: &mut assets::Assets) -> EncounterScene {
-        let background = assets.piv.get(self.background).unwrap();
+    pub fn build(
+        &self,
+        ctx: &mut ggez::Context,
+        assets: &mut assets::Assets,
+    ) -> Result<EncounterScene> {
+        let background = assets.piv.get(self.background).ok_or_else(|| {
+            eyre!(format!(
+                "{} has not been loaded as a piv asset",
+                self.background
+            ))
+        })?;
 
         let background_image = graphics::Image::from_pixels(
             ctx,
@@ -42,7 +52,7 @@ impl EncounterBuilder {
         // in each frame
         //
         // https://github.com/ggez/ggez/issues/1056
-        ctx.gfx.begin_frame();
+        ctx.gfx.begin_frame()?;
 
         let canvas_image = graphics::Image::new_canvas_image(
             ctx,
@@ -56,9 +66,20 @@ impl EncounterBuilder {
         canvas.draw(&background_image, graphics::DrawParam::default());
 
         // Draw scenery from terrain tileset
-        let scenery = assets.terrain.get(self.terrain).unwrap();
+        let scenery = assets.terrain.get(self.terrain).ok_or_else(|| {
+            eyre!(format!(
+                "{} has not been loaded as a terrain asset",
+                self.terrain
+            ))
+        })?;
+
         for p in &scenery.positions {
-            let cmp = assets.piv.get(&p.atlas).unwrap();
+            let cmp = assets.piv.get(&p.atlas).ok_or_else(|| {
+                eyre!(format!(
+                    "Failed to load terrain sprite sheet {} has not been loaded as a piv asset",
+                    p.atlas
+                ))
+            })?;
             let entry = format!("{}-{}", p.atlas, scenery.background);
 
             let ggez_image = match assets.images.entry(entry) {
@@ -82,12 +103,14 @@ impl EncounterBuilder {
                 .dest(Vec2::new(p.x as f32, p.y as f32));
             canvas.draw(ggez_image, draw_params);
         }
-        canvas.finish(ctx).unwrap();
-        ctx.gfx.end_frame();
+        canvas
+            .finish(ctx)
+            .wrap_err("Failed to draw encounter background")?;
+        ctx.gfx.end_frame()?;
 
-        EncounterScene {
+        Ok(EncounterScene {
             background: canvas_image,
-        }
+        })
     }
 }
 

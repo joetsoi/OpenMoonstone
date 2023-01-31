@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 bv = "*"
 byteorder = "*"
+color-eyre = "*"
 # TODO: change to next release after 0.8.1
 # Canvas.set_sampler is currently broken in 0.8.1
 # https://github.com/ggez/ggez/issues/1138

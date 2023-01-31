@@ -2,10 +2,12 @@
 use std::io::Read;
 use std::{env, path};
 
-use files::terrain::Background;
-use files::{Files, TerrainFile};
+use color_eyre::{self, Result};
 use ggez::event;
 use ggez::input::keyboard;
+
+use files::terrain::Background;
+use files::{Files, TerrainFile};
 use piv::PivImage;
 use ron;
 
@@ -110,7 +112,8 @@ fn load_assets(ctx: &mut ggez::Context, assets: &mut assets::Assets) {
     assets.load_terrain(ctx, "wa1.t");
 }
 
-fn main() {
+fn main() -> Result<()> {
+    color_eyre::install()?;
     let game_id = "openmoonstone";
     let mut builder = ggez::ContextBuilder::new(game_id, game_id);
     if let Ok(manifest_dir) = env::var("CARGO_MANIFEST_DIR") {
@@ -118,15 +121,14 @@ fn main() {
         println!("Adding 'resources' path {:?}", path);
         builder = builder.add_resource_path(path);
     }
-    let (mut ctx, event_loop) = builder.build().unwrap();
+    let (mut ctx, event_loop) = builder.build()?;
 
     let game = game::Game::new(&mut ctx);
     let mut scene_stack = scenes::FSceneStack::new(&ctx, game);
     load_assets(&mut ctx, &mut scene_stack.world.assets);
     let encounter_builder = scenes::EncounterBuilder::new("wab1", "wa1.t");
-    let encounter_scene =
-        Box::new(encounter_builder.build(&mut ctx, &mut scene_stack.world.assets));
-    scene_stack.push(encounter_scene);
+    let encounter_scene = encounter_builder.build(&mut ctx, &mut scene_stack.world.assets)?;
+    scene_stack.push(Box::new(encounter_scene));
 
     let state = MainState {
         scene_stack,
