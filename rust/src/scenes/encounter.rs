@@ -1,18 +1,19 @@
-use std::collections::hash_map::Entry::{Occupied, Vacant};
-use std::path;
+use std::{
+    collections::hash_map::Entry::{Occupied, Vacant},
+    path,
+};
 
 use color_eyre::eyre::{eyre, Result, WrapErr};
-use ggez::glam::Vec2;
-use ggez::graphics::{self, Canvas};
+use ggez::{
+    glam::Vec2,
+    graphics::{self, Canvas},
+};
 
-use crate::assets;
-use crate::files;
-use crate::files::terrain::{Background, SCENERY_RECTS};
-use crate::game;
-use crate::input;
-use crate::piv;
-use crate::scenes;
-use crate::scenestack;
+use crate::{
+    assets, files,
+    files::terrain::{Background, SCENERY_RECTS},
+    game, input, piv, scenes, scenestack,
+};
 
 pub struct EncounterBuilder {
     pub background: &'static str,
