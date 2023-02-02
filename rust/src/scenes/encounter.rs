@@ -14,6 +14,7 @@ use specs::{Dispatcher, DispatcherBuilder, Entity, Join, World, WorldExt};
 
 use crate::{
     assets::Assets,
+    combat::components::{Draw, Position},
     files,
     files::terrain::{Background, SCENERY_RECTS},
     game, input, piv, scenes, scenestack,
@@ -34,7 +35,9 @@ impl EncounterBuilder {
 
     pub fn build<'a>(&self, ctx: &mut Context, assets: &mut Assets) -> Result<EncounterScene<'a>> {
         let background = self.build_background(ctx, assets)?;
-        let world = World::new();
+        let mut world = World::new();
+        world.register::<Draw>();
+        world.register::<Position>();
         let dispatcher = DispatcherBuilder::new().build();
 
         Ok(EncounterScene {

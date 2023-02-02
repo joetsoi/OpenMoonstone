@@ -12,6 +12,8 @@ use piv::PivImage;
 use ron;
 
 mod assets;
+mod animation;
+mod combat;
 mod files;
 mod game;
 mod input;

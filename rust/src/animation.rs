@@ -2,9 +2,7 @@ use std::collections::HashMap;
 
 use ggez::Context;
 use serde_derive::{Deserialize, Serialize};
-use warmy;
 
-use loadable_macro_derive::{LoadableRon, LoadableYaml};
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 pub struct SpriteData {
@@ -58,7 +56,7 @@ pub struct Animation {
     pub order: Option<Vec<i32>>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, LoadableRon, LoadableYaml)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct Sprite {
     pub animations: HashMap<String, Animation>,
