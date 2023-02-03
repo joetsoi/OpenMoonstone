@@ -1,8 +1,7 @@
 use std::collections::HashMap;
 
-use ggez::Context;
+use ron;
 use serde_derive::{Deserialize, Serialize};
-
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 pub struct SpriteData {
@@ -60,4 +59,12 @@ pub struct Animation {
 #[serde(transparent)]
 pub struct Sprite {
     pub animations: HashMap<String, Animation>,
+}
+
+impl Sprite {
+    pub fn new(ron_string: &String) -> Sprite {
+        Sprite {
+            animations: ron::from_str(&ron_string).unwrap(),
+        }
+    }
 }

@@ -5,6 +5,7 @@ use std::{
 
 use color_eyre::eyre::{eyre, Result, WrapErr};
 use ggez::{
+    filesystem,
     glam::Vec2,
     graphics::{self, Canvas, DrawParam, Image, ImageFormat, Rect, Sampler},
     Context,
@@ -13,8 +14,9 @@ use specs::world::{Builder, Index};
 use specs::{Dispatcher, DispatcherBuilder, Entity, Join, World, WorldExt};
 
 use crate::{
+    animation::Sprite,
     assets::Assets,
-    combat::components::{Draw, Position},
+    combat::components::{Draw, Facing, Position},
     files,
     files::terrain::{Background, SCENERY_RECTS},
     game, input, piv, scenes, scenestack,
@@ -39,6 +41,18 @@ impl EncounterBuilder {
         world.register::<Draw>();
         world.register::<Position>();
         let dispatcher = DispatcherBuilder::new().build();
+
+        let sprite = Sprite::new(&files::read(ctx, "/knight.ron"));
+
+        world
+            .create_entity()
+            .with(Position { x: 50, y: 50 })
+            .with(Draw {
+                frame: sprite.animations.get("idle").unwrap().frames[0].clone(),
+                animation: "idle".to_string(),
+                direction: Facing::Left,
+            })
+            .build();
 
         Ok(EncounterScene {
             world,
@@ -140,6 +154,11 @@ impl<'a> scenestack::Scene<game::Game, input::InputEvent> for EncounterScene<'a>
         canvas.set_screen_coordinates(Rect::new(0., 0., 320., 200.));
         canvas.draw(&self.background, DrawParam::default());
         canvas.finish(ctx)?;
+
+        let position_storage = self.world.read_storage::<Position>();
+        let draw_storage = self.world.read_storage::<Draw>();
+        let entities = self.world.entities();
+
         Ok(())
     }
 
