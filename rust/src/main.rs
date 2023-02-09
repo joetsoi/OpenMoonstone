@@ -113,6 +113,10 @@ fn load_assets(ctx: &mut ggez::Context, assets: &mut assets::Assets) {
     assets.load_scene(ctx, "wab1");
     assets.load_scene(ctx, "wa1");
     assets.load_terrain(ctx, "wa1.t");
+    assets.load_texture_atlas(ctx, "kn1.ob");
+    assets.load_texture_atlas(ctx, "kn2.ob");
+    assets.load_texture_atlas(ctx, "kn3.ob");
+    assets.load_texture_atlas(ctx, "kn4.ob");
 }
 
 fn main() -> Result<()> {

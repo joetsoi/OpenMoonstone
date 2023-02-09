@@ -53,11 +53,19 @@ impl EncounterBuilder {
                 direction: Facing::Left,
             })
             .build();
+        let piv = assets.piv.get(self.background).ok_or_else(|| {
+            eyre!(format!(
+                "{} has not been loaded as a piv asset",
+                self.background
+            ))
+        })?;
+        let palette = piv.palette.clone();
 
         Ok(EncounterScene {
             world,
             dispatcher,
             background,
+            palette,
         })
     }
 
@@ -139,6 +147,7 @@ pub struct EncounterScene<'a> {
     pub world: World,
     pub dispatcher: Dispatcher<'a, 'a>,
     pub background: Image,
+    pub palette: Vec<piv::Colour>,
 }
 
 impl<'a> scenestack::Scene<game::Game, input::InputEvent> for EncounterScene<'a> {
@@ -148,7 +157,7 @@ impl<'a> scenestack::Scene<game::Game, input::InputEvent> for EncounterScene<'a>
         return scenestack::SceneSwitch::None;
     }
 
-    fn draw(&mut self, _game: &mut game::Game, ctx: &mut ggez::Context) -> ggez::GameResult<()> {
+    fn draw(&mut self, game: &mut game::Game, ctx: &mut ggez::Context) -> ggez::GameResult<()> {
         let mut canvas = Canvas::from_frame(ctx, Option::None);
         canvas.set_sampler(Sampler::nearest_clamp());
         canvas.set_screen_coordinates(Rect::new(0., 0., 320., 200.));
@@ -164,6 +173,20 @@ impl<'a> scenestack::Scene<game::Game, input::InputEvent> for EncounterScene<'a>
 
         for (position, draw, entity) in storage {
             let images: Vec<&AnimationImage> = draw.frame.images.iter().collect();
+            for image in images {
+                let atlas = game.assets.atlases.get(&image.sheet).unwrap();
+                let atlas_dimension = atlas.image.width;
+                let ggez_image = match game.assets.images.entry(image.sheet.clone()) {
+                    Occupied(i) => i.into_mut(),
+                    Vacant(i) => i.insert(graphics::Image::from_pixels(
+                        ctx,
+                        &atlas.image.to_rgba8(&self.palette),
+                        graphics::ImageFormat::Rgba8UnormSrgb,
+                        atlas_dimension as u32,
+                        atlas_dimension as u32,
+                    )),
+                };
+            }
         }
 
         Ok(())
