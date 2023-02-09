@@ -14,7 +14,7 @@ use specs::world::{Builder, Index};
 use specs::{Dispatcher, DispatcherBuilder, Entity, Join, World, WorldExt};
 
 use crate::{
-    animation::Sprite,
+    animation::{Image as AnimationImage, Sprite},
     assets::Assets,
     combat::components::{Draw, Facing, Position},
     files,
@@ -158,6 +158,13 @@ impl<'a> scenestack::Scene<game::Game, input::InputEvent> for EncounterScene<'a>
         let position_storage = self.world.read_storage::<Position>();
         let draw_storage = self.world.read_storage::<Draw>();
         let entities = self.world.entities();
+        let mut storage = (&position_storage, &draw_storage, &entities)
+            .join()
+            .collect::<Vec<_>>();
+
+        for (position, draw, entity) in storage {
+            let images: Vec<&AnimationImage> = draw.frame.images.iter().collect();
+        }
 
         Ok(())
     }

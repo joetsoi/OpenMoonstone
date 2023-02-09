@@ -1920,6 +1920,7 @@ dependencies = [
  "pest",
  "pest_derive",
  "rand",
+ "rect_packer",
  "ron",
  "serde",
  "serde_derive",
@@ -2187,6 +2188,12 @@ dependencies = [
  "crossbeam-utils",
  "num_cpus",
 ]
+
+[[package]]
+name = "rect_packer"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d8ffb4dfda4b01cc420847665dc480760d596ce186f2772a66ed32fe9acb1c45"
 
 [[package]]
 name = "redox_syscall"

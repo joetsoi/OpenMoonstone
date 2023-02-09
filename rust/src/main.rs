@@ -11,14 +11,15 @@ use files::{Files, TerrainFile};
 use piv::PivImage;
 use ron;
 
-mod assets;
 mod animation;
+mod assets;
 mod combat;
 mod files;
 mod game;
 mod input;
 mod input_binding;
 mod lz77;
+mod objects;
 mod piv;
 mod rect;
 mod scenes;

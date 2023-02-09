@@ -33,6 +33,6 @@ pub struct Terrain {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TextureAtlasFile {
-    file: String,
-    texture_size: i32,
+    pub file: String,
+    pub texture_size: i32,
 }
