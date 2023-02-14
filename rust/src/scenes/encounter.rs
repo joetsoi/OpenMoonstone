@@ -162,7 +162,6 @@ impl<'a> scenestack::Scene<game::Game, input::InputEvent> for EncounterScene<'a>
         canvas.set_sampler(Sampler::nearest_clamp());
         canvas.set_screen_coordinates(Rect::new(0., 0., 320., 200.));
         canvas.draw(&self.background, DrawParam::default());
-        canvas.finish(ctx)?;
 
         let position_storage = self.world.read_storage::<Position>();
         let draw_storage = self.world.read_storage::<Draw>();
@@ -186,9 +185,25 @@ impl<'a> scenestack::Scene<game::Game, input::InputEvent> for EncounterScene<'a>
                         atlas_dimension as u32,
                     )),
                 };
+                let rect = atlas.rects[image.image];
+                let texture_size = atlas.image.width as f32;
+                let draw_params = graphics::DrawParam::default()
+                    .src(graphics::Rect {
+                        x: rect.x as f32 / texture_size,
+                        y: rect.y as f32 / texture_size,
+                        w: rect.w as f32 / texture_size,
+                        h: rect.h as f32 / texture_size,
+                    })
+                    .dest(Vec2::new(
+                        (position.x as i32 + (draw.direction as i32 * image.x)) as f32,
+                        (position.y as i32 + image.y) as f32,
+                    ))
+                    .scale(Vec2::new(draw.direction as i32 as f32, 1.0));
+                canvas.draw(ggez_image, draw_params);
             }
         }
 
+        canvas.finish(ctx)?;
         Ok(())
     }
 
