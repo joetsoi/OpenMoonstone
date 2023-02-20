@@ -16,7 +16,8 @@ use specs::{Dispatcher, DispatcherBuilder, Entity, Join, World, WorldExt};
 use crate::{
     animation::{Image as AnimationImage, Sprite},
     assets::Assets,
-    combat::components::{Draw, Facing, Position},
+    combat::components::{Controller, Draw, Facing, Intent, Position, State},
+    combat::systems::Commander,
     files,
     files::terrain::{Background, SCENERY_RECTS},
     game, input, piv, scenes, scenestack,
@@ -38,9 +39,14 @@ impl EncounterBuilder {
     pub fn build<'a>(&self, ctx: &mut Context, assets: &mut Assets) -> Result<EncounterScene<'a>> {
         let background = self.build_background(ctx, assets)?;
         let mut world = World::new();
+        world.register::<Controller>();
         world.register::<Draw>();
         world.register::<Position>();
-        let dispatcher = DispatcherBuilder::new().build();
+        world.register::<Intent>();
+        world.register::<State>();
+        let dispatcher = DispatcherBuilder::new()
+            .with(Commander, "commander", &[])
+            .build();
 
         let sprite = Sprite::new(&files::read(ctx, "/knight.ron"));
 
@@ -51,6 +57,18 @@ impl EncounterBuilder {
                 frame: sprite.animations.get("idle").unwrap().frames[0].clone(),
                 animation: "idle".to_string(),
                 direction: Facing::Left,
+            })
+            .with(Intent {
+                ..Default::default()
+            })
+            .with(State {
+                ..Default::default()
+            })
+            .with(Controller {
+                x_axis: input::Axis::Horz1,
+                y_axis: input::Axis::Vert1,
+                button: input::Button::Fire1,
+                ..Default::default()
             })
             .build();
         let piv = assets.piv.get(self.background).ok_or_else(|| {
@@ -150,9 +168,22 @@ pub struct EncounterScene<'a> {
     pub palette: Vec<piv::Colour>,
 }
 
+impl<'a> EncounterScene<'a> {
+    fn update_controllers(&mut self, input: &input::InputState) {
+        let entities = self.world.entities();
+        let mut controllers = self.world.write_storage::<Controller>();
+        for (_e, controller) in (&*entities, &mut controllers).join() {
+            controller.x = input.get_axis_raw(controller.x_axis) as i32;
+            controller.y = input.get_axis_raw(controller.y_axis) as i32;
+            controller.fire = input.get_button_down(controller.button);
+        }
+    }
+}
+
 impl<'a> scenestack::Scene<game::Game, input::InputEvent> for EncounterScene<'a> {
-    fn update(&mut self, _game: &mut game::Game, _ctx: &mut ggez::Context) -> scenes::FSceneSwitch {
+    fn update(&mut self, game: &mut game::Game, _ctx: &mut ggez::Context) -> scenes::FSceneSwitch {
         self.world.maintain();
+        self.update_controllers(&game.input);
         self.dispatcher.dispatch_par(&self.world);
         return scenestack::SceneSwitch::None;
     }

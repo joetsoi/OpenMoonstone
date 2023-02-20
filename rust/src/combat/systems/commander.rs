@@ -49,6 +49,7 @@ impl<'a> System<'a> for Commander {
                 };
                 intent.command = attack_type;
             }
+            dbg!(&intent);
         }
     }
 }
