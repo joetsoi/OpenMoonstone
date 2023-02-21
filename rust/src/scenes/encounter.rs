@@ -17,7 +17,7 @@ use crate::{
     animation::{Image as AnimationImage, Sprite},
     assets::Assets,
     combat::components::{Controller, Draw, Facing, Intent, Position, State},
-    combat::systems::Commander,
+    combat::systems::{Commander, PlayerDirection},
     files,
     files::terrain::{Background, SCENERY_RECTS},
     game, input, piv, scenes, scenestack,
@@ -46,6 +46,7 @@ impl EncounterBuilder {
         world.register::<State>();
         let dispatcher = DispatcherBuilder::new()
             .with(Commander, "commander", &[])
+            .with(PlayerDirection, "player_direction", &["commander"])
             .build();
 
         let sprite = Sprite::new(&files::read(ctx, "/knight.ron"));

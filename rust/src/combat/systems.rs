@@ -4,7 +4,7 @@
 // pub mod boundary;
 // pub mod collision;
 pub mod commander;
-// pub mod direction;
+pub mod direction;
 // pub mod draw;
 // pub mod health;
 // pub mod movement;
@@ -24,7 +24,7 @@ pub mod commander;
 //     UpdateBoundingBoxes,
 // };
 pub use self::commander::Commander;
-// pub use self::direction::{AiDirection, PlayerDirection};
+pub use self::direction::{AiDirection, PlayerDirection};
 // pub use self::draw::UpdateImage;
 // pub use self::health::{CheckEndOfCombat, EntityDeath};
 // pub use self::movement::Movement;
