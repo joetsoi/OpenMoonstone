@@ -1,4 +1,4 @@
-// pub mod action;
+pub mod action;
 // pub mod ai;
 // pub mod animation;
 // pub mod boundary;
@@ -13,7 +13,7 @@ pub mod direction;
 // pub mod state;
 // pub mod velocity;
 
-// pub use self::action::ActionSystem;
+pub use self::action::ActionSystem;
 // pub use self::ai::{BlackKnightAi, SetAiTarget};
 // pub use self::animation::Animation;
 // pub use self::boundary::RestrictMovementToBoundary;

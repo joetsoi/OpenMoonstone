@@ -22,7 +22,7 @@ pub enum AttackType {
     Swing,
     ThrowDagger,
     Thrust,
-    UpThrust
+    UpThrust,
 }
 
 #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq)]

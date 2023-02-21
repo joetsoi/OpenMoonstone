@@ -16,8 +16,8 @@ use specs::{Dispatcher, DispatcherBuilder, Entity, Join, World, WorldExt};
 use crate::{
     animation::{Image as AnimationImage, Sprite},
     assets::Assets,
-    combat::components::{Controller, Draw, Facing, Intent, Position, State},
-    combat::systems::{Commander, PlayerDirection},
+    combat::components::{Controller, DaggersInventory, Draw, Facing, Intent, Position, State},
+    combat::systems::{ActionSystem, Commander, PlayerDirection},
     files,
     files::terrain::{Background, SCENERY_RECTS},
     game, input, piv, scenes, scenestack,
@@ -40,6 +40,7 @@ impl EncounterBuilder {
         let background = self.build_background(ctx, assets)?;
         let mut world = World::new();
         world.register::<Controller>();
+        world.register::<DaggersInventory>();
         world.register::<Draw>();
         world.register::<Position>();
         world.register::<Intent>();
@@ -47,6 +48,12 @@ impl EncounterBuilder {
         let dispatcher = DispatcherBuilder::new()
             .with(Commander, "commander", &[])
             .with(PlayerDirection, "player_direction", &["commander"])
+            .with(
+                ActionSystem,
+                "action",
+                // &["player_direction", "ai_direction"],
+                &["player_direction"],
+            )
             .build();
 
         let sprite = Sprite::new(&files::read(ctx, "/knight.ron"));

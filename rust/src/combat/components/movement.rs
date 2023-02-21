@@ -2,9 +2,9 @@ use specs::{Component, VecStorage};
 use specs_derive::*;
 
 use super::Facing;
+use crate::combat::resources::StepDistance;
 use crate::input;
 use crate::rect::Point;
-use crate::combat::resources::StepDistance;
 
 #[derive(Component, Debug, Default, Clone)]
 #[storage(VecStorage)]
