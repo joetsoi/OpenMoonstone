@@ -98,8 +98,9 @@ impl<'a> System<'a> for ConfirmVelocity {
         use specs::Join;
         for (velocity, state, walking_state) in (&velocity, &mut state, &mut walking_state).join() {
             if let Action::Move { mut x, mut y } = state.action {
-
-                let x_step_size = walking_state.step_distances.x_axis[(x as i32 + 1) as usize][walking_state.step as usize].i;
+                let x_step_size = walking_state.step_distances.x_axis[(x as i32 + 1) as usize]
+                    [walking_state.step as usize]
+                    .i;
                 // Trogg spears have an animation where the size of the step they take is x = 0
                 // if we only checked velocity here, then the x axis would be centered and we'd
                 // incorrectly set the action as Idle. This check will also be needed if I come

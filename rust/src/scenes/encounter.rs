@@ -13,11 +13,16 @@ use ggez::{
 use specs::world::{Builder, Index};
 use specs::{Dispatcher, DispatcherBuilder, Entity, Join, World, WorldExt};
 
+use crate::combat::resources::MoveDistances;
 use crate::{
     animation::{Image as AnimationImage, Sprite},
     assets::Assets,
-    combat::components::{Controller, DaggersInventory, Draw, Facing, Intent, Position, State},
-    combat::systems::{ActionSystem, Commander, PlayerDirection},
+    combat::components::{
+        Controller, DaggersInventory, Draw, Facing, Intent, Position, State, Velocity, WalkingState,
+    },
+    combat::systems::{
+        ActionSystem, Commander, ConfirmVelocity, Movement, PlayerDirection, VelocitySystem,
+    },
     files,
     files::terrain::{Background, SCENERY_RECTS},
     game, input, piv, scenes, scenestack,
@@ -45,6 +50,8 @@ impl EncounterBuilder {
         world.register::<Position>();
         world.register::<Intent>();
         world.register::<State>();
+        world.register::<Velocity>();
+        world.register::<WalkingState>();
         let dispatcher = DispatcherBuilder::new()
             .with(Commander, "commander", &[])
             .with(PlayerDirection, "player_direction", &["commander"])
@@ -54,13 +61,32 @@ impl EncounterBuilder {
                 // &["player_direction", "ai_direction"],
                 &["player_direction"],
             )
+            .with(
+                VelocitySystem,
+                "velocity",
+                // &["player_direction", "ai_direction"],
+                &["player_direction"],
+            )
+            .with(
+                ConfirmVelocity,
+                "confirm_velocity",
+                &[],
+                // &["restrict_movement_to_boundary", "entity_collision"],
+            )
+            .with(Movement, "movement", &["confirm_velocity"])
             .build();
 
         let sprite = Sprite::new(&files::read(ctx, "/knight.ron"));
+        let move_distances: MoveDistances =
+            ron::from_str(&files::read(ctx, "/movement.ron")).unwrap();
+        let knight_move = move_distances.distances.get("knight").unwrap();
 
         world
             .create_entity()
             .with(Position { x: 50, y: 50 })
+            .with(Velocity {
+                ..Default::default()
+            })
             .with(Draw {
                 frame: sprite.animations.get("idle").unwrap().frames[0].clone(),
                 animation: "idle".to_string(),
@@ -76,6 +102,10 @@ impl EncounterBuilder {
                 x_axis: input::Axis::Horz1,
                 y_axis: input::Axis::Vert1,
                 button: input::Button::Fire1,
+                ..Default::default()
+            })
+            .with(WalkingState {
+                step_distances: knight_move.clone(),
                 ..Default::default()
             })
             .build();

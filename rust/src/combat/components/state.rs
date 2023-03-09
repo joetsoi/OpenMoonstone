@@ -43,7 +43,7 @@ impl Action {
 
 impl Default for Action {
     fn default() -> Action {
-        Action::Entrance
+        Action::Idle
     }
 }
 
