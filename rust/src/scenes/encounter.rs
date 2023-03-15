@@ -18,10 +18,12 @@ use crate::{
     animation::{Image as AnimationImage, Sprite},
     assets::Assets,
     combat::components::{
-        Controller, DaggersInventory, Draw, Facing, Intent, Position, State, Velocity, WalkingState,
+        AnimationState, Controller, DaggersInventory, Draw, Facing, Intent, Position, State,
+        Velocity, WalkingState,
     },
     combat::systems::{
-        ActionSystem, Commander, ConfirmVelocity, Movement, PlayerDirection, VelocitySystem,
+        ActionSystem, Animation, Commander, ConfirmVelocity, Movement, PlayerDirection,
+        VelocitySystem,
     },
     files,
     files::terrain::{Background, SCENERY_RECTS},
@@ -44,6 +46,7 @@ impl EncounterBuilder {
     pub fn build<'a>(&self, ctx: &mut Context, assets: &mut Assets) -> Result<EncounterScene<'a>> {
         let background = self.build_background(ctx, assets)?;
         let mut world = World::new();
+        world.register::<AnimationState>();
         world.register::<Controller>();
         world.register::<DaggersInventory>();
         world.register::<Draw>();
@@ -74,6 +77,7 @@ impl EncounterBuilder {
                 // &["restrict_movement_to_boundary", "entity_collision"],
             )
             .with(Movement, "movement", &["confirm_velocity"])
+            .with(Animation, "animation", &["movement"])
             .build();
 
         let sprite = Sprite::new(&files::read(ctx, "/knight.ron"));
@@ -91,6 +95,9 @@ impl EncounterBuilder {
                 frame: sprite.animations.get("idle").unwrap().frames[0].clone(),
                 animation: "idle".to_string(),
                 direction: Facing::Left,
+            })
+            .with(AnimationState {
+                ..Default::default()
             })
             .with(Intent {
                 ..Default::default()

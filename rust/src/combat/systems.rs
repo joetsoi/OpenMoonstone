@@ -1,6 +1,6 @@
 pub mod action;
 // pub mod ai;
-// pub mod animation;
+pub mod animation;
 // pub mod boundary;
 // pub mod collision;
 pub mod commander;
@@ -15,7 +15,7 @@ pub mod velocity;
 
 pub use self::action::ActionSystem;
 // pub use self::ai::{BlackKnightAi, SetAiTarget};
-// pub use self::animation::Animation;
+pub use self::animation::Animation;
 // pub use self::boundary::RestrictMovementToBoundary;
 // pub use self::collision::{
 //     CheckCollisions,
