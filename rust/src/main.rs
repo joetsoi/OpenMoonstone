@@ -101,8 +101,8 @@ impl event::EventHandler for MainState {
             self.scene_stack
                 .input(input::InputEvent::Key(keycode), true);
             if let Some(ev) = self.input_binding.resolve(keycode) {
-                self.scene_stack.input(input::InputEvent::Binded(ev), true);
-                self.scene_stack.world.input.update_effect(ev, true);
+                self.scene_stack.input(input::InputEvent::Binded(ev), false);
+                self.scene_stack.world.input.update_effect(ev, false);
             }
         }
         Ok(())
