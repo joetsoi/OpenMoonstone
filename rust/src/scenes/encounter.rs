@@ -20,11 +20,11 @@ use crate::{
     assets::Assets,
     combat::components::{
         AnimationState, Controller, DaggersInventory, Draw, Facing, Intent, Position, State,
-        Velocity, WalkingState,
+        UnitType, Velocity, WalkingState,
     },
     combat::systems::{
         ActionSystem, Animation, Commander, ConfirmVelocity, Movement, PlayerDirection,
-        StateUpdater, VelocitySystem,
+        StateUpdater, UpdateImage, VelocitySystem,
     },
     files,
     files::terrain::{Background, SCENERY_RECTS},
@@ -54,6 +54,7 @@ impl EncounterBuilder {
         world.register::<Position>();
         world.register::<Intent>();
         world.register::<State>();
+        world.register::<UnitType>();
         world.register::<Velocity>();
         world.register::<WalkingState>();
         let dispatcher = DispatcherBuilder::new()
@@ -79,6 +80,7 @@ impl EncounterBuilder {
             )
             .with(Movement, "movement", &["confirm_velocity"])
             .with(Animation, "animation", &["movement"])
+            .with(UpdateImage, "update_image", &["animation"])
             .with(StateUpdater, "state_updater", &["animation"])
             //, &["resolve_collisions"])
             .build();
@@ -94,6 +96,9 @@ impl EncounterBuilder {
 
         world
             .create_entity()
+            .with(UnitType {
+                name: "knight".to_string(),
+            })
             .with(Position { x: 50, y: 50 })
             .with(Velocity {
                 ..Default::default()
