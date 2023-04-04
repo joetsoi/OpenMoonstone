@@ -14,6 +14,7 @@ use ron;
 mod animation;
 mod assets;
 mod combat;
+mod components;
 mod files;
 mod game;
 mod input;

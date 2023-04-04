@@ -1,11 +1,11 @@
 pub mod ai;
 pub mod animation;
-// pub mod collision;
+pub mod collision;
 pub mod daggers;
 pub mod direction;
 pub mod draw;
 // pub mod health;
-// pub mod identity;
+pub mod identity;
 pub mod intent;
 pub mod movement;
 pub mod state;
@@ -13,12 +13,12 @@ pub mod state;
 
 pub use self::ai::AiState;
 pub use self::animation::AnimationState;
-// pub use self::collision::{Body, Collided, Weapon};
+pub use self::collision::{Body, Collided, Weapon};
 pub use self::daggers::DaggersInventory;
 pub use self::direction::Facing;
 pub use self::draw::{Draw, Palette};
 // pub use self::health::{Health, MustLive};
-// pub use self::identity::UnitType;
+pub use self::identity::UnitType;
 pub use self::intent::{Command, Intent};
 pub use self::movement::{Controller, Position, Velocity, WalkingState};
 pub use self::state::{Action, State};

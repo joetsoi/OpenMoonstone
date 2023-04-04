@@ -1,5 +1,6 @@
 use std::{
     collections::hash_map::Entry::{Occupied, Vacant},
+    collections::HashMap,
     path,
 };
 
@@ -15,7 +16,7 @@ use specs::{Dispatcher, DispatcherBuilder, Entity, Join, World, WorldExt};
 
 use crate::combat::resources::MoveDistances;
 use crate::{
-    animation::{Image as AnimationImage, Sprite},
+    animation::{Image as AnimationImage, Sprite, SpriteData},
     assets::Assets,
     combat::components::{
         AnimationState, Controller, DaggersInventory, Draw, Facing, Intent, Position, State,
@@ -23,7 +24,7 @@ use crate::{
     },
     combat::systems::{
         ActionSystem, Animation, Commander, ConfirmVelocity, Movement, PlayerDirection,
-        VelocitySystem,
+        StateUpdater, VelocitySystem,
     },
     files,
     files::terrain::{Background, SCENERY_RECTS},
@@ -78,12 +79,18 @@ impl EncounterBuilder {
             )
             .with(Movement, "movement", &["confirm_velocity"])
             .with(Animation, "animation", &["movement"])
+            .with(StateUpdater, "state_updater", &["animation"])
+            //, &["resolve_collisions"])
             .build();
 
         let sprite = Sprite::new(&files::read(ctx, "/knight.ron"));
         let move_distances: MoveDistances =
             ron::from_str(&files::read(ctx, "/movement.ron")).unwrap();
         let knight_move = move_distances.distances.get("knight").unwrap();
+
+        let mut sprites: HashMap<String, Sprite> = HashMap::new();
+        sprites.insert("knight".to_string(), sprite.clone());
+        world.insert(SpriteData { sprites });
 
         world
             .create_entity()
