@@ -19,8 +19,8 @@ use crate::{
     animation::{Image as AnimationImage, Sprite, SpriteData},
     assets::Assets,
     combat::components::{
-        AnimationState, Controller, DaggersInventory, Draw, Facing, Intent, Position, State,
-        UnitType, Velocity, WalkingState,
+        AnimationState, Controller, DaggersInventory, Draw, Facing, Health, Intent, Position,
+        State, UnitType, Velocity, WalkingState,
     },
     combat::systems::{
         ActionSystem, Animation, Commander, ConfirmVelocity, Movement, PlayerDirection,
@@ -57,6 +57,7 @@ impl EncounterBuilder {
         world.register::<UnitType>();
         world.register::<Velocity>();
         world.register::<WalkingState>();
+        world.register::<Health>();
         let dispatcher = DispatcherBuilder::new()
             .with(Commander, "commander", &[])
             .with(PlayerDirection, "player_direction", &["commander"])
@@ -125,6 +126,9 @@ impl EncounterBuilder {
             })
             .with(WalkingState {
                 step_distances: knight_move.clone(),
+                ..Default::default()
+            })
+            .with(Health {
                 ..Default::default()
             })
             .build();

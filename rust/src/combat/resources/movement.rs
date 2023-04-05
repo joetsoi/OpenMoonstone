@@ -2,7 +2,6 @@ use std::collections::HashMap;
 
 use serde_derive::{Deserialize, Serialize};
 
-
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub struct Vector {
     pub i: i32,
