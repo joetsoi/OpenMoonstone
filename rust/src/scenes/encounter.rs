@@ -4,6 +4,7 @@ use std::{
     path,
 };
 
+use crate::files::collide::CollisionBoxes;
 use color_eyre::eyre::{eyre, Result, WrapErr};
 use ggez::{
     filesystem,
@@ -19,17 +20,24 @@ use crate::{
     animation::{Image as AnimationImage, Sprite, SpriteData},
     assets::Assets,
     combat::components::{
-        AnimationState, Controller, DaggersInventory, Draw, Facing, Health, Intent, Position,
-        State, UnitType, Velocity, WalkingState,
+        AnimationState, Body, Controller, DaggersInventory, Draw, Facing, Health, Intent, Position,
+        State, UnitType, Velocity, WalkingState, Weapon,
     },
     combat::systems::{
         ActionSystem, Animation, Commander, ConfirmVelocity, Movement, PlayerDirection,
-        StateUpdater, UpdateImage, VelocitySystem,
+        StateUpdater, UpdateBoundingBoxes, UpdateImage, VelocitySystem,
     },
     files,
     files::terrain::{Background, SCENERY_RECTS},
-    game, input, piv, scenes, scenestack,
+    game, input,
+    objects::TextureAtlas,
+    piv, scenes, scenestack,
 };
+
+#[derive(Debug, Default, Clone)]
+pub struct EncounterTextures {
+    pub data: HashMap<String, TextureAtlas>,
+}
 
 pub struct EncounterBuilder {
     pub background: &'static str,
@@ -48,6 +56,7 @@ impl EncounterBuilder {
         let background = self.build_background(ctx, assets)?;
         let mut world = World::new();
         world.register::<AnimationState>();
+        world.register::<Body>();
         world.register::<Controller>();
         world.register::<DaggersInventory>();
         world.register::<Draw>();
@@ -58,6 +67,7 @@ impl EncounterBuilder {
         world.register::<Velocity>();
         world.register::<WalkingState>();
         world.register::<Health>();
+        world.register::<Weapon>();
         let dispatcher = DispatcherBuilder::new()
             .with(Commander, "commander", &[])
             .with(PlayerDirection, "player_direction", &["commander"])
@@ -82,6 +92,11 @@ impl EncounterBuilder {
             .with(Movement, "movement", &["confirm_velocity"])
             .with(Animation, "animation", &["movement"])
             .with(UpdateImage, "update_image", &["animation"])
+            .with(
+                UpdateBoundingBoxes,
+                "update_bounding_boxes",
+                &["update_image"],
+            )
             .with(StateUpdater, "state_updater", &["animation"])
             //, &["resolve_collisions"])
             .build();
@@ -94,6 +109,19 @@ impl EncounterBuilder {
         let mut sprites: HashMap<String, Sprite> = HashMap::new();
         sprites.insert("knight".to_string(), sprite.clone());
         world.insert(SpriteData { sprites });
+        let collide_hit = assets.collide.as_ref().unwrap();
+        world.insert(collide_hit.clone());
+
+        let mut texture_atlases: HashMap<String, TextureAtlas> = HashMap::new();
+        let atlas_names = ["knight", "dagger"];
+        for atlas_name in atlas_names {
+            if let Some(atlas) = assets.atlases.get(atlas_name) {
+                texture_atlases.insert(atlas_name.to_string(), atlas.clone());
+            }
+        }
+        world.insert(EncounterTextures {
+            data: texture_atlases,
+        });
 
         world
             .create_entity()
