@@ -20,12 +20,12 @@ use crate::{
     animation::{Image as AnimationImage, Sprite, SpriteData},
     assets::Assets,
     combat::components::{
-        AnimationState, Body, Controller, DaggersInventory, Draw, Facing, Health, Intent, Position,
-        State, UnitType, Velocity, WalkingState, Weapon,
+        AnimationState, Body, Collided, Controller, DaggersInventory, Draw, Facing, Health, Intent,
+        Position, State, UnitType, Velocity, WalkingState, Weapon,
     },
     combat::systems::{
-        ActionSystem, Animation, Commander, ConfirmVelocity, Movement, PlayerDirection,
-        StateUpdater, UpdateBoundingBoxes, UpdateImage, VelocitySystem,
+        ActionSystem, Animation, CheckCollisions, Commander, ConfirmVelocity, Movement,
+        PlayerDirection, StateUpdater, UpdateBoundingBoxes, UpdateImage, VelocitySystem,
     },
     files,
     files::terrain::{Background, SCENERY_RECTS},
@@ -57,6 +57,7 @@ impl EncounterBuilder {
         let mut world = World::new();
         world.register::<AnimationState>();
         world.register::<Body>();
+        world.register::<Collided>();
         world.register::<Controller>();
         world.register::<DaggersInventory>();
         world.register::<Draw>();
@@ -96,6 +97,11 @@ impl EncounterBuilder {
                 UpdateBoundingBoxes,
                 "update_bounding_boxes",
                 &["update_image"],
+            )
+            .with(
+                CheckCollisions,
+                "check_collisions",
+                &["update_bounding_boxes"],
             )
             .with(StateUpdater, "state_updater", &["animation"])
             //, &["resolve_collisions"])
