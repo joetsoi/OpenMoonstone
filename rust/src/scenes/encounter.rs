@@ -15,6 +15,7 @@ use ggez::{
 use specs::world::{Builder, Index};
 use specs::{Dispatcher, DispatcherBuilder, Entity, Join, World, WorldExt};
 
+use crate::combat::damage::DamageTables;
 use crate::combat::resources::MoveDistances;
 use crate::{
     animation::{Image as AnimationImage, Sprite, SpriteData},
@@ -25,7 +26,8 @@ use crate::{
     },
     combat::systems::{
         ActionSystem, Animation, CheckCollisions, Commander, ConfirmVelocity, Movement,
-        PlayerDirection, StateUpdater, UpdateBoundingBoxes, UpdateImage, VelocitySystem,
+        PlayerDirection, ResolveCollisions, StateUpdater, UpdateBoundingBoxes, UpdateImage,
+        VelocitySystem,
     },
     files,
     files::terrain::{Background, SCENERY_RECTS},
@@ -103,9 +105,17 @@ impl EncounterBuilder {
                 "check_collisions",
                 &["update_bounding_boxes"],
             )
+            .with(
+                ResolveCollisions,
+                "resolve_collisions",
+                &["check_collisions"],
+            )
             .with(StateUpdater, "state_updater", &["animation"])
             //, &["resolve_collisions"])
             .build();
+
+        let damage_tables: DamageTables = ron::from_str(&files::read(ctx, "/damage.ron")).unwrap();
+        world.insert(damage_tables);
 
         let sprite = Sprite::new(&files::read(ctx, "/knight.ron"));
         let move_distances: MoveDistances =

@@ -118,6 +118,7 @@ fn load_assets(ctx: &mut ggez::Context, assets: &mut assets::Assets) {
     assets.load_texture_atlas(ctx, "kn2.ob");
     assets.load_texture_atlas(ctx, "kn3.ob");
     assets.load_texture_atlas(ctx, "kn4.ob");
+    assets.load_collide_hit(ctx);
 }
 
 fn main() -> Result<()> {
