@@ -56,63 +56,8 @@ impl EncounterBuilder {
 
     pub fn build<'a>(&self, ctx: &mut Context, assets: &mut Assets) -> Result<EncounterScene<'a>> {
         let background = self.build_background(ctx, assets)?;
-        let mut world = World::new();
-        world.register::<AnimationState>();
-        world.register::<Body>();
-        world.register::<Collided>();
-        world.register::<Controller>();
-        world.register::<DaggersInventory>();
-        world.register::<Draw>();
-        world.register::<Position>();
-        world.register::<Intent>();
-        world.register::<State>();
-        world.register::<UnitType>();
-        world.register::<Velocity>();
-        world.register::<WalkingState>();
-        world.register::<Health>();
-        world.register::<Weapon>();
-        let dispatcher = DispatcherBuilder::new()
-            .with(Commander, "commander", &[])
-            .with(PlayerDirection, "player_direction", &["commander"])
-            .with(
-                ActionSystem,
-                "action",
-                // &["player_direction", "ai_direction"],
-                &["player_direction"],
-            )
-            .with(
-                VelocitySystem,
-                "velocity",
-                // &["player_direction", "ai_direction"],
-                &["player_direction"],
-            )
-            .with(
-                ConfirmVelocity,
-                "confirm_velocity",
-                &[],
-                // &["restrict_movement_to_boundary", "entity_collision"],
-            )
-            .with(Movement, "movement", &["confirm_velocity"])
-            .with(Animation, "animation", &["movement"])
-            .with(UpdateImage, "update_image", &["animation"])
-            .with(
-                UpdateBoundingBoxes,
-                "update_bounding_boxes",
-                &["update_image"],
-            )
-            .with(
-                CheckCollisions,
-                "check_collisions",
-                &["update_bounding_boxes"],
-            )
-            .with(
-                ResolveCollisions,
-                "resolve_collisions",
-                &["check_collisions"],
-            )
-            .with(StateUpdater, "state_updater", &["animation"])
-            //, &["resolve_collisions"])
-            .build();
+        let mut world = EncounterBuilder::build_world();
+        let dispatcher = EncounterBuilder::build_dispatcher();
 
         let damage_tables: DamageTables = ron::from_str(&files::read(ctx, "/damage.ron")).unwrap();
         world.insert(damage_tables);
@@ -263,6 +208,70 @@ impl EncounterBuilder {
             .wrap_err("Failed to draw encounter background")?;
         ctx.gfx.end_frame()?;
         Ok(canvas_image)
+    }
+
+    fn build_world() -> World {
+        let mut world = World::new();
+        world.register::<AnimationState>();
+        world.register::<Body>();
+        world.register::<Collided>();
+        world.register::<Controller>();
+        world.register::<DaggersInventory>();
+        world.register::<Draw>();
+        world.register::<Position>();
+        world.register::<Intent>();
+        world.register::<State>();
+        world.register::<UnitType>();
+        world.register::<Velocity>();
+        world.register::<WalkingState>();
+        world.register::<Health>();
+        world.register::<Weapon>();
+        world
+    }
+
+    fn build_dispatcher<'a>() -> Dispatcher<'a, 'a> {
+        DispatcherBuilder::new()
+            .with(Commander, "commander", &[])
+            .with(PlayerDirection, "player_direction", &["commander"])
+            .with(
+                ActionSystem,
+                "action",
+                // &["player_direction", "ai_direction"],
+                &["player_direction"],
+            )
+            .with(
+                VelocitySystem,
+                "velocity",
+                // &["player_direction", "ai_direction"],
+                &["player_direction"],
+            )
+            .with(
+                ConfirmVelocity,
+                "confirm_velocity",
+                &[],
+                // &["restrict_movement_to_boundary", "entity_collision"],
+            )
+            .with(Movement, "movement", &["confirm_velocity"])
+            .with(Animation, "animation", &["movement"])
+            .with(UpdateImage, "update_image", &["animation"])
+            .with(
+                UpdateBoundingBoxes,
+                "update_bounding_boxes",
+                &["update_image"],
+            )
+            .with(
+                CheckCollisions,
+                "check_collisions",
+                &["update_bounding_boxes"],
+            )
+            .with(
+                ResolveCollisions,
+                "resolve_collisions",
+                &["check_collisions"],
+            )
+            .with(StateUpdater, "state_updater", &["animation"])
+            //, &["resolve_collisions"])
+            .build()
     }
 }
 
